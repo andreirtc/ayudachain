@@ -1,0 +1,40 @@
+{
+  "name": "ayudachain",
+  "version": "1.0.0",
+  "description": "Single, tamper-evident digital trail for disaster relief & public aid in the Philippines",
+  "private": true,
+  "scripts": {
+    "start": "bash start_ayudachain.sh",
+    "test": "npm run test:contracts && npm run test:backend",
+    "test:contracts": "npm --prefix contracts test",
+    "test:backend": "python3 backend/test_backend.py",
+    "compile:contracts": "npm --prefix contracts run compile",
+    "dev:contracts": "npm --prefix contracts run node",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "python3 backend/server.py 8000",
+    "build:frontend": "npm --prefix frontend run build",
+    "typecheck": "cd frontend && ./node_modules/.bin/tsc --noEmit"
+  },
+  "keywords": [
+    "blockchain",
+    "polygon",
+    "evm",
+    "solidity",
+    "nextjs",
+    "disaster-relief",
+    "dafac",
+    "philippines",
+    "anti-corruption",
+    "entity-resolution"
+  ],
+  "author": "AyudaChain Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andreirtc/ayudachain.git"
+  },
+  "bugs": {
+    "url": "https://github.com/andreirtc/ayudachain/issues"
+  },
+  "homepage": "https://github.com/andreirtc/ayudachain#readme"
+}

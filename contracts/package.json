@@ -1,0 +1,29 @@
+{
+  "name": "ayudachain-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for AyudaChain disaster relief transparency layer",
+  "main": "index.js",
+  "scripts": {
+    "test": "hardhat test",
+    "compile": "hardhat compile",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "deploy:amoy": "hardhat run scripts/deploy.js --network amoy",
+    "node": "hardhat node"
+  },
+  "keywords": [
+    "solidity",
+    "ethereum",
+    "polygon",
+    "transparency",
+    "ayuda"
+  ],
+  "author": "AyudaChain Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.0"
+  },
+  "dependencies": {
+    "ethers": "^6.17.0"
+  }
+}

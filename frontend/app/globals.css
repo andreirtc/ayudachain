@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+:root {
+  --primary: #0f172a;
+  --accent: #2563eb;
+  --emerald: #059669;
+  --amber: #d97706;
+}
+
+body {
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom badges & animations */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.pulse-dot {
+  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
