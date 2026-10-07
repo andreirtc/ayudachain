@@ -160,10 +160,10 @@ cd frontend
 
 ## 📖 Additional Documentation
 
-- [User Guide & Role Walkthrough](docs/USER_GUIDE.md) — Comprehensive guide for Citizens, Barangay Workers, and COA Auditors.
-- [Technical Architecture Specification](docs/architecture.md) — In-depth hybrid off-chain/on-chain design.
-- [Smart Contract & Blockchain Spec](docs/blockchain-spec.md) — Gas optimization, data structures, and Polygon Amoy deployment.
-- [5-Minute Hackathon Demo Script](docs/demo-script.md) — Minute-by-minute pitch guide with winning talking points.
+- [User Guide & Role Walkthrough](docs/guides/user-guide.md) — Comprehensive guide for Citizens, Barangay Workers, and COA Auditors.
+- [Technical Architecture Specification](docs/system/architecture.md) — In-depth hybrid off-chain/on-chain design.
+- [Smart Contract & Blockchain Spec](docs/system/blockchain-spec.md) — Gas optimization, data structures, and Polygon Amoy deployment.
+- [5-Minute Hackathon Demo Script](docs/guides/demo-script.md) — Minute-by-minute pitch guide with winning talking points.
 
 ---
 
