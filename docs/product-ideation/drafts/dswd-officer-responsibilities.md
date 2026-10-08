@@ -1,8 +1,8 @@
-# Finance Officer Responsibilities (scratch)
+# DSWD Officer Responsibilities: funds (scratch)
 
 **Status: scratch notes, not a specification.** Nothing here is built. Items marked *unconfirmed* come from general knowledge of Philippine government finance and must be checked with a DSWD Field Office before they go into the PRD.
 
-The Finance Officer is a member of the Financial Management Division of a DSWD Field Office (regional). In AyudaChain's planned hierarchy this is the top role for the first version. In the real organisation the Regional Director sits above it and approves.
+These notes cover the funds side of the [DSWD Officer](../roles/dswd-officer.md) role, which was first called the Finance Officer. In a real Field Office this work belongs to the Financial Management Division. In AyudaChain's planned hierarchy the DSWD Officer is the top role for the first version. In the real organisation the Regional Director sits above it and approves.
 
 ## Already in scope
 
@@ -45,7 +45,7 @@ The Sub-ARO says how much may be spent; the NTA says the cash exists. A ledger e
 
 ## Open questions
 
-1. Who approves a budget entry in the first version: the Regional Director, a second finance officer, or nobody?
+1. Who approves a budget entry in the first version: the Regional Director, a second DSWD Officer, or nobody?
 2. Does one disaster ever receive funds from more than one source (Quick Response Fund plus donations, for example)?
 3. Is "covered area" recorded per release, or once per disaster?
 4. Should the direct-to-LGU fund transfer mode be supported, where the LGU pays families instead of DSWD staff?

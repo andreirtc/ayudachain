@@ -1,8 +1,10 @@
-# Finance Officer User Flow (draft)
+# DSWD Officer User Flow: funds (draft)
 
-**Status: draft of a planned design. None of this is built.** For what the app does today, read [the current user flow](../../product/user-flow.md). Role background and open questions are in [finance-officer-responsibilities.md](finance-officer-responsibilities.md).
+**Status: draft of a planned design. None of this is built.** For what the app does today, read [the current user flow](../../product/user-flow.md). Role background and open questions are in [dswd-officer-responsibilities.md](dswd-officer-responsibilities.md).
 
-The Finance Officer works in the Financial Management Division of a DSWD Field Office and is the top role in AyudaChain's first version. Their workspace is a budget ledger per disaster. It records how much was received, for what purpose and for which area. It does not yet cover which families receive anything.
+This draft covers the funds side of the [DSWD Officer](../roles/dswd-officer.md) role, which was first called the Finance Officer. The role's beneficiary list flows are not drafted yet.
+
+The DSWD Officer works in a DSWD Field Office and is the top role in AyudaChain's first version. Their funds workspace is a budget ledger per disaster. It records how much was received, for what purpose and for which area. It does not yet cover which families receive anything.
 
 ## Scope
 

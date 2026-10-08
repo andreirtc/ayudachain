@@ -56,7 +56,7 @@ Read the document that matches your task before designing or changing behaviour.
 | Deciding what to build, or whether something is in scope | `docs/product/prd.md` |
 | Checking what the redesign has settled and what is still open | `docs/product-ideation/decisions-2026-10-08.md` |
 | Discussing or extending the redesign's roles | `docs/product-ideation/roles/<role>.md` |
-| Discussing Finance Officer screens, or needing the audit rules behind that role | `docs/product-ideation/drafts/` |
+| Discussing the DSWD Officer's funds screens, or needing the audit rules behind them | `docs/product-ideation/drafts/` |
 | Adding or moving a page or route in the code as it is today | `docs/product/sitemap.md` |
 | Changing a screen's steps or permissions in the code as it is today | `docs/product/user-flow.md` |
 | Moving data between frontend, backend, chain or files | `docs/system/dfd.md` |
