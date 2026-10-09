@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="light">
+<title>AyudaChain redesign: presentation source</title>
+<!--
+  Source of presentation.mp4. The whole picture is a function of one time value:
+  window.renderAt(t) draws exactly the frame for t seconds. Nothing here uses timers,
+  CSS animations or transitions. render.mjs steps t one frame at a time and encodes.
+
+  Open this file in a browser to preview and scrub. Add ?t=75 to jump to a time.
+  Captions and timings: storyboard.js. Mockup markup: screens.generated.js (generated).
+-->
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#0b1220;overflow:hidden}
+body.capture{background:var(--base)}
+#frame{position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:hidden;transform-origin:0 0;background:var(--base);color:var(--ink);font:20px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+
+/* top strip: brand, mockup label, section progress */
+#top{position:absolute;left:96px;width:1728px;top:54px;height:52px;display:flex;align-items:center;gap:14px}
+#top .brand{display:flex;align-items:center;gap:11px}
+#top .brand svg{width:34px;height:34px;color:var(--blue)}
+#top .brand strong{font-size:27px;letter-spacing:-.5px}
+#top .brand span{display:none}
+.pill{background:var(--warn-bg);border:1px solid #e8dcc0;color:#664313;border-radius:5px;padding:6px 12px;font-size:17px;white-space:nowrap}
+.pill b{font-weight:700;letter-spacing:.2px}
+#progress{margin-left:auto;display:flex;gap:12px}
+#progress .seg{width:150px}
+#progress .seg span{display:block;font-size:16px;color:var(--muted);margin-bottom:6px;white-space:nowrap}
+#progress .seg.now span{color:var(--ink);font-weight:650}
+#progress .track{height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+#progress .fill{height:100%;width:100%;background:var(--blue);transform-origin:0 0}
+
+#stage{position:absolute;left:96px;top:120px;width:1728px;height:790px}
+#stage>div{position:absolute}
+
+/* caption band */
+#caption{position:absolute;left:96px;top:926px;width:1728px;height:100px;background:#fff;border:1px solid var(--line);border-radius:6px}
+#caption div{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:600;letter-spacing:-.4px;white-space:nowrap;color:var(--ink)}
+#measure{position:absolute;visibility:hidden;white-space:nowrap;left:0;top:0}
+
+/* title */
+#title{inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#title .brand{display:flex;align-items:center;gap:30px}
+#title .brand svg{width:132px;height:132px;color:var(--blue)}
+#title .brand strong{font-size:124px;letter-spacing:-4px;line-height:1}
+#title .brand span{display:none}
+#title .sub{font-size:38px;color:var(--muted);margin-top:26px}
+#title .foot{font-size:23px;color:var(--muted);margin-top:44px;max-width:1300px}
+
+/* today's product */
+#today{inset:0}
+#today .tag{position:absolute;left:0;top:0;font-size:22px;font-weight:650;background:#eef2f7;color:#334155;border-radius:4px;padding:5px 12px}
+#today .box{position:absolute;background:#fff;border:1px solid #9aacbf;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#today .box b{font-size:24px;font-weight:650}
+#today .box code{font:19px/1.3 Consolas,"Cascadia Mono",monospace;color:var(--muted);margin-top:4px}
+#today .note{position:absolute;left:0;width:100%;top:690px;text-align:center;font-size:26px;color:var(--bad);font-weight:600}
+#today svg{position:absolute;left:0;top:0;overflow:visible}
+#today svg path{fill:none;stroke:#64748b;stroke-width:1.6}
+
+/* site map */
+#map{inset:0}
+#map svg{position:absolute;left:0;top:0;overflow:visible}
+#map svg path{fill:none;stroke:#9aacbf;stroke-width:1.6}
+#map svg path.jr{stroke:var(--blue);stroke-width:2.6}
+#map svg path.re{stroke:var(--blue);stroke-width:3.6}
+#map svg polygon{fill:var(--blue)}
+.mnode,.mhead,.mroot{position:absolute;display:flex;align-items:center;white-space:nowrap}
+.mroot{justify-content:center;background:var(--ink);color:#fff;border-radius:5px;font-size:24px;font-weight:650;letter-spacing:-.3px}
+.mroot small{font-size:16px;font-weight:400;opacity:.85;margin-left:10px;letter-spacing:0}
+.mhead{background:var(--blue-soft);border:1px solid #a8bfe9;color:#1e3a8a;border-radius:5px;padding:0 13px;font-size:20px;font-weight:650;justify-content:space-between}
+.mhead small{font-size:14px;font-weight:400;margin-left:8px}
+.mnode{background:#fff;border:1px solid var(--line);border-radius:5px;padding:0 12px;color:var(--ink)}
+.mnode .on{position:absolute;inset:-1px;display:flex;align-items:center;padding:0 12px;background:var(--blue-soft);border:2px solid var(--blue);border-radius:5px;color:#1e3a8a;font-weight:600}
+.mnode .num{position:absolute;left:-13px;top:-13px;min-width:28px;height:28px;padding:0 7px;border-radius:14px;background:var(--blue);color:#fff;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+#chip{position:absolute;left:0;top:0;display:flex;align-items:center;justify-content:center;gap:8px;width:0;height:38px}
+#chip b{background:var(--blue);color:#fff;border-radius:19px;padding:5px 15px;font-size:19px;font-weight:700;white-space:nowrap;box-shadow:0 4px 14px rgba(15,23,42,.25)}
+#chip span{background:#0f172a;color:#fff;border-radius:5px;padding:4px 10px;font-size:17px;white-space:nowrap}
+#dot{position:absolute;left:-8px;top:-8px;width:16px;height:16px;border-radius:8px;background:var(--blue);box-shadow:0 0 0 5px rgba(29,78,216,.22)}
+
+/* one role, nine screens */
+#grid{inset:0}
+#gridhead{position:absolute}
+#gridlimit{position:absolute;left:372px;top:0;width:1356px;height:56px;display:flex;align-items:center;font-size:21px;line-height:1.3;color:var(--muted)}
+#gridlimit b{color:var(--ink);font-weight:650}
+.tile{position:absolute;background:#fff;border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.tile .bar{display:flex;align-items:center;padding:0 12px;white-space:nowrap;border-bottom:1px solid var(--line)}
+.tile .port{position:relative;overflow:hidden}
+
+/* the screen */
+.view{position:absolute;overflow:hidden;background:var(--base);border-radius:6px}
+#head{left:0;top:4px;width:1728px;height:48px;display:flex;align-items:center;gap:10px;white-space:nowrap}
+#head .rc{position:relative;border:1px solid var(--line);background:#fff;border-radius:5px;padding:6px 13px;font-size:19px;color:var(--muted)}
+#head .rc.seen{color:var(--ink)}
+#head .rc i{position:absolute;inset:-1px;font-style:normal;display:flex;align-items:center;justify-content:center;background:var(--blue);border-radius:5px;color:#fff;font-weight:650}
+#head .scr{font-size:23px;font-weight:650;margin-left:8px}
+#head .rec{margin-left:auto;border:1px solid var(--line);background:#fff;border-radius:5px;padding:6px 13px;font-size:19px}
+#head .rec b{font-weight:650;font-variant-numeric:tabular-nums}
+
+/* closing card */
+#close{left:214px;top:150px;width:1300px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:44px 56px;text-align:center}
+#close h1{margin:0 0 6px;font-size:58px;letter-spacing:-1.5px;font-weight:650}
+#close .state{font-size:27px;color:var(--muted);margin:0 0 30px}
+#close .banner{background:var(--warn-bg);border:1px solid #e8dcc0;color:#664313;border-radius:5px;padding:20px 26px;font-size:27px;line-height:1.45;text-align:left}
+#close .banner strong{margin-right:12px}
+#close .foot{font-size:23px;color:var(--muted);margin:26px 0 0}
+
+/* preview controls: never part of a rendered frame */
+#scrub{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;gap:14px;padding:0 18px;background:#0b1220;color:#cbd5e1;font:14px/1 "Segoe UI",sans-serif}
+#scrub input{flex:1}
+#scrub button{font:inherit;padding:7px 14px;border-radius:4px;border:1px solid #475569;background:#1e293b;color:#fff;cursor:pointer}
+#scrub output{min-width:330px;font-variant-numeric:tabular-nums}
+body.capture #scrub{display:none}
+</style>
+</head>
+<body>
+<div id="frame">
+  <div id="top">
+    <div class="brand" id="topbrand"></div>
+    <div class="pill" id="mocklabel"></div>
+    <div class="pill" id="simlabel"></div>
+    <div id="progress"></div>
+  </div>
+  <div id="stage">
+    <div id="title"></div>
+    <div id="today"></div>
+    <div id="map"></div>
+    <div id="grid"></div>
+    <div id="head"></div>
+    <div id="close"></div>
+  </div>
+  <div id="caption"><div id="capB"></div><div id="capA"></div></div>
+  <span id="measure"></span>
+</div>
+<div id="scrub"><button id="play">Play</button><input id="time" type="range" min="0" step="0.0333" value="0"><output id="clock"></output></div>
+
+<script src="screens.generated.js"></script>
+<script src="storyboard.js"></script>
+<script>
+"use strict";
+(() => {
+const SB = globalThis.STORYBOARD, M = window.MOCK;
+const CAPTURE = new URLSearchParams(location.search).has("capture");
+document.body.classList.toggle("capture", CAPTURE);
+const $ = (id) => document.getElementById(id);
+const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+// ---------- motion vocabulary: one easing, a few durations ----------
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const ease = (x) => { x = clamp(x); return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; };
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const es = (t, a, b) => ease(seg(t, a, b));
+const lerp = (a, b, p) => a + (b - a) * p;
+const lerpRect = (A, B, p) => ({ x: lerp(A.x, B.x, p), y: lerp(A.y, B.y, p), w: lerp(A.w, B.w, p), h: lerp(A.h, B.h, p) });
+const ARRIVE = { tile: 1.5, handoff: 2.4, nav: 1.0, state: 0, scroll: 0 };
+const CHANGE = 0.4; // seconds from a button press to the screen showing its result
+const show = (node, alpha) => { node.style.display = alpha <= 0.001 ? "none" : ""; node.style.opacity = alpha >= 0.999 ? "" : alpha.toFixed(3); };
+const place = (node, r) => { node.style.left = r.x.toFixed(2) + "px"; node.style.top = r.y.toFixed(2) + "px"; node.style.width = r.w.toFixed(2) + "px"; node.style.height = r.h.toFixed(2) + "px"; };
+
+// ---------- the mockup's own tokens and stylesheet ----------
+const rootVars = (M.css.match(/:root\{([^}]*)\}/) || [0, ""])[1];
+for (const decl of rootVars.split(";")) { const i = decl.indexOf(":"); if (i > 0) document.documentElement.style.setProperty(decl.slice(0, i).trim(), decl.slice(i + 1).trim()); }
+function stripMedia(css) { // responsive, print and animation rules must not depend on the preview window
+  let out = "", i = 0;
+  for (;;) {
+    const a = css.indexOf("@media", i);
+    if (a < 0) return out + css.slice(i);
+    out += css.slice(i, a);
+    let depth = 0, j = css.indexOf("{", a);
+    for (; j < css.length; j++) { if (css[j] === "{") depth++; else if (css[j] === "}" && --depth === 0) { j++; break; } }
+    i = j;
+  }
+}
+const WD = 1382, HD = 579, SIDE = 220, GAP = 22, WORK = WD - SIDE - GAP, ACTION_H = 78; // mockup design pixels
+const mockSheet = new CSSStyleSheet();
+mockSheet.replaceSync(
+  stripMedia(M.css).replace(":root{", ":host{").replace("}body{", "}.mock-body{") + `
+  *{animation:none!important;transition:none!important}
+  :host{display:block;position:absolute;left:0;top:0;transform-origin:0 0}
+  .mock-body{margin:0}
+  .pv-layout{display:grid;grid-template-columns:${SIDE}px minmax(0,1fr);gap:${GAP}px;width:${WD}px;height:${HD}px}
+  .sidebar{position:static}
+  .pv-work{display:flex;flex-direction:column;height:${HD}px}
+  .pv-scroll{position:relative;flex:1;overflow:hidden}
+  .pv-layer{position:absolute;left:0;top:0;width:100%;background:#fff}
+  .pv-actions{position:relative;flex:none;height:${ACTION_H}px;border-top:1px solid var(--line);background:#fff}
+  .pv-action{position:absolute;inset:0;display:flex;align-items:center;padding:0 28px;background:#fff}
+  .pv-action .action-area{flex:1;border:0;margin:0;padding:0}
+  .tile-work{width:${WORK}px;border:0;border-radius:0}
+  /* --hl fades the highlight in after a value changes */
+  dd.chg,.identity p.chg,.spot{justify-self:start;width:fit-content;background:rgba(219,231,255,var(--hl,1));box-shadow:0 0 0 2px rgba(219,231,255,var(--hl,1));outline:2px solid rgba(29,78,216,var(--hl,1));outline-offset:2px;border-radius:2px}
+  .code.chg{display:inline-block;padding:10px 16px 6px 20px;margin:8px 0 6px;background:rgba(219,231,255,var(--hl,1));outline:2px solid rgba(29,78,216,var(--hl,1));border-radius:3px}
+  .spot{font-weight:600;padding:2px 4px}
+  td.chg{background:rgba(219,231,255,var(--hl,1));box-shadow:inset 0 0 0 2px rgba(29,78,216,var(--hl,1))}
+  input.chg{background:rgba(219,231,255,var(--hl,1));box-shadow:0 0 0 2px rgba(29,78,216,var(--hl,1))}
+  .notice.chg,.timeline li.chg{box-shadow:0 0 0 2px rgba(29,78,216,var(--hl,1))}
+  `);
+
+// ---------- timeline ----------
+const beats = SB.beats;
+let acc = 0;
+beats.forEach((b, i) => { b.i = i; b.t0 = acc; acc += b.dur; b.t1 = acc; });
+const TOTAL = acc;
+const beatAt = (t) => beats.find((b) => t < b.t1) || beats[beats.length - 1];
+const sections = SB.sections.map((s) => { const own = beats.filter((b) => b.section === s.id); return { ...s, t0: own[0].t0, t1: own[own.length - 1].t1 }; });
+const screenBeats = beats.filter((b) => b.kind === "screen");
+const roles = Object.keys(M.roleNames);
+const pageName = (r, p) => M.pages[r].find((x) => x[0] === p)[1];
+const pageIdx = (r, p) => M.pages[r].findIndex((x) => x[0] === p);
+let visitN = 0, handK = 0;
+const handoffs = [], navs = [];
+screenBeats.forEach((b, j) => {
+  b.arr = ARRIVE[b.arrive];
+  b.prev = screenBeats[j - 1] || null;
+  if (b.arrive === "handoff") { b.hand = { k: handK++, beat: b }; handoffs.push(b.hand); }
+  if (b.arrive === "nav") navs.push(b);
+  if (b.arrive === "tile" || b.arrive === "handoff" || b.arrive === "nav") { b.visit = ++visitN; b.visitAt = b.t0 + { tile: 1.2, handoff: 1.7, nav: 0.5 }[b.arrive]; }
+  b.presses = b.press || b.steps.slice(1).map((_, k) => (b.arr || 0.1) + 1.5 + k * 2.6);
+});
+
+// ---------- top strip ----------
+$("topbrand").innerHTML = M.brand;
+$("mocklabel").innerHTML = `<b>${esc(SB.labels.mockup)}</b> · ${esc(SB.labels.mockupNote)}`;
+$("simlabel").innerHTML = `<b>${esc(SB.labels.simulated)}</b> · ${esc(SB.labels.simulatedNote)}`; // both labels sit in every frame
+sections.forEach((s, i) => { const n = el("div", "seg", `<span>${i + 1} · ${esc(s.label)}</span><div class="track"><div class="fill"></div></div>`); s.el = n; s.fill = n.querySelector(".fill"); $("progress").appendChild(n); });
+
+// ---------- captions (fit to one line) ----------
+const CAP_SIZE = 44, CAP_MAX = 1640;
+$("measure").style.cssText += `;font-weight:600;letter-spacing:-.4px;font-size:${CAP_SIZE}px`;
+beats.forEach((b) => { $("measure").textContent = b.caption; b.capSize = Math.min(CAP_SIZE, Math.floor(CAP_SIZE * CAP_MAX / $("measure").offsetWidth)); });
+const setCaption = (node, b, alpha) => { if (b && node._b !== b) { node.textContent = b.caption; node.style.fontSize = b.capSize + "px"; node._b = b; } show(node, b ? alpha : 0); };
+
+// ---------- geometry (stage coordinates) ----------
+const STAGE_W = 1728, PANEL = { x: 0, y: 66, w: 1728, h: 724 };
+const HERO = { x: (SIDE + GAP) * PANEL.w / WD, y: PANEL.y, w: WORK * PANEL.w / WD, h: PANEL.h }; // where a screen's workspace sits inside PANEL
+const COLW = STAGE_W / roles.length, ROOT = { x: (STAGE_W - 440) / 2, y: 0, w: 440, h: 48 }, TRUNK_Y = 66;
+const HEAD = { dx: 8, y: 84, w: 282, h: 56 }, SPINE_DX = 22, NODE = { dx: 40, w: 250, h: 46, y0: 214, pitch: 60 };
+const GUT0 = 299, LANE = 6.5, BUS0 = 151, BUSLANE = 8; // journey lines run in the gutter right of each column and a bus under the headers
+const colLeft = (r) => roles.indexOf(r) * COLW;
+const nodeRect = (r, p) => ({ x: colLeft(r) + NODE.dx, y: NODE.y0 + pageIdx(r, p) * NODE.pitch, w: NODE.w, h: NODE.h });
+const headRect = (r) => ({ x: colLeft(r) + HEAD.dx, y: HEAD.y, w: HEAD.w, h: HEAD.h });
+const NS = "http://www.w3.org/2000/svg";
+function rounded(pts, r = 7) {
+  let d = `M${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], [x2, y2] = pts[i + 1];
+    const d1 = Math.hypot(x1 - x0, y1 - y0), d2 = Math.hypot(x2 - x1, y2 - y1), rr = Math.min(r, d1 / 2, d2 / 2);
+    d += ` L${x1 - (x1 - x0) / d1 * rr} ${y1 - (y1 - y0) / d1 * rr} Q${x1} ${y1} ${x1 + (x2 - x1) / d2 * rr} ${y1 + (y2 - y1) / d2 * rr}`;
+  }
+  const last = pts[pts.length - 1];
+  return d + ` L${last[0]} ${last[1]}`;
+}
+function mkPath(svg, pts, cls) {
+  const p = document.createElementNS(NS, "path");
+  p.setAttribute("d", rounded(pts)); if (cls) p.setAttribute("class", cls);
+  svg.appendChild(p);
+  const len = p.getTotalLength();
+  p.style.strokeDasharray = `${len} ${len}`;
+  return { el: p, len };
+}
+const drawPath = (P, p, alpha = 1) => { P.el.style.display = p <= 0.0005 || alpha <= 0.001 ? "none" : ""; P.el.style.strokeDashoffset = (P.len * (1 - clamp(p))).toFixed(2); P.el.style.opacity = alpha.toFixed(3); };
+function mkArrow(svg, x, y, dir) { // tip at (x, y); dir = +1 points right, -1 points left
+  const a = document.createElementNS(NS, "polygon");
+  a.setAttribute("points", `${x},${y} ${x - dir * 11},${y - 6} ${x - dir * 11},${y + 6}`);
+  svg.appendChild(a);
+  return a;
+}
+const fitFont = (text, weight, size, max, min) => { const m = $("measure"); m.style.fontWeight = weight; m.style.letterSpacing = "0"; m.style.fontSize = size + "px"; m.textContent = text; const w = m.offsetWidth; return w <= max ? size : Math.max(min, Math.floor(size * max / w * 10) / 10); };
+
+// ---------- title ----------
+$("title").innerHTML = `<div class="brand">${M.brand}</div><div class="sub">Redesign: ${esc(M.brandSubtitle.toLowerCase())}</div><div class="foot">${esc(M.footer.split(". ").slice(0, 2).join(". "))}.</div>`;
+
+// ---------- today's product (from docs/product/sitemap.md) ----------
+const today = { roles: [], pages: [], lines: [] };
+(() => {
+  const host = $("today"), T = SB.today;
+  host.appendChild(today.tag = el("div", "tag", esc(T.tag)));
+  const svg = document.createElementNS(NS, "svg"); svg.setAttribute("width", STAGE_W); svg.setAttribute("height", 790); host.appendChild(svg);
+  const rw = 330, rh = 76, ry = 120, pw = 300, ph = 100, py = 500;
+  T.roles.forEach((name, i) => { const x = STAGE_W / 2 + (i - 1) * 480 - rw / 2; const n = el("div", "box", `<b>${esc(name)}</b>`); place(n, { x, y: ry, w: rw, h: rh }); host.appendChild(n); today.roles.push({ el: n, cx: x + rw / 2 }); });
+  T.pages.forEach(([route, name], j) => { const x = j * ((STAGE_W - pw) / 4); const n = el("div", "box", `<b>${esc(name)}</b><code>${esc(route)}</code>`); place(n, { x, y: py, w: pw, h: ph }); host.appendChild(n); today.pages.push({ el: n, cx: x + pw / 2 }); });
+  today.roles.forEach((r, i) => today.pages.forEach((p, j) => {
+    const sx = r.cx + (j - 2) * 34, ex = p.cx + (i - 1) * 46, p1 = document.createElementNS(NS, "path");
+    p1.setAttribute("d", `M${sx} ${ry + rh} C${sx} ${ry + rh + 150} ${ex} ${py - 150} ${ex} ${py}`); svg.appendChild(p1);
+    const len = p1.getTotalLength(); p1.style.strokeDasharray = `${len} ${len}`; today.lines.push({ el: p1, len });
+  }));
+  host.appendChild(today.note = el("div", "note", esc(T.note)));
+})();
+
+// ---------- site map ----------
+const map = { roles: {}, nodes: {}, hand: [], nav: [], order: [] };
+(() => {
+  const host = $("map");
+  const svg = map.svg = document.createElementNS(NS, "svg"); svg.setAttribute("width", STAGE_W); svg.setAttribute("height", 790); host.appendChild(svg);
+  map.root = el("div", "mroot", `${esc(M.brand.match(/<strong>(.*?)<\/strong>/)[1])}<small></small>`); place(map.root, ROOT); host.appendChild(map.root);
+  map.rootNote = map.root.querySelector("small");
+  const total = roles.reduce((n, r) => n + M.pages[r].length, 0);
+  map.rootNote.textContent = `${roles.length} roles · ${total} proposed screens`;
+  for (const r of roles) {
+    const left = colLeft(r), hr = headRect(r), cx = hr.x + hr.w / 2, pages = M.pages[r], R = map.roles[r] = { nodes: [] };
+    R.beat = beats.find((b) => b.kind === "map" && b.role === r);
+    R.trunk = mkPath(svg, [[STAGE_W / 2, ROOT.h], [STAGE_W / 2, TRUNK_Y], [cx, TRUNK_Y], [cx, HEAD.y]]);
+    const lastMid = NODE.y0 + (pages.length - 1) * NODE.pitch + NODE.h / 2;
+    R.spine = mkPath(svg, [[left + SPINE_DX, HEAD.y + HEAD.h], [left + SPINE_DX, lastMid]]);
+    R.head = el("div", "mhead", `<span>${esc(M.roleNames[r])}</span><small>${pages.length} screens</small>`); place(R.head, hr); host.appendChild(R.head);
+    R.count = R.head.querySelector("small");
+    pages.forEach(([p, name], i) => {
+      const rect = nodeRect(r, p), mid = rect.y + rect.h / 2;
+      const font = fitFont(name, 400, 19, NODE.w - 26, 14);
+      const node = el("div", "mnode", `<span>${esc(name)}</span><span class="on">${esc(name)}</span><span class="num"></span>`);
+      node.style.fontSize = font + "px"; place(node, rect); host.appendChild(node);
+      const N = { el: node, on: node.querySelector(".on"), num: node.querySelector(".num"), elbow: mkPath(svg, [[left + SPINE_DX, mid], [rect.x, mid]]), rect, font, name, visits: [] };
+      R.nodes.push(N); map.nodes[r + "/" + p] = N;
+    });
+  }
+  // the journey: handoffs between roles, and moves inside a role
+  for (const b of screenBeats) {
+    if (b.visit) map.nodes[b.role + "/" + b.page].visits.push(b);
+    if (b.arrive === "handoff") {
+      const k = b.hand.k, A = nodeRect(b.prev.role, b.prev.page), B = nodeRect(b.role, b.page), off = (k - 3) * 4;
+      const ay = A.y + A.h / 2 + off, by = B.y + B.h / 2 + off, busY = BUS0 + k * BUSLANE;
+      const gA = colLeft(b.prev.role) + GUT0 + k * LANE, gB = colLeft(b.role) + GUT0 + k * LANE, bx = B.x + B.w;
+      const pts = [[A.x + A.w, ay], [gA, ay], [gA, busY], [gB, busY], [gB, by], [bx + 11, by]];
+      Object.assign(b.hand, { line: mkPath(svg, pts, "jr"), arrow: mkArrow(svg, bx + 1, by, -1) });
+      map.hand.push(b.hand); map.order.push({ beat: b, kind: "hand" });
+    } else if (b.arrive === "nav") {
+      const A = nodeRect(b.prev.role, b.prev.page), B = nodeRect(b.role, b.page), x = colLeft(b.role) + 31;
+      const pts = [[A.x, A.y + A.h / 2], [x, A.y + A.h / 2], [x, B.y + B.h / 2], [B.x - 10, B.y + B.h / 2]];
+      b.navLine = { line: mkPath(svg, pts, "jr"), arrow: mkArrow(svg, B.x - 1, B.y + B.h / 2, 1) };
+      map.nav.push(b); map.order.push({ beat: b, kind: "nav" });
+    }
+  }
+  // a second, heavier stroke for retracing the path at the end
+  let run = 0;
+  for (const o of map.order) {
+    const src = o.kind === "hand" ? o.beat.hand.line : o.beat.navLine.line, p = document.createElementNS(NS, "path");
+    p.setAttribute("d", src.el.getAttribute("d")); p.setAttribute("class", "re"); p.style.strokeDasharray = `${src.len} ${src.len}`; svg.appendChild(p);
+    o.re = { el: p, len: src.len }; o.from = run; run += src.len; o.to = run;
+  }
+  map.runLength = run;
+  for (const key in map.nodes) { const N = map.nodes[key]; if (N.visits.length) N.num.textContent = N.visits.map((b) => b.visit).join(" · "); }
+  host.appendChild(map.chip = el("div", "", `<b>${esc(SB.record.id)}</b><span></span>`)); map.chip.id = "chip";
+  host.appendChild(map.dot = el("div", "")); map.dot.id = "dot";
+})();
+
+// ---------- mockup screens ----------
+function shadowHost(parent, html) {
+  const host = el("div"); parent.appendChild(host);
+  const root = host.attachShadow({ mode: "open" });
+  root.adoptedStyleSheets = [mockSheet];
+  root.innerHTML = html;
+  return { host, root };
+}
+function splitScreen(html) { // a mockup screen, with its presenter action strip taken out
+  const box = el("div", "", html), action = box.querySelector(".action-area");
+  if (action) action.remove();
+  return { box, action };
+}
+const atomSelector = "dd, td, .field input, .notice, .code, .timeline li, .identity p";
+function atomKey(a) {
+  const sec = a.closest(".section"), title = sec && sec.querySelector("h2") ? sec.querySelector("h2").textContent : "";
+  if (a.matches("dd")) return "dd|" + title + "|" + a.previousElementSibling.textContent;
+  if (a.matches("td")) return "td|" + title + "|" + a.parentElement.rowIndex + "|" + a.cellIndex;
+  if (a.matches("input")) return "in|" + a.closest("label").textContent;
+  if (a.matches(".notice")) return "no|" + a.textContent;
+  if (a.matches(".timeline li")) return "li|" + a.textContent;
+  return a.className + "|" + title;
+}
+const atomText = (a) => (a.matches("input") ? a.getAttribute("value") : a.textContent);
+function markChanges(prev, next) { // light up what this role's action changed
+  const before = new Map([...prev.querySelectorAll(atomSelector)].map((a) => [atomKey(a), atomText(a)]));
+  for (const a of next.querySelectorAll(atomSelector)) if (before.get(atomKey(a)) !== atomText(a)) a.classList.add("chg");
+}
+function buildView(b) {
+  const wrap = el("div", "view"); $("stage").insertBefore(wrap, $("head"));
+  const { host, root } = shadowHost(wrap, `<div class="mock-body"><div class="pv-layout"><aside class="sidebar">${M.sidebars[b.role]}</aside><div class="workspace pv-work"><div class="pv-scroll"></div><div class="pv-actions"></div></div></div></div>`);
+  root.querySelector(`#role-nav [data-page="${b.page}"]`).setAttribute("aria-current", "page");
+  const scroll = root.querySelector(".pv-scroll"), actions = root.querySelector(".pv-actions");
+  const V = { wrap, host, scrollEl: scroll, actionsEl: actions, layers: [], actions: [], buttons: [] };
+  b.steps.forEach((step, k) => {
+    const src = M.screens[`${step}|${b.role}|${b.page}`];
+    if (!src) throw new Error(`Screen missing from screens.generated.js: step ${step} ${b.role}/${b.page}. Run npm run extract.`);
+    const { box, action } = splitScreen(src.html);
+    const layer = el("div", "pv-layer"); layer.append(...box.childNodes); scroll.appendChild(layer);
+    if (k > 0) markChanges(V.layers[k - 1], layer);
+    else if (b.arrive === "state" && b.prev.view.layers.length > 1) { // same screen continues: keep what the last beat lit up
+      const before = b.prev.view.layers; markChanges(before[before.length - 2], layer); V.carried = true;
+    }
+    let act = null;
+    if (action && action.querySelector("[data-next]")) act = action; // this role's next action in the mockup
+    else if (k > 0 && V.actions[k - 1]) { act = V.actions[k - 1].firstChild.cloneNode(true); act.querySelector("button").disabled = true; } // the action just taken
+    const slot = el("div", "pv-action"); if (act) slot.appendChild(act); actions.appendChild(slot);
+    V.layers.push(layer); V.actions.push(slot); V.buttons.push(act ? act.querySelector("button") : null);
+  });
+  if (b.spot) for (const n of V.layers[V.layers.length - 1].querySelectorAll(b.spot)) n.classList.add("spot");
+  const side = root.querySelector(".sidebar"), limit = side.querySelector(".role-limit");
+  if (limit && side.scrollHeight > HD) limit.style.display = "none"; // never show a clipped sentence
+  V.hasActions = V.buttons.some(Boolean);
+  if (!V.hasActions) actions.style.display = "none";
+  V.portH = HD - 2 - (V.hasActions ? ACTION_H : 0);
+  return V;
+}
+function focusY(V, k, key) { // scroll offset that brings a section of layer k into view
+  if (!key || key.focus == null) return 0;
+  const layer = V.layers[k], h2 = [...layer.querySelectorAll("h2")].find((h) => h.textContent.trim() === key.focus);
+  if (!h2) return null;
+  const sec = h2.closest(".section") || h2, max = Math.max(0, layer.offsetHeight - V.portH);
+  return clamp(key.align === "end" ? sec.offsetTop + sec.offsetHeight - V.portH + 18 : sec.offsetTop - 12, 0, max);
+}
+for (const b of screenBeats) {
+  const V = b.view = buildView(b);
+  const keys = b.scroll || [{ focus: b.focus }];
+  b.scrollKeys = keys.map((key) => { const ys = V.layers.map((_, k) => focusY(V, k, key)); const known = ys.find((y) => y != null); if (known == null) throw new Error(`Beat "${b.id}": no section titled "${key.focus}" on ${b.role}/${b.page}.`); return { ...key, ys: ys.map((y) => (y == null ? known : y)) }; });
+}
+
+// ---------- one role's screens as tiles ----------
+const gridBeat = beats.find((b) => b.kind === "grid"), grid = { tiles: [] };
+(() => {
+  const host = $("grid"), r = gridBeat.role, pages = M.pages[r], cols = 3, tw = 544, th = 220, gx = 48, gy = 26, top = 78;
+  pages.forEach(([p, name], i) => {
+    const tile = el("div", "tile", `<div class="bar">${esc(name)}</div><div class="port"></div>`); host.appendChild(tile);
+    const N = map.nodes[r + "/" + p], { box } = splitScreen(M.screens[`${gridBeat.step}|${r}|${p}`].html);
+    const { host: sh, root } = shadowHost(tile.querySelector(".port"), `<div class="mock-body"><div class="workspace tile-work"></div></div>`);
+    root.querySelector(".tile-work").append(...box.childNodes);
+    tile.querySelector(".bar").style.fontSize = N.font + "px";
+    grid.tiles.push({ el: tile, bar: tile.querySelector(".bar"), port: tile.querySelector(".port"), host: sh, from: N.rect, to: { x: (i % cols) * (tw + gx), y: top + Math.floor(i / cols) * (th + gy), w: tw, h: th }, page: p });
+  });
+  const hr = headRect(r);
+  grid.head = el("div", "mhead", `<span>${esc(M.roleNames[r])}</span><small>${pages.length} screens</small>`); grid.head.id = "gridhead"; host.appendChild(grid.head);
+  grid.headFrom = hr; grid.headTo = { x: 0, y: 0, w: 344, h: 56 };
+  const limit = M.limits[r], cut = limit.lastIndexOf(". ", limit.length - 2);
+  grid.limit = el("div", "", cut > 0 ? `<span>${esc(limit.slice(0, cut + 1))} <b>${esc(limit.slice(cut + 2))}</b></span>` : `<span>${esc(limit)}</span>`); grid.limit.id = "gridlimit"; host.appendChild(grid.limit);
+  grid.firstScreen = screenBeats.find((b) => b.arrive === "tile");
+})();
+
+// ---------- head of the screen: who holds the record ----------
+const head = { chips: {} };
+(() => {
+  const host = $("head");
+  for (const r of roles) { const c = el("div", "rc", `${esc(M.roleNames[r])}<i>${esc(M.roleNames[r])}</i>`); host.appendChild(c); head.chips[r] = { el: c, on: c.querySelector("i") }; }
+  host.appendChild(head.scr = el("div", "scr"));
+  host.appendChild(el("div", "rec", `Record <b>${esc(SB.record.id)}</b> · ${esc(SB.record.name)}`));
+})();
+
+// ---------- closing card ----------
+$("close").innerHTML = `<h1>${esc(SB.labels.mockup)}</h1><p class="state">Still in ideation. Not built.</p><div class="banner">${M.banner}</div><p class="foot">${esc(M.footer.split(". ").slice(0, 2).join(". "))}.</p>`;
+
+// ---------- drawing one frame ----------
+function drawView(b, lt, rect, alpha, content = 1) {
+  const V = b.view;
+  show(V.wrap, alpha);
+  if (alpha <= 0.001) return;
+  V.scrollEl.style.opacity = V.actionsEl.style.opacity = content >= 0.999 ? "" : content.toFixed(3);
+  place(V.wrap, rect);
+  V.host.style.transform = `scale(${(rect.w / WD).toFixed(5)})`;
+  // A press shows on the button, the values then change at once, and the changed values light up.
+  let idx = 0, ring = 0, settle = 1, glow = V.carried ? 1 - es(lt, 0, 0.5) : 1; // a carried-over highlight lets go as the next beat starts
+  b.presses.forEach((tp, k) => {
+    if (lt >= tp + CHANGE) { idx = k + 1; glow = es(lt, tp + CHANGE, tp + CHANGE + 0.4); settle = es(lt, tp + CHANGE, tp + CHANGE + 0.7); }
+    else if (lt >= tp && idx === k) ring = seg(lt, tp, tp + 0.3);
+  });
+  V.layers.forEach((layer, k) => {
+    const a = k === idx ? 1 : 0;
+    show(layer, a); show(V.actions[k], a);
+    layer.style.setProperty("--hl", k === idx ? glow.toFixed(3) : "1");
+    const btn = V.buttons[k];
+    if (btn && !btn.disabled) { // pressed look: the mockup's own focus ring and hover colour
+      const on = k === idx && ring > 0;
+      btn.style.outline = on ? `3px solid rgba(29,78,216,${ring.toFixed(3)})` : "";
+      btn.style.outlineOffset = on ? "4px" : "";
+      btn.style.background = on ? "#1e40af" : ""; btn.style.borderColor = on ? "#1e40af" : "";
+    }
+  });
+  // if the new state is taller or shorter, the view settles onto the same section instead of jumping
+  const yOf = (key) => (idx > 0 ? lerp(key.ys[idx - 1], key.ys[idx], settle) : key.ys[0]);
+  let y = yOf(b.scrollKeys[0]);
+  for (let i = 1; i < b.scrollKeys.length; i++) { const key = b.scrollKeys[i]; y = lerp(y, yOf(key), es(lt, key.at, key.at + key.dur)); }
+  for (const layer of V.layers) layer.style.transform = `translateY(${(-y).toFixed(2)}px)`;
+}
+
+function renderAt(t) {
+  t = clamp(t, 0, TOTAL - 1e-6);
+  const b = beatAt(t), lt = t - b.t0, prevBeat = beats[b.i - 1] || null;
+
+  // progress and caption
+  for (const s of sections) { s.fill.style.transform = `scaleX(${seg(t, s.t0, s.t1).toFixed(4)})`; s.el.classList.toggle("now", t >= s.t0 && t < s.t1); }
+  setCaption($("capB"), prevBeat, 1 - seg(lt, 0, 0.25));
+  setCaption($("capA"), b, seg(lt, 0.25, 0.55));
+
+  // title and today's product
+  show($("title"), b.kind === "title" ? es(lt, 0.15, 0.9) * (1 - es(lt, b.dur - 0.5, b.dur)) : 0);
+  const todayA = b.kind === "today" ? es(lt, 0, 0.5) * (1 - es(lt, b.dur - 0.5, b.dur)) : 0;
+  show($("today"), todayA);
+  if (todayA > 0) {
+    today.roles.forEach((r, i) => show(r.el, es(lt, 0.3 + i * 0.15, 0.7 + i * 0.15)));
+    today.pages.forEach((p, j) => show(p.el, es(lt, 0.8 + j * 0.12, 1.2 + j * 0.12)));
+    today.lines.forEach((L, n) => drawPath(L, es(lt, 1.6 + n * 0.12, 2.1 + n * 0.12)));
+    show(today.note, es(lt, 4.0, 4.5));
+  }
+
+  // which parts of the map are on stage
+  let mapA = 0, othersA = 1, gridRoleA = 1, dim = 0, retrace = -1;
+  const hand = b.kind === "screen" && b.arrive === "handoff";
+  if (b.kind === "map" || b.kind === "map-hold") mapA = 1;
+  else if (b.kind === "grid") { mapA = 1; othersA = 1 - es(lt, 0, 0.6); gridRoleA = 0; }
+  else if (hand) mapA = lt < 1.2 ? es(lt, 0.15, 0.6) : 1 - es(lt, 1.85, 2.2);
+  else if (b.kind === "path") { mapA = es(lt, 0.15, 0.6); dim = es(lt, 0.6, 1.1); retrace = seg(lt, 1.2, 4.4); }
+  else if (b.kind === "close") { mapA = lerp(1, 0.2, es(lt, 0, 0.6)); dim = 1; retrace = 1; }
+  show($("map"), mapA);
+  if (mapA > 0) {
+    const firstMap = beats.find((x) => x.kind === "map");
+    show(map.root, othersA * es(t, firstMap.t0, firstMap.t0 + 0.5));
+    show(map.rootNote, es(t, beats.find((x) => x.kind === "map-hold").t0 + 0.2, beats.find((x) => x.kind === "map-hold").t0 + 0.8));
+    for (const r of roles) {
+      const R = map.roles[r], t0 = R.beat.t0, n = R.nodes.length, colA = r === gridBeat.role ? gridRoleA : othersA;
+      const isGridRole = r === gridBeat.role && b.kind === "grid";
+      drawPath(R.trunk, es(t, t0 + 0.25, t0 + 0.95), othersA);
+      show(R.head, isGridRole ? 0 : colA * es(t, t0 + 0.8, t0 + 1.2));
+      show(R.count, es(t, t0 + 1.3 + n * 0.22, t0 + 1.7 + n * 0.22));
+      const linesA = isGridRole ? 1 - es(lt, 0, 0.4) : colA;
+      drawPath(R.spine, seg(t, t0 + 1.1, t0 + 1.15 + n * 0.22), linesA);
+      R.nodes.forEach((N, i) => {
+        const p = es(t, t0 + 1.15 + i * 0.22, t0 + 1.5 + i * 0.22), visited = N.visits.length ? es(t, N.visits[0].visitAt, N.visits[0].visitAt + 0.3) : 0;
+        drawPath(N.elbow, p, linesA);
+        show(N.el, isGridRole ? 0 : colA * p * (visited ? 1 : lerp(1, 0.45, dim)));
+        N.el.style.transform = p < 1 ? `translateX(${((1 - p) * -10).toFixed(2)}px)` : "";
+        show(N.on, visited); show(N.num, visited);
+        if (N.visits.length > 1) N.num.textContent = N.visits.filter((v) => t >= v.visitAt).map((v) => v.visit).join(" · ") || N.visits[0].visit;
+      });
+    }
+    // journey lines drawn so far
+    const baseStroke = dim > 0 ? `rgba(29,78,216,${lerp(1, 0.3, dim).toFixed(3)})` : "";
+    for (const H of map.hand) { const p = es(t, H.beat.t0 + 0.7, H.beat.t0 + 1.7); drawPath(H.line, p); H.line.el.style.stroke = baseStroke; show(H.arrow, p >= 1 ? 1 : 0); }
+    for (const nb of map.nav) { const on = t >= nb.t0 + 0.5 ? 1 : 0; drawPath(nb.navLine.line, on); nb.navLine.line.el.style.stroke = baseStroke; show(nb.navLine.arrow, on); }
+    let dotAt = null;
+    for (const o of map.order) {
+      const p = retrace < 0 ? 0 : seg(retrace * map.runLength, o.from, o.to);
+      drawPath(o.re, p);
+      if (p > 0 && p < 1) dotAt = o.re.el.getPointAtLength(p * o.re.len);
+    }
+    show(map.dot, dotAt ? 1 : 0);
+    if (dotAt) map.dot.style.transform = `translate(${dotAt.x.toFixed(2)}px,${dotAt.y.toFixed(2)}px)`;
+    // the record travelling between roles
+    const chipA = hand ? es(lt, 0.45, 0.7) * (1 - es(lt, 1.75, 2.0)) : 0;
+    show(map.chip, chipA);
+    if (chipA > 0) {
+      const L = b.hand.line, pt = L.el.getPointAtLength(es(lt, 0.7, 1.7) * L.len);
+      map.chip.style.transform = `translate(${pt.x.toFixed(2)}px,${(pt.y - 19).toFixed(2)}px)`;
+      map.chip.lastChild.textContent = b.carry || "";
+    }
+  }
+
+  // one role: its nodes open into screens
+  const tileBeat = grid.firstScreen, inTile = b === tileBeat;
+  const gridOn = b.kind === "grid" || b.kind === "grid-limit" || (inTile && lt < 1.5);
+  show($("grid"), gridOn ? 1 : 0);
+  if (gridOn) {
+    const move = b.kind === "grid" ? es(lt, 0.3, 1.1) : 1, open = b.kind === "grid" ? es(lt, 1.0, 1.8) : 1, leave = inTile ? 1 - es(lt, 0, 0.5) : 1;
+    const grow = inTile ? es(lt, 0.2, 1.2) : 0;
+    place(grid.head, lerpRect(grid.headFrom, grid.headTo, move)); show(grid.head, leave);
+    grid.head.style.fontSize = lerp(20, 26, move).toFixed(2) + "px";
+    show(grid.limit, leave * (b.kind === "grid" ? 0 : b.kind === "grid-limit" ? es(lt, 0.2, 0.8) : 1));
+    for (const T of grid.tiles) {
+      const hero = inTile && T.page === tileBeat.page;
+      const rect = hero ? lerpRect(T.to, HERO, grow)
+        : { x: lerp(T.from.x, T.to.x, move), y: lerp(T.from.y, T.to.y, move), w: lerp(T.from.w, T.to.w, move), h: lerp(T.from.h, T.to.h, open) };
+      place(T.el, rect); show(T.el, hero ? 1 : leave);
+      const barH = hero ? lerp(40, 0, grow) : lerp(NODE.h - 2, 40, open);
+      T.bar.style.height = barH.toFixed(2) + "px"; T.bar.style.borderBottomWidth = open > 0.02 && !hero ? "1px" : "0";
+      T.bar.style.opacity = hero ? (1 - es(lt, 0.2, 0.6)).toFixed(3) : "";
+      T.port.style.height = Math.max(0, rect.h - 2 - barH).toFixed(2) + "px";
+      T.host.style.transform = `scale(${((rect.w - 2) / WORK).toFixed(5)})`;
+    }
+  }
+
+  // the screen in front, and the one it replaces
+  for (const sb of screenBeats) if (sb !== b && sb !== b.prev) show(sb.view.wrap, 0);
+  let headA = 0, headRole = null, headPrev = null, roleMix = 1, nameA = 1, nameBeat = null;
+  if (b.kind === "screen") {
+    const prev = b.prev;
+    headA = 1; headRole = b.role; nameBeat = b;
+    if (b.arrive === "tile") { drawView(b, lt, PANEL, es(lt, 1.05, 1.5)); headA = es(lt, 1.05, 1.5); }
+    else if (b.arrive === "handoff") {
+      drawView(prev, prev.dur, lerpRect(PANEL, nodeRect(prev.role, prev.page), es(lt, 0, 0.7)), 1 - es(lt, 0.3, 0.7));
+      drawView(b, lt, lerpRect(nodeRect(b.role, b.page), PANEL, es(lt, 1.7, 2.4)), es(lt, 1.7, 2.05));
+      headPrev = prev.role; roleMix = es(lt, 1.2, 1.7); headA = lt < 1.2 ? 1 - es(lt, 0, 0.25) : es(lt, 2.15, 2.4);
+      if (lt < 1.45) { nameBeat = prev; nameA = 1 - es(lt, 0.4, 0.8); } else nameA = es(lt, 1.6, 2.0);
+    } else if (b.arrive === "nav") {
+      // same role, next screen: the sidebar stays put, the workspace empties and refills
+      if (lt < 0.35) { drawView(prev, prev.dur, PANEL, 1, 1 - es(lt, 0.05, 0.35)); show(b.view.wrap, 0); nameBeat = prev; nameA = 1 - es(lt, 0.05, 0.35); }
+      else { show(prev.view.wrap, 0); drawView(b, lt, PANEL, 1, es(lt, 0.35, 0.7)); nameA = es(lt, 0.35, 0.7); }
+    } else { if (prev) show(prev.view.wrap, 0); drawView(b, lt, PANEL, 1); }
+  } else if (b.kind === "path") {
+    const last = screenBeats[screenBeats.length - 1];
+    drawView(last, last.dur, lerpRect(PANEL, nodeRect(last.role, last.page), es(lt, 0, 0.8)), 1 - es(lt, 0.35, 0.8));
+    headA = 1 - es(lt, 0, 0.25); headRole = last.role; nameBeat = last;
+  } else for (const sb of screenBeats) show(sb.view.wrap, 0);
+  show($("head"), headA);
+  if (headA > 0) {
+    for (const r of roles) {
+      const C = head.chips[r];
+      show(C.on, r === headRole ? roleMix : r === headPrev ? 1 - roleMix : 0);
+      C.el.classList.toggle("seen", screenBeats.some((sb) => sb.role === r && sb.t0 + sb.arr <= t + 1e-6));
+    }
+    head.scr.textContent = pageName(nameBeat.role, nameBeat.page); head.scr.style.opacity = nameA.toFixed(3);
+  }
+
+  show($("close"), b.kind === "close" ? es(lt, 0.4, 1.0) : 0);
+}
+
+// ---------- checkpoints for stills: the middle of every beat and every transition ----------
+const checkpoints = [];
+beats.forEach((b, i) => {
+  const n = String(i + 1).padStart(2, "0"), add = (label, lt) => checkpoints.push({ name: `${n}-${b.id}-${label}`, t: +(b.t0 + lt).toFixed(3) });
+  if (b.kind === "screen") {
+    if (b.arrive === "handoff") { add("t1-leave", 0.35); add("t2-travel", 1.2); add("t3-arrive", 2.05); }
+    if (b.arrive === "tile") add("t-open", 0.75);
+    if (b.arrive === "nav") add("t-nav", 0.35);
+    b.presses.forEach((tp, k) => { add(`t-press${k + 1}`, tp + 0.28); add(`t-change${k + 1}`, tp + CHANGE + 0.2); });
+    (b.scrollKeys || []).slice(1).forEach((key, k) => add(`t-scroll${k + 1}`, key.at + key.dur / 2));
+    const settled = Math.max(b.arr, ...b.presses.map((tp) => tp + CHANGE + 0.4), ...b.scrollKeys.slice(1).map((key) => key.at + key.dur));
+    add("hold", (settled + b.dur) / 2);
+  } else {
+    if (b.kind === "map") add("t-build", 1.6);
+    if (b.kind === "today") add("t-build", 2.4);
+    if (b.kind === "grid") add("t-open", 0.9);
+    if (b.kind === "path") { add("t-pullback", 0.4); add("t-retrace", 2.8); }
+    if (b.kind === "close") add("t-in", 0.5);
+    add("hold", b.kind === "path" ? 6.8 : b.dur * 0.66);
+  }
+});
+
+window.TOTAL = TOTAL;
+window.FPS = SB.fps;
+window.CHECKPOINTS = checkpoints;
+window.BEATS = beats.map((b) => ({ n: b.i + 1, id: b.id, section: b.section, kind: b.kind, t0: b.t0, dur: b.dur, arrive: b.arrive || null, arr: b.arr || 0, caption: b.caption, capSize: b.capSize }));
+window.renderAt = renderAt;
+
+// ---------- preview only: fit to the window and scrub. Not used when rendering. ----------
+if (!CAPTURE) {
+  const fit = () => { const s = Math.min(innerWidth / 1920, (innerHeight - 56) / 1080); $("frame").style.transform = `scale(${s})`; };
+  addEventListener("resize", fit); fit();
+  const time = $("time"), clock = $("clock"); time.max = TOTAL;
+  let now = +(new URLSearchParams(location.search).get("t") || 0), playing = false, last = 0;
+  const paint = () => { renderAt(now); time.value = now; const b = beatAt(now); clock.textContent = `${now.toFixed(2)} s / ${TOTAL.toFixed(1)} s · beat ${b.i + 1} ${b.id}`; };
+  time.addEventListener("input", () => { now = +time.value; paint(); });
+  $("play").addEventListener("click", () => { playing = !playing; $("play").textContent = playing ? "Pause" : "Play"; last = performance.now(); if (playing) requestAnimationFrame(tick); });
+  const tick = (ts) => { if (!playing) return; now = Math.min(TOTAL, now + (ts - last) / 1000); last = ts; paint(); if (now >= TOTAL) { playing = false; $("play").textContent = "Play"; } else requestAnimationFrame(tick); };
+  paint();
+} else renderAt(0);
+window.READY = true;
+})();
+</script>
+</body>
+</html>
