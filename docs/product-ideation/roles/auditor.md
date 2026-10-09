@@ -4,6 +4,8 @@
 
 Each item is marked **Decided** (confirmed by the maintainer) or **Later** (agreed in principle, outside version 1).
 
+**Decided, process session of 2026-10-09.** [The end-to-end process](../process.md) defines the three records' handoffs, states and commitment inventory. Additions are indexed in decisions section 16 and remain unbuilt ideation.
+
 This role shares only its name with the `Auditor / COA` role in the running code, which can review and delete beneficiaries and confirm payouts. The redesigned auditor changes nothing.
 
 ## Who this is
@@ -57,14 +59,20 @@ Automatic checks put an entry on the list. They are a plain script and only poin
 - assisted, unconfirmed and disputed payouts, per officer and per site
 - a challenge raised after a payout
 - every grievance
+- a system fallback snapshot, distinguished from a signed barangay batch
+- stale/invalidated payout authorisation, pending list publication and paid-amount difference flags
+
+**Decided.** A recorded handover, recipient full confirmation, adverse answer and neutral unconfirmed are separate evidence/outcome measures. Unconfirmed starts 72 hours after handover, and later answers remain possible. The Auditor sees revised answers and grievance reopening/resolution history; no record or complaint is erased. System-generated intakes never imply a barangay signature. The ledger balance is not reconciled physical cash while advances/returns/liquidation remain Later.
 
 ## Rules
 
 - **The auditor changes no record.** There is no approve, reject, edit, mark or note in version 1. Decided.
-- **An integrity check has three outcomes:** matches, does not match, or chain unreachable. Unreachable is never reported as a match. Decided.
+- **An integrity check distinguishes:** matches, does not match, required anchor absent, or chain unreachable. Missing off-chain evidence is unavailable, never verified. Unreachable proves neither a match nor absence. Decided.
 - **The auditor sees everything, including personal data.** Names and claim details show in lists. ID numbers and photos show only when a specific record is opened. Decided.
 - **Each view of an ID number or photo is logged.** Decided.
 - **An access log records what the auditor viewed.** It is not shown to the Field Office, so staff cannot tell which entries are under scrutiny. The log is written by the system, not by the auditor. Decided.
+- **Integrity re-checks do not change business records or expose inspection choices to the Field Office.** Required commitments/retries are in the shared records; this Auditor's read/check access stays in the private access log. Decided.
+- **Files are private and off-chain.** Release/input documents, resolutions, identity and damage evidence are retrievable according to permissions; the Auditor sees full evidence and history. No identity data, answer, PIN or payout code is put on-chain. Decided.
 
 ## What the auditor cannot do
 
@@ -78,6 +86,7 @@ Automatic checks put an entry on the list. They are a plain script and only poin
 - **The list shows what the checks were written to catch.** A problem no check looks for stays off it, though the full ledger remains browsable.
 - **A matching hash proves the document is unchanged since it was anchored,** not that the document was genuine when uploaded.
 - **Without sign-in, the role is a selectable setting.** Until sign-in exists, nothing stops anyone from choosing the auditor view, and that gap must be stated wherever version 1 is presented.
+- **Phone signup/sign-in remains Proposed planning only.** The five-role process needs authenticated identities but has no chosen SMS authentication provider or established free-tier feasibility; it is not built.
 
 ## Later
 

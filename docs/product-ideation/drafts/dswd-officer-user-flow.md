@@ -6,6 +6,8 @@ This draft covers the funds side of the [DSWD Officer](../roles/dswd-officer.md)
 
 The DSWD Officer works in a DSWD Field Office and is the top role in AyudaChain's first version. Their funds workspace is a budget ledger per disaster. It records how much was received, for what purpose and for which area. It does not yet cover which families receive anything.
 
+**Decided, alignment of 2026-10-09.** [The end-to-end process](../process.md) settles cross-role handoffs without expanding this funds draft or designing new screens. Its correction, anchoring and financial-boundary rules apply below; all remain planned and unbuilt.
+
 ## Scope
 
 | Flow | First version | Later |
@@ -20,7 +22,7 @@ The DSWD Officer works in a DSWD Field Office and is the top role in AyudaChain'
 | 8. Track liquidation and returns | | Yes |
 | 9. Report and export | | Yes |
 
-Declaring a disaster is out of scope. Disasters arrive in the system already declared; how they are created is not decided yet.
+Declaring/creating a disaster is out of scope; disasters come from a seeded list. DSWD explicitly opening claim intake for selected barangays is a separate planned action in the end-to-end process.
 
 ## Overview
 
@@ -33,11 +35,15 @@ flowchart TD
     E --> F[Fields extracted and prefilled]
     F --> G[Officer checks and corrects each field]
     G --> H[Submit]
-    H --> I[Document hashed, entry and hash anchored on-chain]
+    H --> I[Save entry and queue document and entry anchors]
     I --> J{Approval enabled?}
     J -->|No| K[Entry counts toward the budget]
     J -->|Yes| L[Pending until a second person approves]
     L --> K
+    I --> O{Anchor confirmed?}
+    O -->|No| P[Explicit not anchored; retry unchanged content]
+    P --> O
+    O -->|Yes| Q[Store real chain reference]
     C --> M[Correct an entry: add a reversing entry]
     C --> N[Later: advances, liquidation, reports]
 ```
@@ -75,7 +81,7 @@ This is the core flow.
    - Covered area (provinces, cities or municipalities)
    - Signatory name and position as printed
 5. The officer submits.
-6. The system computes a hash of the file, stores the file off-chain, and anchors the hash, amount and disaster ID on-chain.
+6. Uploaded files have been hashed and stored privately off-chain. The system saves the confirmed entry and queues its document/entry commitments, recorded amount and opaque disaster/entry references for anchoring.
 7. The entry appears in the ledger with its anchoring state.
 
 **Rules**
@@ -84,6 +90,7 @@ This is the core flow.
 - Extraction only ever prefills. An entry is saved only after the officer has confirmed it.
 - If the officer changes a machine-read amount, the entry records both values and that it was overridden.
 - A document whose hash already exists in the system is rejected as a duplicate, to stop one release being counted twice.
+- A linked correction set may reference the original evidence; this exception never makes it another independent release.
 - If anchoring fails, the entry is saved as "not anchored" and says so. It is never shown as anchored.
 - The signatory is recorded as "named on the document". The system does not claim to have authenticated a handwritten signature or stamp.
 - If the file carries a government digital signature, the system validates it and records the result separately as "digitally signed by".
@@ -94,31 +101,34 @@ This is the core flow.
 2. Three totals sit above the list:
    - **Received:** sum of fund releases.
    - **Advanced:** sum of cash advances to disbursing officers (zero until Flow 7 exists).
-   - **Remaining:** received minus advanced, plus returns.
+   - **Remaining:** received minus advanced, plus recorded returns (returns have no feeding event until Flow 8 exists).
 3. Opening an entry shows its document, its hash, its on-chain reference, and its history.
 4. From an entry the officer can re-check integrity: the stored file is hashed again and compared with the anchored hash.
 
 **Rules**
 
 - Totals are computed from entries, never typed.
-- An integrity check reports one of three results: matches, does not match, or could not reach the chain. An unreachable chain is not a match.
+- An integrity check distinguishes matches, does not match, required anchor absent and could not reach the chain. Missing off-chain evidence is unavailable, never verified; an unreachable chain proves neither a match nor absence.
+- The remaining figure is the recorded ledger balance, not certified available cash. Planned payout handover/outcome totals are separate and do not silently feed advanced or reduce this ledger. Physical funding is an outside Accounting/Cash operation.
 
 ## Flow 5: Correct an entry
 
 1. The officer opens an entry and chooses "Correct".
 2. They state the reason and enter the right values, with a document if the correction comes from an amended release.
-3. The system adds a reversing entry and a replacement entry. The original stays visible, marked as superseded.
+3. The system saves the reversing entry and replacement as one linked correction set, with required anchors queued. The original stays visible; its superseded state is derived from the appended correction.
 
 **Rules**
 
 - Entries are never edited or deleted. The ledger is append-only, which matches the audit trail rule in `AGENTS.md`.
 - A reason is required for every correction.
+- A transcription correction references the original source document. An amended source requires its new document. The linked set qualifies the duplicate-document prohibition without counting another independent release.
+- Totals cancel the original and count the replacement once even when a required anchor fails; that failure remains explicit and is retried against unchanged content.
 
 ## Flow 6: Approve an entry (design for it now)
 
 1. A submitted entry is "pending" and does not count toward the remaining balance.
 2. A second person, probably the Regional Director, opens it, compares it with the document, and approves or returns it with a reason.
-3. Approval is itself anchored, with the approver's identity.
+3. Later, the approval commitment is anchored with an opaque approver reference; personal identity stays off-chain.
 
 **Rules**
 
@@ -137,11 +147,13 @@ This is where the budget ledger connects to payouts. It replaces the current app
 
 ## Flow 8: Track liquidation and returns (later)
 
-1. For each advance the officer sees cash advanced, payouts confirmed against it, and cash returned.
-2. An advance is settled when payouts plus returns equal the amount advanced.
+1. For each advance the officer sees cash advanced, payout evidence/outcomes for Accounting's review, and cash returned.
+2. Later, Accounting-accepted disbursements plus evidenced returns must equal the advance. Recorded handover and recipient confirmation remain distinct; the accounting acceptance/exception process is not designed here.
 3. Advances that are overdue or do not balance are listed first.
 
 This is the reconciliation an auditor will read, so it should be computed automatically from payout records, not entered by hand.
+
+Closing a planned payout session does not confirm every receipt or liquidate an advance. These accounting flows remain Later.
 
 ## Flow 9: Report and export (later)
 
@@ -162,8 +174,8 @@ This is the reconciliation an auditor will read, so it should be computed automa
 
 ## Open questions
 
-1. Who creates a disaster record, given that declaring one is out of scope?
+1. **Decided:** disaster records are seeded; declaring/creating them is outside this flow. Seed administration is not designed here.
 2. Who approves entries, and from which version?
-3. Is covered area set per release or per disaster?
+3. **Decided:** covered area is recorded per release; explicit claim opening for selected barangays is separate.
 4. Which file types are accepted: scanned PDF, photo, digitally signed PDF?
-5. How long must documents be retained, and where are they stored?
+5. **Decided boundary; Later policy:** files live in a private off-chain store with record references/hashes and preserved versions; provider, backup/retention period remain unsettled.

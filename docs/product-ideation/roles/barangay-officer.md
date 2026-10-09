@@ -4,6 +4,8 @@
 
 Each item is marked **Decided** (confirmed by the maintainer) or **To verify** (depends on a fact not yet checked with DSWD).
 
+**Decided, process session of 2026-10-09.** [The end-to-end process](../process.md) settles handoffs, state transitions and exceptions across all five roles. Its additions are indexed in decisions section 16; none is permission to build.
+
 This role was first called the "barangay endorser". It shares only its name with the `Barangay Officer` role in the running code, which reviews and deletes beneficiaries and confirms payouts. The redesigned role does none of those.
 
 ## Who this is
@@ -22,6 +24,7 @@ The role ships with the [Beneficiary](beneficiary.md) role, since each is useles
 | A barangay may have several officers. Each sees only their own barangay | Decided |
 | A barangay needs at least two active officers before it can endorse | Decided |
 | A DSWD Officer approves and deactivates accounts | Decided |
+| DSWD enters the Punong Barangay's documented nomination, including the initial accounts; nominator, entered-by and approver are recorded separately | Decided |
 | A deactivated account can do nothing further. Its past responses stay on record under its name | Decided |
 | The officer signs in with an email for now. How the email is verified is decided later | Decided |
 | The same person may also hold a beneficiary record | Decided |
@@ -46,7 +49,8 @@ The role ships with the [Beneficiary](beneficiary.md) role, since each is useles
 - **The category opinion is recorded separately** from the attestation. Decided.
 - **Endorsing needs nothing beyond the attestation.** Not endorsing, or disputing the category, needs a written reason. A photo is optional in every case. Decided.
 - **The officer cannot block a claim.** A claim that is not endorsed still reaches DSWD, marked "not endorsed" with its reason. Decided.
-- **The officer cannot stall a claim.** The Field Office sets an endorsement window per disaster. A claim with no response when it closes goes to DSWD marked "no barangay response". Decided.
+- **The officer cannot stall a claim.** The Field Office sets a response duration per disaster; every submitted claim starts its own deadline. At expiry the system forwards it with "no barangay response" where applicable. Responded claims with no signed submission are forwarded with a distinct missing-submission flag and their actual responses. Decided.
+- **A declared barangay is unconfirmed at registration.** The residence attestation or a documented DSWD check establishes residence; self-declaration is not permission to read a residents' list. DSWD opens claim intake explicitly for selected barangays. Decided.
 - **Late claims are still taken,** into a later batch, until the Field Office closes claims for that disaster. Decided.
 
 ## Conflicts of interest
@@ -69,8 +73,8 @@ Claim
 ```
 
 - **Nothing is edited.** A change is a new entry attached to the one it answers, like a reply to an email. Decided.
-- **The officer can reply until the DSWD Officer decides the claim.** After that the officer can add nothing. Decided.
-- **A referred-back claim must be answered.** The endorsement deadline rule applies again: no answer in the window is recorded as "no barangay response". Decided.
+- **The officer can reply until a final approval or decline.** A referral keeps the thread open; a permitted resubmission creates a new version/thread without editing the decline. Decided.
+- **A referred-back claim gets a fresh deadline.** No answer returns to DSWD with an explicit missing-response result. Existing referrals/review continue after intake closes; closure bars new claims/resubmissions. Decided.
 
 ## Sending a batch
 
@@ -78,6 +82,8 @@ Claim
 - **The barangay council's resolution is uploaded with the batch** and hashed. Decided.
 - **A batch is a fixed snapshot** of the claims responded to, with the sender's name and the time. Its hash is anchored on-chain. Decided.
 - **Several batches per disaster are allowed.** Decided.
+- **An unavailable endorser or missing sender cannot veto delivery.** Fewer than two active officers or all officers being barred routes the claim as "no eligible endorser", with the staffing/conflict reason. Deadline forwarding is a clearly labelled system snapshot, separately hashed/anchored, with no invented council resolution or Punong Barangay signature. Decided.
+- **Submitted snapshots never change.** Later replies remain in the thread and are considered by DSWD against their own versions; they do not overwrite the batch. Failed batch/fallback anchoring is explicit and retried without withholding the claim from DSWD. Decided.
 
 In practice lists are not sent once: payouts run in batches, missed names are added in later rounds, and late submission is a reported cause of families being left out.
 
@@ -89,11 +95,15 @@ In practice lists are not sent once: payouts run in batches, missed names are ad
 | Household members' names | Photo |
 | Address and zone | Phone number |
 | Stated category | Computed amount |
-| The household's description of the damage | |
+| The household's description of the damage and damage evidence | |
 
 ## What the household sees
 
-The household is told the response (endorsed or not endorsed), the reason when not endorsed, and the officer's name. An official acting in an official capacity is named, and the household needs the reason to challenge it with DSWD. Decided.
+The household is told the response (endorsed or not endorsed), the category opinion, required reasons and the officer's name. An official acting in an official capacity is named, and the household needs the reason to challenge it with DSWD. Decided.
+
+**Photo means identity photo in the restriction above.** Relevant damage evidence is visible to the barangay; identity photos, ID numbers and contact details are not. Uploaded evidence lives in the shared private off-chain store. Decided.
+
+**The residents' approved list** is name, zone and category, with no amount, ID or phone, available only after residence confirmation. The officer sees the same list; payout progress remains aggregate counts. "Paid" counts recorded handovers, not proof of full receipt, and reveals no private closing answers or grievance. Decided.
 
 ## Oversight
 
@@ -128,7 +138,7 @@ These are flags for a person to review. Nothing is penalised automatically. Deci
 ## To verify with DSWD
 
 - **The municipal step.** Reports show the formal list is compiled by the city or municipal social welfare office, endorsed by the local disaster office and signed by the mayor. This design sends the barangay's batch straight to the Field Office and leaves the municipal step out. Recorded as a known gap.
-- **The direct barangay route.** A summary of the 2025 guidelines says a barangay may submit directly, signed by the Barangay Chairperson and backed by a council resolution, subject to Field Office approval. The circular itself has not been read first-hand.
+- **Exact institutional alignment.** Official MC24 s2025 was read first-hand in the process session and supports direct barangay proposals with Chairperson signature/resolution subject to Field Office validation. This app's claim-batch and nomination mechanisms remain product choices; the real formal signatories/municipal processing are not fully modelled. See [the research and outside boundaries](../process.md#research-used-in-this-decision).
 - **Whether a barangay with fewer than two willing officers is realistic,** and what happens there today.
 
 ## Data held
@@ -137,8 +147,8 @@ These are flags for a person to review. Nothing is penalised automatically. Deci
 |---|---|
 | Account | Name, position, barangay, email, who nominated and who approved, active or deactivated |
 | Per response | Claim, officer, endorsed or not endorsed, category opinion, reason, optional photo, relative declaration, time, the entry it replies to |
-| Per batch | Barangay, disaster, sender, time, claims included, council resolution and its hash |
-| On-chain | Batch hash and resolution hash only. No names |
+| Per batch | Barangay, disaster, sender, time, claim/response versions, council resolution and its hash; system intake snapshots separately labelled without a barangay sender |
+| On-chain | Signed-batch/resolution hashes and separately labelled system fallback hashes, with opaque references. No names; see the [consolidated inventory](../process.md#consolidated-commitments) |
 
 ## Sources
 

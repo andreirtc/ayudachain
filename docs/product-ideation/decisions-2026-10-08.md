@@ -2,7 +2,7 @@
 
 **Status: ideation record.** This logs what the maintainer decided while rethinking AyudaChain around the real DSWD process. The overall picture is not final and nothing here is built. Detail lives in the role files; this file is the index of what was settled, what was only recommended, and what is still open.
 
-Each line is marked **Decided** (the maintainer said so), **Recommended** (advised, not explicitly confirmed), or **Open**.
+The original session uses **Decided**, **Recommended** and **Open**. Section 16 records the process session of 2026-10-08 to 2026-10-09 using **Decided**, **Proposed** and **Later**. Cross-references below identify earlier items clarified or changed by that session; existing section numbers are preserved.
 
 ## 1. Repository and process
 
@@ -39,7 +39,7 @@ Not verified: the exact Central Office bureau names, the day counts per damage c
 | 3.1 | AyudaChain is scoped to one DSWD Field Office | Decided |
 | 3.2 | Declaring a disaster is out of scope. Disasters come from a seeded list | Decided |
 | 3.3 | Cash aid only. Relief goods are a separate chain and are not covered | Recommended |
-| 3.4 | DSWD pays families directly. The mode where funds are transferred to a local government to pay out is not covered | Open |
+| 3.4 | DSWD pays households directly in the settled process. Fund-transfer-to-LGU payout is outside it; settled by section 16 | Decided; LGU mode Later |
 | 3.5 | AyudaChain is the shared record every party reads and writes, in place of reports passed between offices | Decided |
 | 3.6 | The Commission on Audit officer sees everything | Decided |
 
@@ -99,11 +99,11 @@ Detail: [roles/beneficiary.md](roles/beneficiary.md). This role is not in versio
 | 7.1 | Beneficiaries register themselves through AyudaChain | Decided |
 | 7.2 | Registration has two stages: a household registry at any time, then a claim per disaster | Decided |
 | 7.3 | The barangay sends or endorses the list through AyudaChain | Decided |
-| 7.4 | DSWD validates the list against its own data | Decided |
+| 7.4 | DSWD validates the list; the earlier description of checks against its own datasets was narrowed by 14.2 to AyudaChain data and labelled National ID simulation, clarified in section 16 | Decided |
 | 7.5 | The approved list is shown to the barangay's own residents, as a control against false entries | Decided |
 | 7.6 | The beneficiary sees their approved amount beforehand, through AyudaChain | Decided |
 | 7.7 | Identification: the National ID first, or another government photo ID; the officer compares the person with the photo | Decided |
-| 7.8 | How beneficiaries sign in is on hold. A one-time code by text and a PIN are possibilities only. Google sign-in is deferred | On hold; was Decided |
+| 7.8 | Phone signup/sign-in remains planning only: method/provider and integration/free-tier feasibility unresolved. This succeeds the earlier on-hold decision; see section 16. Google sign-in remains deferred | Proposed; Google Later |
 | 7.9 | The DSWD Officer validates the list (5.9). The earlier recommendation of a separate role was not taken | Decided |
 
 ## 8. The payout transaction
@@ -115,15 +115,15 @@ Detail: [roles/beneficiary.md](roles/beneficiary.md). This role is not in versio
 | 8.3 | The officer cannot mark the cash as handed over without a one-time code from the recipient | Decided |
 | 8.4 | The transaction code is separate from the sign-in secret, is generated when the transaction is opened, and is never sent in advance | Decided |
 | 8.5 | The officer types no amount; it is computed and shown to the recipient | Decided |
-| 8.6 | One transaction per entitlement; a paid household cannot open another | Decided |
+| 8.6 | One transaction ID per entitlement, with appended pre-handover attempts after the appropriate clearance/session checks; a recorded handover cannot be repeated. Clarified by section 16 alongside 15.4 | Decided |
 | 8.7 | The server enforces the order of steps | Decided |
 | 8.8 | Closing answers are received in full, received less, and not received | Decided |
-| 8.9 | A transaction that is never closed becomes "unconfirmed" and is neutral, not held against the recipient | Decided |
+| 8.9 | An unanswered recorded handover becomes neutral "unconfirmed" after 72 hours; later answers are allowed. Unused pre-handover attempts expire instead. Clarified in section 16 | Decided |
 | 8.10 | The recipient is notified that a payout is happening and opens the transaction after signing in; they scan nothing | Decided |
 | 8.11 | The officer is responsible for a working connection at the site; there is no offline mode | Decided |
 | 8.12 | A recipient with no phone confirms with both an ID check and a PIN on the officer's device | Decided |
 | 8.13 | Assisted payouts get an exit check by a second staff member. Staffing it is DSWD's matter, outside the software | Decided |
-| 8.14 | A recipient with a basic phone does everything by text | Recommended |
+| 8.14 | Basic-phone transaction-by-text requires a protocol/provider and authenticated replies; deferred by section 16, separately from notice SMS | Later; previously Recommended |
 | 8.15 | The DSWD Officer and disbursing officer can see who has been paid. The barangay sees progress counts only: approved, paid, remaining | Decided; narrowed for the barangay by 13.14 |
 
 ## 9. Deferred by the maintainer
@@ -140,9 +140,9 @@ Detail: [roles/beneficiary.md](roles/beneficiary.md). This role is not in versio
 1. What happens to the legacy pages in version 1 (4.5).
 2. Closed: the DSWD Officer validates the list (7.9).
 3. Closed: the barangay sees progress counts only (13.14).
-4. Six defaults for the beneficiary role that were proposed and not yet accepted: whether a registration with no ID waits for a field check, how many households may share a phone number, what residents see on the approved list, who may change a category, how long before a transaction becomes unconfirmed, and who re-links a lost phone. They are listed in [roles/beneficiary.md](roles/beneficiary.md).
+4. Closed by section 16: the six former beneficiary defaults are settled in [roles/beneficiary.md](roles/beneficiary.md#former-defaults-settled-on-2026-10-09). Phone authentication feasibility remains unresolved planning; it is not one of those defaults.
 5. Closed: all five roles now have a role file.
-6. Whether to cover the fund-transfer-to-local-government mode (3.4).
+6. Closed by section 16: direct DSWD cash payout only; the local-government mode is Later (3.4).
 7. Which backend to keep (1.6).
 8. Whether to model the municipal step between the barangay and the Field Office (13.17).
 
@@ -225,7 +225,7 @@ Detail: [roles/dswd-officer.md](roles/dswd-officer.md). Settled in a third sessi
 | 14.15 | An officer cannot decide a claim from their own household | Decided |
 | 14.16 | Grievances are a list with a status and notes. The auditor sees all; the barangay sees none | Decided |
 | 14.17 | Each claim decision stores who made it and an empty "confirmed by", as 4.3 does for budget entries | Decided |
-| 14.18 | The household registry and claim are meant to match DSWD's FACED form. Its fields are still to be read | Decided |
+| 14.18 | The household registry and claim are intended to align with FACED. The official process clauses were read first-hand in section 16's session; exact field mapping remains Proposed, and one household entitlement deliberately simplifies separate-family profiling | Decided boundary; mapping Proposed |
 
 ## 15. Disbursing Officer
 
@@ -234,10 +234,51 @@ Detail: [roles/disbursing-officer.md](roles/disbursing-officer.md). Settled in a
 | # | Decision | Status |
 |---|---|---|
 | 15.1 | A named DSWD staff member with an email sign-in. A DSWD Officer creates and deactivates the account | Decided |
-| 15.2 | A DSWD Officer sets up a payout session: one disaster, one barangay, one date, with named disbursing officers. An officer acts only on that session's approved list, while it is open | Decided |
+| 15.2 | DSWD controls a payout session: one disaster, one barangay, one date/site, published-list version and named officers. Section 16 narrows the original all-actions-while-open restriction to cash actions; late answers, independent exit checks and notes continue after closure | Decided; narrowed in section 16 |
 | 15.3 | The officer sees the head's name, photo, ID type, category and computed amount, and nothing else about the household | Decided |
 | 15.4 | When the ID check fails the officer stops the transaction with a reason. The entitlement stands and a DSWD Officer reviews it | Decided |
 | 15.5 | The exit check on an assisted payout is done by another disbursing officer on the same session. It is not a separate role | Decided |
 | 15.6 | An officer cannot pay their own household | Decided |
 | 15.7 | A handover cannot be undone. The officer may add a note | Decided |
 | 15.8 | Cash carried out and brought back is not recorded yet. It waits for cash advances and liquidation. The session shows a computed total paid | Decided |
+
+## 16. End-to-end process: 2026-10-09
+
+Detail: [process.md](process.md). Settled through three numbered grilling rounds (Q1–Q21) on 2026-10-08 to 2026-10-09, followed by the maintainer's explicit confirmation of the consolidated summary. This resolves handoffs between the five designed roles; it does not expand version 1 or authorise implementation. The source PRD was absent; the maintainer's brief and listed ideation documents were accepted as authority.
+
+| # | Decision | Status |
+|---|---|---|
+| 16.1 | Direct DSWD cash payout only, one entitlement and at most one recorded handover per household per disaster, retained for simplicity | Decided |
+| 16.2 | Independently living families within one household, additional tranches/phases, representatives and LGU-funded payout are outside this process | Later |
+| 16.3 | DSWD explicitly opens selected barangays for a seeded disaster, records external authority/basis and endorsement duration, and closes intake. Recording release coverage does not open claims or declare a disaster | Decided |
+| 16.4 | DSWD enters the Punong Barangay's documented nomination, including initial accounts, then approves; nominator, entered-by and approver are recorded distinctly | Decided |
+| 16.5 | Registration routes by self-declared, unconfirmed barangay. Residence attestation or documented DSWD review confirms it; DSWD may check independently of an aid claim. Current residence confirmation gates residents-list access | Decided |
+| 16.6 | Each submitted claim and referral gets a fresh deadline from the disaster's response duration. Existing review/referrals continue after intake closes; the once-only declined-claim resubmission still requires open intake | Decided |
+| 16.7 | No eligible endorser/no response/no signed submission routes directly to DSWD through a labelled system snapshot. Preserve actual responses and exact exception; never invent a sender, resolution or endorsement. Fewer than two active officers is an endorsement-unavailable reason | Decided |
+| 16.8 | Align Beneficiary wording with 14.2: automatic checks use AyudaChain records only; the National ID check is a labelled simulation, not live PSA verification or an external DSWD database match | Decided |
+| 16.9 | Eligibility approval may precede amount inputs. It creates an entitlement awaiting amount; publication/payment require a computed amount and publication waits for the list's confirmed anchor | Decided |
+| 16.10 | Retain one transaction ID per entitlement with appended attempts. DSWD clears a stopped identity-check attempt for a later session; unused expired attempts can be retried under current eligibility/session rules | Decided; clarifies 8.6 and 15.4 |
+| 16.11 | Recorded handover consumes the entitlement and locks its amount, including disputed/unconfirmed receipts. Full confirmation, disputed receipt and no answer are separate outcomes; none automatically permits another handover | Decided |
+| 16.12 | No answer 72 hours after recorded handover becomes neutral unconfirmed, with late/revised answers allowed. Open/presented abandoned attempts expire instead | Decided |
+| 16.13 | An adverse closing answer/report creates one private linked grievance; later adverse evidence reopens it without erasing resolutions. DSWD reviews/closes; full answers do not automatically close it, and software awards no replacement payment | Decided |
+| 16.14 | Shared phones above three households flag rather than reject. Residence-confirmed residents see name, zone and category only. Private list challenges reach DSWD: a pre-handover approval reversal is append-only; post-handover evidence is for the Auditor | Decided |
+| 16.15 | Only DSWD changes an approved category with reason/notification/Auditor visibility, or re-links a lost-phone account after an ID check with logging | Decided |
+| 16.16 | Phone signup/sign-in stays planning only. The maintainer explicitly leaves integration/free-tier feasibility unresolved; no authentication provider or SMS implementation is selected. Privately established hashed assisted PIN remains separate from the transaction code | Proposed phone authentication; assisted PIN Decided |
+| 16.17 | DSWD schedules, opens, closes, cancels and appends session changes. Scheduling triggers a linkless date/site notice. Cash actions require the open session/date; answers, notes and independent assigned exit checks continue after closure. This changes 15.2's original blanket restriction | Decided |
+| 16.18 | Changed unpaid input/category versions hold entitlements, expire codes/attempts, notify old/new amounts, and require revised publication/session updates. Re-check current eligibility/amount at handover. Handed-over versions stay fixed; differences are human-review flags | Decided |
+| 16.19 | No-ID households may register/claim, flagged; payment requires a documented DSWD field check and accepted government photo ID. No independent reviewer/payer/checker means hold/escalate; assisted payouts need two eligible officers | Decided |
+| 16.20 | Certification-only payout without an accepted photo ID is outside the settled process | Later |
+| 16.21 | Private off-chain files hold releases, resolutions, identity/damage evidence and input documents. Keep versions and record references/hashes; storage vendor, formats, retention/backup policy remain unsettled | Decided boundary; operational choices Later |
+| 16.22 | A linked release correction saves reversal/replacement with reason, referencing original evidence for a transcription error or new amended evidence for a changed source. This qualifies the duplicate-document rule; no second independent release counts it again | Decided |
+| 16.23 | Anchor release/correction entries and documents, input versions/documents, signed batches/resolutions, labelled fallback snapshots, approved-list versions, handover receipts and subsequent outcome events. Other individual workflow records remain off-chain with append-only history | Decided |
+| 16.24 | Failed anchors preserve saved records and retry unchanged content. Releases still count; handovers stay consumed; publication remains pending until its anchor is confirmed. No fabricated hashes, lost records or repeat payment | Decided |
+| 16.25 | Integrity distinguishes actual matched hash, mismatch, required anchor absent and chain unreachable; unavailable evidence cannot be verified. A prior match does not stand in for a current failed read | Decided |
+| 16.26 | Amount-input documents and recorded funding authority do not certify physical cash. Advanced stays zero with no advance event; payout totals are separate. Accounting/Cash and bank funding are outside dependencies | Decided |
+| 16.27 | Certify funds, cash advances, returns and liquidation remain deferred; session closure is not liquidation. Notice SMS is required but provider/cost/delivery policy is unresolved. Basic-phone payout/reply protocol and authentication provider selection are deferred separately | Later |
+| 16.28 | Barangay sees relevant damage evidence, never identity photos/IDs/phones/amounts. Household receives attestation, category opinion/reasons and officer name. Private closing answers/grievances are hidden from the payer; an independent exit checker receives the answer they record only | Decided |
+| 16.29 | Every business state change appends audit events. Auditor reads/re-checks change no business record; system records their access privately, hidden from the Field Office | Decided |
+| 16.30 | Legal activation, LGU/formal signature processing, site/security/market certification and financial readiness are outside the five-role simplification. Matching hashes prove content continuity, not true affectedness, authentic originals or physical cash receipt | Decided known limits |
+| 16.31 | Official MC24 s2025, MC11 s2025 and FACED MC12 s2024 process clauses were read first-hand. FACED field mapping is not settled; no official basis was found for the app's nomination/PIN/72-hour/automatic-grievance mechanisms | Decided evidence boundary; field mapping Proposed |
+| 16.32 | These documents define logical records and commitment contents, not database migrations, contract functions or receipt serialization. No code, DFD, screens or deployment is authorised by this design confirmation | Decided |
+
+First-hand sources and access limits are documented in [the process research](process.md#research-used-in-this-decision). COA Circular 97-002's prior link returned HTTP 403 and was not read first-hand in this session; financial-boundary findings instead use the official Government Accounting Manual. No free-tier SMS/authentication claim was made.
