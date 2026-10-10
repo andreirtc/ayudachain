@@ -57,6 +57,22 @@ body.capture{background:var(--base)}
 #today .box b{font-size:24px;font-weight:650}
 #today .box code{font:19px/1.3 Consolas,"Cascadia Mono",monospace;color:var(--muted);margin-top:4px}
 #today .note{position:absolute;left:0;width:100%;top:690px;text-align:center;font-size:26px;color:var(--bad);font-weight:600}
+
+/* what happens before the software: the real procedure */
+#lead{inset:0}
+#lead .tag{position:absolute;left:0;top:0;font-size:22px;font-weight:650;background:#eef2f7;color:#334155;border-radius:4px;padding:5px 12px}
+#lead .zone{position:absolute;font-size:19px;font-weight:650;letter-spacing:.2px;border-top:3px solid #9aacbf;padding-top:10px;color:var(--muted)}
+#lead .zone.app{border-top-color:var(--blue);color:#1e3a8a}
+#lead .step{position:absolute;background:#fff;border:1px solid #9aacbf;border-radius:5px;padding:20px 22px;display:flex;flex-direction:column;justify-content:center}
+#lead .step b{font-size:25px;font-weight:650;line-height:1.25}
+#lead .step span{font-size:20px;line-height:1.35;color:var(--muted);margin-top:8px}
+#lead .step.app{background:var(--blue-soft);border:2px solid var(--blue)}
+#lead .step.app b{color:#1e3a8a}
+#lead .step.app span{color:#1e3a8a}
+#lead .src{position:absolute;left:0;width:100%;top:640px;text-align:center;font-size:21px;color:var(--muted)}
+#lead svg{position:absolute;left:0;top:0;overflow:visible}
+#lead svg path{fill:none;stroke:#64748b;stroke-width:2.2}
+#lead svg polygon{fill:#64748b}
 #today svg{position:absolute;left:0;top:0;overflow:visible}
 #today svg path{fill:none;stroke:#64748b;stroke-width:1.6}
 
@@ -126,6 +142,7 @@ body.capture #scrub{display:none}
   <div id="stage">
     <div id="title"></div>
     <div id="today"></div>
+    <div id="lead"></div>
     <div id="map"></div>
     <div id="grid"></div>
     <div id="head"></div>
@@ -155,7 +172,7 @@ const seg = (t, a, b) => clamp((t - a) / (b - a));
 const es = (t, a, b) => ease(seg(t, a, b));
 const lerp = (a, b, p) => a + (b - a) * p;
 const lerpRect = (A, B, p) => ({ x: lerp(A.x, B.x, p), y: lerp(A.y, B.y, p), w: lerp(A.w, B.w, p), h: lerp(A.h, B.h, p) });
-const ARRIVE = { tile: 1.5, handoff: 2.4, nav: 1.0, state: 0, scroll: 0 };
+const ARRIVE = { tile: 1.5, grow: 1.2, handoff: 2.4, nav: 1.0, state: 0, scroll: 0 };
 const CHANGE = 0.4; // seconds from a button press to the screen showing its result
 const show = (node, alpha) => { node.style.display = alpha <= 0.001 ? "none" : ""; node.style.opacity = alpha >= 0.999 ? "" : alpha.toFixed(3); };
 const place = (node, r) => { node.style.left = r.x.toFixed(2) + "px"; node.style.top = r.y.toFixed(2) + "px"; node.style.width = r.w.toFixed(2) + "px"; node.style.height = r.h.toFixed(2) + "px"; };
@@ -217,7 +234,8 @@ screenBeats.forEach((b, j) => {
   b.prev = screenBeats[j - 1] || null;
   if (b.arrive === "handoff") { b.hand = { k: handK++, beat: b }; handoffs.push(b.hand); }
   if (b.arrive === "nav") navs.push(b);
-  if (b.arrive === "tile" || b.arrive === "handoff" || b.arrive === "nav") { b.visit = ++visitN; b.visitAt = b.t0 + { tile: 1.2, handoff: 1.7, nav: 0.5 }[b.arrive]; }
+  const seen = { tile: 1.2, grow: 1.1, handoff: 1.7, nav: 0.5 }[b.arrive];
+  if (seen != null) { b.visit = ++visitN; b.visitAt = b.t0 + seen; }
   b.presses = b.press || b.steps.slice(1).map((_, k) => (b.arr || 0.1) + 1.5 + k * 2.6);
 });
 
@@ -288,6 +306,24 @@ const today = { roles: [], pages: [], lines: [] };
     const len = p1.getTotalLength(); p1.style.strokeDasharray = `${len} ${len}`; today.lines.push({ el: p1, len });
   }));
   host.appendChild(today.note = el("div", "note", esc(T.note)));
+})();
+
+// ---------- before the software (hand-written in storyboard.js from the cited circular) ----------
+const lead = { steps: [], arrows: [], enterRect: null };
+if (SB.lead) (() => {
+  const host = $("lead"), L = SB.lead, n = L.steps.length + 1, w = 306, h = 190, y = 250, gap = (STAGE_W - n * w) / (n - 1);
+  host.appendChild(lead.tag = el("div", "tag", esc(L.tag)));
+  const svg = document.createElementNS(NS, "svg"); svg.setAttribute("width", STAGE_W); svg.setAttribute("height", 790); host.appendChild(svg);
+  const outsideW = L.steps.length * w + (L.steps.length - 1) * gap;
+  host.appendChild(lead.zoneOut = el("div", "zone", esc(L.outside))); place(lead.zoneOut, { x: 0, y: y - 62, w: outsideW, h: 44 });
+  host.appendChild(lead.zoneApp = el("div", "zone app", esc(L.inside))); place(lead.zoneApp, { x: (n - 1) * (w + gap), y: y - 62, w, h: 44 });
+  [...L.steps, L.enter].forEach(([title, text], i) => {
+    const rect = { x: i * (w + gap), y, w, h }, box = el("div", "step" + (i === n - 1 ? " app" : ""), `<b>${esc(title)}</b><span>${esc(text)}</span>`);
+    place(box, rect); host.appendChild(box); lead.steps.push({ el: box, rect });
+    if (i > 0) lead.arrows.push({ line: mkPath(svg, [[rect.x - gap + 6, y + h / 2], [rect.x - 14, y + h / 2]]), head: mkArrow(svg, rect.x - 4, y + h / 2, 1) });
+  });
+  lead.enterRect = lead.steps[n - 1].rect;
+  host.appendChild(lead.src = el("div", "src", esc(L.source)));
 })();
 
 // ---------- site map ----------
@@ -494,6 +530,16 @@ function renderAt(t) {
   show($("title"), b.kind === "title" ? es(lt, 0.15, 0.9) * (1 - es(lt, b.dur - 0.5, b.dur)) : 0);
   const todayA = b.kind === "today" ? es(lt, 0, 0.5) * (1 - es(lt, b.dur - 0.5, b.dur)) : 0;
   show($("today"), todayA);
+  const growing = b.kind === "screen" && b.arrive === "grow";
+  const leadA = b.kind === "lead" ? es(lt, 0, 0.5) : growing ? 1 - es(lt, 0.5, 0.9) : 0;
+  show($("lead"), leadA);
+  if (leadA > 0) {
+    const at = (i) => (b.kind === "lead" ? 0.5 + i * 0.8 : -9); // one step at a time, left to right
+    show(lead.zoneOut, es(lt, at(0), at(0) + 0.4)); show(lead.zoneApp, es(lt, at(lead.steps.length - 1), at(lead.steps.length - 1) + 0.4));
+    lead.steps.forEach((S, i) => { const p = es(lt, at(i) + 0.25, at(i) + 0.65); show(S.el, p); S.el.style.transform = p < 1 ? `translateX(${((1 - p) * -12).toFixed(2)}px)` : ""; });
+    lead.arrows.forEach((A, i) => { const p = es(lt, at(i + 1) - 0.1, at(i + 1) + 0.3); drawPath(A.line, p); show(A.head, p >= 1 ? 1 : 0); });
+    show(lead.src, es(lt, at(lead.steps.length) + 0.1, at(lead.steps.length) + 0.6));
+  }
   if (todayA > 0) {
     today.roles.forEach((r, i) => show(r.el, es(lt, 0.3 + i * 0.15, 0.7 + i * 0.15)));
     today.pages.forEach((p, j) => show(p.el, es(lt, 0.8 + j * 0.12, 1.2 + j * 0.12)));
@@ -558,7 +604,7 @@ function renderAt(t) {
   const gridOn = b.kind === "grid" || b.kind === "grid-limit" || (inTile && lt < 1.5);
   show($("grid"), gridOn ? 1 : 0);
   if (gridOn) {
-    const move = b.kind === "grid" ? es(lt, 0.3, 1.1) : 1, open = b.kind === "grid" ? es(lt, 1.0, 1.8) : 1, leave = inTile ? 1 - es(lt, 0, 0.5) : 1;
+    const move = b.kind === "grid" ? es(lt, 0.3, 1.1) : 1, open = b.kind === "grid" ? es(lt, 1.0, 1.8) : 1, leave = inTile ? 1 - es(lt, 0, 0.5) : b.kind === "grid-limit" ? 1 - es(lt, b.dur - 0.5, b.dur) : 1;
     const grow = inTile ? es(lt, 0.2, 1.2) : 0;
     place(grid.head, lerpRect(grid.headFrom, grid.headTo, move)); show(grid.head, leave);
     grid.head.style.fontSize = lerp(20, 26, move).toFixed(2) + "px";
@@ -583,6 +629,7 @@ function renderAt(t) {
     const prev = b.prev;
     headA = 1; headRole = b.role; nameBeat = b;
     if (b.arrive === "tile") { drawView(b, lt, PANEL, es(lt, 1.05, 1.5)); headA = es(lt, 1.05, 1.5); }
+    else if (b.arrive === "grow") { drawView(b, lt, lerpRect(lead.enterRect, PANEL, es(lt, 0.2, 1.1)), es(lt, 0.2, 0.55)); headA = es(lt, 0.8, 1.2); }
     else if (b.arrive === "handoff") {
       drawView(prev, prev.dur, lerpRect(PANEL, nodeRect(prev.role, prev.page), es(lt, 0, 0.7)), 1 - es(lt, 0.3, 0.7));
       drawView(b, lt, lerpRect(nodeRect(b.role, b.page), PANEL, es(lt, 1.7, 2.4)), es(lt, 1.7, 2.05));
@@ -618,6 +665,7 @@ beats.forEach((b, i) => {
   if (b.kind === "screen") {
     if (b.arrive === "handoff") { add("t1-leave", 0.35); add("t2-travel", 1.2); add("t3-arrive", 2.05); }
     if (b.arrive === "tile") add("t-open", 0.75);
+    if (b.arrive === "grow") add("t-open", 0.65);
     if (b.arrive === "nav") add("t-nav", 0.35);
     b.presses.forEach((tp, k) => { add(`t-press${k + 1}`, tp + 0.28); add(`t-change${k + 1}`, tp + CHANGE + 0.2); });
     (b.scrollKeys || []).slice(1).forEach((key, k) => add(`t-scroll${k + 1}`, key.at + key.dur / 2));
@@ -626,6 +674,7 @@ beats.forEach((b, i) => {
   } else {
     if (b.kind === "map") add("t-build", 1.6);
     if (b.kind === "today") add("t-build", 2.4);
+    if (b.kind === "lead") add("t-build", 2.3);
     if (b.kind === "grid") add("t-open", 0.9);
     if (b.kind === "path") { add("t-pullback", 0.4); add("t-retrace", 2.8); }
     if (b.kind === "close") add("t-in", 0.5);

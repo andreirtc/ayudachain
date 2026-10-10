@@ -53,6 +53,7 @@ Checkpoints are the middle of every beat and of every transition. Both commands 
 - Screens, role names, screen names, people and identifiers are taken from the mockup at render time. If the mockup changes, the next render picks it up. If a screen or section the storyboard names no longer exists, the render stops and says which.
 - The journey is the mockup's scenario 1, "From funding to full receipt". A screen is shown as the mockup renders it at one guided step, the role's own button is pressed, and the screen changes to how the mockup renders it at the next step.
 - The "today" beat is written by hand from [the current sitemap](../../../product/sitemap.md).
+- The "before AyudaChain" beat is written by hand from DSWD Memorandum Circular No. 24, s. 2025, which amends MC No. 11, s. 2025. It shows the real steps that come before the software: a state of calamity, the barangay's or LGU's request and project proposal, Field Office validation and the Secretary's activation, then the release of funds. Under that circular the beneficiary masterlist follows the release of funds, which is the order the journey then takes. None of those earlier steps is a mockup screen; the redesign treats them as outside the software.
 - Captions and the short labels on each handoff are written by hand in `storyboard.js`.
 
 ## What the video leaves out of the mockup

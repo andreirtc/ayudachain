@@ -37,6 +37,22 @@ globalThis.STORYBOARD = {
     ],
     note: "No login page. No route guards.",
   },
+  // What happens before the software, in the real procedure. Context only: none of these steps is
+  // an AyudaChain screen. Source: DSWD Memorandum Circular No. 24, s. 2025 (amending MC No. 11,
+  // s. 2025): triggers for activation, funding requirements, and implementation procedures.
+  lead: {
+    tag: "Before AyudaChain: the real procedure",
+    outside: "OUTSIDE THE SOFTWARE",
+    inside: "IN AYUDACHAIN",
+    steps: [
+      ["State of calamity", "is declared for the area"],
+      ["Barangay or LGU", "sends a request and a project proposal"],
+      ["DSWD Field Office", "validates it; the Secretary activates cash aid"],
+      ["Central Office", "releases funds to the Field Office"],
+    ],
+    enter: ["DSWD Officer", "records the release document"],
+    source: "Source: DSWD Memorandum Circular No. 24, series of 2025",
+  },
   beats: [
     // ---- Section 1: the problem and the map ----
     { id: "problem", section: "map", kind: "title", dur: 7.5,
@@ -63,13 +79,15 @@ globalThis.STORYBOARD = {
       caption: "It decides claims and runs payout sessions. It cannot hand over cash." },
 
     // ---- Section 3: one payout, end to end ----
-    { id: "funds", section: "payout", kind: "screen", arrive: "tile", dur: 8.0,
+    { id: "before", section: "payout", kind: "lead", dur: 9.5,
+      caption: "First a request goes up and is approved. Then the funds come down." },
+    { id: "funds", section: "payout", kind: "screen", arrive: "grow", dur: 8.0,
       role: "dswd", page: "funds", steps: [2, 3],
       scroll: [{ focus: null }, { at: 1.5, dur: 1.0, focus: "Recorded funding authority" }], press: [3.3],
-      caption: "DSWD records the release document: ₱500,000 in funding authority." },
+      caption: "Funds reach the Field Office. DSWD records the release: ₱500,000." },
     { id: "claim", section: "payout", kind: "screen", arrive: "handoff", carry: "Claim intake opened", dur: 9.0,
       role: "beneficiary", page: "claim", steps: [5, 6], focus: "Submitted claim",
-      caption: "Lina Mercado’s household submits a damage claim." },
+      caption: "With funds released, the list is built. Lina’s household claims." },
     { id: "attest", section: "payout", kind: "screen", arrive: "handoff", carry: "Claim, version 1", dur: 9.0,
       role: "barangay", page: "claims", steps: [6, 7], focus: "Submitted claim",
       caption: "A named Barangay Officer vouches: lives here, was affected." },

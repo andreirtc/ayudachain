@@ -76,7 +76,9 @@ async function main() {
     rmSync(STILLS, { recursive: true, force: true }); mkdirSync(STILLS, { recursive: true });
     for (const c of m.checkpoints) {
       const frame = Math.round(c.t * m.fps);
-      const r = spawnSync(FFMPEG, ["-v", "error", "-y", "-i", OUT, "-vf", `select=eq(n\\,${frame})`, "-frames:v", "1", join(STILLS, `mp4-${c.name}.png`)], { encoding: "utf8" });
+      // seek to half a frame before the wanted frame, so the first frame decoded is exactly that one
+      const at = Math.max(0, (frame - 0.5) / m.fps).toFixed(4);
+      const r = spawnSync(FFMPEG, ["-v", "error", "-y", "-ss", at, "-i", OUT, "-frames:v", "1", join(STILLS, `mp4-${c.name}.png`)], { encoding: "utf8" });
       if (r.status !== 0) throw new Error(`Could not extract frame ${frame}: ${r.stderr}`);
     }
     writeFileSync(join(STILLS, "probe.json"), JSON.stringify(info, null, 2));
