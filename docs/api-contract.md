@@ -89,7 +89,13 @@ Amounts: requests send pesos with at most two decimal places (`5000` or `5000.50
   }
   ```
 - **Endpoint**: `POST /api/beneficiaries/{beneficiary_id}/verify`
-  - Manually review & update status (`VERIFIED` or `REJECTED`).
+  - Body: `{"status":"VERIFIED","review_notes":"Different fictional household after review","reviewed_by":"demo-auditor-01"}`.
+  - Allowed decisions: `VERIFIED` -> review `APPROVED`; `REJECTED` -> review `REJECTED`; `FLAGGED_FOR_REVIEW` -> review `PENDING`. A required reason is trimmed and must contain 1–2000 characters. Reviewer must be `demo-officer-01` or `demo-auditor-01`. Invalid/missing inputs return 422; unknown beneficiary returns 404.
+  - Each accepted decision appends a UUID review record with a server-generated UTC timestamp, prior state/notes, match evidence, active flags before/after, reason, and demo reviewer. The record, registry update, and local `BENEFICIARY_REVIEWED` audit event commit atomically.
+  - Approve and reject resolve active duplicate/anomaly flags; original match ID/confidence remain as evidence. Pending review restores known detection flags and blocks payout. Rejected households also remain ineligible. Existing payouts and receipt hashes are preserved.
+  - Demo reviewer identity is caller supplied, not authenticated. Backend permissions remain pending in backlog section 5; review history is local and is not blockchain protected.
+- **Endpoint**: `GET /api/beneficiaries/{beneficiary_id}/reviews`
+  - Returns recorded decisions newest first, or an empty list for an existing household with no recorded review. Each record includes `review_id`, `decision`, `reason`, `reviewed_by`, `reviewed_at`, prior state, detection evidence, and flags before/after. Unknown IDs with no history return 404. See [Human reviews](HUMAN_REVIEW.md).
 - **Endpoint**: `GET /api/beneficiaries/sample-csv`
   - Returns the fictional sample masterlist as `text/csv`.
 - **Endpoint**: `POST /api/beneficiaries/upload-csv`

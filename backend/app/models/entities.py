@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Text, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import declarative_base, relationship
 
@@ -90,6 +90,30 @@ class Beneficiary(Base):
     distribution = relationship("Distribution", back_populates="beneficiary", uselist=False)
 
 
+class BeneficiaryReview(Base):
+    """Human decisions are appended; model match evidence is retained as a snapshot."""
+    __tablename__ = "beneficiary_reviews"
+
+    id = Column(Integer, primary_key=True, index=True)
+    review_id = Column(String(64), unique=True, index=True, nullable=False)
+    # No delete cascade: historical decisions outlive registry rows.
+    beneficiary_id = Column(String(64), index=True, nullable=False)
+    batch_id = Column(String(64), index=True, nullable=False)
+    decision = Column(String(32), nullable=False)
+    reason = Column(Text, nullable=False)
+    reviewed_by = Column(String(64), nullable=False)
+    reviewed_at = Column(String(40), nullable=False, default=lambda: datetime.now(timezone.utc).isoformat())
+    previous_verification_status = Column(String(32), nullable=False)
+    previous_review_status = Column(String(32), nullable=False)
+    previous_review_notes = Column(Text, nullable=True)
+    duplicate_flag_before = Column(Boolean, nullable=False)
+    anomaly_flag_before = Column(Boolean, nullable=False)
+    duplicate_flag_after = Column(Boolean, nullable=False)
+    anomaly_flag_after = Column(Boolean, nullable=False)
+    matched_beneficiary_id = Column(String(64), nullable=True)
+    duplicate_confidence = Column(Float, nullable=False)
+
+
 class Distribution(CentavoAmount, Base):
     __tablename__ = "distributions"
     # One payout per household per batch
@@ -120,7 +144,7 @@ class AuditEvent(CentavoAmount, Base):
 
     id = Column(Integer, primary_key=True, index=True)
     batch_id = Column(String(64), index=True, nullable=False)
-    event_type = Column(String(64), nullable=False) # FUND_RELEASE, ALLOCATION, BENEFICIARY_VERIFIED, AI_DUPLICATE_FLAG, DISTRIBUTION_CONFIRMED, BLOCKCHAIN_ANCHORED
+    event_type = Column(String(64), nullable=False) # FUND_RELEASE, ALLOCATION, BENEFICIARY_REVIEWED, AI_DUPLICATE_FLAG, DISTRIBUTION_CONFIRMED, BLOCKCHAIN_ANCHORED
     description = Column(String(256), nullable=False)
     amount_centavos = Column(Integer, nullable=True)
     entity_id = Column(String(64), nullable=True)

@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Users, AlertTriangle, CheckCircle2, Search, UserPlus, Filter,
   Sparkles, ArrowRight, ShieldCheck, X, RefreshCw, AlertCircle,
   FileSpreadsheet, UploadCloud, Trash2, Lock
 } from "lucide-react";
-import { fetchBeneficiaries, registerBeneficiary, verifyBeneficiary, Beneficiary, uploadBeneficiaryCsv, CsvBatchResult, deleteBeneficiary } from "@/lib/api";
+import { fetchBeneficiaries, registerBeneficiary, verifyBeneficiary, fetchBeneficiaryReviews, BeneficiaryReview, ReviewDecision, DemoReviewer, Beneficiary, uploadBeneficiaryCsv, CsvBatchResult, deleteBeneficiary } from "@/lib/api";
 import { useRole } from "@/lib/roleContext";
 
 export default function BeneficiariesPage() {
@@ -16,6 +16,16 @@ export default function BeneficiariesPage() {
   const [filterFlagged, setFilterFlagged] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBen, setSelectedBen] = useState<Beneficiary | null>(null);
+  const [reviewReason, setReviewReason] = useState("");
+  const [reviewer, setReviewer] = useState<DemoReviewer>("demo-officer-01");
+  const [reviews, setReviews] = useState<BeneficiaryReview[]>([]);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [reviewSaving, setReviewSaving] = useState(false);
+  const reviewSubmitting = useRef(false);
+  const [historyVersion, setHistoryVersion] = useState(0);
+  const [reviewSaved, setReviewSaved] = useState(false);
   const [deleteSuccessMsg, setDeleteSuccessMsg] = useState<string | null>(null);
 
   // New beneficiary form modal
@@ -44,6 +54,25 @@ export default function BeneficiariesPage() {
   useEffect(() => {
     loadBeneficiaries();
   }, [filterFlagged]);
+
+  useEffect(() => {
+    setReviewReason("");
+    setReviewError(null);
+    setReviewSaved(false);
+  }, [selectedBen?.beneficiary_id]);
+
+  useEffect(() => {
+    if (!selectedBen) return;
+    let cancelled = false;
+    setReviews([]);
+    setHistoryError(null);
+    setHistoryLoading(true);
+    fetchBeneficiaryReviews(selectedBen.beneficiary_id)
+      .then((data) => { if (!cancelled) setReviews(data); })
+      .catch((err) => { if (!cancelled) setHistoryError(err instanceof Error ? err.message : String(err)); })
+      .finally(() => { if (!cancelled) setHistoryLoading(false); });
+    return () => { cancelled = true; };
+  }, [selectedBen?.beneficiary_id, historyVersion]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,14 +103,28 @@ export default function BeneficiariesPage() {
     }
   };
 
-  const handleManualVerify = async (status: string) => {
-    if (!selectedBen) return;
+  const handleManualVerify = async (status: ReviewDecision) => {
+    if (!selectedBen || reviewSubmitting.current) return;
+    if (!reviewReason.trim()) {
+      setReviewError("Enter a reason for this decision.");
+      return;
+    }
+    reviewSubmitting.current = true;
+    setReviewSaving(true);
+    setReviewError(null);
+    setReviewSaved(false);
     try {
-      const updated = await verifyBeneficiary(selectedBen.beneficiary_id, status, `Manual action by Auditor: ${status}`);
+      const updated = await verifyBeneficiary(selectedBen.beneficiary_id, status, reviewReason.trim(), reviewer);
       setSelectedBen(updated);
+      setReviewReason("");
+      setReviewSaved(true);
+      setHistoryVersion((value) => value + 1);
       await loadBeneficiaries();
     } catch (err) {
-      alert("Verification update failed: " + String(err));
+      setReviewError(err instanceof Error ? err.message : String(err));
+    } finally {
+      reviewSubmitting.current = false;
+      setReviewSaving(false);
     }
   };
 
@@ -259,12 +302,12 @@ export default function BeneficiariesPage() {
                       {ben.verification_status === "VERIFIED" ? (
                         <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
                           <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                          VERIFIED
+                          APPROVED
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300">
                           <AlertTriangle className="w-3 h-3 text-amber-600" />
-                          FLAGGED FOR REVIEW
+                          {ben.verification_status === "REJECTED" ? "REJECTED" : ben.verification_status === "FLAGGED_FOR_REVIEW" ? "PENDING REVIEW" : ben.verification_status}
                         </span>
                       )}
                     </td>
@@ -278,7 +321,7 @@ export default function BeneficiariesPage() {
                           ⚠ Non-standard aid amount request
                         </span>
                       ) : (
-                        <span className="text-xs text-slate-400">Zero duplicates detected</span>
+                        <span className="text-xs text-slate-400">No pending flags</span>
                       )}
                     </td>
                     <td className="px-5 py-3.5 text-right">
@@ -317,8 +360,10 @@ export default function BeneficiariesPage() {
       {/* AI Duplicate Inspection Drawer / Modal */}
       {selectedBen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 relative animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-slate-200 relative animate-in fade-in zoom-in-95">
             <button
+              aria-label="Close household review"
+              disabled={reviewSaving}
               onClick={() => setSelectedBen(null)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
             >
@@ -330,7 +375,7 @@ export default function BeneficiariesPage() {
                 <Sparkles className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-bold text-base text-slate-900">AI Beneficiary Verification Review</h3>
+                <h3 className="font-bold text-base text-slate-900">Review household</h3>
                 <p className="text-xs text-slate-400">Record ID: {selectedBen.beneficiary_id}</p>
               </div>
             </div>
@@ -356,12 +401,12 @@ export default function BeneficiariesPage() {
               </div>
 
               {/* Duplicate Flag Callout */}
-              {Boolean(selectedBen.duplicate_flag) && (
+              {Boolean(selectedBen.duplicate_matched_id) && (
                 <div className="p-4 bg-amber-50 border border-amber-300 rounded-xl space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-amber-900 flex items-center gap-1.5">
                       <AlertTriangle className="w-4 h-4 text-amber-600" />
-                      POSSIBLE DUPLICATE DETECTED
+                      {selectedBen.duplicate_flag ? "Possible duplicate" : "Original match evidence"}
                     </span>
                     <span className="bg-amber-200 text-amber-900 font-mono font-bold px-2 py-0.5 rounded text-[11px]">
                       {Math.round(selectedBen.duplicate_confidence * 100)}% Similarity
@@ -401,48 +446,52 @@ export default function BeneficiariesPage() {
                 <strong>Governance Rule:</strong> The AI acts purely as a decision-support tool. It flags suspicious records for human review, and never automatically accuses, rejects, or denies aid.
               </div>
 
-              {/* Role-Based Decision Actions */}
+              {/* Human decision form */}
               {role === "Public Citizen" ? (
-                <div className="pt-2 p-3 bg-slate-100 rounded-xl border border-slate-200 text-slate-600 text-xs flex flex-col sm:flex-row items-center justify-between gap-2.5">
-                  <div className="flex items-center gap-2">
-                    <Lock className="w-4 h-4 text-slate-500 shrink-0" />
-                    <span>
-                      🔒 <strong>Public Citizen View (Read-Only):</strong> Verification &amp; deleting duplicate records is restricted to Barangay Officers and COA Auditors.
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => setRole("Barangay Officer")}
-                    className="text-xs font-bold text-blue-700 hover:text-blue-900 bg-white hover:bg-blue-50 px-3 py-1.5 rounded-lg border border-slate-300 shadow-2xs shrink-0 transition cursor-pointer"
-                  >
-                    Switch to Officer Mode →
-                  </button>
-                </div>
+                <p className="p-3 bg-slate-100 rounded-lg text-slate-600">
+                  Select an officer or auditor demo view to review this household.
+                </p>
               ) : (
-                <div className="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
-                  <button
-                    onClick={() => handleDeleteBeneficiary(selectedBen.beneficiary_id, selectedBen.household_name)}
-                    className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold rounded-xl transition text-xs flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5 text-rose-600" />
-                    Tanggalin ang Doble (Delete Duplicate)
-                  </button>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleManualVerify("REJECTED")}
-                      className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition text-xs cursor-pointer"
-                    >
-                      Flag as Invalid
-                    </button>
-                    <button
-                      onClick={() => handleManualVerify("VERIFIED")}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition text-xs shadow cursor-pointer"
-                    >
-                      Confirm &amp; Verify Beneficiary
-                    </button>
+                <div className="pt-3 border-t border-slate-200 space-y-3">
+                  <div>
+                    <label htmlFor="reviewer" className="block font-semibold text-slate-700 mb-1">Demo reviewer</label>
+                    <select id="reviewer" value={reviewer} disabled={reviewSaving} onChange={(e) => setReviewer(e.target.value as DemoReviewer)} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                      <option value="demo-officer-01">Demo barangay officer</option>
+                      <option value="demo-auditor-01">Demo auditor</option>
+                    </select>
+                    <p className="text-slate-500 mt-1">Simulated reviewer identity. Sign-in is not implemented.</p>
                   </div>
+                  <div>
+                    <label htmlFor="review-reason" className="block font-semibold text-slate-700 mb-1">Reason for decision</label>
+                    <textarea id="review-reason" value={reviewReason} disabled={reviewSaving} maxLength={2000} rows={3} onChange={(e) => setReviewReason(e.target.value)} placeholder="Explain why this household should be approved, rejected, or kept for review." className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                  {reviewError && <p role="alert" className="text-rose-700">{reviewError}</p>}
+                  {reviewSaved && <p role="status" className="text-emerald-700">Review saved.</p>}
+                  <div className="flex flex-wrap gap-2">
+                    <button disabled={reviewSaving || !reviewReason.trim()} onClick={() => handleManualVerify("VERIFIED")} className="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-lg disabled:opacity-50">Approve household</button>
+                    <button disabled={reviewSaving || !reviewReason.trim()} onClick={() => handleManualVerify("REJECTED")} className="px-3 py-2 bg-rose-50 text-rose-700 border border-rose-200 font-semibold rounded-lg disabled:opacity-50">Reject household</button>
+                    <button disabled={reviewSaving || !reviewReason.trim()} onClick={() => handleManualVerify("FLAGGED_FOR_REVIEW")} className="px-3 py-2 bg-slate-100 text-slate-700 font-semibold rounded-lg disabled:opacity-50">Keep for review</button>
+                  </div>
+                  {reviewSaving && <p role="status" className="text-slate-600">Saving review...</p>}
                 </div>
               )}
+
+              <details className="border-t border-slate-200 pt-3">
+                <summary className="font-semibold text-slate-700 cursor-pointer">Review history ({reviews.length})</summary>
+                {historyLoading && <p className="mt-2 text-slate-500">Loading reviews...</p>}
+                {historyError && <div role="alert" className="mt-2 text-rose-700">{historyError} <button onClick={() => setHistoryVersion((value) => value + 1)} className="underline">Retry</button></div>}
+                {!historyLoading && !historyError && reviews.length === 0 && <p className="mt-2 text-slate-500">No recorded human reviews.</p>}
+                <ol className="mt-2 space-y-3">
+                  {reviews.map((review) => (
+                    <li key={review.review_id} className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
+                      <p className="font-semibold text-slate-900">{review.decision === "VERIFIED" ? "Approved" : review.decision === "REJECTED" ? "Rejected" : "Pending review"}</p>
+                      <p className="text-slate-500">{review.reviewed_by} · {new Date(review.reviewed_at).toLocaleString()}</p>
+                      <p className="text-slate-700 whitespace-pre-wrap break-words">{review.reason}</p>
+                      {review.matched_beneficiary_id && <p className="text-slate-500">Match reviewed: {review.matched_beneficiary_id} ({Math.round(review.duplicate_confidence * 100)}%)</p>}
+                    </li>
+                  ))}
+                </ol>
+              </details>
             </div>
           </div>
         </div>

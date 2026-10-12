@@ -282,12 +282,12 @@ class TestAyudaChainAPI(unittest.TestCase):
         self.assertEqual(res.status_code, 400)
         self.assertIn("not approved", res.json()["detail"])
 
-        res = self.client.post("/api/beneficiaries/BEN-0007/verify", json={"status": "VERIFIED", "review_notes": "Different household"})
+        res = self.client.post("/api/beneficiaries/BEN-0007/verify", json={"status": "VERIFIED", "review_notes": "Different household", "reviewed_by": "demo-auditor-01"})
         self.assertEqual(res.status_code, 200)
         self.assertEqual(self._pay("DIST-3001", "BEN-0007", "RELIEF-2026-001", 5000).status_code, 201)
 
     def test_payout_rejected_for_rejected_beneficiary(self):
-        self.client.post("/api/beneficiaries/BEN-0014/verify", json={"status": "REJECTED", "review_notes": "Same as BEN-0013"})
+        self.client.post("/api/beneficiaries/BEN-0014/verify", json={"status": "REJECTED", "review_notes": "Same as BEN-0013", "reviewed_by": "demo-auditor-01"})
         self.assertEqual(self._pay("DIST-3002", "BEN-0014", "RELIEF-2026-001", 5000).status_code, 400)
 
     def test_payout_requires_active_batch(self):
@@ -551,6 +551,152 @@ class TestAyudaChainAPI(unittest.TestCase):
         if "CONTRACT_ADDRESS" not in os.environ:
             self.assertEqual(config.CONTRACT_ADDRESS, deployment.get("contractAddress"))
         self.assertEqual(config.CHAIN_ID, int(os.getenv("CHAIN_ID") or deployment.get("chainId") or 31337))
+
+    def _review(self, ben_id="BEN-0007", status="VERIFIED", reason="Different fictional household", actor="demo-auditor-01"):
+        return self.client.post(f"/api/beneficiaries/{ben_id}/verify", json={
+            "status": status, "review_notes": reason, "reviewed_by": actor,
+        })
+
+    def _reviews(self, ben_id="BEN-0007"):
+        response = self.client.get(f"/api/beneficiaries/{ben_id}/reviews")
+        self.assertEqual(response.status_code, 200, response.text)
+        return response.json()
+
+    def test_approve_duplicate_records_actor_reason_timestamp_and_evidence(self):
+        from datetime import datetime, timezone
+        from uuid import UUID
+        before = self.client.get("/api/beneficiaries/BEN-0007").json()
+        started = datetime.now(timezone.utc)
+        response = self._review(reason="  Different fictional household  ")
+        self.assertEqual(response.status_code, 200, response.text)
+        approved = response.json()
+        self.assertEqual((approved["verification_status"], approved["review_status"]), ("VERIFIED", "APPROVED"))
+        self.assertFalse(approved["duplicate_flag"])
+        self.assertFalse(approved["anomaly_flag"])
+        self.assertEqual(approved["duplicate_matched_id"], before["duplicate_matched_id"])
+        self.assertEqual(approved["duplicate_confidence"], before["duplicate_confidence"])
+        self.assertNotIn("BEN-0007", {b["beneficiary_id"] for b in self.client.get("/api/beneficiaries?flagged_only=true").json()})
+        review = self._reviews()[0]
+        UUID(review["review_id"].removeprefix("REVIEW-"))
+        self.assertEqual(review["reason"], "Different fictional household")
+        self.assertEqual(review["reviewed_by"], "demo-auditor-01")
+        timestamp = datetime.fromisoformat(review["reviewed_at"].replace("Z", "+00:00"))
+        self.assertGreaterEqual(timestamp, started)
+        self.assertLessEqual(timestamp, datetime.now(timezone.utc))
+        self.assertEqual(review["previous_review_notes"], before["review_notes"])
+        self.assertTrue(review["duplicate_flag_before"])
+        self.assertFalse(review["duplicate_flag_after"])
+        self.assertEqual(review["matched_beneficiary_id"], "BEN-0002")
+        events = self.client.get("/api/audit-trail/RELIEF-2026-001").json()
+        audit = next(e for e in events if e["event_type"] == "BENEFICIARY_REVIEWED")
+        self.assertIn(review["review_id"], audit["description"])
+        self.assertIsNone(audit["blockchain_tx_hash"])
+
+    def test_rejection_resolves_flags_but_blocks_payout(self):
+        rejected = self._review(status="REJECTED", reason="Confirmed same fictional household").json()
+        self.assertEqual((rejected["verification_status"], rejected["review_status"]), ("REJECTED", "REJECTED"))
+        self.assertFalse(rejected["duplicate_flag"])
+        self.assertNotIn("BEN-0007", {b["beneficiary_id"] for b in self.client.get("/api/beneficiaries?flagged_only=true").json()})
+        self.assertEqual(self._pay("DIST-REJECTED", "BEN-0007", "RELIEF-2026-001", 5000).status_code, 400)
+        self.assertEqual(self._reviews()[0]["decision"], "REJECTED")
+
+    def test_keep_pending_never_sets_rejected_review_state(self):
+        response = self._review(status="FLAGGED_FOR_REVIEW", reason="Need more evidence")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual((data["verification_status"], data["review_status"]), ("FLAGGED_FOR_REVIEW", "PENDING"))
+        self.assertTrue(data["duplicate_flag"])
+        self.assertEqual(self._pay("DIST-PENDING", "BEN-0007", "RELIEF-2026-001", 5000).status_code, 400)
+
+    def test_reopened_review_restores_flags_and_preserves_prior_decisions(self):
+        self.assertEqual(self._review().status_code, 200)
+        first = self._reviews()[0]
+        self.assertEqual(self._review(status="FLAGGED_FOR_REVIEW", reason="Recheck household evidence").status_code, 200)
+        history = self._reviews()
+        self.assertEqual(len(history), 2)
+        self.assertEqual(history[1], first)
+        self.assertEqual(history[0]["previous_verification_status"], "VERIFIED")
+        self.assertTrue(history[0]["duplicate_flag_after"])
+        self.assertEqual(self._review(status="REJECTED", reason="Same household after review", actor="demo-officer-01").status_code, 200)
+        self.assertEqual(len(self._reviews()), 3)
+        self.assertEqual(self._reviews()[0]["reviewed_by"], "demo-officer-01")
+
+    def test_anomaly_resolution_and_reopening_preserve_evidence(self):
+        approved = self._review(ben_id="BEN-0022", reason="Reviewed fictional grant anomaly").json()
+        self.assertFalse(approved["anomaly_flag"])
+        history = self._reviews("BEN-0022")
+        self.assertTrue(history[0]["anomaly_flag_before"])
+        reopened = self._review(ben_id="BEN-0022", status="FLAGGED_FOR_REVIEW", reason="Reassess anomaly evidence").json()
+        self.assertTrue(reopened["anomaly_flag"])
+        self.assertFalse(reopened["duplicate_flag"])
+        self.assertEqual(reopened["review_status"], "PENDING")
+
+    def test_invalid_review_input_cannot_change_state_or_create_history(self):
+        before = self.client.get("/api/beneficiaries/BEN-0007").json()
+        payload = {"status": "VERIFIED", "review_notes": "Different household", "reviewed_by": "demo-auditor-01"}
+        for changed in ({"status": "APPROVED"}, {"status": "UNKNOWN"}, {"review_notes": "   "}, {"review_notes": None}, {"review_notes": "x" * 2001}, {"reviewed_by": ""}, {"reviewed_by": "unknown-person"}):
+            with self.subTest(changed=changed):
+                self.assertEqual(self.client.post("/api/beneficiaries/BEN-0007/verify", json={**payload, **changed}).status_code, 422)
+        for missing in ("review_notes", "reviewed_by"):
+            partial = {key: value for key, value in payload.items() if key != missing}
+            self.assertEqual(self.client.post("/api/beneficiaries/BEN-0007/verify", json=partial).status_code, 422)
+        self.assertEqual(self.client.get("/api/beneficiaries/BEN-0007").json(), before)
+        self.assertEqual(self._reviews(), [])
+
+    def test_review_history_empty_and_unknown_beneficiary(self):
+        self.assertEqual(self._reviews(), [])
+        self.assertEqual(self.client.get("/api/beneficiaries/BEN-NOPE/reviews").status_code, 404)
+        self.assertEqual(self._review(ben_id="BEN-NOPE").status_code, 404)
+
+    def test_failed_review_commit_leaves_all_state_unchanged(self):
+        from sqlalchemy.orm import Session
+        before = self.client.get("/api/beneficiaries/BEN-0007").json()
+        with patch.object(Session, "commit", side_effect=RuntimeError("Review database failure")):
+            with self.assertRaises(RuntimeError):
+                self._review()
+        self.assertEqual(self.client.get("/api/beneficiaries/BEN-0007").json(), before)
+        self.assertEqual(self._reviews(), [])
+        self.assertFalse(any(e["event_type"] == "BENEFICIARY_REVIEWED" for e in self.client.get("/api/audit-trail/RELIEF-2026-001").json()))
+
+    def test_reviews_never_modify_existing_payouts_or_receipts(self):
+        before = self.client.get("/api/distributions").json()
+        tx_before = fake_chain.tx_count
+        self.assertEqual(self._review(ben_id="BEN-0001", status="REJECTED", reason="Investigate paid household").status_code, 200)
+        self.assertEqual(self.client.get("/api/distributions").json(), before)
+        self.assertEqual(fake_chain.tx_count, tx_before)
+
+    def test_concurrent_reviews_record_serial_prior_states_without_process_lock(self):
+        from concurrent.futures import ThreadPoolExecutor
+        from contextlib import nullcontext
+        import threading
+        import app.main as api
+        barrier = threading.Barrier(4)
+        decisions = ["VERIFIED", "REJECTED", "FLAGGED_FOR_REVIEW", "VERIFIED"]
+        def review_together(index):
+            barrier.wait(timeout=10)
+            return self._review(status=decisions[index], reason=f"Fictional reviewer decision {index}")
+        with patch.object(api, "_funds_lock", nullcontext()):
+            with ThreadPoolExecutor(max_workers=4) as pool:
+                responses = list(pool.map(review_together, range(4)))
+        self.assertEqual([r.status_code for r in responses], [200] * 4)
+        history = list(reversed(self._reviews()))
+        self.assertEqual(len(history), 4)
+        previous_status = "FLAGGED_FOR_REVIEW"
+        for review in history:
+            self.assertEqual(review["previous_verification_status"], previous_status)
+            previous_status = review["decision"]
+        self.assertEqual(self.client.get("/api/beneficiaries/BEN-0007").json()["verification_status"], previous_status)
+
+    def test_review_table_upgrade_preserves_existing_payouts(self):
+        from sqlalchemy import inspect
+        from app.database import engine, init_db
+        from app.models.entities import BeneficiaryReview
+        before = self.client.get("/api/distributions").json()
+        BeneficiaryReview.__table__.drop(engine)
+        init_db()
+        self.assertIn("beneficiary_reviews", inspect(engine).get_table_names())
+        self.assertEqual(self.client.get("/api/distributions").json(), before)
+        self.assertEqual(self._reviews(), [])
 
     def test_delete_beneficiary(self):
         res = self.client.delete("/api/beneficiaries/BEN-0007")

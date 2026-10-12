@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional
-from pydantic import BaseModel, Field
+from typing import List, Literal, Optional
+from pydantic import BaseModel, Field, field_validator
 
 # --- Dashboard ---
 class DashboardStats(BaseModel):
@@ -89,8 +89,36 @@ class BeneficiaryCreate(BaseModel):
     contact_number: Optional[str] = "0917-123-4567"
 
 class BeneficiaryVerifyRequest(BaseModel):
-    status: str = Field(..., example="VERIFIED") # VERIFIED, FLAGGED_FOR_REVIEW, REJECTED
-    review_notes: Optional[str] = None
+    status: Literal["VERIFIED", "FLAGGED_FOR_REVIEW", "REJECTED"]
+    review_notes: str = Field(..., min_length=1, max_length=2000)
+    reviewed_by: Literal["demo-officer-01", "demo-auditor-01"]
+
+    @field_validator("review_notes", mode="before")
+    @classmethod
+    def strip_reason(cls, value):
+        return value.strip() if isinstance(value, str) else value
+
+
+class BeneficiaryReviewResponse(BaseModel):
+    review_id: str
+    beneficiary_id: str
+    batch_id: str
+    decision: str
+    reason: str
+    reviewed_by: str
+    reviewed_at: datetime
+    previous_verification_status: str
+    previous_review_status: str
+    previous_review_notes: Optional[str]
+    duplicate_flag_before: bool
+    anomaly_flag_before: bool
+    duplicate_flag_after: bool
+    anomaly_flag_after: bool
+    matched_beneficiary_id: Optional[str]
+    duplicate_confidence: float
+
+    class Config:
+        from_attributes = True
 
 class BeneficiaryResponse(BaseModel):
     id: int
