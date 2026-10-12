@@ -37,6 +37,8 @@ export interface ReliefBatch {
   recipient_lgu: string;
   purpose: string;
   amount: number;
+  standard_grant: number;
+  max_grant: number;
   status: string;
   blockchain_tx_hash?: string;
   created_at: string;
@@ -122,6 +124,26 @@ export async function fetchDashboard(): Promise<DashboardStats> {
   return res.json();
 }
 
+export function formatPeso(amount: number): string {
+  return `₱${amount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+async function errorFrom(res: Response, fallback: string): Promise<Error> {
+  try {
+    const body = await res.json();
+    if (typeof body.detail === "string") return new Error(body.detail);
+  } catch {
+    // Response had no JSON body
+  }
+  return new Error(fallback);
+}
+
+export async function fetchBatches(): Promise<ReliefBatch[]> {
+  const res = await fetch(`${getApiBase()}/api/batches`, { cache: 'no-store' });
+  if (!res.ok) throw new Error("Failed to fetch batches");
+  return res.json();
+}
+
 export async function fetchBatchDetail(batchId: string): Promise<{
   batch: ReliefBatch;
   allocations: Allocation[];
@@ -189,7 +211,7 @@ export async function confirmDistribution(payload: {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error("Failed to confirm distribution");
+  if (!res.ok) throw await errorFrom(res, "Failed to confirm distribution");
   return res.json();
 }
 

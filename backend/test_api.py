@@ -241,6 +241,40 @@ class TestAyudaChainAPI(unittest.TestCase):
         self.assertEqual(res.status_code, 400)
         self.assertIn("no allocation", res.json()["detail"])
 
+    def test_grant_policy_is_per_batch(self):
+        res = self.client.post("/api/funds/releases", json={
+            "batch_id": "RELIEF-TEST-020", "calamity_name": "Test Quake",
+            "amount": 100000, "standard_grant": 3000, "max_grant": 4000,
+        })
+        self.assertEqual(res.status_code, 201)
+        self.assertEqual(res.json()["standard_grant_centavos"], 300_000)
+        self.assertEqual(res.json()["max_grant"], 4000.0)
+        self._allocate("ALLOC-2000", "RELIEF-TEST-020", 50000, "BRGY-003", "San Roque")
+        self._register("BEN-2001", "Esperanza Dizon", "RELIEF-TEST-020")
+        self._register("BEN-2002", "Feliciano Arroyo", "RELIEF-TEST-020")
+
+        res = self._pay("DIST-2001", "BEN-2001", "RELIEF-TEST-020", 4500)
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("₱4,000.00", res.json()["detail"])
+
+        self.assertEqual(self._pay("DIST-2001", "BEN-2001", "RELIEF-TEST-020", 3000).status_code, 201)
+        self.assertFalse(self.client.get("/api/beneficiaries/BEN-2001").json()["anomaly_flag"])
+
+        self.assertEqual(self._pay("DIST-2002", "BEN-2002", "RELIEF-TEST-020", 3500).status_code, 201)
+        self.assertTrue(self.client.get("/api/beneficiaries/BEN-2002").json()["anomaly_flag"])
+
+    def test_standard_grant_cannot_exceed_maximum(self):
+        res = self.client.post("/api/funds/releases", json={
+            "batch_id": "RELIEF-TEST-021", "calamity_name": "X",
+            "amount": 100000, "standard_grant": 5000, "max_grant": 4000,
+        })
+        self.assertEqual(res.status_code, 400)
+
+    def test_seed_batch_policy(self):
+        batch = self.client.get("/api/batches/RELIEF-2026-001").json()["batch"]
+        self.assertEqual(batch["standard_grant_centavos"], 500_000)
+        self.assertEqual(batch["max_grant_centavos"], 1_000_000)
+
     def test_seeded_payouts_link_to_allocations(self):
         dists = {d["distribution_id"]: d["allocation_id"] for d in self.client.get("/api/distributions").json()}
         self.assertEqual(dists["DIST-0001"], "ALLOC-0001")

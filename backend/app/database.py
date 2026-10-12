@@ -10,13 +10,26 @@ engine = create_engine(DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_db():
-    columns = {c["name"] for c in inspect(engine).get_columns("distributions")} if inspect(engine).has_table("distributions") else None
-    if columns is not None and not {"amount_centavos", "allocation_id"} <= columns:
+    if _schema_is_outdated():
         raise RuntimeError(
             "The database was created by an older version of AyudaChain. Delete backend/ayudachain.db and "
             "restart the chain and backend (see docs/WINDOWS_LOCAL.md, Reset)."
         )
     Base.metadata.create_all(bind=engine)
+
+REQUIRED_COLUMNS = {
+    "distributions": {"amount_centavos", "allocation_id"},
+    "relief_batches": {"amount_centavos", "standard_grant_centavos", "max_grant_centavos"},
+}
+
+def _schema_is_outdated():
+    inspector = inspect(engine)
+    for table, required in REQUIRED_COLUMNS.items():
+        if inspector.has_table(table):
+            columns = {c["name"] for c in inspector.get_columns(table)}
+            if not required <= columns:
+                return True
+    return False
 
 def get_db():
     db = SessionLocal()

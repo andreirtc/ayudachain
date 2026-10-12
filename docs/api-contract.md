@@ -52,6 +52,10 @@ Amounts: requests send pesos with at most two decimal places (`5000` or `5000.50
 
 ---
 
+- Fund release (`POST /api/funds/releases`) also accepts `standard_grant` (default 5000) and `max_grant` (default 10000), in pesos. These are fictional demo policy values per batch; the standard grant cannot exceed the maximum. Payouts above `max_grant` are rejected; payouts different from `standard_grant` are flagged for review.
+
+---
+
 ### 3. Allocations
 - **Endpoint**: `POST /api/allocations`
   - Body:
