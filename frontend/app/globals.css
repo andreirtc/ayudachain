@@ -10,9 +10,16 @@
 body {
   background-color: #f8fafc;
   color: #0f172a;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-body), "Segoe UI", sans-serif;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
 }
+
+h1, h2, h3, .landing-brand, .app-wordmark {
+  font-family: var(--font-heading), "Segoe UI", sans-serif;
+}
+h1, h2, h3 { font-weight: 700; }
 
 /* Custom badges & animations */
 @keyframes pulse-subtle {
@@ -140,7 +147,7 @@ body {
 .landing-hero { display: grid; grid-template-columns: 1.15fr 1fr; gap: 68px; align-items: center; padding-top: 74px; padding-bottom: 80px; }
 .landing-eyebrow { display: inline-flex; align-items: center; gap: 9px; color: #4c6258; font-size: 12px; font-weight: 650; letter-spacing: 0.5px; }
 .landing-eyebrow > span { width: 7px; height: 7px; background: #66816e; border-radius: 50%; }
-.landing h1 { font-size: clamp(44px, 5.4vw, 68px); letter-spacing: -3px; line-height: 1.06; font-weight: 750; margin-top: 25px; }
+.landing h1 { font-size: clamp(42px, 5vw, 64px); letter-spacing: -2px; line-height: 1.12; font-weight: 650; margin-top: 25px; }
 .landing h1 > span { color: #285ed6; }
 .landing-lead { max-width: 465px; font-size: 17px; line-height: 1.75; color: #53616d; margin-top: 25px; }
 .landing-primary { display: inline-flex; align-items: center; gap: 34px; background: #2458cb; color: white; padding: 16px 24px; margin-top: 30px; border-radius: 8px; font-size: 15px; font-weight: 650; box-shadow: 0 4px 8px #2458cb15; }

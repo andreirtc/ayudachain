@@ -27,7 +27,7 @@ export default function Navbar() {
         <div className="flex flex-wrap justify-between items-center gap-4 py-3">
           <Link href="/" className="flex items-center gap-3 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
             <img src="/logo-emblem.png" alt="" className="w-10 h-10 rounded-lg bg-white object-contain" />
-            <span className="font-bold text-xl tracking-tight">AyudaChain</span>
+            <span className="app-wordmark font-semibold text-xl tracking-tight">AyudaChain</span>
           </Link>
           <nav aria-label="Main navigation" className="hidden md:flex flex-wrap gap-1">
             {navLinks.map(({ name, href, icon: Icon }) => {
