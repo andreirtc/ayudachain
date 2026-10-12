@@ -18,11 +18,11 @@ from sqlalchemy.orm import Session
 
 from app import config
 from app.database import init_db, get_db
-from app.models.entities import ReliefBatch, Allocation, Beneficiary, Distribution, AuditEvent
+from app.models.entities import ReliefBatch, Allocation, Beneficiary, BeneficiaryReview, Distribution, AuditEvent
 from app.schemas.schemas import (
     DashboardStats, ReliefBatchCreate, ReliefBatchResponse,
     AllocationCreate, AllocationResponse,
-    BeneficiaryCreate, BeneficiaryResponse, BeneficiaryVerifyRequest,
+    BeneficiaryCreate, BeneficiaryResponse, BeneficiaryVerifyRequest, BeneficiaryReviewResponse,
     DistributionConfirmRequest, DistributionResponse,
     BlockchainVerifyRequest, BlockchainVerifyResponse,
     AuditEventResponse
@@ -401,26 +401,64 @@ def register_beneficiary(payload: BeneficiaryCreate, db: Session = Depends(get_d
     db.refresh(ben)
     return ben
 
+@app.get("/api/beneficiaries/{beneficiary_id}/reviews", response_model=List[BeneficiaryReviewResponse])
+def get_beneficiary_reviews(beneficiary_id: str, db: Session = Depends(get_db)):
+    reviews = db.query(BeneficiaryReview).filter_by(beneficiary_id=beneficiary_id).order_by(BeneficiaryReview.id.desc()).all()
+    if not reviews and not db.query(Beneficiary).filter_by(beneficiary_id=beneficiary_id).first():
+        raise HTTPException(status_code=404, detail="Beneficiary not found")
+    return reviews
+
+
 @app.post("/api/beneficiaries/{beneficiary_id}/verify", response_model=BeneficiaryResponse)
 def verify_beneficiary(beneficiary_id: str, payload: BeneficiaryVerifyRequest, db: Session = Depends(get_db)):
-    ben = db.query(Beneficiary).filter(Beneficiary.beneficiary_id == beneficiary_id).first()
-    if not ben:
-        raise HTTPException(status_code=404, detail="Beneficiary not found")
+    with _funds_lock:
+        # Serialize decisions before reading the prior state, including across SQLite workers.
+        if db.bind.dialect.name == "sqlite":
+            db.connection().exec_driver_sql("BEGIN IMMEDIATE")
+        ben = db.query(Beneficiary).filter_by(beneficiary_id=beneficiary_id).with_for_update().first()
+        if not ben:
+            raise HTTPException(status_code=404, detail="Beneficiary not found")
 
-    ben.verification_status = payload.status
-    ben.review_status = "APPROVED" if payload.status == "VERIFIED" else "REJECTED"
-    if payload.review_notes:
+        duplicate_after = False
+        anomaly_after = False
+        if payload.status == "FLAGGED_FOR_REVIEW":
+            duplicate_after = bool(ben.duplicate_matched_id) or ben.duplicate_flag
+            anomaly_after = ben.anomaly_flag or db.query(BeneficiaryReview).filter_by(
+                beneficiary_id=beneficiary_id, anomaly_flag_before=True
+            ).first() is not None
+
+        review = BeneficiaryReview(
+            review_id=f"REVIEW-{uuid4()}",
+            beneficiary_id=beneficiary_id,
+            batch_id=ben.batch_id,
+            decision=payload.status,
+            reason=payload.review_notes,
+            reviewed_by=payload.reviewed_by,
+            previous_verification_status=ben.verification_status,
+            previous_review_status=ben.review_status,
+            previous_review_notes=ben.review_notes,
+            duplicate_flag_before=ben.duplicate_flag,
+            anomaly_flag_before=ben.anomaly_flag,
+            duplicate_flag_after=duplicate_after,
+            anomaly_flag_after=anomaly_after,
+            matched_beneficiary_id=ben.duplicate_matched_id,
+            duplicate_confidence=ben.duplicate_confidence,
+        )
+        ben.verification_status = payload.status
+        ben.review_status = {"VERIFIED": "APPROVED", "REJECTED": "REJECTED", "FLAGGED_FOR_REVIEW": "PENDING"}[payload.status]
         ben.review_notes = payload.review_notes
-
-    db.add(AuditEvent(
-        batch_id=ben.batch_id,
-        event_type="BENEFICIARY_VERIFIED",
-        description=f"Beneficiary {beneficiary_id} manually reviewed & set to {payload.status}",
-        entity_id=beneficiary_id
-    ))
-    db.commit()
-    db.refresh(ben)
-    return ben
+        ben.duplicate_flag = duplicate_after
+        ben.anomaly_flag = anomaly_after
+        db.add(review)
+        db.add(AuditEvent(
+            batch_id=ben.batch_id,
+            event_type="BENEFICIARY_REVIEWED",
+            description=f"{payload.reviewed_by} reviewed {beneficiary_id}: {payload.status}. Decision {review.review_id}",
+            entity_id=beneficiary_id,
+        ))
+        db.commit()
+        db.refresh(ben)
+        return ben
 
 def _delete_beneficiary(beneficiary_id: str, db: Session):
     ben = db.query(Beneficiary).filter(Beneficiary.beneficiary_id == beneficiary_id).first()

@@ -181,13 +181,41 @@ export async function registerBeneficiary(payload: {
   return res.json();
 }
 
-export async function verifyBeneficiary(beneficiaryId: string, status: string, notes?: string): Promise<Beneficiary> {
-  const res = await fetch(`${getApiBase()}/api/beneficiaries/${beneficiaryId}/verify`, {
+export type ReviewDecision = "VERIFIED" | "REJECTED" | "FLAGGED_FOR_REVIEW";
+export type DemoReviewer = "demo-officer-01" | "demo-auditor-01";
+
+export interface BeneficiaryReview {
+  review_id: string;
+  beneficiary_id: string;
+  batch_id: string;
+  decision: ReviewDecision;
+  reason: string;
+  reviewed_by: DemoReviewer;
+  reviewed_at: string;
+  previous_verification_status: string;
+  previous_review_status: string;
+  previous_review_notes?: string;
+  duplicate_flag_before: boolean;
+  anomaly_flag_before: boolean;
+  duplicate_flag_after: boolean;
+  anomaly_flag_after: boolean;
+  matched_beneficiary_id?: string;
+  duplicate_confidence: number;
+}
+
+export async function verifyBeneficiary(beneficiaryId: string, status: ReviewDecision, notes: string, reviewedBy: DemoReviewer): Promise<Beneficiary> {
+  const res = await fetch(getApiBase() + "/api/beneficiaries/" + beneficiaryId + "/verify", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status, review_notes: notes })
+    body: JSON.stringify({ status, review_notes: notes, reviewed_by: reviewedBy })
   });
-  if (!res.ok) throw new Error("Failed to verify beneficiary");
+  if (!res.ok) throw await errorFrom(res, "Failed to save review");
+  return res.json();
+}
+
+export async function fetchBeneficiaryReviews(beneficiaryId: string): Promise<BeneficiaryReview[]> {
+  const res = await fetch(getApiBase() + "/api/beneficiaries/" + beneficiaryId + "/reviews", { cache: "no-store" });
+  if (!res.ok) throw await errorFrom(res, "Failed to load review history");
   return res.json();
 }
 
