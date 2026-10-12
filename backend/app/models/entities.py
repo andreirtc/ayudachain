@@ -97,6 +97,8 @@ class Distribution(CentavoAmount, Base):
 
     id = Column(Integer, primary_key=True, index=True)
     distribution_id = Column(String(64), unique=True, index=True, nullable=False) # e.g. DIST-0001
+    idempotency_key = Column(String(128), unique=True, index=True, nullable=True)
+    request_fingerprint = Column(String(66), nullable=True)
     beneficiary_id = Column(String(64), ForeignKey("beneficiaries.beneficiary_id"), nullable=False)
     batch_id = Column(String(64), ForeignKey("relief_batches.batch_id"), nullable=False)
     allocation_id = Column(String(64), ForeignKey("allocations.allocation_id"), nullable=False)

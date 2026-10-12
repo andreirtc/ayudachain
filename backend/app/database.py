@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import sessionmaker
 from app.config import DATABASE_URL
 from app.models.entities import Base
@@ -16,6 +16,30 @@ def init_db():
             "restart the chain and backend (see docs/WINDOWS_LOCAL.md, Reset)."
         )
     Base.metadata.create_all(bind=engine)
+    _migrate_payout_idempotency()
+
+def _migrate_payout_idempotency():
+    """Add retry metadata to the preceding SQLite schema without deleting payouts."""
+    if engine.dialect.name != "sqlite":
+        inspector = inspect(engine)
+        columns = {c["name"] for c in inspector.get_columns("distributions")}
+        indexes = inspector.get_indexes("distributions") + inspector.get_unique_constraints("distributions")
+        if {"idempotency_key", "request_fingerprint"} <= columns and any(
+            i["column_names"] == ["idempotency_key"] and i.get("unique", True) for i in indexes
+        ):
+            return
+        raise RuntimeError("Migrate distributions.idempotency_key (unique) and request_fingerprint before startup.")
+    with engine.begin() as connection:
+        # Serialize startup migrations; re-inspect under the SQLite write lock.
+        connection.exec_driver_sql("BEGIN IMMEDIATE")
+        columns = {c["name"] for c in inspect(connection).get_columns("distributions")}
+        for name, size in (("idempotency_key", 128), ("request_fingerprint", 66)):
+            if name not in columns:
+                connection.execute(text(f"ALTER TABLE distributions ADD COLUMN {name} VARCHAR({size})"))
+        connection.execute(text(
+            "CREATE UNIQUE INDEX IF NOT EXISTS ix_distributions_idempotency_key "
+            "ON distributions (idempotency_key)"
+        ))
 
 REQUIRED_COLUMNS = {
     "distributions": {"amount_centavos", "allocation_id"},

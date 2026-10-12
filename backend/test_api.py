@@ -8,6 +8,7 @@ import os
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -328,6 +329,186 @@ class TestAyudaChainAPI(unittest.TestCase):
         self.assertEqual(codes.count(201), 1, codes)
         paid = [d for d in self.client.get("/api/distributions").json() if d["beneficiary_id"] == "BEN-0004"]
         self.assertEqual(len(paid), 1)
+
+    def _keyed_pay(self, key="payout-test", **overrides):
+        return self.client.post("/api/distributions/confirm", headers={"Idempotency-Key": key}, json={
+            "beneficiary_id": "BEN-0004", "batch_id": "RELIEF-2026-001", "amount": 5000,
+            **overrides,
+        })
+
+    def test_idempotent_retry_returns_persisted_uuid_payout_once(self):
+        from uuid import UUID
+        from app.database import SessionLocal
+        from app.models.entities import AuditEvent, ReliefBatch
+        before = fake_chain.tx_count
+        first = self._keyed_pay()
+        self.assertEqual(first.status_code, 201, first.text)
+        UUID(first.json()["distribution_id"].removeprefix("DIST-"))
+        # A later eligibility change must not hide an already recorded result.
+        with SessionLocal() as db:
+            db.query(ReliefBatch).filter_by(batch_id="RELIEF-2026-001").update({"status": "SUSPENDED"})
+            db.commit()
+        # Use a new client/session to establish that replay is not an in-memory cache.
+        retry = TestClient(app).post("/api/distributions/confirm", headers={"Idempotency-Key": "payout-test"}, json={
+            "beneficiary_id": "BEN-0004", "batch_id": "RELIEF-2026-001", "amount": "5000.00",
+        })
+        self.assertEqual(retry.status_code, 200, retry.text)
+        self.assertEqual(first.json(), retry.json())
+        self.assertEqual(fake_chain.tx_count - before, 1)
+        with SessionLocal() as db:
+            self.assertEqual(db.query(AuditEvent).filter_by(entity_id=first.json()["distribution_id"]).count(), 1)
+
+    def test_changed_request_with_same_key_conflicts(self):
+        self.assertEqual(self._keyed_pay().status_code, 201)
+        before = fake_chain.tx_count
+        for changed in (
+            {"amount": 4000}, {"beneficiary_id": "BEN-0005"}, {"batch_id": "RELIEF-OTHER"},
+            {"receipt_filename": "other.svg"}, {"ocr_raw_text": "Changed receipt"},
+            {"verification_method": "OTHER"}, {"distribution_id": "DIST-OTHER"},
+        ):
+            with self.subTest(changed=changed):
+                self.assertEqual(self._keyed_pay(**changed).status_code, 409)
+        self.assertEqual(fake_chain.tx_count, before)
+
+    def test_legacy_stable_distribution_id_replays(self):
+        first = self._pay("DIST-RETRY", "BEN-0004", "RELIEF-2026-001", 5000)
+        retry = self._pay("DIST-RETRY", "BEN-0004", "RELIEF-2026-001", 5000)
+        self.assertEqual(first.status_code, 201)
+        self.assertEqual(retry.status_code, 200)
+        self.assertEqual(first.json(), retry.json())
+        self.assertEqual(self._pay("DIST-RETRY", "BEN-0004", "RELIEF-2026-001", 4000).status_code, 409)
+
+    def test_different_key_cannot_claim_existing_distribution_id(self):
+        self.assertEqual(self._keyed_pay(distribution_id="DIST-KEYED").status_code, 201)
+        self.assertEqual(self._keyed_pay(key="another-key", distribution_id="DIST-KEYED").status_code, 409)
+        self.assertEqual(self._keyed_pay().status_code, 409)
+
+    def test_retry_identity_validation(self):
+        payload = {"beneficiary_id": "BEN-0004", "batch_id": "RELIEF-2026-001", "amount": 5000}
+        self.assertEqual(self.client.post("/api/distributions/confirm", json=payload).status_code, 422)
+        for key in ("", "x" * 129, "white space"):
+            self.assertEqual(self._keyed_pay(key=key).status_code, 422)
+        self.assertEqual(self._keyed_pay(distribution_id="x" * 65).status_code, 422)
+        self.assertEqual(self._keyed_pay(distribution_id="").status_code, 422)
+
+    def test_rejected_request_does_not_consume_key(self):
+        self.assertEqual(self._keyed_pay(amount=15000).status_code, 400)
+        self.assertEqual(self._keyed_pay().status_code, 201)
+
+    def test_payout_survives_anchor_exception_and_retry_does_not_resubmit(self):
+        from app.database import SessionLocal
+        from app.models.entities import Distribution
+        def fail_after_recording(**kwargs):
+            with SessionLocal() as db:
+                self.assertIsNotNone(db.query(Distribution).filter_by(distribution_id=kwargs["distribution_id"]).first())
+            raise TimeoutError("Submission result unknown")
+        with patch.object(blockchain_service, "confirm_distribution", side_effect=fail_after_recording) as submit:
+            first = self._keyed_pay()
+            retry = self._keyed_pay()
+        self.assertEqual(first.status_code, 201, first.text)
+        self.assertEqual(retry.status_code, 200)
+        self.assertEqual(first.json(), retry.json())
+        self.assertIsNone(first.json()["blockchain_tx_hash"])
+        self.assertEqual(submit.call_count, 1)
+
+    def test_failed_anchor_does_not_store_fabricated_transaction_hash(self):
+        with patch.object(blockchain_service, "confirm_distribution", return_value={"success": False, "txHash": "0xfabricated"}) as submit:
+            first = self._keyed_pay()
+            retry = self._keyed_pay()
+        self.assertEqual(first.status_code, 201)
+        self.assertEqual(retry.status_code, 200)
+        self.assertIsNone(first.json()["blockchain_tx_hash"])
+        self.assertEqual(submit.call_count, 1)
+
+    def test_failed_database_commit_does_not_anchor(self):
+        from sqlalchemy.orm import Session
+        with patch.object(blockchain_service, "confirm_distribution", wraps=fake_chain.confirm_distribution) as submit:
+            with patch.object(Session, "commit", side_effect=RuntimeError("Database failure")):
+                with self.assertRaises(RuntimeError):
+                    self._keyed_pay()
+            self.assertEqual(submit.call_count, 0)
+        # No payout was committed, so this key can be submitted normally.
+        with patch.object(blockchain_service, "confirm_distribution", wraps=fake_chain.confirm_distribution) as submit:
+            self.assertEqual(self._keyed_pay().status_code, 201)
+        self.assertEqual(submit.call_count, 1)
+
+    def test_lost_anchor_metadata_commit_replays_without_another_submission(self):
+        from sqlalchemy.orm import Session
+        original_commit = Session.commit
+        commit_count = 0
+        def fail_second_commit(db):
+            nonlocal commit_count
+            commit_count += 1
+            if commit_count == 2:
+                raise RuntimeError("Anchor metadata commit failed")
+            return original_commit(db)
+        with patch.object(blockchain_service, "confirm_distribution", wraps=fake_chain.confirm_distribution) as submit:
+            with patch.object(Session, "commit", fail_second_commit):
+                with self.assertRaises(RuntimeError):
+                    self._keyed_pay()
+            retry = self._keyed_pay()
+        self.assertEqual(retry.status_code, 200)
+        self.assertIsNone(retry.json()["blockchain_tx_hash"])
+        self.assertEqual(submit.call_count, 1)
+        # The receipt can exist on-chain despite lost local transaction metadata.
+        self.assertIn(retry.json()["distribution_id"], fake_chain.receipts)
+
+    def test_concurrent_same_key_replays_without_process_lock(self):
+        from concurrent.futures import ThreadPoolExecutor
+        from contextlib import nullcontext
+        import threading
+        import app.main as api
+        barrier = threading.Barrier(4)
+        thread_state = threading.local()
+        original_replay = api._replayed_payout
+        def simultaneous_initial_lookup(*args):
+            existing = original_replay(*args)
+            if not getattr(thread_state, "started", False):
+                thread_state.started = True
+                barrier.wait(timeout=10)
+            return existing
+        before = fake_chain.tx_count
+        with patch.object(api, "_funds_lock", nullcontext()), patch.object(api, "_replayed_payout", side_effect=simultaneous_initial_lookup):
+            with ThreadPoolExecutor(max_workers=4) as pool:
+                results = list(pool.map(lambda _: self._keyed_pay(), range(4)))
+        codes = [r.status_code for r in results]
+        self.assertEqual(codes.count(201), 1, codes)
+        self.assertEqual(codes.count(200), 3, codes)
+        self.assertEqual(len({r.json()["distribution_id"] for r in results}), 1)
+        self.assertEqual(fake_chain.tx_count - before, 1)
+
+    def test_idempotency_key_has_database_uniqueness(self):
+        from sqlalchemy.exc import IntegrityError
+        from app.database import SessionLocal
+        from app.models.entities import Distribution
+        self.assertEqual(self._keyed_pay().status_code, 201)
+        with SessionLocal() as db:
+            db.add(Distribution(
+                distribution_id="DIST-CONFLICT", beneficiary_id="BEN-0005", batch_id="RELIEF-2026-001",
+                allocation_id="ALLOC-0001", amount_centavos=500_000, receipt_hash="0x" + "1" * 64,
+                idempotency_key="payout-test",
+            ))
+            with self.assertRaises(IntegrityError):
+                db.commit()
+
+    def test_sqlite_retry_migration_preserves_previous_records(self):
+        from sqlalchemy import create_engine, inspect, text
+        import app.database as database
+        migration_engine = create_engine(f"sqlite:///{os.path.join(_tmp_dir, 'migration.db')}")
+        with migration_engine.begin() as conn:
+            conn.execute(text("CREATE TABLE distributions (id INTEGER PRIMARY KEY, distribution_id VARCHAR(64))"))
+            conn.execute(text("INSERT INTO distributions VALUES (1, 'DIST-HISTORY')"))
+        with patch.object(database, "engine", migration_engine):
+            database._migrate_payout_idempotency()
+            # Recover an interrupted migration that added columns but lost its index.
+            with migration_engine.begin() as conn:
+                conn.execute(text("DROP INDEX ix_distributions_idempotency_key"))
+            database._migrate_payout_idempotency()
+        with migration_engine.connect() as conn:
+            self.assertEqual(conn.execute(text("SELECT distribution_id FROM distributions")).scalar(), "DIST-HISTORY")
+        self.assertIn("idempotency_key", {c["name"] for c in inspect(migration_engine).get_columns("distributions")})
+        self.assertTrue(any(i["unique"] and i["column_names"] == ["idempotency_key"] for i in inspect(migration_engine).get_indexes("distributions")))
+        migration_engine.dispose()
 
     def test_seeded_payouts_link_to_allocations(self):
         dists = {d["distribution_id"]: d["allocation_id"] for d in self.client.get("/api/distributions").json()}

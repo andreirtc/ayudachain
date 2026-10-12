@@ -24,7 +24,7 @@ Status: unchecked items are planned, not implemented. Work through one numbered 
 ## 3. Eligibility, review, and duplicate payouts
 - [x] Require approved eligible beneficiary status, active batch, and consistent beneficiary/batch/barangay/allocation relationships before payout. Done 2026-10-12: payouts need `VERIFIED` + `APPROVED`, an `ACTIVE` batch, a matching batch, and the barangay's allocation (batch/allocation checks from #8).
 - [x] Define one payout per household per batch; enforce database uniqueness and transaction-safe checks under concurrent requests. Done 2026-10-12: unique (batch, beneficiary) constraint, record written before anchoring, in-process lock, and contract `beneficiaryPaid` check.
-- [ ] Add idempotency keys, robust IDs, and safe retries; return the existing result for repeated submissions.
+- [x] Add idempotency keys, robust IDs, and safe retries; return the existing result for repeated submissions. Done 2026-10-12: durable unique retry keys and request fingerprints, server UUID payout IDs, 200 replay/409 conflict, database commit before anchor submission, and retained form retry identity. SQLite upgrade preserves existing payouts. See [PAYOUT_RETRIES.md](PAYOUT_RETRIES.md).
 - [ ] Keep potential duplicate matches as human review decisions, with reason, actor, and timestamp; correctly update flag/status after review.
 - [ ] Replace destructive duplicate deletion with historical status/linking that preserves prior payouts and receipts.
 

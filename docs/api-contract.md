@@ -102,7 +102,7 @@ Amounts: requests send pesos with at most two decimal places (`5000` or `5000.50
 ### 5. Distribution Confirmation & Blockchain Anchoring
 - **Endpoint**: `GET /api/distributions`
 - **Endpoint**: `POST /api/distributions/confirm`
-  - Generates canonical SHA-256 hash and commits transaction to Polygon smart contract.
+  - Records a fictional payout and its canonical SHA-256 receipt hash, then attempts anchoring on the configured local chain or public testnet.
   - Body:
   ```json
   {
@@ -113,6 +113,10 @@ Amounts: requests send pesos with at most two decimal places (`5000` or `5000.50
     "receipt_filename": "sample_relief_receipt.svg"
   }
   ```
+  - Send a stable `Idempotency-Key` header (1–128 characters: letters, digits, `.`, `_`, `:`, or `-`, starting with a letter or digit). With this header, `distribution_id` may be omitted; the server generates `DIST-<UUID>`. Legacy callers may supply a stable `distribution_id` (1–64 characters with the same character rules) without the header. Omitting both returns 422.
+  - First accepted request returns 201. An identical retry returns 200 with the stored payout, without adding another payout/audit event or submitting another anchor. Reusing a key or ID with different effective inputs returns 409; changing the key for an existing ID also returns 409. Amounts such as `5000` and `5000.00` are equivalent. Defaults for receipt/OCR inputs are resolved before comparison.
+  - The payout and audit event commit before anchoring. A blockchain failure leaves the payout recorded with a null `blockchain_tx_hash`; an ordinary payout retry returns it. A process crash or failed metadata commit can leave an anchor on-chain without a local hash. Safe anchor reconciliation is still pending in backlog section 4. `CONFIRMED` currently identifies a recorded payout, not proof of anchor confirmation or physical cash delivery.
+  - Historical records from before this change have no request fingerprint and cannot be claimed through retry; reusing their distribution IDs returns 409. The SQLite schema update preserves those records. See [Payout retries](PAYOUT_RETRIES.md) for validation and limits.
   - Rules: the beneficiary must be `VERIFIED` with review `APPROVED`; the batch must be `ACTIVE`; `batch_id` must match the beneficiary's batch; the beneficiary's barangay must have an allocation in that batch; the amount must not exceed what is left in that allocation (400 states the remaining amount). One payout per household per batch (400 if already paid, 409 if a simultaneous request won the race); amount at most the batch's `max_grant`. The response includes `allocation_id`. The contract enforces the allocation limit too.
 
 ---

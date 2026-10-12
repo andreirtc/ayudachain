@@ -198,17 +198,19 @@ export async function fetchDistributions(batchId?: string): Promise<Distribution
   return res.json();
 }
 
-export async function confirmDistribution(payload: {
-  distribution_id: string;
+export interface DistributionConfirmPayload {
+  distribution_id?: string;
   beneficiary_id: string;
   batch_id: string;
   amount: number;
   receipt_filename?: string;
   ocr_raw_text?: string;
-}): Promise<Distribution> {
+}
+
+export async function confirmDistribution(payload: DistributionConfirmPayload, idempotencyKey: string): Promise<Distribution> {
   const res = await fetch(`${getApiBase()}/api/distributions/confirm`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
     body: JSON.stringify(payload)
   });
   if (!res.ok) throw await errorFrom(res, "Failed to confirm distribution");
