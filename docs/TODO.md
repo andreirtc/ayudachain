@@ -49,6 +49,7 @@ The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were 
 
 ## 6. Frontend workflow and features
 - [ ] Apply the UI design priorities below, including a simple landing page, less copy, focused screens, and natural wording without em dashes.
+  - [x] Replace the rejected system-font treatment with locally served Manrope headings and Source Sans 3 interface text. See [UI_TYPOGRAPHY.md](UI_TYPOGRAPHY.md).
   - [x] Simplify `/beneficiaries` for registration and DSWD review: role-specific tasks, readable phone rows, pending-review filters, expandable evidence/history, truthful next steps, loading/empty/error/success feedback and keyboard dialogs. See [REGISTRY_REVIEW_UX.md](REGISTRY_REVIEW_UX.md). Other screens and new-viewer comprehension remain separate.
 - [ ] Reflect authoritative budgets, eligibility, API validation errors, payout state, and anchor state; remove misleading success/network labels and hardcoded summary assumptions.
   - [x] Remove mock offline queue/camera controls and unsupported claims from the demo shell/payout screen; show actual browser connectivity, preserve API errors and keep receipt evidence distinct from recorded payouts. See [TRUTHFUL_DEMO_WORKFLOW.md](TRUTHFUL_DEMO_WORKFLOW.md). Full authoritative anchor lifecycle and remaining screens still need follow-up.
