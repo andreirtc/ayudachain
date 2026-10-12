@@ -11,6 +11,7 @@ from fastapi import FastAPI, Depends, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import PlainTextResponse
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import config
@@ -465,9 +466,12 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session):
     if existing_dist:
         raise HTTPException(status_code=400, detail="Distribution ID already exists")
 
-    prior_payout = db.query(Distribution).filter(Distribution.beneficiary_id == payload.beneficiary_id).first()
+    prior_payout = db.query(Distribution).filter(
+        Distribution.beneficiary_id == payload.beneficiary_id,
+        Distribution.batch_id == ben.batch_id
+    ).first()
     if prior_payout:
-        raise HTTPException(status_code=400, detail=f"Duplicate disbursement rejected: Beneficiary {payload.beneficiary_id} ({ben.household_name}) has already claimed aid.")
+        raise HTTPException(status_code=400, detail=f"Duplicate disbursement rejected: Beneficiary {payload.beneficiary_id} ({ben.household_name}) was already paid in batch {ben.batch_id} ({prior_payout.distribution_id}).")
 
     if payload.batch_id != ben.batch_id:
         raise HTTPException(status_code=400, detail=f"Beneficiary {ben.beneficiary_id} is registered in batch {ben.batch_id}, not {payload.batch_id}.")
@@ -521,18 +525,9 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session):
         verification_method=payload.verification_method
     )
 
-    # Submit Anchor to Polygon Smart Contract
-    bc_res = blockchain_service.confirm_distribution(
-        batch_id=payload.batch_id,
-        allocation_id=allocation.allocation_id,
-        distribution_id=payload.distribution_id,
-        beneficiary_id=payload.beneficiary_id,
-        amount_centavos=amount_c,
-        receipt_hash=receipt_hash
-    )
-    tx_hash = bc_res.get("txHash")
-
-    # Store off-chain record
+    # Store off-chain record first. The flush claims the (batch, beneficiary) unique
+    # constraint and holds the SQLite write lock, so a concurrent duplicate payout
+    # fails here instead of after anchoring.
     receipt_filename = payload.receipt_filename or "sample_relief_receipt.svg"
     dist = Distribution(
         distribution_id=payload.distribution_id,
@@ -544,10 +539,29 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session):
         receipt_hash=receipt_hash,
         receipt_file_path=f"/receipts/{receipt_filename}",
         ocr_text=ocr_content,
-        status="CONFIRMED",
-        blockchain_tx_hash=tx_hash
+        status="CONFIRMED"
     )
     db.add(dist)
+    try:
+        db.flush()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail=f"Duplicate disbursement rejected: Beneficiary {payload.beneficiary_id} already has a payout in batch {ben.batch_id}."
+        )
+
+    # Submit anchor to the smart contract
+    bc_res = blockchain_service.confirm_distribution(
+        batch_id=payload.batch_id,
+        allocation_id=allocation.allocation_id,
+        distribution_id=payload.distribution_id,
+        beneficiary_id=payload.beneficiary_id,
+        amount_centavos=amount_c,
+        receipt_hash=receipt_hash
+    )
+    tx_hash = bc_res.get("txHash")
+    dist.blockchain_tx_hash = tx_hash
 
     audit = AuditEvent(
         batch_id=payload.batch_id,

@@ -302,6 +302,33 @@ class TestAyudaChainAPI(unittest.TestCase):
         self.assertEqual(res.status_code, 400)
         self.assertIn("SUSPENDED", res.json()["detail"])
 
+    def test_database_rejects_second_payout_in_batch(self):
+        from sqlalchemy.exc import IntegrityError
+        from app.database import SessionLocal
+        from app.models.entities import Distribution
+        db = SessionLocal()
+        try:
+            db.add(Distribution(
+                distribution_id="DIST-4001", beneficiary_id="BEN-0001", batch_id="RELIEF-2026-001",
+                allocation_id="ALLOC-0001", amount_centavos=500_000, receipt_hash="0x" + "1" * 64,
+            ))
+            with self.assertRaises(IntegrityError):
+                db.commit()
+        finally:
+            db.rollback()
+            db.close()
+
+    def test_concurrent_payouts_pay_once(self):
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=5) as pool:
+            codes = list(pool.map(
+                lambda i: self._pay(f"DIST-50{i:02d}", "BEN-0004", "RELIEF-2026-001", 5000).status_code,
+                range(5),
+            ))
+        self.assertEqual(codes.count(201), 1, codes)
+        paid = [d for d in self.client.get("/api/distributions").json() if d["beneficiary_id"] == "BEN-0004"]
+        self.assertEqual(len(paid), 1)
+
     def test_seeded_payouts_link_to_allocations(self):
         dists = {d["distribution_id"]: d["allocation_id"] for d in self.client.get("/api/distributions").json()}
         self.assertEqual(dists["DIST-0001"], "ALLOC-0001")

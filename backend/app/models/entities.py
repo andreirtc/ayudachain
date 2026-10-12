@@ -92,6 +92,8 @@ class Beneficiary(Base):
 
 class Distribution(CentavoAmount, Base):
     __tablename__ = "distributions"
+    # One payout per household per batch
+    __table_args__ = (UniqueConstraint("batch_id", "beneficiary_id", name="uq_distribution_batch_beneficiary"),)
 
     id = Column(Integer, primary_key=True, index=True)
     distribution_id = Column(String(64), unique=True, index=True, nullable=False) # e.g. DIST-0001

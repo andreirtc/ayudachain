@@ -22,12 +22,21 @@ REQUIRED_COLUMNS = {
     "relief_batches": {"amount_centavos", "standard_grant_centavos", "max_grant_centavos"},
 }
 
+REQUIRED_UNIQUE_CONSTRAINTS = {
+    "distributions": "uq_distribution_batch_beneficiary",
+}
+
 def _schema_is_outdated():
     inspector = inspect(engine)
     for table, required in REQUIRED_COLUMNS.items():
         if inspector.has_table(table):
             columns = {c["name"] for c in inspector.get_columns(table)}
             if not required <= columns:
+                return True
+    for table, name in REQUIRED_UNIQUE_CONSTRAINTS.items():
+        if inspector.has_table(table):
+            names = {c["name"] for c in inspector.get_unique_constraints(table)}
+            if name not in names:
                 return True
     return False
 
