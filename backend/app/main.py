@@ -214,11 +214,11 @@ def release_fund(payload: ReliefBatchCreate, db: Session = Depends(get_db)):
 # --- Allocations API ---
 @app.post("/api/allocations", response_model=AllocationResponse, status_code=201)
 def create_allocation(payload: AllocationCreate, db: Session = Depends(get_db)):
-    # Serialize allocations so two requests cannot both pass the remaining-funds check
-    with _allocation_lock:
+    # Serialize fund writes so two requests cannot both pass a remaining-funds check
+    with _funds_lock:
         return _create_allocation(payload, db)
 
-_allocation_lock = threading.Lock()
+_funds_lock = threading.Lock()
 
 def _create_allocation(payload: AllocationCreate, db: Session):
     amount_c = to_centavos(payload.amount)
@@ -235,6 +235,16 @@ def _create_allocation(payload: AllocationCreate, db: Session):
     error = barangay_error(payload.barangay_id, payload.barangay_name)
     if error:
         raise HTTPException(status_code=400, detail=error)
+
+    same_barangay = db.query(Allocation).filter(
+        Allocation.batch_id == batch.batch_id,
+        Allocation.barangay_id == payload.barangay_id
+    ).first()
+    if same_barangay:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Barangay {payload.barangay_id} already has allocation {same_barangay.allocation_id} in batch {batch.batch_id}."
+        )
 
     allocated_c = sum(a.amount_centavos for a in db.query(Allocation).filter(Allocation.batch_id == batch.batch_id))
     remaining_c = batch.amount_centavos - allocated_c
@@ -439,6 +449,10 @@ def get_distributions(batch_id: Optional[str] = None, db: Session = Depends(get_
 
 @app.post("/api/distributions/confirm", response_model=DistributionResponse, status_code=201)
 def confirm_distribution(payload: DistributionConfirmRequest, db: Session = Depends(get_db)):
+    with _funds_lock:
+        return _confirm_distribution(payload, db)
+
+def _confirm_distribution(payload: DistributionConfirmRequest, db: Session):
     amount_c = to_centavos(payload.amount)
     ben = db.query(Beneficiary).filter(Beneficiary.beneficiary_id == payload.beneficiary_id).first()
     if not ben:
@@ -454,6 +468,24 @@ def confirm_distribution(payload: DistributionConfirmRequest, db: Session = Depe
     prior_payout = db.query(Distribution).filter(Distribution.beneficiary_id == payload.beneficiary_id).first()
     if prior_payout:
         raise HTTPException(status_code=400, detail=f"Duplicate disbursement rejected: Beneficiary {payload.beneficiary_id} ({ben.household_name}) has already claimed aid.")
+
+    if payload.batch_id != ben.batch_id:
+        raise HTTPException(status_code=400, detail=f"Beneficiary {ben.beneficiary_id} is registered in batch {ben.batch_id}, not {payload.batch_id}.")
+
+    allocation = db.query(Allocation).filter(
+        Allocation.batch_id == ben.batch_id,
+        Allocation.barangay_id == ben.barangay_id
+    ).first()
+    if not allocation:
+        raise HTTPException(status_code=400, detail=f"Barangay {ben.barangay_name} has no allocation in batch {ben.batch_id}.")
+
+    paid_c = sum(d.amount_centavos for d in db.query(Distribution).filter(Distribution.allocation_id == allocation.allocation_id))
+    remaining_c = allocation.amount_centavos - paid_c
+    if amount_c > remaining_c:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Payout of {format_peso(amount_c)} exceeds the {format_peso(remaining_c)} left in {ben.barangay_name}'s allocation {allocation.allocation_id}."
+        )
 
     # Flag non-standard amounts (standard demo grant is ₱5,000)
     is_anomalous_amount = amount_c != STANDARD_GRANT_CENTAVOS
@@ -477,6 +509,7 @@ def confirm_distribution(payload: DistributionConfirmRequest, db: Session = Depe
     # Submit Anchor to Polygon Smart Contract
     bc_res = blockchain_service.confirm_distribution(
         batch_id=payload.batch_id,
+        allocation_id=allocation.allocation_id,
         distribution_id=payload.distribution_id,
         beneficiary_id=payload.beneficiary_id,
         amount_centavos=amount_c,
@@ -490,6 +523,7 @@ def confirm_distribution(payload: DistributionConfirmRequest, db: Session = Depe
         distribution_id=payload.distribution_id,
         beneficiary_id=payload.beneficiary_id,
         batch_id=payload.batch_id,
+        allocation_id=allocation.allocation_id,
         amount_centavos=amount_c,
         verification_method=payload.verification_method,
         receipt_hash=receipt_hash,

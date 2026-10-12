@@ -24,12 +24,14 @@ contract AyudaChainRegistry {
         bytes32 allocationId;
         bytes32 barangayId;
         uint256 amount;
+        uint256 distributedAmount;
         uint256 timestamp;
         bool exists;
     }
 
     struct DistributionRecord {
         bytes32 batchId;
+        bytes32 allocationId;
         bytes32 distributionId;
         bytes32 beneficiaryId;
         uint256 amount;
@@ -157,6 +159,7 @@ contract AyudaChainRegistry {
             allocationId: allocationId,
             barangayId: barangayId,
             amount: amount,
+            distributedAmount: 0,
             timestamp: block.timestamp,
             exists: true
         });
@@ -169,6 +172,7 @@ contract AyudaChainRegistry {
      */
     function confirmDistribution(
         bytes32 batchId,
+        bytes32 allocationId,
         bytes32 distributionId,
         bytes32 beneficiaryId,
         uint256 amount,
@@ -178,9 +182,21 @@ contract AyudaChainRegistry {
         require(distributionId != bytes32(0), "AyudaChain: Invalid distribution ID");
         require(!distributions[distributionId].exists, "AyudaChain: Distribution already exists");
         require(receiptHash != bytes32(0), "AyudaChain: Invalid receipt hash");
+        require(amount > 0, "AyudaChain: Amount must be greater than zero");
+
+        AllocationRecord storage allocation = allocations[allocationId];
+        require(allocation.exists, "AyudaChain: Allocation does not exist");
+        require(allocation.batchId == batchId, "AyudaChain: Allocation belongs to another batch");
+        require(
+            allocation.distributedAmount + amount <= allocation.amount,
+            "AyudaChain: Distribution exceeds remaining allocation"
+        );
+
+        allocation.distributedAmount += amount;
 
         distributions[distributionId] = DistributionRecord({
             batchId: batchId,
+            allocationId: allocationId,
             distributionId: distributionId,
             beneficiaryId: beneficiaryId,
             amount: amount,

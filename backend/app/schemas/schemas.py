@@ -122,6 +122,7 @@ class DistributionResponse(BaseModel):
     distribution_id: str
     beneficiary_id: str
     batch_id: str
+    allocation_id: str
     amount: float
     amount_centavos: int
     verification_method: str

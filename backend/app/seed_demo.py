@@ -62,9 +62,11 @@ def seed_database():
 
     # 2. Barangay Allocations
     barangays = [(b_id, b_name, 250_000_000, 500) for b_id, b_name in DEMO_BARANGAYS.items()]
+    allocation_by_barangay_name = {}
 
     for b_idx, (b_id, b_name, b_amt, b_count) in enumerate(barangays):
         alloc_id = f"ALLOC-000{b_idx+1}"
+        allocation_by_barangay_name[b_name] = alloc_id
         bc_alloc = blockchain_service.allocate_fund(
             batch_id=batch_id,
             allocation_id=alloc_id,
@@ -175,8 +177,10 @@ def seed_database():
             ocr_text=DEMO_OCR_TEXT
         )
 
+        alloc_id = allocation_by_barangay_name[b_name]
         bc_dist = blockchain_service.confirm_distribution(
             batch_id=batch_id,
+            allocation_id=alloc_id,
             distribution_id=d_id,
             beneficiary_id=ben_id,
             amount_centavos=amt,
@@ -188,6 +192,7 @@ def seed_database():
             distribution_id=d_id,
             beneficiary_id=ben_id,
             batch_id=batch_id,
+            allocation_id=alloc_id,
             amount_centavos=amt,
             verification_method="QR_VOUCHER_PHYSICAL_RECEIPT",
             receipt_hash=r_hash,

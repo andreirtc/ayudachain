@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Text, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import declarative_base, relationship
 
 from app.money import centavos_to_pesos
@@ -37,6 +37,8 @@ class ReliefBatch(CentavoAmount, Base):
 
 class Allocation(CentavoAmount, Base):
     __tablename__ = "allocations"
+    # One allocation per barangay per batch; payouts draw from it
+    __table_args__ = (UniqueConstraint("batch_id", "barangay_id", name="uq_allocation_batch_barangay"),)
 
     id = Column(Integer, primary_key=True, index=True)
     allocation_id = Column(String(64), unique=True, index=True, nullable=False) # e.g. ALLOC-0001
@@ -83,6 +85,7 @@ class Distribution(CentavoAmount, Base):
     distribution_id = Column(String(64), unique=True, index=True, nullable=False) # e.g. DIST-0001
     beneficiary_id = Column(String(64), ForeignKey("beneficiaries.beneficiary_id"), nullable=False)
     batch_id = Column(String(64), ForeignKey("relief_batches.batch_id"), nullable=False)
+    allocation_id = Column(String(64), ForeignKey("allocations.allocation_id"), nullable=False)
     amount_centavos = Column(Integer, nullable=False) # e.g. 500000 (₱5,000.00)
     verification_method = Column(String(64), default="QR_VOUCHER_PHYSICAL_RECEIPT")
     receipt_hash = Column(String(66), nullable=False) # SHA-256 (0x...)

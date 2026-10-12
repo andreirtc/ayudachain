@@ -11,9 +11,9 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def init_db():
     columns = {c["name"] for c in inspect(engine).get_columns("distributions")} if inspect(engine).has_table("distributions") else None
-    if columns is not None and "amount_centavos" not in columns:
+    if columns is not None and not {"amount_centavos", "allocation_id"} <= columns:
         raise RuntimeError(
-            "The database uses the old peso amount format. Delete backend/ayudachain.db and "
+            "The database was created by an older version of AyudaChain. Delete backend/ayudachain.db and "
             "restart the chain and backend (see docs/WINDOWS_LOCAL.md, Reset)."
         )
     Base.metadata.create_all(bind=engine)

@@ -18,7 +18,7 @@ Status: unchecked items are planned, not implemented. Work through one numbered 
 ## 2. Correct fictional fund accounting
 - [x] Use integer centavos (or exact decimals) consistently in database, API, hashing, and contract integration. Done 2026-10-12: stored and sent to the contract as integer centavos; API accepts pesos with at most two decimals and returns `amount` plus `amount_centavos`; receipt hash format unchanged.
 - [x] Validate positive releases/allocations, known batches/barangays, and allocation totals <= released funds. Done 2026-10-12: backend checks plus contract `allocatedAmount` limit.
-- [ ] Link distributions to their barangay allocation; prevent distributions exceeding remaining allocation/batch budgets. Enforce applicable limits in contracts too.
+- [x] Link distributions to their barangay allocation; prevent distributions exceeding remaining allocation/batch budgets. Enforce applicable limits in contracts too. Done 2026-10-12: one allocation per barangay per batch; payouts store `allocation_id`; backend and contract reject payouts beyond the allocation's remaining amount.
 - [ ] Store per-batch grant policy rather than hardcoded amounts; label demo amounts as fictional, without unsupported statutory claims.
 
 ## 3. Eligibility, review, and duplicate payouts
