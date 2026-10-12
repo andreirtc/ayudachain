@@ -12,6 +12,7 @@ class DashboardStats(BaseModel):
     total_distributed: float
     unallocated_funds: float
     total_beneficiaries: int
+    historical_beneficiaries: int = 0
     verified_beneficiaries: int
     flagged_records: int
     confirmed_distributions: int
@@ -88,8 +89,7 @@ class BeneficiaryCreate(BaseModel):
     dafac_id: Optional[str] = None
     contact_number: Optional[str] = "0917-123-4567"
 
-class BeneficiaryVerifyRequest(BaseModel):
-    status: Literal["VERIFIED", "FLAGGED_FOR_REVIEW", "REJECTED"]
+class BeneficiaryReviewInput(BaseModel):
     review_notes: str = Field(..., min_length=1, max_length=2000)
     reviewed_by: Literal["demo-officer-01", "demo-auditor-01"]
 
@@ -97,6 +97,14 @@ class BeneficiaryVerifyRequest(BaseModel):
     @classmethod
     def strip_reason(cls, value):
         return value.strip() if isinstance(value, str) else value
+
+
+class BeneficiaryVerifyRequest(BeneficiaryReviewInput):
+    status: Literal["VERIFIED", "FLAGGED_FOR_REVIEW", "REJECTED"]
+
+
+class BeneficiaryDuplicateRequest(BeneficiaryReviewInput):
+    canonical_beneficiary_id: str = Field(..., min_length=1, max_length=64)
 
 
 class BeneficiaryReviewResponse(BaseModel):
@@ -114,6 +122,7 @@ class BeneficiaryReviewResponse(BaseModel):
     anomaly_flag_before: bool
     duplicate_flag_after: bool
     anomaly_flag_after: bool
+    linked_beneficiary_id: Optional[str]
     matched_beneficiary_id: Optional[str]
     duplicate_confidence: float
 
@@ -124,6 +133,8 @@ class BeneficiaryResponse(BaseModel):
     id: int
     beneficiary_id: str
     dafac_id: Optional[str]
+    record_status: str
+    canonical_beneficiary_id: Optional[str]
     household_name: str
     barangay_id: str
     barangay_name: str

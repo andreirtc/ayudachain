@@ -13,8 +13,8 @@ In the top navigation bar, click the **Role Selector Dropdown** to toggle betwee
 | Role | Target User | Permitted Actions |
 | :--- | :--- | :--- |
 | **Public Citizen (Mamamayan)** | Calamity survivors, evacuees, journalists, watchdog NGOs | • Read-only access to LGU allocations and national batch fund.<br>• Verify family voucher authenticity on the blockchain.<br>• Inspect public audit timeline. *(Cannot delete or disburse).* |
-| **Barangay Officer (Kawani)** | Barangay captains, kagawads, DSWD field workers, evacuation center desk | • Scan DAFAC QR codes with camera viewfinder.<br>• Disburse ₱5,000 statutory cash grants.<br>• Cache vouchers offline during downed connectivity.<br>• Review AI duplicate flags and delete invalid duplicate records. |
-| **COA / Auditor (Tagasuri)** | Commission on Audit officials, municipal internal auditors | • Full investigative audit access.<br>• Trigger real-world fraud simulations (Scenario A & B).<br>• Purge verified fraudulent duplicates with audit logging.<br>• Inspect raw cryptographic hashes on Polygon blockchain. |
+| **Barangay Officer (Kawani)** | Barangay captains, kagawads, DSWD field workers, evacuation center desk | • Scan DAFAC QR codes with camera viewfinder.<br>• Record fictional payouts under each batch's grant policy.<br>• Cache vouchers offline during downed connectivity.<br>• Review suggested matches and retain linked duplicate records with their history. |
+| **COA / Auditor (Tagasuri)** | Commission on Audit officials, municipal internal auditors | • Full investigative audit access.<br>• Trigger real-world fraud simulations (Scenario A & B).<br>• Resolve confirmed duplicate matches with retained history.<br>• Inspect raw cryptographic hashes on Polygon blockchain. |
 
 ---
 
@@ -60,13 +60,13 @@ Deep-dive operational view of a specific calamity batch (e.g., `RELIEF-2026-001`
 
 ### 3. AI Beneficiary Registry & CSV Analyzer (`/beneficiaries`)
 
-Combines official **DSWD DAFAC** (*Disaster Assistance Family Access Card*) tracking with deterministic AI Entity Resolution to eliminate ghost beneficiaries.
+Uses fictional DAFAC records and similarity scores to suggest matches for human review. Demo roles and reviewer identities are simulated; backend authentication is not implemented yet.
 
 #### How to Use:
 1. **Bulk LGU CSV Masterlist Analyzer**:
    - Click **"Batch CSV AI Analyzer"** in the top-right corner.
-   - Click **"Run 1-Click Test Masterlist"** (loads `seed_beneficiaries.csv` with 10 real-world calamity households), or upload your own CSV.
-   - The AI displays a pairwise comparison table with 4 real-world anomaly types:
+   - Click **"Run 1-Click Test Masterlist"** (loads `seed_beneficiaries.csv` with 10 fictional calamity households), or upload your own CSV.
+   - The AI displays a pairwise comparison table with four sample matching patterns:
      - **Clerical Typo**: *Juan Dela Cruz* ↔ *Jhon Dela Cruz* (95.0% match).
      - **Swapped Name Fields**: *Maria Santos* ↔ *Santos Maria* (95.6% match).
      - **Cross-Barangay Duplicate Claim**: *Ricardo Reyes (Brgy 628)* ↔ *Riccardo Reyes (Brgy 630)* (92.8% match).
@@ -74,10 +74,13 @@ Combines official **DSWD DAFAC** (*Disaster Assistance Family Access Card*) trac
 2. **Inspecting Flagged Records**:
    - Click **"Inspect"** on any flagged row (e.g., *Juan D. Cruz `BEN-0007`*).
    - The drawer displays the similarity score %, matched record ID, and phonetic reasoning.
-3. **Deleting Duplicate Records (Role-Gated)**:
-   - If in **Public Citizen Mode**: The modal displays a read-only lock with an instant `[Switch to Officer Mode →]` button.
-   - If in **Barangay Officer / COA Mode**: Click the red **"🗑️ Tanggalin ang Doble (Delete Duplicate)"** button.
-   - Confirm the deletion prompt. The duplicate is permanently removed, and a `BENEFICIARY_DELETED` entry is recorded in the public audit trail.
+3. **Reviewing and Retaining Duplicate Records**:
+   - Select an officer or auditor demo view in the navigation, then inspect the household.
+   - Choose a demo reviewer and enter a reason. Approve, reject, or keep the record for review when the match is uncertain.
+   - To resolve a confirmed duplicate, expand **"Resolve as a duplicate"**, select the surviving household, and click **"Mark duplicate and retain history"**. Use another active record from the same batch.
+   - Enable **"Include historical duplicates"** to inspect the retained record. Its original ID, payouts, receipt hashes, and review history remain available. It cannot receive another payout or be reapproved through the ordinary review action.
+   - Expand **"Review history"** to see the reason, demo reviewer, timestamp, and surviving household. History and audit events are local; they are not blockchain protected.
+
 
 ---
 

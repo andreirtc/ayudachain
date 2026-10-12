@@ -72,6 +72,8 @@ class Beneficiary(Base):
     id = Column(Integer, primary_key=True, index=True)
     beneficiary_id = Column(String(64), unique=True, index=True, nullable=False) # e.g. BEN-0001
     dafac_id = Column(String(64), nullable=True) # e.g. DFC-2026-0001
+    record_status = Column(String(32), nullable=False, default="ACTIVE", server_default="ACTIVE", index=True)
+    canonical_beneficiary_id = Column(String(64), nullable=True, index=True)
     household_name = Column(String(128), nullable=False) # e.g. Juan Dela Cruz
     barangay_id = Column(String(32), index=True, nullable=False)
     barangay_name = Column(String(128), nullable=False)
@@ -110,6 +112,7 @@ class BeneficiaryReview(Base):
     anomaly_flag_before = Column(Boolean, nullable=False)
     duplicate_flag_after = Column(Boolean, nullable=False)
     anomaly_flag_after = Column(Boolean, nullable=False)
+    linked_beneficiary_id = Column(String(64), nullable=True)
     matched_beneficiary_id = Column(String(64), nullable=True)
     duplicate_confidence = Column(Float, nullable=False)
 

@@ -65,10 +65,10 @@ AyudaChain creates a closed-loop, verifiable pipeline:
   - *Exact Duplicates*: Instant flagging with direct comparison drawer.
 - **Ethical AI Principle**: The AI never denies food or cash autonomously. It flags suspicious records for human review, and field officers make the final call.
 
-### 3. 🗑️ Role-Based Governance & Duplicate Record Removal (`/beneficiaries`)
-- **3 Dynamic Personas**: Switch between **Public Citizen (Mamamayan)**, **Barangay Officer (Kawani)**, and **COA Auditor (Tagasuri)**.
-- **Role-Gated Actions**: Normal citizens can inspect records in read-only mode, while Barangay Officers and Auditors can permanently purge duplicate records with **"Tanggalin ang Doble (Delete Duplicate)"**.
-- **Immutable Audit Trail**: Every deletion triggers a permanent `BENEFICIARY_DELETED` event on the audit log to prevent corrupt insiders from secretly deleting legitimate claimants.
+### 3. Human reviews and retained duplicates (/beneficiaries)
+- Select an officer or auditor demo view, inspect a household, and record a reason and named demo reviewer for each decision. Reviewer identities are simulated and caller supplied; authenticated backend permissions are not implemented yet.
+- **Retain duplicate records**: Select the surviving household and choose **"Mark duplicate and retain history"**. The duplicate leaves the active list while its original ID, payouts, receipts, and review history remain available under **"Include historical duplicates"**.
+- **Local history**: Resolution appends a review decision and a local `BENEFICIARY_DUPLICATE_RESOLVED` audit event. These records are not blockchain protected. Payout checks include prior payouts under linked household IDs. See [retained duplicate behavior](docs/RETAINED_DUPLICATES.md).
 
 ### 4. 📶 Evacuation Center Offline Mode (Downed Cell Tower Resilience)
 - Addresses the #1 judge question: *"What happens when typhoon winds topple cell towers?"*

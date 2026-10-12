@@ -4,15 +4,17 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   Users, AlertTriangle, CheckCircle2, Search, UserPlus, Filter,
   Sparkles, ArrowRight, ShieldCheck, X, RefreshCw, AlertCircle,
-  FileSpreadsheet, UploadCloud, Trash2, Lock
+  FileSpreadsheet, UploadCloud
 } from "lucide-react";
-import { fetchBeneficiaries, registerBeneficiary, verifyBeneficiary, fetchBeneficiaryReviews, BeneficiaryReview, ReviewDecision, DemoReviewer, Beneficiary, uploadBeneficiaryCsv, CsvBatchResult, deleteBeneficiary } from "@/lib/api";
+import { fetchBeneficiaries, registerBeneficiary, verifyBeneficiary, fetchBeneficiaryReviews, BeneficiaryReview, ReviewDecision, DemoReviewer, Beneficiary, uploadBeneficiaryCsv, CsvBatchResult, resolveBeneficiaryDuplicate } from "@/lib/api";
 import { useRole } from "@/lib/roleContext";
 
 export default function BeneficiariesPage() {
-  const { role, setRole } = useRole();
+  const { role } = useRole();
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showHistorical, setShowHistorical] = useState(false);
+  const [canonicalId, setCanonicalId] = useState("");
   const [filterFlagged, setFilterFlagged] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBen, setSelectedBen] = useState<Beneficiary | null>(null);
@@ -26,7 +28,6 @@ export default function BeneficiariesPage() {
   const reviewSubmitting = useRef(false);
   const [historyVersion, setHistoryVersion] = useState(0);
   const [reviewSaved, setReviewSaved] = useState(false);
-  const [deleteSuccessMsg, setDeleteSuccessMsg] = useState<string | null>(null);
 
   // New beneficiary form modal
   const [showAddModal, setShowAddModal] = useState(false);
@@ -42,7 +43,7 @@ export default function BeneficiariesPage() {
   const loadBeneficiaries = async () => {
     try {
       setLoading(true);
-      const data = await fetchBeneficiaries({ flagged_only: filterFlagged });
+      const data = await fetchBeneficiaries({ include_historical: showHistorical });
       setBeneficiaries(data);
     } catch (err) {
       console.error(err);
@@ -53,10 +54,11 @@ export default function BeneficiariesPage() {
 
   useEffect(() => {
     loadBeneficiaries();
-  }, [filterFlagged]);
+  }, [showHistorical]);
 
   useEffect(() => {
     setReviewReason("");
+    setCanonicalId(selectedBen?.duplicate_matched_id || "");
     setReviewError(null);
     setReviewSaved(false);
   }, [selectedBen?.beneficiary_id]);
@@ -128,20 +130,24 @@ export default function BeneficiariesPage() {
     }
   };
 
-  const handleDeleteBeneficiary = async (benId: string, name: string) => {
-    if (!confirm(`Sigurado ka bang nais mong tanggalin ang dobleng talaan ni "${name}" (${benId}) mula sa opisyal na listahan ng mga evacuee?`)) {
-      return;
-    }
+  const handleResolveDuplicate = async () => {
+    if (!selectedBen || !canonicalId || !reviewReason.trim() || reviewSubmitting.current) return;
+    reviewSubmitting.current = true;
+    setReviewSaving(true);
+    setReviewError(null);
+    setReviewSaved(false);
     try {
-      await deleteBeneficiary(benId);
-      setDeleteSuccessMsg(`✓ Matagumpay na natanggal ang dobleng talaan: ${name} (${benId})!`);
-      setTimeout(() => setDeleteSuccessMsg(null), 4000);
-      if (selectedBen?.beneficiary_id === benId) {
-        setSelectedBen(null);
-      }
+      const updated = await resolveBeneficiaryDuplicate(selectedBen.beneficiary_id, canonicalId, reviewReason.trim(), reviewer);
+      setSelectedBen(updated);
+      setReviewReason("");
+      setReviewSaved(true);
+      setHistoryVersion((value) => value + 1);
       await loadBeneficiaries();
     } catch (err) {
-      alert("Hindi matanggal ang benepisyaryo: " + String(err));
+      setReviewError(err instanceof Error ? err.message : String(err));
+    } finally {
+      reviewSubmitting.current = false;
+      setReviewSaving(false);
     }
   };
 
@@ -176,7 +182,8 @@ export default function BeneficiariesPage() {
     reader.readAsText(file);
   };
 
-  const filteredList = beneficiaries.filter((b) =>
+  const canonicalCandidates = beneficiaries.filter((b) => b.record_status === "ACTIVE" && b.beneficiary_id !== selectedBen?.beneficiary_id && b.batch_id === selectedBen?.batch_id);
+  const filteredList = beneficiaries.filter((b) => !filterFlagged || b.verification_status === "FLAGGED_FOR_REVIEW" || b.duplicate_flag || b.anomaly_flag).filter((b) =>
     b.household_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     b.beneficiary_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (b.dafac_id && b.dafac_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
@@ -234,7 +241,11 @@ export default function BeneficiariesPage() {
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+          <label className="flex items-center gap-2 text-xs text-slate-700">
+            <input type="checkbox" checked={showHistorical} onChange={(e) => setShowHistorical(e.target.checked)} />
+            Include historical duplicates
+          </label>
           <button
             onClick={() => setFilterFlagged(!filterFlagged)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition w-full sm:w-auto justify-center ${
@@ -248,18 +259,6 @@ export default function BeneficiariesPage() {
           </button>
         </div>
       </div>
-
-      {deleteSuccessMsg && (
-        <div className="p-3 bg-emerald-50 border border-emerald-300 rounded-xl text-emerald-900 text-xs font-semibold flex items-center justify-between shadow-xs animate-in fade-in">
-          <span className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            {deleteSuccessMsg}
-          </span>
-          <button onClick={() => setDeleteSuccessMsg(null)} className="text-emerald-700 hover:text-emerald-900 font-bold cursor-pointer">
-            ✕
-          </button>
-        </div>
-      )}
 
       {/* Beneficiaries Table */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -299,7 +298,9 @@ export default function BeneficiariesPage() {
                       {ben.barangay_name}
                     </td>
                     <td className="px-5 py-3.5">
-                      {ben.verification_status === "VERIFIED" ? (
+                      {ben.record_status === "DUPLICATE" ? (
+                        <span className="inline-flex text-[11px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">RETAINED DUPLICATE</span>
+                      ) : ben.verification_status === "VERIFIED" ? (
                         <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
                           <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                           APPROVED
@@ -321,7 +322,7 @@ export default function BeneficiariesPage() {
                           ⚠ Non-standard aid amount request
                         </span>
                       ) : (
-                        <span className="text-xs text-slate-400">No pending flags</span>
+                        <span className="text-xs text-slate-500">{ben.record_status === "DUPLICATE" ? "Linked to " + ben.canonical_beneficiary_id : "No pending flags"}</span>
                       )}
                     </td>
                     <td className="px-5 py-3.5 text-right">
@@ -335,18 +336,7 @@ export default function BeneficiariesPage() {
                         >
                           Inspect <ArrowRight className="w-3 h-3" />
                         </button>
-                        {role !== "Public Citizen" && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteBeneficiary(ben.beneficiary_id, ben.household_name);
-                            }}
-                            title="Tanggalin ang Dobleng Talaan (Delete Duplicate)"
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
+
                       </div>
                     </td>
                   </tr>
@@ -447,7 +437,11 @@ export default function BeneficiariesPage() {
               </div>
 
               {/* Human decision form */}
-              {role === "Public Citizen" ? (
+              {selectedBen.record_status === "DUPLICATE" ? (
+                <p className="p-3 bg-slate-100 rounded-lg text-slate-700">
+                  Retained duplicate of {selectedBen.canonical_beneficiary_id}. Payouts, receipts, and review history are preserved. This record cannot receive a new payout.
+                </p>
+              ) : role === "Public Citizen" ? (
                 <p className="p-3 bg-slate-100 rounded-lg text-slate-600">
                   Select an officer or auditor demo view to review this household.
                 </p>
@@ -472,6 +466,18 @@ export default function BeneficiariesPage() {
                     <button disabled={reviewSaving || !reviewReason.trim()} onClick={() => handleManualVerify("REJECTED")} className="px-3 py-2 bg-rose-50 text-rose-700 border border-rose-200 font-semibold rounded-lg disabled:opacity-50">Reject household</button>
                     <button disabled={reviewSaving || !reviewReason.trim()} onClick={() => handleManualVerify("FLAGGED_FOR_REVIEW")} className="px-3 py-2 bg-slate-100 text-slate-700 font-semibold rounded-lg disabled:opacity-50">Keep for review</button>
                   </div>
+                  <details className="border-t border-slate-200 pt-3">
+                    <summary className="font-semibold text-slate-700 cursor-pointer">Resolve as a duplicate</summary>
+                    <div className="mt-3 space-y-2">
+                      <label htmlFor="canonical-household" className="block font-semibold text-slate-700">Keep household record</label>
+                      <select id="canonical-household" value={canonicalCandidates.some((b) => b.beneficiary_id === canonicalId) ? canonicalId : ""} disabled={reviewSaving} onChange={(e) => setCanonicalId(e.target.value)} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="">Select the surviving household</option>
+                        {canonicalCandidates.map((b) => <option key={b.beneficiary_id} value={b.beneficiary_id}>{b.beneficiary_id}: {b.household_name}</option>)}
+                      </select>
+                      <p className="text-slate-600">This record will leave the active list. Its payouts, receipts, and review history remain available. Use the reviewer and reason above.</p>
+                      <button disabled={reviewSaving || !reviewReason.trim() || !canonicalCandidates.some((b) => b.beneficiary_id === canonicalId)} onClick={handleResolveDuplicate} className="px-3 py-2 bg-slate-800 text-white font-semibold rounded-lg disabled:opacity-50">Mark duplicate and retain history</button>
+                    </div>
+                  </details>
                   {reviewSaving && <p role="status" className="text-slate-600">Saving review...</p>}
                 </div>
               )}
@@ -484,9 +490,10 @@ export default function BeneficiariesPage() {
                 <ol className="mt-2 space-y-3">
                   {reviews.map((review) => (
                     <li key={review.review_id} className="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1">
-                      <p className="font-semibold text-slate-900">{review.decision === "VERIFIED" ? "Approved" : review.decision === "REJECTED" ? "Rejected" : "Pending review"}</p>
+                      <p className="font-semibold text-slate-900">{review.decision === "DUPLICATE" ? "Retained duplicate" : review.decision === "VERIFIED" ? "Approved" : review.decision === "REJECTED" ? "Rejected" : "Pending review"}</p>
                       <p className="text-slate-500">{review.reviewed_by} · {new Date(review.reviewed_at).toLocaleString()}</p>
                       <p className="text-slate-700 whitespace-pre-wrap break-words">{review.reason}</p>
+                      {review.linked_beneficiary_id && <p className="text-slate-700">Surviving household: {review.linked_beneficiary_id}</p>}
                       {review.matched_beneficiary_id && <p className="text-slate-500">Match reviewed: {review.matched_beneficiary_id} ({Math.round(review.duplicate_confidence * 100)}%)</p>}
                     </li>
                   ))}

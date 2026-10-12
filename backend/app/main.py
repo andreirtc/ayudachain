@@ -22,7 +22,7 @@ from app.models.entities import ReliefBatch, Allocation, Beneficiary, Beneficiar
 from app.schemas.schemas import (
     DashboardStats, ReliefBatchCreate, ReliefBatchResponse,
     AllocationCreate, AllocationResponse,
-    BeneficiaryCreate, BeneficiaryResponse, BeneficiaryVerifyRequest, BeneficiaryReviewResponse,
+    BeneficiaryCreate, BeneficiaryResponse, BeneficiaryVerifyRequest, BeneficiaryReviewResponse, BeneficiaryDuplicateRequest,
     DistributionConfirmRequest, DistributionResponse,
     BlockchainVerifyRequest, BlockchainVerifyResponse,
     AuditEventResponse
@@ -88,7 +88,8 @@ def get_dashboard(db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No active relief batch found. Run seed script.")
 
     allocations = db.query(Allocation).filter(Allocation.batch_id == batch.batch_id).all()
-    beneficiaries = db.query(Beneficiary).filter(Beneficiary.batch_id == batch.batch_id).all()
+    beneficiaries = db.query(Beneficiary).filter(Beneficiary.batch_id == batch.batch_id, Beneficiary.record_status == "ACTIVE").all()
+    historical_bens = db.query(Beneficiary).filter(Beneficiary.batch_id == batch.batch_id, Beneficiary.record_status == "DUPLICATE").count()
     distributions = db.query(Distribution).filter(
         Distribution.batch_id == batch.batch_id,
         Distribution.status == "CONFIRMED"
@@ -136,6 +137,7 @@ def get_dashboard(db: Session = Depends(get_db)):
         total_distributed=total_distributed,
         unallocated_funds=unallocated_funds,
         total_beneficiaries=total_bens,
+        historical_beneficiaries=historical_bens,
         verified_beneficiaries=verified_bens,
         flagged_records=flagged_recs,
         confirmed_distributions=confirmed_dists,
@@ -300,9 +302,12 @@ def get_beneficiaries(
     batch_id: Optional[str] = None,
     status: Optional[str] = None,
     flagged_only: bool = False,
+    include_historical: bool = False,
     db: Session = Depends(get_db)
 ):
     query = db.query(Beneficiary)
+    if not include_historical:
+        query = query.filter(Beneficiary.record_status == "ACTIVE")
     if batch_id:
         query = query.filter(Beneficiary.batch_id == batch_id)
     if status:
@@ -351,7 +356,7 @@ def register_beneficiary(payload: BeneficiaryCreate, db: Session = Depends(get_d
         raise HTTPException(status_code=400, detail=error)
 
     # Run AI Duplicate Check against existing beneficiaries
-    other_bens = db.query(Beneficiary).filter(Beneficiary.batch_id == payload.batch_id).all()
+    other_bens = db.query(Beneficiary).filter(Beneficiary.batch_id == payload.batch_id, Beneficiary.record_status == "ACTIVE").all()
     bens_dict = [
         {"beneficiary_id": b.beneficiary_id, "household_name": b.household_name, "barangay_id": b.barangay_id}
         for b in other_bens
@@ -409,15 +414,34 @@ def get_beneficiary_reviews(beneficiary_id: str, db: Session = Depends(get_db)):
     return reviews
 
 
+def _registry_write_lock(db: Session):
+    # SQLite is the supported demo database. Claim its writer before checking eligibility/links.
+    if db.bind.dialect.name == "sqlite":
+        db.connection().exec_driver_sql("BEGIN IMMEDIATE")
+
+
+def _review_record(ben, payload, decision, duplicate_after=False, anomaly_after=False, linked_id=None):
+    return BeneficiaryReview(
+        review_id=f"REVIEW-{uuid4()}", beneficiary_id=ben.beneficiary_id, batch_id=ben.batch_id,
+        decision=decision, reason=payload.review_notes, reviewed_by=payload.reviewed_by,
+        previous_verification_status=ben.verification_status, previous_review_status=ben.review_status,
+        previous_review_notes=ben.review_notes, duplicate_flag_before=ben.duplicate_flag,
+        anomaly_flag_before=ben.anomaly_flag, duplicate_flag_after=duplicate_after,
+        anomaly_flag_after=anomaly_after, linked_beneficiary_id=linked_id,
+        matched_beneficiary_id=ben.duplicate_matched_id, duplicate_confidence=ben.duplicate_confidence,
+    )
+
+
 @app.post("/api/beneficiaries/{beneficiary_id}/verify", response_model=BeneficiaryResponse)
 def verify_beneficiary(beneficiary_id: str, payload: BeneficiaryVerifyRequest, db: Session = Depends(get_db)):
     with _funds_lock:
-        # Serialize decisions before reading the prior state, including across SQLite workers.
-        if db.bind.dialect.name == "sqlite":
-            db.connection().exec_driver_sql("BEGIN IMMEDIATE")
+        _registry_write_lock(db)
         ben = db.query(Beneficiary).filter_by(beneficiary_id=beneficiary_id).with_for_update().first()
         if not ben:
             raise HTTPException(status_code=404, detail="Beneficiary not found")
+
+        if ben.record_status != "ACTIVE":
+            raise HTTPException(status_code=409, detail="This historical duplicate cannot be approved or reopened for payout.")
 
         duplicate_after = False
         anomaly_after = False
@@ -427,23 +451,7 @@ def verify_beneficiary(beneficiary_id: str, payload: BeneficiaryVerifyRequest, d
                 beneficiary_id=beneficiary_id, anomaly_flag_before=True
             ).first() is not None
 
-        review = BeneficiaryReview(
-            review_id=f"REVIEW-{uuid4()}",
-            beneficiary_id=beneficiary_id,
-            batch_id=ben.batch_id,
-            decision=payload.status,
-            reason=payload.review_notes,
-            reviewed_by=payload.reviewed_by,
-            previous_verification_status=ben.verification_status,
-            previous_review_status=ben.review_status,
-            previous_review_notes=ben.review_notes,
-            duplicate_flag_before=ben.duplicate_flag,
-            anomaly_flag_before=ben.anomaly_flag,
-            duplicate_flag_after=duplicate_after,
-            anomaly_flag_after=anomaly_after,
-            matched_beneficiary_id=ben.duplicate_matched_id,
-            duplicate_confidence=ben.duplicate_confidence,
-        )
+        review = _review_record(ben, payload, payload.status, duplicate_after, anomaly_after)
         ben.verification_status = payload.status
         ben.review_status = {"VERIFIED": "APPROVED", "REJECTED": "REJECTED", "FLAGGED_FOR_REVIEW": "PENDING"}[payload.status]
         ben.review_notes = payload.review_notes
@@ -460,28 +468,54 @@ def verify_beneficiary(beneficiary_id: str, payload: BeneficiaryVerifyRequest, d
         db.refresh(ben)
         return ben
 
-def _delete_beneficiary(beneficiary_id: str, db: Session):
-    ben = db.query(Beneficiary).filter(Beneficiary.beneficiary_id == beneficiary_id).first()
-    if not ben:
-        raise HTTPException(status_code=404, detail="Beneficiary not found")
+@app.post("/api/beneficiaries/{beneficiary_id}/resolve-duplicate", response_model=BeneficiaryResponse)
+def resolve_duplicate(beneficiary_id: str, payload: BeneficiaryDuplicateRequest, db: Session = Depends(get_db)):
+    with _funds_lock:
+        _registry_write_lock(db)
+        records = db.query(Beneficiary).filter(
+            Beneficiary.beneficiary_id.in_([beneficiary_id, payload.canonical_beneficiary_id])
+        ).order_by(Beneficiary.id).with_for_update().all()
+        by_id = {b.beneficiary_id: b for b in records}
+        ben = by_id.get(beneficiary_id)
+        canonical = by_id.get(payload.canonical_beneficiary_id)
+        if not ben or not canonical:
+            raise HTTPException(status_code=404, detail="Household or surviving household record not found")
+        if ben.beneficiary_id == canonical.beneficiary_id:
+            raise HTTPException(status_code=400, detail="A household cannot be linked to itself.")
+        if ben.batch_id != canonical.batch_id:
+            raise HTTPException(status_code=400, detail="Duplicate records must belong to the same batch.")
+        if ben.record_status == "DUPLICATE":
+            prior = db.query(BeneficiaryReview).filter_by(beneficiary_id=beneficiary_id, decision="DUPLICATE").order_by(BeneficiaryReview.id.desc()).first()
+            if prior and ben.canonical_beneficiary_id == canonical.beneficiary_id and prior.reason == payload.review_notes and prior.reviewed_by == payload.reviewed_by:
+                return ben
+            raise HTTPException(status_code=409, detail="This household already has a retained duplicate decision.")
+        if canonical.record_status != "ACTIVE":
+            raise HTTPException(status_code=409, detail="Select an active surviving household; duplicate link chains are not allowed.")
+        if db.query(Beneficiary).filter_by(canonical_beneficiary_id=beneficiary_id).first():
+            raise HTTPException(status_code=409, detail="This household is already the surviving record for linked duplicates.")
 
-    db.delete(ben)
-    db.add(AuditEvent(
-        batch_id=ben.batch_id,
-        event_type="BENEFICIARY_DELETED",
-        description=f"Deleted duplicate beneficiary {beneficiary_id} ({ben.household_name})",
-        entity_id=beneficiary_id
-    ))
-    db.commit()
-    return {"success": True, "message": f"Beneficiary {beneficiary_id} deleted successfully."}
+        review = _review_record(ben, payload, "DUPLICATE", linked_id=canonical.beneficiary_id)
+        ben.record_status = "DUPLICATE"
+        ben.canonical_beneficiary_id = canonical.beneficiary_id
+        ben.verification_status = "REJECTED"
+        ben.review_status = "REJECTED"
+        ben.review_notes = payload.review_notes
+        ben.duplicate_flag = False
+        ben.anomaly_flag = False
+        db.add(review)
+        db.add(AuditEvent(
+            batch_id=ben.batch_id, event_type="BENEFICIARY_DUPLICATE_RESOLVED", entity_id=beneficiary_id,
+            description=f"{payload.reviewed_by} retained {beneficiary_id} as duplicate of {canonical.beneficiary_id}. Decision {review.review_id}",
+        ))
+        db.commit()
+        db.refresh(ben)
+        return ben
+
 
 @app.delete("/api/beneficiaries/{beneficiary_id}")
-def delete_beneficiary(beneficiary_id: str, db: Session = Depends(get_db)):
-    return _delete_beneficiary(beneficiary_id, db)
-
 @app.post("/api/beneficiaries/{beneficiary_id}/delete")
-def delete_beneficiary_fallback(beneficiary_id: str, db: Session = Depends(get_db)):
-    return _delete_beneficiary(beneficiary_id, db)
+def delete_beneficiary_retired(beneficiary_id: str):
+    raise HTTPException(status_code=410, detail="Deletion is disabled. Use resolve-duplicate with a surviving household, reason, and demo reviewer to retain history.")
 
 # --- Distributions API ---
 @app.get("/api/distributions", response_model=List[DistributionResponse])
@@ -533,6 +567,7 @@ def confirm_distribution(
 
 
 def _confirm_distribution(payload: DistributionConfirmRequest, db: Session, idempotency_key: Optional[str], response: Response):
+    _registry_write_lock(db)
     fingerprint = _payout_fingerprint(payload)
     existing = _replayed_payout(payload, db, idempotency_key, fingerprint)
     if existing is not None:
@@ -545,12 +580,19 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session, idem
     if not ben:
         raise HTTPException(status_code=404, detail="Beneficiary not found")
 
+    if ben.record_status != "ACTIVE":
+        raise HTTPException(status_code=400, detail=f"Historical duplicate {ben.beneficiary_id} is linked to {ben.canonical_beneficiary_id} and cannot receive a new payout.")
+
+    household_ids = [b.beneficiary_id for b in db.query(Beneficiary).filter(
+        Beneficiary.batch_id == ben.batch_id,
+        (Beneficiary.beneficiary_id == ben.beneficiary_id) | (Beneficiary.canonical_beneficiary_id == ben.beneficiary_id),
+    )]
     prior_payout = db.query(Distribution).filter(
-        Distribution.beneficiary_id == payload.beneficiary_id,
+        Distribution.beneficiary_id.in_(household_ids),
         Distribution.batch_id == ben.batch_id
     ).first()
     if prior_payout:
-        raise HTTPException(status_code=400, detail=f"Duplicate disbursement rejected: Beneficiary {payload.beneficiary_id} ({ben.household_name}) was already paid in batch {ben.batch_id} ({prior_payout.distribution_id}).")
+        raise HTTPException(status_code=400, detail=f"Duplicate disbursement rejected: Beneficiary {payload.beneficiary_id} ({ben.household_name}) or a linked duplicate was already paid in batch {ben.batch_id} ({prior_payout.distribution_id}, {prior_payout.beneficiary_id}).")
 
     if payload.batch_id != ben.batch_id:
         raise HTTPException(status_code=400, detail=f"Beneficiary {ben.beneficiary_id} is registered in batch {ben.batch_id}, not {payload.batch_id}.")
