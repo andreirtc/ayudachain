@@ -2,12 +2,21 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { RefreshCw } from "lucide-react";
 import {
-  Receipt, CheckCircle2, Lock, ArrowRight, ShieldCheck,
-  FileCheck, RefreshCw, Eye, AlertTriangle, AlertCircle,
-  Wifi, WifiOff, X
-} from "lucide-react";
-import { fetchDistributions, fetchBeneficiaries, fetchBatches, confirmDistribution, DistributionConfirmPayload, Distribution, Beneficiary, ReliefBatch, apiUrl, formatPeso } from "@/lib/api";
+  fetchDistributions,
+  fetchBeneficiaries,
+  fetchBatches,
+  fetchBatchDetail,
+  Allocation,
+  confirmDistribution,
+  DistributionConfirmPayload,
+  Distribution,
+  Beneficiary,
+  ReliefBatch,
+  apiUrl,
+  formatPeso,
+} from "@/lib/api";
 import { useChainStatus, chainLabel } from "@/lib/useChainStatus";
 import { useRole } from "@/lib/roleContext";
 import { receiptVerificationHref } from "@/lib/receiptNavigation";
@@ -23,6 +32,9 @@ export default function DistributionsPage() {
   const [distributions, setDistributions] = useState<Distribution[]>([]);
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
   const [batches, setBatches] = useState<ReliefBatch[]>([]);
+  const [allocations, setAllocations] = useState<Allocation[]>([]);
+  const loadVersion = useRef(0);
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -33,13 +45,24 @@ export default function DistributionsPage() {
   const selectedReceipt = "sample_relief_receipt.svg";
   const [step, setStep] = useState<"IDLE" | "SUBMITTING" | "SUCCESS">("IDLE");
   const submitting = useRef(false);
-  const pendingSubmission = useRef<{ key: string; payload: DistributionConfirmPayload; serialized: string } | null>(null);
+  const pendingSubmission = useRef<{
+    key: string;
+    payload: DistributionConfirmPayload;
+    serialized: string;
+  } | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [confirmedResult, setConfirmedResult] = useState<Distribution | null>(null);
-  const [previewReceipt, setPreviewReceipt] = useState<Distribution | null>(null);
+  const [confirmedResult, setConfirmedResult] = useState<Distribution | null>(
+    null,
+  );
+  const [previewReceipt, setPreviewReceipt] = useState<Distribution | null>(
+    null,
+  );
   const recovering = useRef(false);
   const [anchorBusy, setAnchorBusy] = useState(false);
-  const [anchorError, setAnchorError] = useState<{ id: string; message: string } | null>(null);
+  const [anchorError, setAnchorError] = useState<{
+    id: string;
+    message: string;
+  } | null>(null);
 
   const recoverAnchor = async (id: string) => {
     if (recovering.current || role !== "DISBURSING") return;
@@ -47,47 +70,75 @@ export default function DistributionsPage() {
     setAnchorBusy(true);
     setAnchorError(null);
     try {
-      const result = await submitOnlinePayout(navigator.onLine, () => recoverPayoutAnchor(id));
-      setDistributions((rows) => rows.map((row) => row.distribution_id === id ? result : row));
-      setConfirmedResult((current) => current?.distribution_id === id ? result : current);
+      const result = await submitOnlinePayout(navigator.onLine, () =>
+        recoverPayoutAnchor(id),
+      );
+      setDistributions((rows) =>
+        rows.map((row) => (row.distribution_id === id ? result : row)),
+      );
+      setConfirmedResult((current) =>
+        current?.distribution_id === id ? result : current,
+      );
     } catch (e) {
-      setAnchorError({ id, message: e instanceof Error ? e.message : "Recovery failed. Try again." });
-    } finally { recovering.current = false; setAnchorBusy(false); }
-  };
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      setLoadError(null);
-      const [dList, bList, batchList] = await Promise.all([
-        fetchDistributions(),
-        fetchBeneficiaries(),
-        fetchBatches()
-      ]);
-      setDistributions(dList);
-      setBeneficiaries(bList);
-      setBatches(batchList);
-      if (bList.length > 0) {
-        // Find an un-distributed verified beneficiary or default to first
-        const candidate = bList.find((b) => b.verification_status === "VERIFIED" && b.review_status === "APPROVED" && !dList.some((d) => d.beneficiary_id === b.beneficiary_id && d.batch_id === b.batch_id)) || bList[0];
-        setSelectedBenId((current) => current || candidate.beneficiary_id);
-      }
-    } catch (err) {
-      setLoadError(err instanceof Error ? err.message : String(err));
+      setAnchorError({
+        id,
+        message: e instanceof Error ? e.message : "Recovery failed. Try again.",
+      });
     } finally {
-      setLoading(false);
+      recovering.current = false;
+      setAnchorBusy(false);
     }
   };
 
+  const loadData = async () => {
+    const version = ++loadVersion.current;
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const [dList, bList, batchList] = await Promise.all([
+        fetchDistributions(),
+        fetchBeneficiaries(),
+        fetchBatches(),
+      ]);
+      const details =
+        role === "DISBURSING"
+          ? await Promise.all(
+              batchList.map((batch) => fetchBatchDetail(batch.batch_id)),
+            )
+          : [];
+      if (version !== loadVersion.current) return;
+      setDistributions(dList);
+      setBeneficiaries(bList);
+      setBatches(batchList);
+      setAllocations(details.flatMap((detail) => detail.allocations));
+      setSelectedBenId((current) =>
+        bList.some((b) => b.beneficiary_id === current) ? current : "",
+      );
+    } catch (err) {
+      if (version === loadVersion.current)
+        setLoadError(
+          err instanceof Error
+            ? err.message
+            : "Payout records could not be loaded.",
+        );
+    } finally {
+      if (version === loadVersion.current) setLoading(false);
+    }
+  };
   useEffect(() => {
-    loadData();
+    void loadData();
+    return () => {
+      loadVersion.current++;
+    };
   }, [account?.id]);
 
   const handleDisburse = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedBenId || submitting.current) return;
-    if (role !== "DISBURSING" || loading || loadError) {
-      setSubmitError("Sign in as a disbursing officer and refresh the household records before recording a payout.");
+    if (role !== "DISBURSING" || loading || loadError || blockedReason) {
+      setSubmitError(
+        "Sign in as a disbursing officer and refresh the household records before recording a payout.",
+      );
       return;
     }
 
@@ -100,16 +151,22 @@ export default function DistributionsPage() {
         beneficiary_id: selectedBenId,
         batch_id: selectedBeneficiaryObj?.batch_id || "",
         amount: numericAmount,
-        receipt_filename: selectedReceipt
+        receipt_filename: selectedReceipt,
       };
       const serialized = JSON.stringify(payload);
       if (pendingSubmission.current?.serialized !== serialized) {
         const bytes = crypto.getRandomValues(new Uint8Array(16));
-        const key = "payout-" + Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+        const key =
+          "payout-" +
+          Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(
+            "",
+          );
         pendingSubmission.current = { key, payload, serialized };
       }
       const request = pendingSubmission.current;
-      const result = await submitOnlinePayout(navigator.onLine, () => confirmDistribution(request.payload, request.key));
+      const result = await submitOnlinePayout(navigator.onLine, () =>
+        confirmDistribution(request.payload, request.key),
+      );
       setConfirmedResult(result);
       setStep("SUCCESS");
       await loadData();
@@ -121,10 +178,15 @@ export default function DistributionsPage() {
     }
   };
 
-  const selectedBeneficiaryObj = beneficiaries.find((b) => b.beneficiary_id === selectedBenId);
-  const selectedBatch = batches.find((b) => b.batch_id === selectedBeneficiaryObj?.batch_id);
+  const selectedBeneficiaryObj = beneficiaries.find(
+    (b) => b.beneficiary_id === selectedBenId,
+  );
+  const selectedBatch = batches.find(
+    (b) => b.batch_id === selectedBeneficiaryObj?.batch_id,
+  );
   const selectedIsApproved =
-    selectedBeneficiaryObj?.verification_status === "VERIFIED" && selectedBeneficiaryObj?.review_status === "APPROVED";
+    selectedBeneficiaryObj?.verification_status === "VERIFIED" &&
+    selectedBeneficiaryObj?.review_status === "APPROVED";
   const standardGrant = selectedBatch?.standard_grant ?? 0;
   const maxGrant = selectedBatch?.max_grant ?? 0;
 
@@ -133,317 +195,458 @@ export default function DistributionsPage() {
     if (selectedBatch) setAmountStr(String(selectedBatch.standard_grant));
   }, [selectedBenId, selectedBatch?.batch_id]);
 
+  const existingPayout = distributions.find(
+    (d) =>
+      d.beneficiary_id === selectedBenId &&
+      d.batch_id === selectedBatch?.batch_id,
+  );
+  const allocation = allocations.find(
+    (a) =>
+      a.batch_id === selectedBatch?.batch_id &&
+      a.barangay_id === selectedBeneficiaryObj?.barangay_id,
+  );
+  const spentCentavos = allocation
+    ? distributions
+        .filter((d) => d.allocation_id === allocation.allocation_id)
+        .reduce(
+          (sum, d) => sum + (d.amount_centavos ?? Math.round(d.amount * 100)),
+          0,
+        )
+    : 0;
+  const remainingCentavos = allocation
+    ? (allocation.amount_centavos ?? Math.round(allocation.amount * 100)) -
+      spentCentavos
+    : 0;
+  const amountValid =
+    /^\d+(?:\.\d{1,2})?$/.test(amountStr) && numericAmount > 0;
+  const blockedReason = !selectedBeneficiaryObj
+    ? "Choose a household to begin."
+    : existingPayout
+      ? "A payout is already recorded for this household in this batch."
+      : !selectedIsApproved
+        ? "This household needs DSWD approval before payout."
+        : !selectedBatch || selectedBatch.status !== "ACTIVE"
+          ? "This household's relief batch is not active."
+          : !allocation
+            ? "No allocation is recorded for this barangay and batch."
+            : !amountValid
+              ? "Enter a positive amount with up to two decimal places."
+              : numericAmount > maxGrant
+                ? "The amount exceeds this batch's maximum grant."
+                : Math.round(numericAmount * 100) > remainingCentavos
+                  ? "The amount exceeds the remaining recorded allocation."
+                  : null;
+  const query = searchTerm.trim().toLowerCase();
+  const filteredPayouts = distributions.filter((d) =>
+    [
+      d.distribution_id,
+      d.beneficiary_id,
+      beneficiaries.find((b) => b.beneficiary_id === d.beneficiary_id)
+        ?.household_name,
+    ].some((value) => value?.toLowerCase().includes(query)),
+  );
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+    <div className="registry workflow space-y-6">
+      <header className="registry-header">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-              <Receipt className="w-6 h-6 text-blue-600" />
-              Record a demo payout
-            </h1>
-
-          </div>
-          <p className="text-xs text-slate-500 mt-1">
-            Select an approved household, record a fictional grant, then check its receipt.
+          <h1 id="payout-heading" tabIndex={-1}>
+            {role === "DISBURSING"
+              ? "Record a demo payout"
+              : role === "BENEFICIARY"
+                ? "My payouts"
+                : "Payout records"}
+          </h1>
+          <p className="registry-description">
+            {role === "DISBURSING"
+              ? "Choose an approved household, check the amount and record its synthetic payout."
+              : "Inspect recorded payouts and their receipts."}
           </p>
         </div>
-
-        <div className="flex items-center gap-2">
-          <Link
-            href="/verify"
-            className="px-3.5 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold rounded-lg text-xs hover:bg-emerald-100 transition flex items-center gap-1.5"
+        <Link href="/verify" className="registry-button">
+          Check receipts
+        </Link>
+      </header>
+      {role !== "DISBURSING" && (
+        <p className="workflow-context">
+          Your signed-in role can inspect these records. A disbursing officer
+          records the payout.
+        </p>
+      )}
+      {loading && <p role="status">Loading household and payout records...</p>}
+      {loadError && (
+        <div role="alert" className="registry-error">
+          {loadError} Previously loaded records are hidden until refresh
+          succeeds.{" "}
+          <button
+            type="button"
+            onClick={() => void loadData()}
+            className="registry-button"
           >
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-            Check receipts
-          </Link>
+            Refresh records
+          </button>
         </div>
-      </div>
-
-      {loading && <p role="status" className="text-sm text-slate-600">Loading household and payout records...</p>}
-      {loadError && <div role="alert" className="p-4 border border-rose-200 bg-rose-50 rounded-xl text-sm text-rose-900">{loadError} <button type="button" onClick={() => void loadData()} className="underline font-semibold min-h-11">Refresh records</button></div>}
-      {!loading && !loadError && beneficiaries.length === 0 && <p className="text-sm text-slate-600">No active households are available. <Link href="/beneficiaries" className="underline text-blue-700">Open the household registry</Link>.</p>}
-
-      {/* Main 2-Column Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column (5 Cols): Distribution Action Form */}
-        <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div role={browserOnline === false ? "alert" : "status"} className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm text-slate-700 space-y-1">
-            <p className="flex items-center gap-2 font-semibold">{browserOnline === true ? <Wifi className="w-4 h-4" aria-hidden="true" /> : browserOnline === false ? <WifiOff className="w-4 h-4" aria-hidden="true" /> : null}{browserOnline === true ? "Browser reports a connection" : browserOnline === false ? "Browser is offline" : "Checking browser connection..."}</p>
-            <p className="text-xs">{browserOnline === false ? "Reconnect before recording a payout. This screen does not queue payouts offline." : "Record a payout through the API. Blockchain anchoring can still fail."}</p>
-            <p className="text-xs">{chainLabel(chain)}</p>
-          </div>
-
-          <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-            <div>
-              <h2 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                <Receipt className="w-4 h-4 text-blue-600" />
-                Payout details
-              </h2>
-              <span className="text-[10px] text-slate-500 block">
-                Use fictional household records only.
-              </span>
-            </div>
-            {selectedBatch && <span className="text-xs text-slate-600 break-all">{selectedBatch.batch_id}</span>}
-          </div>
-
-          <form onSubmit={handleDisburse} className="space-y-4 text-xs">
-            {/* Manual household selection */}
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label htmlFor="payout-household" className="font-semibold text-slate-700">Household</label>
-              </div>
-              <select
-                id="payout-household"
-                value={selectedBenId}
-                disabled={step === "SUBMITTING" || loading || Boolean(loadError)}
-                onChange={(e) => setSelectedBenId(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
-              >
-                {beneficiaries.map((b) => (
-                  <option key={b.beneficiary_id} value={b.beneficiary_id}>
-                    {b.beneficiary_id} ({b.dafac_id || "No demo card reference"}) · {b.household_name} ({b.barangay_name})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Selected Beneficiary Info Card */}
-            {selectedBeneficiaryObj && (
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-600 space-y-1">
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Locality:</span>
-                  <span className="font-semibold text-slate-900">{selectedBeneficiaryObj.barangay_name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Status:</span>
-                  <span className={`font-bold ${selectedIsApproved ? "text-emerald-600" : "text-amber-600"}`}>{selectedBeneficiaryObj.verification_status}</span>
-                </div>
-                {distributions.some((d) => d.beneficiary_id === selectedBenId) && (
-                  <div className="pt-1.5 border-t border-slate-200 text-rose-700 font-bold flex items-center gap-1 text-[11px]">
-                    <AlertCircle className="w-3.5 h-3.5" />
-                    A payout is already recorded for this household. This does not confirm cash delivery.
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Amount */}
-            <div>
-              <label htmlFor="payout-amount" className="block font-semibold text-slate-700 mb-1">Fictional amount (PHP)</label>
-              <input
-                id="payout-amount"
-                type="number"
-                min="0.01"
-                step="0.01"
-                value={amountStr}
-                disabled={step === "SUBMITTING"}
-                onChange={(e) => setAmountStr(e.target.value)}
-                placeholder={String(standardGrant || "")}
-                className={`w-full px-3 py-2 border rounded-lg text-sm font-bold focus:outline-none focus:ring-2 ${
-                  numericAmount > maxGrant || (amountStr !== "" && numericAmount <= 0)
-                    ? "border-rose-400 bg-rose-50/50 text-rose-900 focus:ring-rose-500"
-                    : numericAmount !== standardGrant
-                    ? "border-amber-400 bg-amber-50/50 text-amber-900 focus:ring-amber-500"
-                    : "border-slate-300 text-slate-900 focus:ring-blue-500"
-                }`}
-              />
-
-              {/* Real-Time Amount Feedback */}
-              {selectedBatch && numericAmount === standardGrant && (
-                <p className="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1">
-                  ✓ Standard grant for this batch ({formatPeso(standardGrant)})
+      )}
+      <div className={role === "DISBURSING" ? "workflow-columns" : ""}>
+        {role === "DISBURSING" && (
+          <section aria-label="Payout entry" className="workflow-panel">
+            {browserOnline === false && (
+              <div role="alert" className="registry-notice">
+                <p className="font-semibold">Browser is offline</p>
+                <p>
+                  Reconnect to record or recover a payout. Nothing is queued.
                 </p>
-              )}
-
-              {selectedBatch && numericAmount > 0 && numericAmount !== standardGrant && numericAmount <= maxGrant && (
-                <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-lg text-[11px] text-amber-900 mt-1.5 space-y-0.5 animate-in fade-in">
-                  <p className="font-bold flex items-center gap-1">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                    Different from the batch standard ({formatPeso(numericAmount)})
+              </div>
+            )}
+            {confirmedResult && step === "SUCCESS" ? (
+              <div role="status" className="space-y-4">
+                <div className="registry-success">
+                  <h2>Payout recorded</h2>
+                  <p>
+                    {beneficiaries.find(
+                      (b) =>
+                        b.beneficiary_id === confirmedResult.beneficiary_id,
+                    )?.household_name || confirmedResult.beneficiary_id}
                   </p>
-                  <p className="text-amber-800 text-[10px]">
-                    This batch's standard grant is {formatPeso(standardGrant)}. Check the amount before recording it.
+                  <p className="workflow-amount">
+                    {formatPeso(confirmedResult.amount)}
                   </p>
-                </div>
-              )}
-
-              {selectedBatch && numericAmount > maxGrant && (
-                <div className="p-2.5 bg-rose-50 border border-rose-300 rounded-lg text-[11px] text-rose-900 mt-1.5 space-y-0.5 animate-in fade-in">
-                  <p className="font-bold flex items-center gap-1">
-                    <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                    Above this batch's maximum ({formatPeso(maxGrant)})
-                  </p>
-                  <p className="text-rose-800 text-[10px]">
-                    Each fictional batch sets its own maximum grant. The backend rejects payouts above it.
+                  <p className="registry-muted break-all">
+                    Receipt: {confirmedResult.distribution_id}
                   </p>
                 </div>
-              )}
-
-              {amountStr !== "" && numericAmount <= 0 && (
-                <p className="text-[11px] text-rose-600 font-semibold mt-1">
-                  Amount must be greater than zero.
+                <PayoutAnchorStatus
+                  anchor={confirmedResult.anchor_job}
+                  busy={anchorBusy || !browserOnline}
+                  onRecover={() =>
+                    void recoverAnchor(confirmedResult.distribution_id)
+                  }
+                  error={
+                    anchorError?.id === confirmedResult.distribution_id
+                      ? anchorError.message
+                      : undefined
+                  }
+                />
+                <p className="registry-muted">
+                  Synthetic payout. A saved record or receipt match does not
+                  prove cash delivery.
                 </p>
-              )}
-            </div>
-
-            {/* Receipt Selection & Simulated OCR */}
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">Demo receipt template</label>
-              <div className="p-3 border border-dashed border-slate-300 rounded-xl bg-slate-50 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <FileCheck className="w-5 h-5 text-blue-600" />
-                  <div>
-                    <p className="font-bold text-slate-900">sample_relief_receipt.svg</p>
-                    <p className="text-[10px] text-slate-400">Fictional SVG template; receipt uploads are not available here.</p>
-                  </div>
-                </div>
-                <span className="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">Sample</span>
-              </div>
-            </div>
-
-            {/* Step Progression */}
-            {step !== "IDLE" && (
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-1.5 text-[11px]">
-                <div className="flex items-center gap-2 text-blue-900 font-bold">
-                  {step !== "SUCCESS" && <RefreshCw className="w-3.5 h-3.5 animate-spin text-blue-600" />}
-                  {step === "SUBMITTING" && "Saving payout..."}
-                  {step === "SUCCESS" && "Payout recorded."}
-                </div>
-              </div>
-            )}
-
-            {submitError && (
-              <p role="alert" className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-900">
-                {submitError} Retry the same details to retrieve an existing payout if the response was lost.
-              </p>
-            )}
-
-            {/* Confirmed Success Card */}
-            {confirmedResult && step === "SUCCESS" && (
-              <div role="status" className="p-4 bg-blue-50 border border-blue-200 rounded-xl space-y-3 text-sm">
-                <div className="flex items-center gap-1.5 text-blue-950 font-bold">
-                  <CheckCircle2 className="w-4 h-4" />
-                  Payout recorded
-                </div>
-                <p className="text-slate-800">{beneficiaries.find((household) => household.beneficiary_id === confirmedResult.beneficiary_id)?.household_name || confirmedResult.beneficiary_id} · {formatPeso(confirmedResult.amount)}</p>
-                <p className="text-xs text-slate-600 break-all">Receipt: {confirmedResult.distribution_id}</p>
-                <PayoutAnchorStatus anchor={confirmedResult.anchor_job} busy={anchorBusy || !browserOnline} onRecover={role === "DISBURSING" ? () => void recoverAnchor(confirmedResult.distribution_id) : undefined} error={anchorError?.id === confirmedResult.distribution_id ? anchorError.message : undefined} />
-                <p className="text-xs text-slate-600">Synthetic payout. A receipt check does not prove cash delivery.</p>
                 <Link
-                  href={receiptVerificationHref(confirmedResult.distribution_id)}
-                  className="flex items-center justify-center gap-2 min-h-11 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+                  href={receiptVerificationHref(
+                    confirmedResult.distribution_id,
+                  )}
+                  className="registry-button registry-primary"
                 >
-                  Check this receipt <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                  Check this receipt
                 </Link>
-                <details className="text-xs text-slate-700">
-                  <summary className="cursor-pointer py-2 font-semibold">Receipt hash and transaction</summary>
-                  <dl className="space-y-2 mt-2">
-                    <div><dt className="font-semibold">Receipt hash</dt><dd className="font-mono break-all">{confirmedResult.receipt_hash}</dd></div>
-                    <div><dt className="font-semibold">Anchor transaction</dt><dd className="font-mono break-all">{confirmedResult.blockchain_tx_hash || "None recorded"}</dd></div>
+                <button
+                  type="button"
+                  className="registry-button"
+                  disabled={loading || !!loadError || anchorBusy}
+                  onClick={() => {
+                    setConfirmedResult(null);
+                    setStep("IDLE");
+                    setSelectedBenId("");
+                    setAmountStr("");
+                    setSubmitError(null);
+                    pendingSubmission.current = null;
+                  }}
+                >
+                  Record another payout
+                </button>
+                <details className="registry-detail">
+                  <summary>Receipt hash and transaction</summary>
+                  <dl className="registry-references">
+                    <dt>Receipt hash</dt>
+                    <dd>{confirmedResult.receipt_hash}</dd>
+                    <dt>Anchor transaction</dt>
+                    <dd>
+                      {confirmedResult.blockchain_tx_hash || "None recorded"}
+                    </dd>
                   </dl>
                 </details>
               </div>
-            )}
-
-            {role !== "DISBURSING" ? (
-              <div className="p-3 bg-slate-100 rounded-xl border border-slate-200 text-center text-slate-500 text-xs space-y-1">
-                <p className="font-semibold text-slate-700">Payout entry is for disbursing officers</p>
-                <p className="text-[11px]">
-                  Your signed-in role can inspect these records. A disbursing officer records the payout.
-                </p>
-              </div>
             ) : (
-              <button
-                type="submit"
-                disabled={step !== "IDLE" && step !== "SUCCESS" || !browserOnline || loading || Boolean(loadError) || selectedBatch?.status !== "ACTIVE" || !selectedBatch || !selectedIsApproved || numericAmount > maxGrant || numericAmount <= 0 || distributions.some((d) => d.beneficiary_id === selectedBenId)}
-                className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow transition disabled:opacity-50 text-xs flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+              <form
+                onSubmit={handleDisburse}
+                aria-busy={step === "SUBMITTING"}
+                className="space-y-5"
               >
-                <Lock className="w-3.5 h-3.5" />
-                {distributions.some((d) => d.beneficiary_id === selectedBenId)
-                  ? "Payout already recorded"
-                  : browserOnline === null
-                  ? "Checking browser connection"
-                  : !browserOnline
-                  ? "Reconnect to record a payout"
-                  : selectedBatch && selectedBatch.status !== "ACTIVE"
-                  ? "Batch is not active"
-                  : selectedBeneficiaryObj && !selectedIsApproved
-                  ? "Household Not Approved for Payout"
-                  : numericAmount > maxGrant
-                  ? `Cannot Disburse: Above ${formatPeso(maxGrant)} Maximum`
-                  : submitError ? "Retry payout request" : "Record demo payout"}
-              </button>
-            )}
-          </form>
-        </div>
-
-        {/* Right Column (7 Cols): Recent Confirmed Distributions */}
-        <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-            <div>
-              <h2 className="font-bold text-sm text-slate-900">Recorded payouts</h2>
-              <p className="text-xs text-slate-500">Open a receipt to check its current integrity.</p>
-            </div>
-            <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">
-              {distributions.length} Records
-            </span>
-          </div>
-
-          <div className="divide-y divide-slate-100 overflow-y-auto max-h-[560px]">
-            {distributions.map((dist) => (
-              <div key={dist.id} className="py-3.5 space-y-2 text-xs">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <span className="font-mono font-bold text-slate-900 text-sm">{dist.distribution_id}</span>
-                    <span className="text-slate-400 mx-1.5">•</span>
-                    <span className="font-semibold text-slate-700">Beneficiary: {dist.beneficiary_id}</span>
+                <h2>Payout details</h2>
+                <div>
+                  <label htmlFor="payout-household">Household</label>
+                  <select
+                    id="payout-household"
+                    value={selectedBenId}
+                    disabled={step === "SUBMITTING" || loading || !!loadError}
+                    onChange={(e) => {
+                      setSelectedBenId(e.target.value);
+                      setSubmitError(null);
+                    }}
+                  >
+                    <option value="">Choose a household</option>
+                    {beneficiaries.map((b) => (
+                      <option key={b.beneficiary_id} value={b.beneficiary_id}>
+                        {b.household_name} ({b.barangay_name})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {selectedBeneficiaryObj && !loading && !loadError && (
+                  <div className="workflow-context space-y-3">
+                    <h3>{selectedBeneficiaryObj.household_name}</h3>
+                    <p>{selectedBeneficiaryObj.barangay_name}</p>
+                    <p
+                      className={
+                        selectedIsApproved
+                          ? "text-emerald-800"
+                          : "text-amber-800"
+                      }
+                    >
+                      {selectedIsApproved
+                        ? "Approved"
+                        : selectedBeneficiaryObj.verification_status ===
+                            "REJECTED"
+                          ? "Rejected"
+                          : "Pending DSWD review"}
+                    </p>
+                    <dl className="workflow-facts">
+                      <dt>Relief batch</dt>
+                      <dd>{selectedBatch?.calamity_name || "Not available"}</dd>
+                      <dt>Batch status</dt>
+                      <dd>
+                        {selectedBatch?.status === "ACTIVE"
+                          ? "Active"
+                          : selectedBatch?.status || "Not available"}
+                      </dd>
+                      <dt>Standard grant</dt>
+                      <dd>{formatPeso(standardGrant)}</dd>
+                      <dt>Maximum grant</dt>
+                      <dd>{formatPeso(maxGrant)}</dd>
+                      <dt>Remaining recorded allocation</dt>
+                      <dd>
+                        {allocation
+                          ? formatPeso(remainingCentavos / 100)
+                          : "No allocation"}
+                      </dd>
+                    </dl>
+                    <p className="registry-muted">
+                      This is the recorded budget, not cash on hand. The API
+                      checks the current balance when saving.
+                    </p>
                   </div>
-                  <span className="font-black text-slate-900 text-sm">₱{dist.amount.toLocaleString()}</span>
+                )}
+                <div>
+                  <label htmlFor="payout-amount">Fictional amount (PHP)</label>
+                  <input
+                    id="payout-amount"
+                    type="text"
+                    inputMode="decimal"
+                    value={amountStr}
+                    disabled={
+                      !selectedBenId ||
+                      step === "SUBMITTING" ||
+                      loading ||
+                      !!loadError
+                    }
+                    onChange={(e) => setAmountStr(e.target.value)}
+                    aria-describedby="payout-amount-help"
+                  />
+                  <p id="payout-amount-help" className="registry-muted mt-2">
+                    Use up to two decimal places.
+                    {selectedBatch &&
+                    amountValid &&
+                    numericAmount !== standardGrant
+                      ? " This differs from the batch's standard grant. Check the amount before saving."
+                      : ""}
+                  </p>
                 </div>
-
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] text-slate-500 font-mono">
-                  <span>Hash: {dist.receipt_hash.slice(0, 16)}...{dist.receipt_hash.slice(-6)}</span>
-                  <span className="text-slate-400">{new Date(dist.distributed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                </div>
-
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                  <span className="text-[10px] text-slate-700 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded font-semibold flex items-center gap-1">
-                    <Receipt className="w-3 h-3" aria-hidden="true" />
-                    {dist.anchor_job ? { PENDING: "Anchor pending", SUBMITTED: "Awaiting confirmation", CONFIRMED: "Anchor confirmed", FAILED: "Anchor needs attention" }[dist.anchor_job.state] : "Anchor not tracked"}
-                  </span>
-
-                  <div className="flex items-center gap-2">
+                {blockedReason && !loading && !loadError && (
+                  <p
+                    className={
+                      selectedBenId ? "registry-notice" : "registry-muted"
+                    }
+                  >
+                    {blockedReason}
+                    {existingPayout && (
+                      <Link
+                        href={receiptVerificationHref(
+                          existingPayout.distribution_id,
+                        )}
+                        className="registry-button registry-text-button"
+                      >
+                        Open recorded receipt
+                      </Link>
+                    )}
+                  </p>
+                )}
+                {submitError && (
+                  <p role="alert" className="registry-error">
+                    {submitError} Retry the same details to retrieve an existing
+                    payout if the response was lost.
+                  </p>
+                )}
+                {step === "SUBMITTING" && <p role="status">Saving payout...</p>}
+                <button
+                  type="submit"
+                  disabled={
+                    step === "SUBMITTING" ||
+                    !browserOnline ||
+                    loading ||
+                    !!loadError ||
+                    !!blockedReason
+                  }
+                  className="registry-button registry-primary w-full"
+                >
+                  {step === "SUBMITTING"
+                    ? "Saving payout..."
+                    : !browserOnline
+                      ? "Reconnect to record a payout"
+                      : submitError
+                        ? "Retry payout request"
+                        : "Record demo payout"}
+                </button>
+                <details className="registry-detail">
+                  <summary>Demo evidence and connection</summary>
+                  <p>
+                    The demo uses a shared receipt template. Household-specific
+                    receipt uploads and recipient acknowledgement are not
+                    available.
+                  </p>
+                  <p>
+                    {chainLabel(chain)}. Payout recording and blockchain
+                    confirmation are separate.
+                  </p>
+                </details>
+              </form>
+            )}
+          </section>
+        )}
+        <section
+          aria-label="Recorded payouts"
+          className="workflow-panel space-y-4"
+        >
+          <div className="workflow-section-heading">
+            <h2>Recorded payouts</h2>
+            <button
+              className="registry-button"
+              disabled={loading || step === "SUBMITTING"}
+              onClick={() => void loadData()}
+            >
+              <RefreshCw size={16} aria-hidden="true" />
+              Refresh
+            </button>
+          </div>
+          <label htmlFor="payout-search">Search payout records</label>
+          <input
+            id="payout-search"
+            type="search"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Household name or receipt reference"
+          />
+          {!loading && !loadError && filteredPayouts.length === 0 && (
+            <div className="registry-empty">
+              <h3>{query ? "No matching payouts" : "No payouts recorded"}</h3>
+              <p>
+                {query
+                  ? "Try another household name or receipt reference."
+                  : "Recorded payouts will appear here."}
+              </p>
+              {query && (
+                <button
+                  className="registry-button"
+                  onClick={() => setSearchTerm("")}
+                >
+                  Clear search
+                </button>
+              )}
+            </div>
+          )}
+          {!loading && !loadError && (
+            <ol className="workflow-records">
+              {filteredPayouts.map((dist) => (
+                <li key={dist.distribution_id} className="workflow-record">
+                  <div className="workflow-section-heading">
+                    <h3>
+                      {beneficiaries.find(
+                        (b) => b.beneficiary_id === dist.beneficiary_id,
+                      )?.household_name || dist.beneficiary_id}
+                    </h3>
+                    <p className="workflow-amount-small">
+                      {formatPeso(dist.amount)}
+                    </p>
+                  </div>
+                  <p className="registry-muted">
+                    Recorded {new Date(dist.distributed_at).toLocaleString()}
+                  </p>
+                  <p className="registry-record-id break-all">
+                    {dist.distribution_id}
+                  </p>
+                  <p
+                    className={
+                      dist.anchor_job?.state === "FAILED"
+                        ? "text-amber-800"
+                        : "text-slate-700"
+                    }
+                  >
+                    {dist.anchor_job
+                      ? {
+                          PENDING: "Anchor pending",
+                          SUBMITTED: "Awaiting anchor confirmation",
+                          CONFIRMED: "Anchor confirmed",
+                          FAILED: "Anchor needs attention",
+                        }[dist.anchor_job.state]
+                      : "Anchor not tracked"}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => setPreviewReceipt(dist)}
-                      className="text-slate-600 hover:text-blue-600 font-semibold flex items-center gap-1 text-xs"
+                      className="registry-button"
                     >
-                      <Eye className="w-3.5 h-3.5" /> View Receipt
+                      View receipt
                     </button>
                     <Link
                       href={receiptVerificationHref(dist.distribution_id)}
-                      className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 text-xs"
+                      className="registry-button registry-text-button"
                     >
-                      Verify <ArrowRight className="w-3 h-3" />
+                      Check receipt
                     </Link>
                   </div>
-                </div>
-                <details className="text-xs text-slate-700"><summary className="cursor-pointer py-2">Anchor status and recovery</summary><PayoutAnchorStatus anchor={dist.anchor_job} busy={anchorBusy || !browserOnline} onRecover={role === "DISBURSING" ? () => void recoverAnchor(dist.distribution_id) : undefined} error={anchorError?.id === dist.distribution_id ? anchorError.message : undefined} /></details>
-              </div>
-            ))}
-          </div>
-        </div>
+                  <details className="registry-detail">
+                    <summary>Anchor status and recovery</summary>
+                    <PayoutAnchorStatus
+                      anchor={dist.anchor_job}
+                      busy={anchorBusy || !browserOnline}
+                      onRecover={
+                        role === "DISBURSING"
+                          ? () => void recoverAnchor(dist.distribution_id)
+                          : undefined
+                      }
+                      error={
+                        anchorError?.id === dist.distribution_id
+                          ? anchorError.message
+                          : undefined
+                      }
+                    />
+                  </details>
+                </li>
+              ))}
+            </ol>
+          )}
+        </section>
       </div>
-
       {/* Modal: View Receipt Preview & OCR Text */}
       {previewReceipt && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
               <div>
-                <h3 className="font-bold text-base text-slate-900">Demo payout receipt</h3>
-                <p className="text-xs text-slate-400 font-mono">ID: {previewReceipt.distribution_id}</p>
+                <h3 className="font-bold text-base text-slate-900">
+                  Demo payout receipt
+                </h3>
+                <p className="text-xs text-slate-400 font-mono">
+                  ID: {previewReceipt.distribution_id}
+                </p>
               </div>
               <button
                 onClick={() => setPreviewReceipt(null)}
@@ -455,11 +658,18 @@ export default function DistributionsPage() {
 
             {/* Receipt Preview */}
             <div className="bg-slate-100 rounded-xl p-4 flex justify-center border border-slate-200 mb-4">
-              {previewReceipt.receipt_file_path ? <img
-                src={apiUrl(previewReceipt.receipt_file_path)}
-                alt="Relief Receipt"
-                className="max-h-96 rounded-lg shadow-sm border border-slate-300"
-              /> : <p className="text-sm text-slate-600">No household receipt image is available for this record. Its saved hash can still be checked.</p>}
+              {previewReceipt.receipt_file_path ? (
+                <img
+                  src={apiUrl(previewReceipt.receipt_file_path)}
+                  alt="Relief Receipt"
+                  className="max-h-96 rounded-lg shadow-sm border border-slate-300"
+                />
+              ) : (
+                <p className="text-sm text-slate-600">
+                  No household receipt image is available for this record. Its
+                  saved hash can still be checked.
+                </p>
+              )}
             </div>
 
             {/* OCR Extracted Text */}
@@ -482,7 +692,6 @@ export default function DistributionsPage() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
