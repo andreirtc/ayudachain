@@ -18,6 +18,14 @@ class CentavoAmount:
 class ReliefBatch(CentavoAmount, Base):
     __tablename__ = "relief_batches"
 
+    @property
+    def standard_grant(self):
+        return centavos_to_pesos(self.standard_grant_centavos)
+
+    @property
+    def max_grant(self):
+        return centavos_to_pesos(self.max_grant_centavos)
+
     id = Column(Integer, primary_key=True, index=True)
     batch_id = Column(String(64), unique=True, index=True, nullable=False) # e.g. RELIEF-2026-001
     calamity_name = Column(String(128), nullable=False) # e.g. Typhoon Salinlahi
@@ -26,6 +34,10 @@ class ReliefBatch(CentavoAmount, Base):
     recipient_lgu = Column(String(128), default="Provincial Government of Albay")
     purpose = Column(String(256), default="Emergency Calamity Cash and Food Assistance")
     amount_centavos = Column(Integer, nullable=False) # e.g. 1000000000 (₱10,000,000.00)
+    # Fictional per-batch grant policy: payouts above the maximum are rejected,
+    # payouts that differ from the standard grant are flagged for review
+    standard_grant_centavos = Column(Integer, nullable=False, default=500_000)
+    max_grant_centavos = Column(Integer, nullable=False, default=1_000_000)
     status = Column(String(32), default="ACTIVE") # ACTIVE, COMPLETED, SUSPENDED
     blockchain_tx_hash = Column(String(66), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)

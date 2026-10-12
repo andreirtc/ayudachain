@@ -7,7 +7,7 @@ import {
   FileCheck, Sparkles, ExternalLink, RefreshCw, Eye, AlertTriangle, AlertCircle,
   Camera, QrCode, Wifi, WifiOff, X
 } from "lucide-react";
-import { fetchDistributions, fetchBeneficiaries, confirmDistribution, Distribution, Beneficiary, apiUrl } from "@/lib/api";
+import { fetchDistributions, fetchBeneficiaries, fetchBatches, confirmDistribution, Distribution, Beneficiary, ReliefBatch, apiUrl, formatPeso } from "@/lib/api";
 import { useChainStatus, chainLabel } from "@/lib/useChainStatus";
 import { useRole } from "@/lib/roleContext";
 
@@ -16,11 +16,12 @@ export default function DistributionsPage() {
   const { role } = useRole();
   const [distributions, setDistributions] = useState<Distribution[]>([]);
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
+  const [batches, setBatches] = useState<ReliefBatch[]>([]);
   const [loading, setLoading] = useState(true);
 
   // New Distribution Form State
   const [selectedBenId, setSelectedBenId] = useState("");
-  const [amountStr, setAmountStr] = useState("5000");
+  const [amountStr, setAmountStr] = useState("");
   const numericAmount = parseFloat(amountStr) || 0;
   const [selectedReceipt, setSelectedReceipt] = useState("sample_relief_receipt.svg");
   const [step, setStep] = useState<"IDLE" | "PREPARING" | "OFFCHAIN_STORED" | "ANCHORING" | "SUCCESS">("IDLE");
@@ -35,12 +36,14 @@ export default function DistributionsPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [dList, bList] = await Promise.all([
+      const [dList, bList, batchList] = await Promise.all([
         fetchDistributions(),
-        fetchBeneficiaries()
+        fetchBeneficiaries(),
+        fetchBatches()
       ]);
       setDistributions(dList);
       setBeneficiaries(bList);
+      setBatches(batchList);
       if (bList.length > 0) {
         // Find an un-distributed verified beneficiary or default to first
         const candidate = bList.find((b) => b.verification_status === "VERIFIED") || bList[0];
@@ -72,7 +75,7 @@ export default function DistributionsPage() {
       const result = await confirmDistribution({
         distribution_id: distId,
         beneficiary_id: selectedBenId,
-        batch_id: "RELIEF-2026-001",
+        batch_id: selectedBeneficiaryObj?.batch_id || "",
         amount: numericAmount,
         receipt_filename: selectedReceipt
       });
@@ -81,13 +84,21 @@ export default function DistributionsPage() {
       setStep("SUCCESS");
       await loadData();
     } catch (err) {
-      alert("Distribution failed: " + String(err));
+      alert("Distribution failed: " + (err instanceof Error ? err.message : String(err)));
     } finally {
       if (step !== "SUCCESS") setStep("IDLE");
     }
   };
 
   const selectedBeneficiaryObj = beneficiaries.find((b) => b.beneficiary_id === selectedBenId);
+  const selectedBatch = batches.find((b) => b.batch_id === selectedBeneficiaryObj?.batch_id);
+  const standardGrant = selectedBatch?.standard_grant ?? 0;
+  const maxGrant = selectedBatch?.max_grant ?? 0;
+
+  // Start each household at its batch's standard grant
+  useEffect(() => {
+    if (selectedBatch) setAmountStr(String(selectedBatch.standard_grant));
+  }, [selectedBenId, selectedBatch?.batch_id]);
 
   return (
     <div className="space-y-6">
@@ -104,7 +115,7 @@ export default function DistributionsPage() {
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            <strong>Point-of-Payout &amp; Blockchain Seal:</strong> Scan or select the evacuee using their DAFAC ID, release the ₱5,000 cash grant, and generate an immutable on-chain receipt proof.
+            <strong>Point-of-Payout &amp; Blockchain Seal:</strong> Scan or select the evacuee using their DAFAC ID, release the batch's cash grant, and generate an immutable on-chain receipt proof.
           </p>
         </div>
 
@@ -131,7 +142,7 @@ export default function DistributionsPage() {
         <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-start gap-2.5">
           <span className="w-5 h-5 rounded-full bg-emerald-600 text-white font-bold text-[11px] flex items-center justify-center shrink-0">2</span>
           <div>
-            <span className="font-bold text-emerald-950 block">2. Hand Out ₱5,000.00 Ayuda</span>
+            <span className="font-bold text-emerald-950 block">2. Hand Out the Grant</span>
             <span className="text-[11px] text-emerald-700">Siguraduhing buo ang perang matatanggap ng pamilya.</span>
           </div>
         </div>
@@ -261,43 +272,43 @@ export default function DistributionsPage() {
                 type="number"
                 value={amountStr}
                 onChange={(e) => setAmountStr(e.target.value)}
-                placeholder="5000"
+                placeholder={String(standardGrant || "")}
                 className={`w-full px-3 py-2 border rounded-lg text-sm font-bold focus:outline-none focus:ring-2 ${
-                  numericAmount > 10000 || (amountStr !== "" && numericAmount <= 0)
+                  numericAmount > maxGrant || (amountStr !== "" && numericAmount <= 0)
                     ? "border-rose-400 bg-rose-50/50 text-rose-900 focus:ring-rose-500"
-                    : numericAmount !== 5000
+                    : numericAmount !== standardGrant
                     ? "border-amber-400 bg-amber-50/50 text-amber-900 focus:ring-amber-500"
                     : "border-slate-300 text-slate-900 focus:ring-blue-500"
                 }`}
               />
 
               {/* Real-Time Amount Feedback */}
-              {numericAmount === 5000 && (
+              {selectedBatch && numericAmount === standardGrant && (
                 <p className="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1">
-                  ✓ Standard Calamity Relief Grant (₱5,000.00)
+                  ✓ Standard grant for this batch ({formatPeso(standardGrant)})
                 </p>
               )}
 
-              {numericAmount > 0 && numericAmount !== 5000 && numericAmount <= 10000 && (
+              {selectedBatch && numericAmount > 0 && numericAmount !== standardGrant && numericAmount <= maxGrant && (
                 <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-lg text-[11px] text-amber-900 mt-1.5 space-y-0.5 animate-in fade-in">
                   <p className="font-bold flex items-center gap-1">
                     <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                    AI Anomaly Flag: Irregular Grant Amount (₱{numericAmount.toLocaleString()})
+                    AI Anomaly Flag: Irregular Grant Amount ({formatPeso(numericAmount)})
                   </p>
                   <p className="text-amber-800 text-[10px]">
-                    Standard calamity grant is ₱5,000.00. AyudaChain AI Anomaly Engine will automatically record this irregularity on the on-chain audit trail for Ombudsman/COA auditor review.
+                    This batch's standard grant is {formatPeso(standardGrant)}. The payout will be flagged for auditor review.
                   </p>
                 </div>
               )}
 
-              {numericAmount > 10000 && (
+              {selectedBatch && numericAmount > maxGrant && (
                 <div className="p-2.5 bg-rose-50 border border-rose-300 rounded-lg text-[11px] text-rose-900 mt-1.5 space-y-0.5 animate-in fade-in">
                   <p className="font-bold flex items-center gap-1">
                     <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                    Ceiling Limit Exceeded (Max ₱10,000.00)
+                    Above this batch's maximum ({formatPeso(maxGrant)})
                   </p>
                   <p className="text-rose-800 text-[10px]">
-                    Statutory calamity cash grant limit is ₱10,000.00. This disbursement will be rejected by backend governance rules.
+                    Each fictional batch sets its own maximum grant. The backend rejects payouts above it.
                   </p>
                 </div>
               )}
@@ -387,14 +398,14 @@ export default function DistributionsPage() {
             ) : (
               <button
                 type="submit"
-                disabled={step !== "IDLE" && step !== "SUCCESS" || numericAmount > 10000 || numericAmount <= 0 || distributions.some((d) => d.beneficiary_id === selectedBenId)}
+                disabled={step !== "IDLE" && step !== "SUCCESS" || !selectedBatch || numericAmount > maxGrant || numericAmount <= 0 || distributions.some((d) => d.beneficiary_id === selectedBenId)}
                 className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow transition disabled:opacity-50 text-xs flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
               >
                 <Lock className="w-3.5 h-3.5" />
                 {distributions.some((d) => d.beneficiary_id === selectedBenId)
                   ? "Claim Already Completed for this Household"
-                  : numericAmount > 10000
-                  ? "Cannot Disburse: Exceeds ₱10,000 Limit"
+                  : numericAmount > maxGrant
+                  ? `Cannot Disburse: Above ${formatPeso(maxGrant)} Maximum`
                   : "Confirm Aid & Anchor on Blockchain"}
               </button>
             )}
@@ -558,7 +569,7 @@ export default function DistributionsPage() {
                     key={item.id}
                     onClick={() => {
                       setSelectedBenId(item.id);
-                      setAmountStr("5000");
+                      setAmountStr(String(standardGrant || ""));
                       setScannedAlert(`✓ Scanned DAFAC Voucher: ${item.name} (${item.dafac}) — Auto-loaded for disbursement!`);
                       setShowScanner(false);
                     }}

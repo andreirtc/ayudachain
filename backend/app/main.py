@@ -61,9 +61,6 @@ app.mount("/receipts", StaticFiles(directory=RECEIPTS_DIR), name="receipts")
 entity_resolver = EntityResolutionEngine(confidence_threshold=0.78)
 anomaly_detector = DistributionAnomalyDetector(standard_grant_amount=5000.0)
 
-STANDARD_GRANT_CENTAVOS = 500_000  # ₱5,000.00 demo grant
-MAX_GRANT_CENTAVOS = 1_000_000  # ₱10,000.00 demo maximum
-
 @app.on_event("startup")
 def on_startup():
     init_db()
@@ -171,6 +168,10 @@ def get_batch_detail(batch_id: str, db: Session = Depends(get_db)):
 @app.post("/api/funds/releases", response_model=ReliefBatchResponse, status_code=201)
 def release_fund(payload: ReliefBatchCreate, db: Session = Depends(get_db)):
     amount_c = to_centavos(payload.amount)
+    standard_c = to_centavos(payload.standard_grant)
+    max_c = to_centavos(payload.max_grant)
+    if standard_c > max_c:
+        raise HTTPException(status_code=400, detail="The standard grant cannot be larger than the maximum grant.")
     existing = db.query(ReliefBatch).filter(ReliefBatch.batch_id == payload.batch_id).first()
     if existing:
         raise HTTPException(status_code=400, detail="Batch ID already exists")
@@ -192,6 +193,8 @@ def release_fund(payload: ReliefBatchCreate, db: Session = Depends(get_db)):
         recipient_lgu=payload.recipient_lgu,
         purpose=payload.purpose,
         amount_centavos=amount_c,
+        standard_grant_centavos=standard_c,
+        max_grant_centavos=max_c,
         status="ACTIVE",
         blockchain_tx_hash=tx_hash
     )
@@ -462,15 +465,19 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session):
     if existing_dist:
         raise HTTPException(status_code=400, detail="Distribution ID already exists")
 
-    if amount_c > MAX_GRANT_CENTAVOS:
-        raise HTTPException(status_code=400, detail=f"Amount {format_peso(amount_c)} exceeds the demo maximum grant of {format_peso(MAX_GRANT_CENTAVOS)}.")
-
     prior_payout = db.query(Distribution).filter(Distribution.beneficiary_id == payload.beneficiary_id).first()
     if prior_payout:
         raise HTTPException(status_code=400, detail=f"Duplicate disbursement rejected: Beneficiary {payload.beneficiary_id} ({ben.household_name}) has already claimed aid.")
 
     if payload.batch_id != ben.batch_id:
         raise HTTPException(status_code=400, detail=f"Beneficiary {ben.beneficiary_id} is registered in batch {ben.batch_id}, not {payload.batch_id}.")
+
+    batch = db.query(ReliefBatch).filter(ReliefBatch.batch_id == ben.batch_id).first()
+    if amount_c > batch.max_grant_centavos:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Amount {format_peso(amount_c)} is above the {format_peso(batch.max_grant_centavos)} maximum grant for batch {batch.batch_id}."
+        )
 
     allocation = db.query(Allocation).filter(
         Allocation.batch_id == ben.batch_id,
@@ -487,11 +494,11 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session):
             detail=f"Payout of {format_peso(amount_c)} exceeds the {format_peso(remaining_c)} left in {ben.barangay_name}'s allocation {allocation.allocation_id}."
         )
 
-    # Flag non-standard amounts (standard demo grant is ₱5,000)
-    is_anomalous_amount = amount_c != STANDARD_GRANT_CENTAVOS
+    # Flag amounts that differ from this batch's standard grant
+    is_anomalous_amount = amount_c != batch.standard_grant_centavos
     if is_anomalous_amount:
         ben.anomaly_flag = True
-        ben.review_notes = f"AI Anomaly: Non-standard grant amount {format_peso(amount_c)} (expected standard ₱5,000.00). Flagged for COA audit."
+        ben.review_notes = f"AI Anomaly: Non-standard grant amount {format_peso(amount_c)} (batch standard {format_peso(batch.standard_grant_centavos)}). Flagged for auditor review."
 
     # Generate or normalize OCR text
     ocr_content = payload.ocr_raw_text or DEMO_OCR_TEXT
@@ -548,7 +555,7 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session):
         db.add(AuditEvent(
             batch_id=payload.batch_id,
             event_type="AI_ANOMALY_FLAG",
-            description=f"AI Anomaly Engine: Non-standard disbursement of {format_peso(amount_c)} to {payload.beneficiary_id} flagged for COA review (Expected ₱5,000.00)",
+            description=f"AI Anomaly Engine: Non-standard disbursement of {format_peso(amount_c)} to {payload.beneficiary_id} flagged for auditor review (batch standard {format_peso(batch.standard_grant_centavos)})",
             amount_centavos=amount_c,
             entity_id=payload.beneficiary_id
         ))

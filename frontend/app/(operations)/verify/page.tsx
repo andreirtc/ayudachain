@@ -6,7 +6,7 @@ import {
   ShieldCheck, CheckCircle2, AlertTriangle, XCircle, Lock, RefreshCw,
   ExternalLink, FileText, Database, UserCheck, HelpCircle, ChevronDown, ChevronUp, Info
 } from "lucide-react";
-import { verifyBlockchain, VerifyResponse, fetchDistributions, fetchBeneficiaries, Distribution, Beneficiary } from "@/lib/api";
+import { verifyBlockchain, VerifyResponse, fetchDistributions, fetchBeneficiaries, Distribution, Beneficiary, formatPeso } from "@/lib/api";
 import { useChainStatus, chainLabel } from "@/lib/useChainStatus";
 
 function VerifyContent() {
@@ -262,8 +262,8 @@ function VerifyContent() {
                     <strong className="text-emerald-800">{activeBen?.household_name || "Danilo Soriano"}</strong>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Official Grant Amount:</span>
-                    <strong className="text-emerald-800 text-sm font-black">₱5,000.00</strong>
+                    <span className="text-slate-500">Recorded Amount:</span>
+                    <strong className="text-emerald-800 text-sm font-black">{activeDist ? formatPeso(activeDist.amount) : "None selected"}</strong>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Blockchain Witness:</span>

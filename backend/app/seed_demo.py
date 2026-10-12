@@ -54,6 +54,8 @@ def seed_database():
         recipient_lgu=recipient_lgu,
         purpose="Emergency Calamity Cash & Relief Food Pack Assistance",
         amount_centavos=total_fund,
+        standard_grant_centavos=500_000, # ₱5,000.00 (fictional demo policy)
+        max_grant_centavos=1_000_000, # ₱10,000.00 (fictional demo policy)
         status="ACTIVE",
         blockchain_tx_hash=release_tx,
         created_at=now - timedelta(hours=3)

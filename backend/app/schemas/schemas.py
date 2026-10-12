@@ -29,6 +29,8 @@ class ReliefBatchCreate(BaseModel):
     recipient_lgu: str = "Provincial Government of Albay"
     purpose: str = "Emergency Calamity Cash & Relief Assistance"
     amount: Decimal = Field(..., gt=0, max_digits=15, decimal_places=2, example=10000000.0)
+    standard_grant: Decimal = Field(Decimal("5000"), gt=0, max_digits=15, decimal_places=2)
+    max_grant: Decimal = Field(Decimal("10000"), gt=0, max_digits=15, decimal_places=2)
 
 class ReliefBatchResponse(BaseModel):
     id: int
@@ -40,6 +42,10 @@ class ReliefBatchResponse(BaseModel):
     purpose: str
     amount: float
     amount_centavos: int
+    standard_grant: float
+    standard_grant_centavos: int
+    max_grant: float
+    max_grant_centavos: int
     status: str
     blockchain_tx_hash: Optional[str]
     created_at: datetime
