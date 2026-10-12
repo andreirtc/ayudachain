@@ -65,6 +65,7 @@ Amounts: requests send pesos with at most two decimal places (`5000` or `5000.50
     "beneficiary_count": 500
   }
   ```
+  - Rules: the batch must exist (404) and be `ACTIVE`; the barangay must be one of the known demo barangays in `backend/app/barangays.py` with its matching name; the amount must be positive and must not exceed the batch's unallocated funds (400 with the remaining amount). The contract enforces the same total limit.
 
 ---
 
@@ -72,6 +73,7 @@ Amounts: requests send pesos with at most two decimal places (`5000` or `5000.50
 - **Endpoint**: `GET /api/beneficiaries?flagged_only=false`
 - **Endpoint**: `POST /api/beneficiaries`
   - Triggers live AI Entity Resolution against existing records.
+  - The batch must exist (404) and the barangay must be a known demo barangay with its matching name (400).
   - Body:
   ```json
   {

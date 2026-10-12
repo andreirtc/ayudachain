@@ -148,15 +148,64 @@ class TestAyudaChainAPI(unittest.TestCase):
         self.assertEqual(dist["amount_centavos"], 500_000)
         self.assertEqual(dist["amount"], 5000.0)
 
-        res = self.client.post("/api/allocations", json={
-            "allocation_id": "ALLOC-0100",
-            "batch_id": "RELIEF-2026-001",
-            "barangay_id": "BRGY-001",
-            "barangay_name": "San Isidro",
-            "amount": 0.1,
-        })
+        self._release("RELIEF-TEST-001", 1000)
+        res = self._allocate("ALLOC-0100", "RELIEF-TEST-001", 0.1)
         self.assertEqual(res.status_code, 201)
         self.assertEqual(res.json()["amount_centavos"], 10)
+
+    def _release(self, batch_id, amount):
+        res = self.client.post("/api/funds/releases", json={
+            "batch_id": batch_id,
+            "calamity_name": "Test Flood",
+            "amount": amount,
+        })
+        self.assertEqual(res.status_code, 201)
+
+    def _allocate(self, allocation_id, batch_id, amount, barangay_id="BRGY-001", barangay_name="San Isidro"):
+        return self.client.post("/api/allocations", json={
+            "allocation_id": allocation_id,
+            "batch_id": batch_id,
+            "barangay_id": barangay_id,
+            "barangay_name": barangay_name,
+            "amount": amount,
+        })
+
+    def test_allocations_cannot_exceed_released_funds(self):
+        self._release("RELIEF-TEST-002", 1000)
+        self.assertEqual(self._allocate("ALLOC-0200", "RELIEF-TEST-002", 600).status_code, 201)
+
+        res = self._allocate("ALLOC-0201", "RELIEF-TEST-002", 400.01)
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("₱400.00", res.json()["detail"])
+
+        self.assertEqual(self._allocate("ALLOC-0202", "RELIEF-TEST-002", 400).status_code, 201)
+        dashboard_alloc = sum(a["amount_centavos"] for a in self.client.get("/api/batches/RELIEF-TEST-002").json()["allocations"])
+        self.assertEqual(dashboard_alloc, 100_000)
+
+    def test_fully_allocated_seed_batch_rejects_more(self):
+        res = self._allocate("ALLOC-0300", "RELIEF-2026-001", 1)
+        self.assertEqual(res.status_code, 400)
+
+    def test_allocation_requires_known_batch_and_barangay(self):
+        self.assertEqual(self._allocate("ALLOC-0400", "RELIEF-NOPE", 1).status_code, 404)
+
+        self._release("RELIEF-TEST-003", 1000)
+        res = self._allocate("ALLOC-0401", "RELIEF-TEST-003", 1, barangay_id="BRGY-999", barangay_name="Nowhere")
+        self.assertEqual(res.status_code, 400)
+        res = self._allocate("ALLOC-0402", "RELIEF-TEST-003", 1, barangay_id="BRGY-001", barangay_name="Maligaya")
+        self.assertEqual(res.status_code, 400)
+
+    def test_zero_or_negative_amounts_rejected(self):
+        res = self.client.post("/api/funds/releases", json={"batch_id": "RELIEF-TEST-004", "calamity_name": "X", "amount": 0})
+        self.assertEqual(res.status_code, 422)
+        self._release("RELIEF-TEST-005", 1000)
+        self.assertEqual(self._allocate("ALLOC-0500", "RELIEF-TEST-005", -5).status_code, 422)
+
+    def test_register_requires_known_batch_and_barangay(self):
+        base = {"beneficiary_id": "BEN-0500", "household_name": "Test Household", "barangay_id": "BRGY-001", "barangay_name": "San Isidro"}
+        self.assertEqual(self.client.post("/api/beneficiaries", json={**base, "batch_id": "RELIEF-NOPE"}).status_code, 404)
+        res = self.client.post("/api/beneficiaries", json={**base, "batch_id": "RELIEF-2026-001", "barangay_id": "BRGY-999"})
+        self.assertEqual(res.status_code, 400)
 
     def test_fractional_centavo_rejected(self):
         res = self.client.post("/api/distributions/confirm", json={

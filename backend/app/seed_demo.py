@@ -13,6 +13,7 @@ from app.services.hasher import compute_receipt_hash
 from app.services.receipt_generator import save_sample_receipt, DEMO_OCR_TEXT
 from app.services.blockchain import blockchain_service
 from app.money import format_peso
+from app.barangays import DEMO_BARANGAYS
 
 def seed_database():
     init_db()
@@ -60,12 +61,7 @@ def seed_database():
     db.add(batch)
 
     # 2. Barangay Allocations
-    barangays = [
-        ("BRGY-001", "San Isidro", 250_000_000, 500),
-        ("BRGY-002", "Santa Elena", 250_000_000, 500),
-        ("BRGY-003", "San Roque", 250_000_000, 500),
-        ("BRGY-004", "Maligaya", 250_000_000, 500),
-    ]
+    barangays = [(b_id, b_name, 250_000_000, 500) for b_id, b_name in DEMO_BARANGAYS.items()]
 
     for b_idx, (b_id, b_name, b_amt, b_count) in enumerate(barangays):
         alloc_id = f"ALLOC-000{b_idx+1}"
