@@ -4,7 +4,7 @@ Reviewed 2026-10-12 against stack head `5e5c2c41871d08b01100c35b570b17e19bda315b
 
 ## Branch identity
 
-Configured origin is `https://github.com/andreirtc/ayudachain.git`. A fresh `git ls-remote --heads` found no `feat/five-role-map`; `feat/five-role-mvp` points to `56102c46afd4a429ad0a3b47fe57d15e759fd9fe`. Its implementation commit is `151fcf6`, authored by Nanashi, followed by evaluator-decision documentation. No open PR was returned for that head. The user has been asked whether this is the intended branch; that identity remains unconfirmed. Do not equate the two names automatically.
+Configured origin is `https://github.com/andreirtc/ayudachain.git`. A fresh `git ls-remote --heads` found no `feat/five-role-map`; `feat/five-role-mvp` points to `56102c46afd4a429ad0a3b47fe57d15e759fd9fe`. Its implementation commit is `151fcf6`, authored by Nanashi, followed by evaluator-decision documentation. No open PR was returned for that head. The user subsequently confirmed this is the workmate's intended branch; `five-role-map` was a typo.
 
 Fetched only for comparison; no checkout, cherry-pick or merge of that branch was applied. The prior provider session was not controlled. The common ancestor is `6d92882dcbc4496645b4379561f457d1504aed53`, before our stack. The branch adds a parallel MVP across 364 changed files, rather than a small role selector patch.
 
@@ -29,7 +29,7 @@ A read-only three-way `git merge-tree` found conflict markers in `CONTRIBUTING.m
 
 ## Integration approach
 
-1. Confirm branch identity and product direction. The five-role model is a useful design reference, not authorization to replace the supported stack.
+1. Branch identity is confirmed. Settle product direction after isolated runtime validation. The five-role model is a useful design reference, not authorization to replace the supported stack.
 2. Preserve both implementations. If adopting the complete MVP is desired, first run it in an isolated checkout with its own PostgreSQL, evidence files, ports and local-chain deployment. Do not use our database or original chain. Re-run its claimed journeys and fault tests; its validation ledger records chain-dependent gaps and stopped worker/chain, not fresh passing evidence here.
 3. For incremental adoption, bring forward one supported user journey per stacked PR. Start with concise next actions and exact receipt links; retain `/` and current endpoints. Only expose new role tasks once they have connected APIs and documented ownership. Reuse their role map rather than inventing a second five-role model.
 4. Treat PostgreSQL, immutable evidence and the worker as a separate migration decision with a compatibility ADR and data bridge. Acceptance must cover exact money, budget limits, eligibility, retained duplicate aliases, review history, idempotent uncertain retries and all four current verification outcomes before cutover.
