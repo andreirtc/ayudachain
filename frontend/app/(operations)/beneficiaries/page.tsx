@@ -6,20 +6,23 @@ import {
   Sparkles, ArrowRight, ShieldCheck, X, RefreshCw, AlertCircle,
   FileSpreadsheet, UploadCloud
 } from "lucide-react";
-import { fetchBeneficiaries, registerBeneficiary, verifyBeneficiary, fetchBeneficiaryReviews, BeneficiaryReview, ReviewDecision, DemoReviewer, Beneficiary, uploadBeneficiaryCsv, CsvBatchResult, resolveBeneficiaryDuplicate } from "@/lib/api";
+import { fetchBeneficiaries, registerBeneficiary, verifyBeneficiary, fetchBeneficiaryReviews, BeneficiaryReview, ReviewDecision, Beneficiary, uploadBeneficiaryCsv, CsvBatchResult, resolveBeneficiaryDuplicate } from "@/lib/api";
 import { useRole } from "@/lib/roleContext";
 
 export default function BeneficiariesPage() {
-  const { role } = useRole();
+  const { role, account } = useRole();
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [showHistorical, setShowHistorical] = useState(false);
   const [canonicalId, setCanonicalId] = useState("");
   const [filterFlagged, setFilterFlagged] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBen, setSelectedBen] = useState<Beneficiary | null>(null);
   const [reviewReason, setReviewReason] = useState("");
-  const [reviewer, setReviewer] = useState<DemoReviewer>("demo-officer-01");
+  const reviewer = account?.id;
+  const canRegister = role === "DSWD" || role === "BARANGAY";
+  const canInspectHistory = role === "DSWD" || role === "AUDITOR" || role === "BENEFICIARY";
   const [reviews, setReviews] = useState<BeneficiaryReview[]>([]);
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [historyError, setHistoryError] = useState<string | null>(null);
@@ -32,8 +35,10 @@ export default function BeneficiariesPage() {
   // New beneficiary form modal
   const [showAddModal, setShowAddModal] = useState(false);
   const [newName, setNewName] = useState("");
-  const [newBrgy, setNewBrgy] = useState("BRGY-001");
+  const [newBrgy, setNewBrgy] = useState(account?.barangay_id || "BRGY-001");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const registerSubmitting = useRef(false);
+  const [registerError, setRegisterError] = useState<string | null>(null);
 
   // Batch CSV Upload & AI Verification State
   const [showCsvModal, setShowCsvModal] = useState(false);
@@ -43,10 +48,11 @@ export default function BeneficiariesPage() {
   const loadBeneficiaries = async () => {
     try {
       setLoading(true);
+      setLoadError(null);
       const data = await fetchBeneficiaries({ include_historical: showHistorical });
       setBeneficiaries(data);
     } catch (err) {
-      console.error(err);
+      setLoadError(err instanceof Error ? err.message : "Household records could not be loaded.");
     } finally {
       setLoading(false);
     }
@@ -54,7 +60,7 @@ export default function BeneficiariesPage() {
 
   useEffect(() => {
     loadBeneficiaries();
-  }, [showHistorical]);
+  }, [showHistorical, account?.id]);
 
   useEffect(() => {
     setReviewReason("");
@@ -64,7 +70,7 @@ export default function BeneficiariesPage() {
   }, [selectedBen?.beneficiary_id]);
 
   useEffect(() => {
-    if (!selectedBen) return;
+    if (!selectedBen || !canInspectHistory) return;
     let cancelled = false;
     setReviews([]);
     setHistoryError(null);
@@ -74,11 +80,13 @@ export default function BeneficiariesPage() {
       .catch((err) => { if (!cancelled) setHistoryError(err instanceof Error ? err.message : String(err)); })
       .finally(() => { if (!cancelled) setHistoryLoading(false); });
     return () => { cancelled = true; };
-  }, [selectedBen?.beneficiary_id, historyVersion]);
+  }, [selectedBen?.beneficiary_id, historyVersion, canInspectHistory]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newName.trim()) return;
+    if (!newName.trim() || registerSubmitting.current) return;
+    registerSubmitting.current = true;
+    setRegisterError(null);
     setIsSubmitting(true);
     try {
       const brgyMap: Record<string, string> = {
@@ -88,9 +96,9 @@ export default function BeneficiariesPage() {
         "BRGY-004": "Maligaya"
       };
       const created = await registerBeneficiary({
-        beneficiary_id: `BEN-${Date.now().toString().slice(-4)}`,
+        beneficiary_id: "BEN-" + crypto.randomUUID(),
         household_name: newName.trim(),
-        barangay_id: newBrgy,
+        barangay_id: account?.role === "BARANGAY" ? account.barangay_id || newBrgy : newBrgy,
         barangay_name: brgyMap[newBrgy] || "San Isidro",
         batch_id: "RELIEF-2026-001"
       });
@@ -99,8 +107,9 @@ export default function BeneficiariesPage() {
       await loadBeneficiaries();
       setSelectedBen(created); // Open review modal for newly registered
     } catch (err) {
-      alert("Error: " + String(err));
+      setRegisterError(err instanceof Error ? err.message : "Registration failed. Try again.");
     } finally {
+      registerSubmitting.current = false;
       setIsSubmitting(false);
     }
   };
@@ -207,7 +216,7 @@ export default function BeneficiariesPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
+          {role === "DSWD" && <button
             onClick={() => {
               setShowCsvModal(true);
               if (!csvResult) handleAnalyzeSampleCsv();
@@ -215,16 +224,16 @@ export default function BeneficiariesPage() {
             className="flex items-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-xs px-3.5 py-2 rounded-xl shadow-xs transition cursor-pointer"
           >
             <FileSpreadsheet className="w-4 h-4 text-indigo-600" />
-            Bulk CSV AI Analyzer (10 Seeded Evacuees)
-          </button>
+            Analyze a CSV
+          </button>}
 
-          <button
-            onClick={() => setShowAddModal(true)}
+          {canRegister && <button
+            onClick={() => { setRegisterError(null); setShowAddModal(true); }}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-4 py-2 rounded-xl shadow transition cursor-pointer"
           >
             <UserPlus className="w-4 h-4" />
-            Test Register Beneficiary
-          </button>
+            Register a household
+          </button>}
         </div>
       </div>
 
@@ -348,6 +357,7 @@ export default function BeneficiariesPage() {
       </div>
 
       {/* AI Duplicate Inspection Drawer / Modal */}
+      {loadError && <div role="alert" className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 text-sm">{loadError} <button onClick={() => void loadBeneficiaries()} className="underline min-h-11">Retry loading households</button></div>}
       {selectedBen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl border border-slate-200 relative animate-in fade-in zoom-in-95">
@@ -441,19 +451,15 @@ export default function BeneficiariesPage() {
                 <p className="p-3 bg-slate-100 rounded-lg text-slate-700">
                   Retained duplicate of {selectedBen.canonical_beneficiary_id}. Payouts, receipts, and review history are preserved. This record cannot receive a new payout.
                 </p>
-              ) : role === "Public Citizen" ? (
+              ) : role !== "DSWD" ? (
                 <p className="p-3 bg-slate-100 rounded-lg text-slate-600">
-                  Select an officer or auditor demo view to review this household.
+                  Eligibility decisions belong to the DSWD Officer. Your account can inspect the records available to its role.
                 </p>
               ) : (
                 <div className="pt-3 border-t border-slate-200 space-y-3">
                   <div>
-                    <label htmlFor="reviewer" className="block font-semibold text-slate-700 mb-1">Demo reviewer</label>
-                    <select id="reviewer" value={reviewer} disabled={reviewSaving} onChange={(e) => setReviewer(e.target.value as DemoReviewer)} className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-                      <option value="demo-officer-01">Demo barangay officer</option>
-                      <option value="demo-auditor-01">Demo auditor</option>
-                    </select>
-                    <p className="text-slate-500 mt-1">Simulated reviewer identity. Sign-in is not implemented.</p>
+                    <p className="font-semibold">Reviewer: {account?.display_name}</p>
+                    <p className="text-slate-500 mt-1">The signed-in account is recorded with this decision.</p>
                   </div>
                   <div>
                     <label htmlFor="review-reason" className="block font-semibold text-slate-700 mb-1">Reason for decision</label>
@@ -482,7 +488,7 @@ export default function BeneficiariesPage() {
                 </div>
               )}
 
-              <details className="border-t border-slate-200 pt-3">
+              {canInspectHistory && <details className="border-t border-slate-200 pt-3">
                 <summary className="font-semibold text-slate-700 cursor-pointer">Review history ({reviews.length})</summary>
                 {historyLoading && <p className="mt-2 text-slate-500">Loading reviews...</p>}
                 {historyError && <div role="alert" className="mt-2 text-rose-700">{historyError} <button onClick={() => setHistoryVersion((value) => value + 1)} className="underline">Retry</button></div>}
@@ -498,7 +504,7 @@ export default function BeneficiariesPage() {
                     </li>
                   ))}
                 </ol>
-              </details>
+              </details>}
             </div>
           </div>
         </div>
@@ -509,37 +515,40 @@ export default function BeneficiariesPage() {
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 relative animate-in fade-in">
             <button
+              disabled={isSubmitting}
+              aria-label="Close registration"
               onClick={() => setShowAddModal(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
             >
               <X className="w-5 h-5" />
             </button>
 
-            <h3 className="font-bold text-base text-slate-900 mb-1">Register Beneficiary (Live Test)</h3>
+            <h3 className="font-bold text-base text-slate-900 mb-1">Register a household</h3>
             <p className="text-xs text-slate-500 mb-4">
-              Enter a name to test the live AI Entity Resolution duplicate engine.
+              Use a fictional household. Registration checks for possible duplicate records; DSWD handles eligibility decisions.
             </p>
 
             <form onSubmit={handleRegister} className="space-y-4 text-xs">
+              {registerError && <p role="alert" className="text-rose-700">{registerError}</p>}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Household Head Full Name</label>
+                <label htmlFor="new-household-name" className="block font-semibold text-slate-700 mb-1">Household Head Full Name</label>
                 <input
+                  id="new-household-name"
                   type="text"
+                  disabled={isSubmitting}
                   placeholder="e.g. Juan D. Cruz or Juan Dela Cruz"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
-                <p className="text-[11px] text-slate-400 mt-1">
-                  Tip: Type &quot;Juan D. Cruz&quot; to trigger the seeded 94% duplicate match!
-                </p>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Barangay Locality</label>
+                <label htmlFor="new-household-barangay" className="block font-semibold text-slate-700 mb-1">Barangay Locality</label>
                 <select
-                  value={newBrgy}
+                  id="new-household-barangay"
+                  disabled={role === "BARANGAY" || isSubmitting} value={newBrgy}
                   onChange={(e) => setNewBrgy(e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
@@ -553,6 +562,7 @@ export default function BeneficiariesPage() {
               <div className="pt-2 flex justify-end gap-2">
                 <button
                   type="button"
+                  disabled={isSubmitting}
                   onClick={() => setShowAddModal(false)}
                   className="px-3 py-2 text-slate-600 font-semibold"
                 >
@@ -563,7 +573,7 @@ export default function BeneficiariesPage() {
                   disabled={isSubmitting}
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg shadow disabled:opacity-50"
                 >
-                  {isSubmitting ? "Running AI..." : "Register & Run AI Check"}
+                  {isSubmitting ? "Registering..." : "Register household"}
                 </button>
               </div>
             </form>

@@ -91,7 +91,7 @@ class BeneficiaryCreate(BaseModel):
 
 class BeneficiaryReviewInput(BaseModel):
     review_notes: str = Field(..., min_length=1, max_length=2000)
-    reviewed_by: Literal["demo-officer-01", "demo-auditor-01"]
+    reviewed_by: Optional[str] = Field(default=None, min_length=1, max_length=64)
 
     @field_validator("review_notes", mode="before")
     @classmethod
@@ -188,7 +188,7 @@ class BlockchainVerifyRequest(BaseModel):
 
 class BlockchainVerifyResponse(BaseModel):
     record_id: str
-    beneficiary_id: str
+    beneficiary_id: Optional[str] = None
     receipt_hash_local: str
     receipt_hash_onchain: Optional[str]
     verification_status: Literal["UNAVAILABLE", "UNANCHORED", "MISMATCH", "VERIFIED"]

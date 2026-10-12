@@ -4,7 +4,8 @@ import React, { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AlertTriangle, CheckCircle2, RefreshCw, ShieldCheck } from "lucide-react";
-import { verifyBlockchain, VerifyResponse, fetchDistributions, fetchBeneficiaries, Distribution, Beneficiary, formatPeso } from "@/lib/api";
+import { verifyBlockchain, VerifyResponse, fetchDistributions, fetchBeneficiaries, Distribution, Beneficiary, formatPeso, fetchPublicReceipts, PublicReceiptReference } from "@/lib/api";
+import { useRole } from "@/lib/roleContext";
 import { receiptVerificationHref, selectReceiptId } from "@/lib/receiptNavigation";
 
 const outcomes = {
@@ -15,11 +16,13 @@ const outcomes = {
 };
 
 function VerifyContent() {
+  const { account, loading: sessionLoading } = useRole();
+  const privateContext = !!account && account.role !== "BARANGAY";
   const searchParams = useSearchParams();
   const router = useRouter();
   const requestedId = searchParams.get("distribution_id");
   const [loadedReference, setLoadedReference] = useState<string | null | undefined>(undefined);
-  const [distributions, setDistributions] = useState<Distribution[]>([]);
+  const [distributions, setDistributions] = useState<(PublicReceiptReference & Partial<Distribution>)[]>([]);
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
   const [selectedId, setSelectedId] = useState("");
   const [result, setResult] = useState<VerifyResponse | null>(null);
@@ -31,6 +34,7 @@ function VerifyContent() {
   const requestVersion = useRef(0);
 
   useEffect(() => {
+    if (sessionLoading) return;
     let cancelled = false;
     setLoadingRecords(true);
     setLoadedReference(undefined);
@@ -38,7 +42,7 @@ function VerifyContent() {
     setSelectedId("");
     setResult(null);
     setChecking(false);
-    Promise.all([fetchDistributions(), fetchBeneficiaries({ include_historical: true })])
+    Promise.all([privateContext ? fetchDistributions() : fetchPublicReceipts(), privateContext ? fetchBeneficiaries({ include_historical: true }) : Promise.resolve([])])
       .then(([records, households]) => {
         if (cancelled) return;
         setDistributions(records);
@@ -49,7 +53,7 @@ function VerifyContent() {
       .catch((err) => { if (!cancelled) setError(err instanceof Error ? err.message : String(err)); })
       .finally(() => { if (!cancelled) setLoadingRecords(false); });
     return () => { cancelled = true; };
-  }, [requestedId, reload]);
+  }, [requestedId, reload, account?.id, sessionLoading]);
 
   useEffect(() => {
     if (!selectedId) return;
@@ -91,7 +95,7 @@ function VerifyContent() {
               <label htmlFor="receipt-record" className="block text-sm font-semibold text-slate-700 mb-1">Receipt</label>
               <select id="receipt-record" value={recordsReady ? selectedId : ""} disabled={!recordsReady || distributions.length === 0} onChange={(event) => { setResult(null); setSelectedId(""); router.replace(receiptVerificationHref(event.target.value), { scroll: false }); }} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
                 {!selectedId && <option value="" disabled>Choose a recorded receipt</option>}
-                {distributions.map((record) => <option key={record.distribution_id} value={record.distribution_id}>{record.distribution_id}: {record.beneficiary_id} ({formatPeso(record.amount)})</option>)}
+                {distributions.map((record) => <option key={record.distribution_id} value={record.distribution_id}>{record.distribution_id}{record.amount !== undefined ? `: ${record.beneficiary_id} (${formatPeso(record.amount)})` : ""}</option>)}
               </select>
             </div>
             <button onClick={() => setRecheck((value) => value + 1)} disabled={checking || !selectedId || !recordsReady} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50">
@@ -101,7 +105,7 @@ function VerifyContent() {
         )}
         {error && <div role="alert" className="text-sm text-rose-700">{error} <button onClick={() => { setReload((value) => value + 1); setRecheck((value) => value + 1); }} className="underline">Retry</button></div>}
         {checking && recordsReady && <p role="status" className="text-sm text-slate-600">Reading the blockchain receipt...</p>}
-        {activeDist && <div className="p-3 bg-slate-50 rounded-lg text-sm text-slate-700 space-y-1">
+        {activeDist && activeDist.amount !== undefined && <div className="p-3 bg-slate-50 rounded-lg text-sm text-slate-700 space-y-1">
           <p className="text-xs font-semibold uppercase text-slate-500">Recorded locally</p>
           <p>{activeBen?.household_name || activeDist.beneficiary_id}</p>
           <p>{formatPeso(activeDist.amount)} · {activeDist.batch_id}</p>

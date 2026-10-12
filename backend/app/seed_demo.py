@@ -6,6 +6,7 @@ Includes intentional duplicates and anomalies for pitch demonstration.
 """
 
 import os
+from app import config
 from datetime import datetime, timedelta
 from app.database import SessionLocal, init_db, engine
 from app.models.entities import Base, ReliefBatch, Allocation, Beneficiary, Distribution, AuditEvent
@@ -24,7 +25,7 @@ def seed_database():
     Base.metadata.create_all(bind=engine)
 
     # Save sample receipt SVG asset
-    receipts_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "receipts")
+    receipts_dir = config.RECEIPTS_DIR
     os.makedirs(receipts_dir, exist_ok=True)
     save_sample_receipt(receipts_dir)
 

@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import DemoPitchBar from "@/components/DemoPitchBar";
 import RoleIndicatorBanner from "@/components/RoleIndicatorBanner";
 import { RoleProvider } from "@/lib/roleContext";
+import SessionGate from "@/components/SessionGate";
 
 export default function OperationsLayout({
   children,
@@ -15,7 +16,7 @@ export default function OperationsLayout({
           <DemoPitchBar />
           <RoleIndicatorBanner />
           <main id="main-content" tabIndex={-1} className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            {children}
+            <SessionGate>{children}</SessionGate>
           </main>
         </RoleProvider>
         <footer className="bg-slate-900 border-t border-slate-800 text-slate-400 py-8 px-4 sm:px-6 lg:px-8 text-xs">

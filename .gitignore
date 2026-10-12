@@ -107,3 +107,7 @@ Thumbs.db
 # ==========================================
 *.log
 /tmp/ayudachain*
+backend/.demo-accounts.json
+backend/.demo-login.json
+frontend/test-results/
+frontend/playwright-report/

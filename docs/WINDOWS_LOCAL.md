@@ -23,17 +23,15 @@ cd ..
 
 ## Configuration
 
-The defaults below work for the local chain, so no configuration is needed. To override them, copy `backend/.env.example` to `backend/.env` and `frontend/.env.example` to `frontend/.env.local`, or set variables in the window that runs the service. Variables set in the window win over the files. The backend reads all of its settings in `backend/app/config.py`.
+Public functionality has local defaults. Private workflows require provisioned synthetic accounts; see [DEMO_SESSIONS.md](DEMO_SESSIONS.md). Existing sessions may use isolated preview ports/database overrides. Inspect the handoff and running processes before starting services; leave another provider's session and original data/chain intact. To override them, copy `backend/.env.example` to `backend/.env` and `frontend/.env.example` to `frontend/.env.local`, or set variables in the window that runs the service. Variables set in the window win over the files. The backend reads all of its settings in `backend/app/config.py`.
 
-| Variable | Used by | Default |
-| --- | --- | --- |
-| `POLYGON_RPC_URL` | backend | `http://127.0.0.1:8545` |
-| `POLYGON_PRIVATE_KEY` | backend | Hardhat test account #0 (public, local only) |
-| `CONTRACT_ADDRESS` | backend | Address in `backend/app/blockchain/AyudaChainRegistry.json`, written by the deploy script |
-| `CHAIN_ID` | backend | Chain ID in the same file (31337 locally) |
-| `DATABASE_URL` | backend | `backend/ayudachain.db` |
-| `CORS_ORIGINS` | backend | All origins |
-| `NEXT_PUBLIC_API_URL` | frontend | `http://<page host>:8000` |
+- POLYGON_RPC_URL defaults to http://127.0.0.1:8545; POLYGON_PRIVATE_KEY defaults to public Hardhat test account #0 for local use only.
+- CONTRACT_ADDRESS and CHAIN_ID default to the retained deployment file in backend/app/blockchain/AyudaChainRegistry.json.
+- DATABASE_URL defaults to backend/ayudachain.db. When preserving an older database, choose a new isolated copy/path instead.
+- RECEIPTS_DIR defaults to backend/app/data/receipts; use a separate directory for an isolated test/demo.
+- CORS_ORIGINS defaults to exact localhost/127.0.0.1 frontend origins on 3000/3001. A wildcard does not authorize login.
+- DEMO_ACCOUNTS_FILE defaults to backend/.demo-accounts.json; SESSION_COOKIE_SECURE defaults false only for loopback.
+- NEXT_PUBLIC_API_URL defaults to http://<page host>:8000.
 
 Example: `$env:NEXT_PUBLIC_API_URL = "http://127.0.0.1:8000"`. Next.js reads `NEXT_PUBLIC_*` values at build time, so rebuild the frontend after changing it.
 
@@ -97,25 +95,19 @@ Stop-Process -Id <OwningProcess>
 
 Check the process name with `Get-Process -Id <OwningProcess>` before stopping it.
 
-## Reset
+## Reset an isolated demo
 
-The Hardhat chain keeps everything in memory, so stopping it erases all anchored records. The SQLite database keeps its records, including transaction hashes that no longer exist on the new chain. Always reset both together.
+A stopped Hardhat chain loses in-memory anchors while SQLite retains records. This can make verification unavailable or unanchored; stored transaction references are not proof of current evidence. The API does not generate placeholder hashes or successful verification fallbacks.
 
-1. Stop the frontend, backend, and chain.
-2. Delete the database: `Remove-Item backend/ayudachain.db`
-3. Start the chain, deploy the contract, then start the backend and frontend as above.
+POST /api/demo/reset is disabled with 410. Do not delete the original database or reset another provider's chain to obtain a working preview. For a deliberately fresh synthetic demo, stop only its owned services, select a new DATABASE_URL and RECEIPTS_DIR, and use a separate local chain/contract configuration. Keep the originals and previous deployment artifacts. The seed procedure creates data only in the selected empty database.
 
-The dashboard's demo reset button (`POST /api/demo/reset`) only reseeds the database. It does not reset the chain, which already holds the demo records, so the chain rejects the new copies and the database stores placeholder transaction hashes that do not exist on the chain. Use the full reset above when you need the two to match.
-
-When a pull request changes the smart contract, do the full reset so the new contract is deployed.
-
-If the backend stops at startup with "The database uses the old peso amount format", your `ayudachain.db` was created before amounts moved to centavos. Do the full reset above.
+If an older database uses the former peso format, preserve it and use a compatible isolated copy/new database. Contract changes need deliberate compatibility checks; anchor reconciliation is unfinished.
 
 ## Tests
 
 ```powershell
 npm --prefix contracts test
-cd backend; .venv\Scripts\python test_backend.py; .venv\Scripts\python test_api.py; cd ..
+cd backend; .venv\Scripts\python test_backend.py; .venv\Scripts\python test_api.py; .venv\Scripts\python test_auth.py; cd ..
 cd frontend; npx tsc --noEmit; cd ..
 ```
 
@@ -123,5 +115,5 @@ Run the contract tests from the repository as shown (or from `contracts/`). Runn
 
 ## Known gaps
 
-- If the chain is not running when the backend creates or records data, the backend currently stores a generated placeholder hash instead of failing. Section 4 of [TODO.md](TODO.md) tracks removing this.
+- Failed anchoring records no fabricated transaction hash. Explicit anchor jobs, safe reconciliation and synchronized recovery remain section 4 of [TODO.md](TODO.md).
 - There is no single Windows start script yet.

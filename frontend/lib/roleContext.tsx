@@ -1,41 +1,23 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { DemoAccount, fetchSession, clearSession, signOut } from "./api";
 
-export type UserRole = "Public Citizen" | "Barangay Officer" | "Auditor / COA";
+export type UserRole = "PUBLIC" | DemoAccount["role"];
+const RoleContext = createContext<{ role: UserRole; account: DemoAccount | null; loading: boolean; error: string | null; refresh: () => Promise<void>; logout: () => Promise<void> }>({ role: "PUBLIC", account: null, loading: true, error: null, refresh: async () => {}, logout: async () => {} });
 
-interface RoleContextType {
-  role: UserRole;
-  setRole: (role: UserRole) => void;
-}
-
-const RoleContext = createContext<RoleContextType>({
-  role: "Public Citizen",
-  setRole: () => {},
-});
-
-export function RoleProvider({ children }: { children: React.ReactNode }) {
-  const [role, setRoleState] = useState<UserRole>("Public Citizen");
-
+export function RoleProvider({ children }: { children: ReactNode }) {
+  const [account, setAccount] = useState<DemoAccount | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  async function refresh() { setLoading(true); setError(null); try { setAccount(await fetchSession()); } catch (e) { setAccount(null); clearSession(); setError(e instanceof Error ? e.message : "Session unavailable"); } finally { setLoading(false); } }
+  async function logout() { await signOut(); setAccount(null); }
   useEffect(() => {
-    const saved = localStorage.getItem("ayudachain_role") as UserRole;
-    if (saved && ["Public Citizen", "Barangay Officer", "Auditor / COA"].includes(saved)) {
-      setRoleState(saved);
-    }
+    void refresh();
+    const expire = () => { setAccount(null); clearSession(); };
+    window.addEventListener("ayudachain-session-expired", expire);
+    return () => window.removeEventListener("ayudachain-session-expired", expire);
   }, []);
-
-  const setRole = (newRole: UserRole) => {
-    setRoleState(newRole);
-    localStorage.setItem("ayudachain_role", newRole);
-  };
-
-  return (
-    <RoleContext.Provider value={{ role, setRole }}>
-      {children}
-    </RoleContext.Provider>
-  );
+  return <RoleContext.Provider value={{ role: account?.role || "PUBLIC", account, loading, error, refresh, logout }}>{children}</RoleContext.Provider>;
 }
-
-export function useRole() {
-  return useContext(RoleContext);
-}
+export function useRole() { return useContext(RoleContext); }

@@ -123,7 +123,7 @@ export interface AuditEvent {
 }
 
 export async function fetchDashboard(): Promise<DashboardStats> {
-  const res = await fetch(`${getApiBase()}/api/dashboard`, { cache: 'no-store' });
+  const res = await authenticatedFetch(`${getApiBase()}/api/dashboard`, { cache: 'no-store' });
   if (!res.ok) throw new Error("Failed to fetch dashboard");
   return res.json();
 }
@@ -143,7 +143,7 @@ async function errorFrom(res: Response, fallback: string): Promise<Error> {
 }
 
 export async function fetchBatches(): Promise<ReliefBatch[]> {
-  const res = await fetch(`${getApiBase()}/api/batches`, { cache: 'no-store' });
+  const res = await authenticatedFetch(`${getApiBase()}/api/batches`, { cache: 'no-store' });
   if (!res.ok) throw new Error("Failed to fetch batches");
   return res.json();
 }
@@ -155,7 +155,7 @@ export async function fetchBatchDetail(batchId: string): Promise<{
   distributed_amount: number;
   timeline: AuditEvent[];
 }> {
-  const res = await fetch(`${getApiBase()}/api/batches/${batchId}`, { cache: 'no-store' });
+  const res = await authenticatedFetch(`${getApiBase()}/api/batches/${batchId}`, { cache: 'no-store' });
   if (!res.ok) throw new Error("Failed to fetch batch detail");
   return res.json();
 }
@@ -165,7 +165,7 @@ export async function fetchBeneficiaries(params?: { batch_id?: string; flagged_o
   if (params?.batch_id) query.set("batch_id", params.batch_id);
   if (params?.flagged_only) query.set("flagged_only", "true");
   if (params?.include_historical) query.set("include_historical", "true");
-  const res = await fetch(`${getApiBase()}/api/beneficiaries?${query.toString()}`, { cache: 'no-store' });
+  const res = await authenticatedFetch(`${getApiBase()}/api/beneficiaries?${query.toString()}`, { cache: 'no-store' });
   if (!res.ok) throw new Error("Failed to fetch beneficiaries");
   return res.json();
 }
@@ -177,7 +177,7 @@ export async function registerBeneficiary(payload: {
   barangay_name: string;
   batch_id: string;
 }): Promise<Beneficiary> {
-  const res = await fetch(`${getApiBase()}/api/beneficiaries`, {
+  const res = await authenticatedFetch(`${getApiBase()}/api/beneficiaries`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
@@ -187,7 +187,7 @@ export async function registerBeneficiary(payload: {
 }
 
 export type ReviewDecision = "VERIFIED" | "REJECTED" | "FLAGGED_FOR_REVIEW";
-export type DemoReviewer = "demo-officer-01" | "demo-auditor-01";
+export type DemoReviewer = string;
 
 export interface BeneficiaryReview {
   review_id: string;
@@ -209,8 +209,8 @@ export interface BeneficiaryReview {
   duplicate_confidence: number;
 }
 
-export async function verifyBeneficiary(beneficiaryId: string, status: ReviewDecision, notes: string, reviewedBy: DemoReviewer): Promise<Beneficiary> {
-  const res = await fetch(getApiBase() + "/api/beneficiaries/" + beneficiaryId + "/verify", {
+export async function verifyBeneficiary(beneficiaryId: string, status: ReviewDecision, notes: string, reviewedBy?: DemoReviewer): Promise<Beneficiary> {
+  const res = await authenticatedFetch(getApiBase() + "/api/beneficiaries/" + beneficiaryId + "/verify", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status, review_notes: notes, reviewed_by: reviewedBy })
@@ -220,14 +220,14 @@ export async function verifyBeneficiary(beneficiaryId: string, status: ReviewDec
 }
 
 export async function fetchBeneficiaryReviews(beneficiaryId: string): Promise<BeneficiaryReview[]> {
-  const res = await fetch(getApiBase() + "/api/beneficiaries/" + beneficiaryId + "/reviews", { cache: "no-store" });
+  const res = await authenticatedFetch(getApiBase() + "/api/beneficiaries/" + beneficiaryId + "/reviews", { cache: "no-store" });
   if (!res.ok) throw await errorFrom(res, "Failed to load review history");
   return res.json();
 }
 
 export async function fetchDistributions(batchId?: string): Promise<Distribution[]> {
   const url = batchId ? `${getApiBase()}/api/distributions?batch_id=${batchId}` : `${getApiBase()}/api/distributions`;
-  const res = await fetch(url, { cache: 'no-store' });
+  const res = await authenticatedFetch(url, { cache: 'no-store' });
   if (!res.ok) throw new Error("Failed to fetch distributions");
   return res.json();
 }
@@ -242,7 +242,7 @@ export interface DistributionConfirmPayload {
 }
 
 export async function confirmDistribution(payload: DistributionConfirmPayload, idempotencyKey: string): Promise<Distribution> {
-  const res = await fetch(`${getApiBase()}/api/distributions/confirm`, {
+  const res = await authenticatedFetch(`${getApiBase()}/api/distributions/confirm`, {
     method: "POST",
     headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
     body: JSON.stringify(payload)
@@ -252,7 +252,7 @@ export async function confirmDistribution(payload: DistributionConfirmPayload, i
 }
 
 export async function verifyBlockchain(distributionId?: string, receiptHash?: string): Promise<VerifyResponse> {
-  const res = await fetch(`${getApiBase()}/api/blockchain/verify`, {
+  const res = await authenticatedFetch(`${getApiBase()}/api/blockchain/verify`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ distribution_id: distributionId, receipt_hash: receiptHash })
@@ -262,13 +262,13 @@ export async function verifyBlockchain(distributionId?: string, receiptHash?: st
 }
 
 export async function fetchAuditTrail(batchId: string): Promise<AuditEvent[]> {
-  const res = await fetch(`${getApiBase()}/api/audit-trail/${batchId}`, { cache: 'no-store' });
+  const res = await authenticatedFetch(`${getApiBase()}/api/audit-trail/${batchId}`, { cache: 'no-store' });
   if (!res.ok) throw new Error("Failed to fetch audit trail");
   return res.json();
 }
 
 export async function resetDemoData(): Promise<{ success: boolean; message: string }> {
-  const res = await fetch(`${getApiBase()}/api/demo/reset`, {
+  const res = await authenticatedFetch(`${getApiBase()}/api/demo/reset`, {
     method: "POST"
   });
   if (!res.ok) throw new Error("Failed to reset demo data");
@@ -306,7 +306,7 @@ export interface CsvBatchResult {
 }
 
 export async function uploadBeneficiaryCsv(csvContent?: string): Promise<CsvBatchResult> {
-  const res = await fetch(`${getApiBase()}/api/beneficiaries/upload-csv`, {
+  const res = await authenticatedFetch(`${getApiBase()}/api/beneficiaries/upload-csv`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ csv_content: csvContent || "" })
@@ -315,8 +315,8 @@ export async function uploadBeneficiaryCsv(csvContent?: string): Promise<CsvBatc
   return res.json();
 }
 
-export async function resolveBeneficiaryDuplicate(beneficiaryId: string, canonicalId: string, notes: string, reviewedBy: DemoReviewer): Promise<Beneficiary> {
-  const res = await fetch(getApiBase() + "/api/beneficiaries/" + beneficiaryId + "/resolve-duplicate", {
+export async function resolveBeneficiaryDuplicate(beneficiaryId: string, canonicalId: string, notes: string, reviewedBy?: DemoReviewer): Promise<Beneficiary> {
+  const res = await authenticatedFetch(getApiBase() + "/api/beneficiaries/" + beneficiaryId + "/resolve-duplicate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ canonical_beneficiary_id: canonicalId, review_notes: notes, reviewed_by: reviewedBy })
@@ -338,8 +338,53 @@ export interface ChainStatus {
 }
 
 export async function fetchChainStatus(): Promise<ChainStatus> {
-  const res = await fetch(`${getApiBase()}/api/health`, { cache: 'no-store' });
+  const res = await authenticatedFetch(`${getApiBase()}/api/health`, { cache: 'no-store' });
   if (!res.ok) throw new Error("Failed to fetch backend health");
   const data = await res.json();
   return data.blockchain;
+}
+
+
+export type AccountRole = "DSWD" | "BARANGAY" | "DISBURSING" | "BENEFICIARY" | "AUDITOR";
+export interface DemoAccount { id: string; role: AccountRole; display_name: string; barangay_id: string | null; beneficiary_id: string | null; }
+interface SessionResult { account: DemoAccount; csrf_token: string; synthetic: boolean; }
+let csrfToken = "";
+export function clearSession(): void { csrfToken = ""; }
+
+export async function authenticatedFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  const headers = new Headers(options.headers);
+  headers.set("X-AyudaChain-Client", "web");
+  if (csrfToken) headers.set("X-CSRF-Token", csrfToken);
+  const result = await fetch(url, { ...options, headers, credentials: "include" });
+  if (result.status === 401 && !url.endsWith("/api/auth/login") && typeof window !== "undefined") {
+    clearSession();
+    window.dispatchEvent(new Event("ayudachain-session-expired"));
+  }
+  return result;
+}
+
+export async function fetchSession(): Promise<DemoAccount | null> {
+  const response = await authenticatedFetch(getApiBase() + "/api/auth/session", { cache: "no-store" });
+  if (response.status === 401) return null;
+  if (!response.ok) throw await errorFrom(response, "Sign-in service unavailable");
+  const session: SessionResult = await response.json(); csrfToken = session.csrf_token; return session.account;
+}
+
+export async function signIn(username: string, password: string): Promise<DemoAccount> {
+  const response = await authenticatedFetch(getApiBase() + "/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password }) });
+  if (!response.ok) throw await errorFrom(response, "Sign-in failed");
+  const session: SessionResult = await response.json(); csrfToken = session.csrf_token; return session.account;
+}
+
+export async function signOut(): Promise<void> {
+  const response = await authenticatedFetch(getApiBase() + "/api/auth/logout", { method: "POST" });
+  if (!response.ok && response.status !== 401) throw await errorFrom(response, "Sign-out failed. Try again.");
+  clearSession();
+}
+
+export interface PublicReceiptReference { distribution_id: string; batch_id: string; }
+export async function fetchPublicReceipts(): Promise<PublicReceiptReference[]> {
+  const response = await authenticatedFetch(getApiBase() + "/api/public/receipts", { cache: "no-store" });
+  if (!response.ok) throw await errorFrom(response, "Failed to load receipt references");
+  return response.json();
 }

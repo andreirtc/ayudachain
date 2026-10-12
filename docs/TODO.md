@@ -40,8 +40,8 @@ The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were 
 
 ## 5. Connected data and permissions
 - [ ] Connect CSV validation -> preview -> duplicate review -> explicit import -> beneficiary registry; detect matches against existing records and provide row errors.
-- [ ] Enforce permissions on backend endpoints using synthetic demo accounts; prevent browser role selection alone authorizing privileged writes.
-- [ ] Make public responses appropriately limited; keep detailed household/contact records in staff views even with synthetic fixtures.
+- [x] Enforce permissions on backend endpoints using synthetic demo accounts; prevent browser role selection alone authorizing privileged writes. Password-authenticated sessions, five server roles, scoped records, DSWD review attribution and read-only Auditor implemented. See [DEMO_SESSIONS.md](DEMO_SESSIONS.md). Staff assignment, recusal, account administration and production identity remain follow-ups.
+- [x] Make public responses appropriately limited; keep detailed household/contact records in permitted private views even with synthetic fixtures. Public funding activity omits household narratives; receipt references/hash verification omit household context. Scoped accounts cannot access the shared historical sample template. Existing hashes/IDs remain compatible; this is not a privacy-preserving commitment protocol.
 - [ ] Add explicit simulated recipient acknowledgement and payout lifecycle; communicate that receipt integrity cannot prove physical cash delivery.
 
 ## 6. Frontend workflow and features
@@ -54,6 +54,7 @@ The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were 
 - [ ] Implement persistent offline queue/cached required data, reconnect sync, retries, and conflict handling; clearly distinguish queued payouts from confirmed anchors.
 - [ ] Make registration, review, payout, and citizen verification a connected understandable journey; preserve useful existing styling.
   - [x] Connect a recorded payout to its exact receipt check; reject unknown receipt links without substituting another household's receipt. See [RECEIPT_HANDOFF.md](RECEIPT_HANDOFF.md). The wider journey and browser QA remain open.
+  - [x] Add connected sign-in and role-relevant registration/review/payout/own-household/Auditor journeys, validated in real headless desktop and phone browsers. See [DEMO_SESSIONS.md](DEMO_SESSIONS.md). Complete claim/session/recipient workflows remain open.
 - [ ] Test mobile layouts, readable text, touch targets, keyboard/focus accessibility, loading/empty/error states, and prevention of accidental repeat submissions.
 
 ## 7. Verification and deployment

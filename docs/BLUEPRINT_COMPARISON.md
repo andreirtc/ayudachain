@@ -1,5 +1,7 @@
 # Blueprint, PR stack and five-role MVP decisions
 
+Follow-up: [DEMO_SESSIONS.md](DEMO_SESSIONS.md) implements authenticated five-role permissions, limited public responses, disabled HTTP reset and actual headless desktop/phone checks. The comparisons and validation below describe the earlier PR #17 boundary.
+
 Reviewed 2026-10-12. Source: [shared AyudaChain blueprint](https://chatgpt.com/s/t_6accc978bd848191abbdf8a1d3110140), version 1.0, sections 1–20. The public page's full blueprint text was retrieved and read; its downloadable CSV is a separate sandbox attachment and was not obtained. Compared with stack tip `7db0bb4` (PR #16) and confirmed workmate branch `feat/five-role-mvp` at `56102c4`. See [source compatibility review](ROLE_BRANCH_REVIEW.md).
 
 ## Conclusion
