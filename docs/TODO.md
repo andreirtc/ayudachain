@@ -9,7 +9,7 @@ Status: unchecked items are planned, not implemented. Work through one numbered 
 ## 0. Runnable baseline
 - [x] Install dependencies and run local blockchain, backend, and frontend; verify dashboard and all routes via HTTP. Browser visual/interactivity review remains pending.
 - [ ] Document Windows startup and shutdown, environment setup, and database/blockchain reset together.
-- [ ] Run existing tests and separate TypeScript checking (build currently ignores type errors); record baseline failures.
+- [x] Run existing tests and separate TypeScript checking (build currently ignores type errors); record baseline failures. Contract tests: 9 passing. Backend tests: 8 passing. Separate frontend TypeScript check passes. See [landing-page validation](PUBLIC_LANDING.md).
 
 ## 1. Select and consolidate the backend
 - [ ] Choose one supported API implementation: server.py versus FastAPI app/main.py; reconcile DAFAC/schema/endpoint differences and remove ambiguity in docs.
@@ -66,7 +66,7 @@ Recorded 2026-10-12. These requirements guide all frontend work in section 6. Pr
 - [ ] Show only a few meaningful elements per screen or viewport. Give each task screen one clear purpose and primary action; use whitespace and hierarchy to reduce fatigue. Keep related inputs together when useful rather than enforcing an arbitrary element count or adding needless clicks.
 - [ ] Use progressive disclosure for secondary details, historical records, receipt hashes, contract addresses, and advanced settings. Important errors and transaction states must remain visible.
 - [ ] Write natural, concise UI copy. Remove em dashes from authored product text, formulaic AI-style phrasing, exaggerated claims, and unnecessary decorative emoji. Use direct action labels and familiar terms. This punctuation preference comes from the user, not a claim that punctuation proves AI authorship.
-- [ ] Add a proper public landing page distinct from the operational dashboard. Explain what AyudaChain does, who it helps, and the problem it addresses in simple language, without requiring blockchain knowledge.
+- [x] Add a proper public landing page distinct from the operational dashboard. Explain what AyudaChain does, who it helps, and the problem it addresses in simple language, without requiring blockchain knowledge.
 - [ ] Give the landing page a short outcome-focused headline, one brief explanation, one primary entry action, and a compact visual journey from fund release to household receipt. Show an understandable example of the benefit and a clear synthetic-demo label; avoid a wall of feature cards or technical badges.
 - [ ] Make the project story understandable through actual interactions: follow a fictional household, review a possible duplicate, record its payout, and see whether its receipt remains unchanged. Keep the story truthful about what the system proves and what is simulated.
 - [ ] Separate citizen, field-worker, and auditor tasks. Offer understandable navigation and useful defaults; show each role relevant actions and information.
@@ -87,4 +87,8 @@ These references inform implementation; the specific landing-page structure and 
 - [GOV.UK: Government Design Principles](https://www.gov.uk/guidance/government-design-principles) provides guidance on starting with user needs, making services understandable, and iterating.
 
 ## Current preview session
-Started 2026-10-12. Node 24 / Python 3.13. Frontend: http://127.0.0.1:3000. Backend: http://127.0.0.1:8000. Local blockchain: http://127.0.0.1:8545 (chain 31337). Contract deployed locally; SQLite seeded with 24 fictional beneficiaries and five sample payout records. Dashboard, beneficiaries, distributions, verify, and batch routes return HTTP 200; backend health and receipt verification respond successfully against Local EVM. No in-app browser is available for visual/interactivity inspection. Existing tests have not yet been run in this session. No real funds or real citizen data involved.
+Started 2026-10-12. Node 24 / Python 3.13. Frontend: http://127.0.0.1:3000. Backend: http://127.0.0.1:8000. Local blockchain: http://127.0.0.1:8545 (chain 31337). Contract deployed locally; SQLite seeded with 24 fictional beneficiaries and five sample payout records. Dashboard, beneficiaries, distributions, verify, and batch routes return HTTP 200; backend health and receipt verification respond successfully against Local EVM. No in-app browser is available for visual/interactivity inspection. Baseline tests were subsequently run: 9 contract tests and 8 backend tests pass; separate TypeScript checking passes. No real funds or real citizen data involved.
+
+## Public landing page follow-up
+
+The public landing page is implemented at `/`, with the existing operational dashboard moved to `/dashboard`. See [PUBLIC_LANDING.md](PUBLIC_LANDING.md) for scope, validation, and pending visual/comprehension checks. This bounded task was selected ahead of backend changes because the landing page does not consume APIs or display live success/verification states. The remaining operational UI work still depends on backend correctness.

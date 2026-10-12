@@ -82,7 +82,7 @@ AyudaChain creates a closed-loop, verifiable pipeline:
   - **Scenario B: Ghost Beneficiary Swap (Multong Claim)** — Simulates secretly swapping an evacuee's name in the database. Instantly caught by the cryptographic signature.
   - **Restore Authentic Record** — Restores the genuine ₱5,000 record and confirms a 100% cryptographic match.
 
-### 6. ⚙️ Interactive Blockchain Ledger Customization Card (`/`)
+### 6. ⚙️ Interactive Blockchain Ledger Customization Card (`/dashboard`)
 - Accessible directly on the homepage dashboard.
 - Allows live switching between **Local EVM (Port 8545)**, **Polygon Amoy Testnet**, and custom RPC endpoints.
 - Features **1-click Copy Contract Address**, direct link to **Polygonscan Block Explorer**, and an educational collapsible explainer on how smart contracts work.
@@ -129,7 +129,7 @@ cd frontend
 npm run build && npm start
 # or for live development: npm run dev
 ```
-Open **http://localhost:3000** in your browser.
+Open **http://localhost:3000** for the public landing page. Select **Explore demo** to open the operational dashboard at **http://localhost:3000/dashboard**.
 
 ---
 

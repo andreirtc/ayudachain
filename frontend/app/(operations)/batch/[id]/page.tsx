@@ -47,7 +47,7 @@ export default function BatchDetailPage() {
     <div className="space-y-6">
       {/* Breadcrumb & Title */}
       <div>
-        <Link href="/" className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 mb-2">
+        <Link href="/dashboard" className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 mb-2">
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Transparency Dashboard
         </Link>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
