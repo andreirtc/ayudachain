@@ -8,7 +8,7 @@ Status: unchecked items are planned, not implemented. Work through one numbered 
 
 ## 0. Runnable baseline
 - [x] Install dependencies and run local blockchain, backend, and frontend; verify dashboard and all routes via HTTP. Browser visual/interactivity review remains pending.
-- [ ] Document Windows startup and shutdown, environment setup, and database/blockchain reset together.
+- [x] Document Windows startup and shutdown, environment setup, and database/blockchain reset together. See [WINDOWS_LOCAL.md](WINDOWS_LOCAL.md); validated with a full reset on 2026-10-12.
 - [x] Run existing tests and separate TypeScript checking (build currently ignores type errors); record baseline failures. Contract tests: 9 passing. Backend tests: 8 passing. Separate frontend TypeScript check passes. See [landing-page validation](PUBLIC_LANDING.md).
 
 ## 1. Select and consolidate the backend

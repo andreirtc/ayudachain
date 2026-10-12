@@ -100,9 +100,7 @@ AyudaChain creates a closed-loop, verifiable pipeline:
 - **Python** 3.10+ or 3.13+
 
 ### 2. Environment Setup
-```bash
-cp .env.example .env
-```
+The local defaults need no configuration. See [docs/WINDOWS_LOCAL.md](docs/WINDOWS_LOCAL.md) for optional variables and for Windows start, stop, and reset steps.
 
 ### 3. Start Local EVM Blockchain Node (Port 8545)
 ```bash
