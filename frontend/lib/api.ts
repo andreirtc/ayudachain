@@ -79,7 +79,9 @@ export interface Distribution {
   distribution_id: string;
   beneficiary_id: string;
   batch_id: string;
+  allocation_id?: string;
   amount: number;
+  amount_centavos?: number;
   verification_method: string;
   receipt_hash: string;
   receipt_file_path?: string;

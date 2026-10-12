@@ -65,7 +65,7 @@ Amounts: requests send pesos with at most two decimal places (`5000` or `5000.50
     "beneficiary_count": 500
   }
   ```
-  - Rules: the batch must exist (404) and be `ACTIVE`; the barangay must be one of the known demo barangays in `backend/app/barangays.py` with its matching name; the amount must be positive and must not exceed the batch's unallocated funds (400 with the remaining amount). The contract enforces the same total limit.
+  - Rules: the batch must exist (404) and be `ACTIVE`; the barangay must be one of the known demo barangays in `backend/app/barangays.py` with its matching name; the amount must be positive and must not exceed the batch's unallocated funds (400 with the remaining amount). Each barangay gets one allocation per batch. The contract enforces the same total limit.
 
 ---
 
@@ -109,6 +109,7 @@ Amounts: requests send pesos with at most two decimal places (`5000` or `5000.50
     "receipt_filename": "sample_relief_receipt.svg"
   }
   ```
+  - Rules: `batch_id` must match the beneficiary's batch; the beneficiary's barangay must have an allocation in that batch; the amount must not exceed what is left in that allocation (400 states the remaining amount). One payout per household; ₱10,000 demo maximum. The response includes `allocation_id`. The contract enforces the allocation limit too.
 
 ---
 

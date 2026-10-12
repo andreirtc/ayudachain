@@ -237,6 +237,11 @@
         },
         {
           "internalType": "uint256",
+          "name": "distributedAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
           "name": "timestamp",
           "type": "uint256"
         },
@@ -388,6 +393,11 @@
         },
         {
           "internalType": "bytes32",
+          "name": "allocationId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
           "name": "distributionId",
           "type": "bytes32"
         },
@@ -425,6 +435,11 @@
         {
           "internalType": "bytes32",
           "name": "batchId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "allocationId",
           "type": "bytes32"
         },
         {

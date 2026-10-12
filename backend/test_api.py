@@ -39,7 +39,7 @@ class FakeChain:
     def allocate_fund(self, *args, **kwargs):
         return self._tx()
 
-    def confirm_distribution(self, batch_id, distribution_id, beneficiary_id, amount_centavos, receipt_hash):
+    def confirm_distribution(self, batch_id, allocation_id, distribution_id, beneficiary_id, amount_centavos, receipt_hash):
         self.receipts[distribution_id] = receipt_hash
         return self._tx()
 
@@ -174,11 +174,11 @@ class TestAyudaChainAPI(unittest.TestCase):
         self._release("RELIEF-TEST-002", 1000)
         self.assertEqual(self._allocate("ALLOC-0200", "RELIEF-TEST-002", 600).status_code, 201)
 
-        res = self._allocate("ALLOC-0201", "RELIEF-TEST-002", 400.01)
+        res = self._allocate("ALLOC-0201", "RELIEF-TEST-002", 400.01, "BRGY-002", "Santa Elena")
         self.assertEqual(res.status_code, 400)
         self.assertIn("₱400.00", res.json()["detail"])
 
-        self.assertEqual(self._allocate("ALLOC-0202", "RELIEF-TEST-002", 400).status_code, 201)
+        self.assertEqual(self._allocate("ALLOC-0202", "RELIEF-TEST-002", 400, "BRGY-002", "Santa Elena").status_code, 201)
         dashboard_alloc = sum(a["amount_centavos"] for a in self.client.get("/api/batches/RELIEF-TEST-002").json()["allocations"])
         self.assertEqual(dashboard_alloc, 100_000)
 
@@ -194,6 +194,57 @@ class TestAyudaChainAPI(unittest.TestCase):
         self.assertEqual(res.status_code, 400)
         res = self._allocate("ALLOC-0402", "RELIEF-TEST-003", 1, barangay_id="BRGY-001", barangay_name="Maligaya")
         self.assertEqual(res.status_code, 400)
+
+    def test_one_allocation_per_barangay_per_batch(self):
+        self._release("RELIEF-TEST-006", 1000)
+        self.assertEqual(self._allocate("ALLOC-0600", "RELIEF-TEST-006", 100).status_code, 201)
+        res = self._allocate("ALLOC-0601", "RELIEF-TEST-006", 100)
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("ALLOC-0600", res.json()["detail"])
+
+    def _register(self, ben_id, name, batch_id, barangay_id="BRGY-003", barangay_name="San Roque"):
+        res = self.client.post("/api/beneficiaries", json={
+            "beneficiary_id": ben_id, "household_name": name,
+            "barangay_id": barangay_id, "barangay_name": barangay_name, "batch_id": batch_id,
+        })
+        self.assertEqual(res.status_code, 201)
+
+    def _pay(self, dist_id, ben_id, batch_id, amount):
+        return self.client.post("/api/distributions/confirm", json={
+            "distribution_id": dist_id, "beneficiary_id": ben_id, "batch_id": batch_id, "amount": amount,
+        })
+
+    def test_payouts_cannot_exceed_barangay_allocation(self):
+        self._release("RELIEF-TEST-010", 10000)
+        self.assertEqual(self._allocate("ALLOC-1000", "RELIEF-TEST-010", 6000, "BRGY-003", "San Roque").status_code, 201)
+        self._register("BEN-1001", "Amelia Ferrer", "RELIEF-TEST-010")
+        self._register("BEN-1002", "Benigno Lacson", "RELIEF-TEST-010")
+        self._register("BEN-1003", "Clarita Umali", "RELIEF-TEST-010")
+
+        res = self._pay("DIST-1001", "BEN-1001", "RELIEF-TEST-010", 5000)
+        self.assertEqual(res.status_code, 201)
+        self.assertEqual(res.json()["allocation_id"], "ALLOC-1000")
+
+        res = self._pay("DIST-1002", "BEN-1002", "RELIEF-TEST-010", 5000)
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("₱1,000.00", res.json()["detail"])
+
+        self.assertEqual(self._pay("DIST-1003", "BEN-1003", "RELIEF-TEST-010", 1000).status_code, 201)
+
+    def test_payout_requires_matching_batch_and_allocation(self):
+        res = self._pay("DIST-1100", "BEN-0004", "RELIEF-OTHER", 5000)
+        self.assertEqual(res.status_code, 400)
+
+        self._release("RELIEF-TEST-011", 10000)
+        self._register("BEN-1101", "Dionisio Salonga", "RELIEF-TEST-011")
+        res = self._pay("DIST-1101", "BEN-1101", "RELIEF-TEST-011", 5000)
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("no allocation", res.json()["detail"])
+
+    def test_seeded_payouts_link_to_allocations(self):
+        dists = {d["distribution_id"]: d["allocation_id"] for d in self.client.get("/api/distributions").json()}
+        self.assertEqual(dists["DIST-0001"], "ALLOC-0001")
+        self.assertEqual(dists["DIST-0005"], "ALLOC-0002")
 
     def test_zero_or_negative_amounts_rejected(self):
         res = self.client.post("/api/funds/releases", json={"batch_id": "RELIEF-TEST-004", "calamity_name": "X", "amount": 0})

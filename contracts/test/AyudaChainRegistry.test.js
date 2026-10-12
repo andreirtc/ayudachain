@@ -99,24 +99,60 @@ describe("AyudaChainRegistry Smart Contract", function () {
     it("should confirm distribution and anchor cryptographic receipt hash", async function () {
       const batchAmount = ethers.parseEther("10000000");
       await registry.releaseFund(batchId, batchAmount, "Typhoon Salinlahi", "DSWD Central");
+      await registry.allocateFund(batchId, allocationId, barangayId, ethers.parseEther("2500000"));
 
       const distAmount = ethers.parseEther("5000");
       await expect(
-        registry.confirmDistribution(batchId, distributionId, beneficiaryId, distAmount, sampleReceiptHash)
+        registry.confirmDistribution(batchId, allocationId, distributionId, beneficiaryId, distAmount, sampleReceiptHash)
       ).to.emit(registry, "DistributionConfirmed")
        .withArgs(batchId, distributionId, beneficiaryId, distAmount, sampleReceiptHash, (ts) => ts > 0);
 
       const dist = await registry.distributions(distributionId);
       expect(dist.exists).to.be.true;
       expect(dist.receiptHash).to.equal(sampleReceiptHash);
+      expect(dist.allocationId).to.equal(allocationId);
+
+      const alloc = await registry.allocations(allocationId);
+      expect(alloc.distributedAmount).to.equal(distAmount);
+    });
+
+    it("should reject distributions that exceed the remaining allocation", async function () {
+      await registry.releaseFund(batchId, 1000n, "Typhoon Salinlahi", "DSWD Central");
+      await registry.allocateFund(batchId, allocationId, barangayId, 500n);
+      await registry.confirmDistribution(batchId, allocationId, distributionId, beneficiaryId, 300n, sampleReceiptHash);
+
+      const secondDistributionId = ethers.encodeBytes32String("DIST-0002");
+      await expect(
+        registry.confirmDistribution(batchId, allocationId, secondDistributionId, beneficiaryId, 201n, sampleReceiptHash)
+      ).to.be.revertedWith("AyudaChain: Distribution exceeds remaining allocation");
+
+      await expect(
+        registry.confirmDistribution(batchId, allocationId, secondDistributionId, beneficiaryId, 200n, sampleReceiptHash)
+      ).to.emit(registry, "DistributionConfirmed");
+    });
+
+    it("should reject distributions without a matching allocation", async function () {
+      await registry.releaseFund(batchId, 1000n, "Typhoon Salinlahi", "DSWD Central");
+      await expect(
+        registry.confirmDistribution(batchId, allocationId, distributionId, beneficiaryId, 1n, sampleReceiptHash)
+      ).to.be.revertedWith("AyudaChain: Allocation does not exist");
+
+      const otherBatchId = ethers.encodeBytes32String("RELIEF-2026-002");
+      await registry.releaseFund(otherBatchId, 1000n, "Other", "DSWD Central");
+      await registry.allocateFund(otherBatchId, allocationId, barangayId, 500n);
+      await expect(
+        registry.confirmDistribution(batchId, allocationId, distributionId, beneficiaryId, 1n, sampleReceiptHash)
+      ).to.be.revertedWith("AyudaChain: Allocation belongs to another batch");
     });
 
     it("should verify matching receipt hash and reject mismatched/altered hash", async function () {
       const batchAmount = ethers.parseEther("10000000");
       await registry.releaseFund(batchId, batchAmount, "Typhoon Salinlahi", "DSWD Central");
 
+      await registry.allocateFund(batchId, allocationId, barangayId, ethers.parseEther("2500000"));
+
       const distAmount = ethers.parseEther("5000");
-      await registry.confirmDistribution(batchId, distributionId, beneficiaryId, distAmount, sampleReceiptHash);
+      await registry.confirmDistribution(batchId, allocationId, distributionId, beneficiaryId, distAmount, sampleReceiptHash);
 
       // Verify authentic hash
       const [matched, timestamp] = await registry.verifyReceipt(distributionId, sampleReceiptHash);

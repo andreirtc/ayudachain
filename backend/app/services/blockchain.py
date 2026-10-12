@@ -89,6 +89,7 @@ class BlockchainService:
     def confirm_distribution(
         self,
         batch_id: str,
+        allocation_id: str,
         distribution_id: str,
         beneficiary_id: str,
         amount_centavos: int,
@@ -97,6 +98,7 @@ class BlockchainService:
         res = self._execute_cli([
             "confirmDistribution",
             batch_id,
+            allocation_id,
             distribution_id,
             beneficiary_id,
             str(amount_centavos),

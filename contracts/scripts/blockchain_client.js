@@ -103,15 +103,16 @@ async function main() {
         gasUsed: receipt.gasUsed.toString()
       }));
     } else if (command === "confirmDistribution") {
-      // args: batchId, distributionId, beneficiaryId, amount (integer centavos), receiptHash
-      const [_, batchId, distributionId, beneficiaryId, amount, receiptHash] = args;
+      // args: batchId, allocationId, distributionId, beneficiaryId, amount (integer centavos), receiptHash
+      const [_, batchId, allocationId, distributionId, beneficiaryId, amount, receiptHash] = args;
       const bId = toBytes32(batchId);
+      const aId = toBytes32(allocationId);
       const dId = toBytes32(distributionId);
       const benId = toBytes32(beneficiaryId);
       const amtCentavos = BigInt(amount);
       const rHash = receiptHash.startsWith("0x") ? receiptHash : `0x${receiptHash}`;
 
-      const tx = await contract.confirmDistribution(bId, dId, benId, amtCentavos, rHash);
+      const tx = await contract.confirmDistribution(bId, aId, dId, benId, amtCentavos, rHash);
       const receipt = await tx.wait();
 
       console.log(JSON.stringify({
