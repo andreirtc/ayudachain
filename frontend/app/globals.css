@@ -134,6 +134,12 @@ h1, h2, h3 { font-weight: 700; }
 .receipt-references dd { overflow-wrap: anywhere; }
 .receipt-image { display: block; max-width: 100%; max-height: 540px; margin-inline: auto; border: 1px solid #cbd5e1; border-radius: 6px; }
 .receipt-extracted { font-family: var(--font-body), sans-serif; white-space: pre-wrap; overflow-wrap: anywhere; padding: 16px; background: #f8fafc; border-radius: 8px; margin-top: 12px; font-size: 14px; }
+.verification-page { max-width: 760px; margin-inline: auto; }
+.verification-result { padding: 24px; border: 1px solid; border-radius: 10px; display: flex; flex-direction: column; gap: 12px; }
+.verification-verified { background: #ecfdf5; border-color: #6ee7b7; color: #064e3b; }
+.verification-mismatch { background: #fff1f2; border-color: #fda4af; color: #881337; }
+.verification-unanchored { background: #fffbeb; border-color: #fcd34d; color: #78350f; }
+.verification-unavailable { background: #f1f5f9; border-color: #cbd5e1; color: #0f172a; }
 @media (max-width: 480px) { .receipt-references { grid-template-columns: minmax(0, 1fr); gap: 4px; } .receipt-references dd { margin-bottom: 10px; } }
 @media (max-width: 900px) {
   .workflow-columns { grid-template-columns: minmax(0, 1fr); gap: 24px; }

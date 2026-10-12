@@ -4,12 +4,6 @@ import React, { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  AlertTriangle,
-  CheckCircle2,
-  RefreshCw,
-  ShieldCheck,
-} from "lucide-react";
-import {
   verifyBlockchain,
   VerifyResponse,
   fetchDistributions,
@@ -21,6 +15,7 @@ import {
   PublicReceiptReference,
 } from "@/lib/api";
 import { useRole } from "@/lib/roleContext";
+import { useBrowserOnline } from "@/lib/useBrowserOnline";
 import ReceiptDetails from "@/components/ReceiptDetails";
 import {
   receiptVerificationHref,
@@ -30,24 +25,33 @@ import {
 const outcomes = {
   VERIFIED: {
     title: "Receipt hash verified",
-    style: "bg-emerald-50 border-emerald-300 text-emerald-950",
+    style: "verification-verified",
+    description:
+      "The current receipt hash matches the hash read from the configured blockchain.",
   },
   MISMATCH: {
     title: "Receipt hash mismatch",
-    style: "bg-rose-50 border-rose-300 text-rose-950",
+    style: "verification-mismatch",
+    description:
+      "The current receipt hash differs from its blockchain record. Investigate the covered fields before relying on this receipt.",
   },
   UNANCHORED: {
     title: "No receipt anchor found",
-    style: "bg-amber-50 border-amber-300 text-amber-950",
+    style: "verification-unanchored",
+    description:
+      "The blockchain was read successfully, but no receipt anchor was found for this reference.",
   },
   UNAVAILABLE: {
     title: "Verification unavailable",
-    style: "bg-slate-50 border-slate-300 text-slate-900",
+    style: "verification-unavailable",
+    description:
+      "A reliable blockchain lookup could not be completed. Try again when the service is available.",
   },
 };
 
 function VerifyContent() {
   const { account, loading: sessionLoading } = useRole();
+  const online = useBrowserOnline();
   const privateContext = !!account && account.role !== "BARANGAY";
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -60,23 +64,29 @@ function VerifyContent() {
   >([]);
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
   const [selectedId, setSelectedId] = useState("");
+  const [manualReference, setManualReference] = useState("");
   const [result, setResult] = useState<VerifyResponse | null>(null);
+  const [checkedAt, setCheckedAt] = useState(0);
   const [loadingRecords, setLoadingRecords] = useState(true);
   const [checking, setChecking] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [recordError, setRecordError] = useState<string | null>(null);
+  const [checkError, setCheckError] = useState<string | null>(null);
   const [reload, setReload] = useState(0);
   const [recheck, setRecheck] = useState(0);
   const requestVersion = useRef(0);
+  const checkPending = useRef(false);
 
   useEffect(() => {
     if (sessionLoading) return;
     let cancelled = false;
     setLoadingRecords(true);
     setLoadedReference(undefined);
-    setError(null);
+    setRecordError(null);
+    setCheckError(null);
     setSelectedId("");
     setResult(null);
     setChecking(false);
+    setCheckedAt(0);
     Promise.all([
       privateContext ? fetchDistributions() : fetchPublicReceipts(),
       privateContext
@@ -92,7 +102,11 @@ function VerifyContent() {
       })
       .catch((err) => {
         if (!cancelled)
-          setError(err instanceof Error ? err.message : String(err));
+          setRecordError(
+            err instanceof Error
+              ? err.message
+              : "Receipt references could not be loaded.",
+          );
       })
       .finally(() => {
         if (!cancelled) setLoadingRecords(false);
@@ -100,29 +114,55 @@ function VerifyContent() {
     return () => {
       cancelled = true;
     };
-  }, [requestedId, reload, account?.id, sessionLoading]);
+  }, [requestedId, reload, account?.id, privateContext, sessionLoading]);
 
   useEffect(() => {
-    if (!selectedId) return;
+    if (!selectedId) {
+      checkPending.current = false;
+      return;
+    }
+    if (!navigator.onLine) {
+      checkPending.current = false;
+      setChecking(false);
+      setCheckError("Reconnect to check this receipt.");
+      return;
+    }
     const version = ++requestVersion.current;
     let cancelled = false;
+    checkPending.current = true;
     setChecking(true);
     setResult(null);
-    setError(null);
+    setCheckError(null);
     verifyBlockchain(selectedId)
       .then((data) => {
-        if (!cancelled && version === requestVersion.current) setResult(data);
+        if (cancelled || version !== requestVersion.current) return;
+        if (
+          data.record_id !== selectedId ||
+          !outcomes[data.verification_status]
+        )
+          throw new Error(
+            "The lookup did not return evidence for this receipt. Try again.",
+          );
+        setResult(data);
+        setCheckedAt(Date.now());
       })
       .catch((err) => {
         if (!cancelled && version === requestVersion.current)
-          setError(err instanceof Error ? err.message : String(err));
+          setCheckError(
+            err instanceof Error
+              ? err.message
+              : "Receipt lookup failed. Try again.",
+          );
       })
       .finally(() => {
-        if (!cancelled && version === requestVersion.current)
+        if (!cancelled && version === requestVersion.current) {
+          checkPending.current = false;
           setChecking(false);
+        }
       });
     return () => {
       cancelled = true;
+      if (version === requestVersion.current) checkPending.current = false;
     };
   }, [selectedId, recheck]);
 
@@ -142,182 +182,230 @@ function VerifyContent() {
   const outcome = currentResult
     ? outcomes[currentResult.verification_status]
     : null;
+  const recheckReceipt = () => {
+    if (
+      checkPending.current ||
+      !navigator.onLine ||
+      !selectedId ||
+      !recordsReady
+    )
+      return;
+    checkPending.current = true;
+    setChecking(true);
+    setRecheck((value) => value + 1);
+  };
+  const openReference = (reference: string) => {
+    if (reference === requestedId && recordsReady && selectedId) {
+      recheckReceipt();
+      return;
+    }
+    setResult(null);
+    setSelectedId("");
+    router.replace(receiptVerificationHref(reference), { scroll: false });
+  };
 
   return (
-    <div className="registry workflow max-w-3xl mx-auto space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-          <ShieldCheck className="w-6 h-6 text-blue-600" />
-          Verify a receipt
-        </h1>
-        <p className="text-sm text-slate-600">
-          Compare a synthetic payout receipt hash with its anchor on the
-          configured blockchain.
+    <div className="registry workflow verification-page space-y-6">
+      <header>
+        <h1>Check a receipt</h1>
+        <p className="registry-description">
+          Check whether covered payout fields match their blockchain proof.
         </p>
-        <p className="text-xs text-slate-500">
-          This check covers the recorded receipt hash. It cannot prove physical
-          cash delivery or household-name integrity.
+      </header>
+      {online === false && (
+        <p role="status" className="registry-notice">
+          Browser is offline. Reconnect to check receipt integrity.
+          {currentResult
+            ? " The displayed result is from an earlier check."
+            : ""}
         </p>
-      </div>
-
-      <section className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 space-y-4">
-        {missingReference && (
-          <div
-            role="alert"
-            className="p-3 bg-amber-50 border border-amber-300 rounded-lg text-sm text-amber-950"
-          >
-            <h2 className="font-semibold">Receipt not found</h2>
-            <p className="mt-1 break-all">
-              No recorded payout matches{" "}
-              {requestedId || "the empty receipt reference"}. Check the link or
-              choose a receipt below.
-            </p>
+      )}
+      <section
+        aria-label="Choose a receipt"
+        className="workflow-panel space-y-4"
+      >
+        {loadingRecords || sessionLoading || (!recordsReady && !recordError) ? (
+          <p role="status">Loading receipts...</p>
+        ) : recordError ? (
+          <div role="alert" className="registry-error">
+            {recordError}
+            <button
+              className="registry-button"
+              onClick={() => setReload((value) => value + 1)}
+            >
+              Retry loading receipts
+            </button>
           </div>
-        )}
-        {loadingRecords ? (
-          <p role="status" className="text-sm text-slate-500">
-            Loading receipts...
-          </p>
-        ) : distributions.length === 0 && !error ? (
-          <p className="text-sm text-slate-600">
-            No payout receipts are recorded yet.{" "}
-            <Link href="/distributions" className="underline">
-              View payouts
-            </Link>
-          </p>
-        ) : !recordsReady && !error ? (
-          <p role="status" className="text-sm text-slate-500">
-            Loading receipts...
-          </p>
         ) : (
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
-            <div className="flex-1">
-              <label
-                htmlFor="receipt-record"
-                className="block text-sm font-semibold text-slate-700 mb-1"
-              >
-                Receipt
-              </label>
-              <select
-                id="receipt-record"
-                value={recordsReady ? selectedId : ""}
-                disabled={!recordsReady || distributions.length === 0}
-                onChange={(event) => {
-                  setResult(null);
-                  setSelectedId("");
-                  router.replace(receiptVerificationHref(event.target.value), {
-                    scroll: false,
-                  });
-                }}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-              >
-                {!selectedId && (
-                  <option value="" disabled>
-                    Choose a recorded receipt
-                  </option>
-                )}
-                {distributions.map((record) => (
-                  <option
-                    key={record.distribution_id}
-                    value={record.distribution_id}
+          <>
+            {missingReference && (
+              <div role="alert" className="registry-notice">
+                <h2>Receipt not found</h2>
+                <p className="break-all">
+                  No recorded payout available to this view matches{" "}
+                  {requestedId || "the empty receipt reference"}. Check the
+                  reference or choose a receipt below.
+                </p>
+              </div>
+            )}
+            {distributions.length === 0 ? (
+              <p>
+                No payout receipts are available to this view.
+                {privateContext && (
+                  <Link
+                    href="/distributions"
+                    className="registry-button registry-text-button"
                   >
-                    {record.distribution_id}
-                    {record.amount !== undefined
-                      ? `: ${record.beneficiary_id} (${formatPeso(record.amount)})`
-                      : ""}
-                  </option>
-                ))}
-              </select>
+                    View payouts
+                  </Link>
+                )}
+              </p>
+            ) : (
+              <div>
+                <label htmlFor="receipt-record">Receipt</label>
+                <select
+                  id="receipt-record"
+                  value={recordsReady ? selectedId : ""}
+                  disabled={!recordsReady}
+                  onChange={(event) => openReference(event.target.value)}
+                >
+                  {!selectedId && (
+                    <option value="" disabled>
+                      Choose a recorded receipt
+                    </option>
+                  )}
+                  {distributions.map((record) => (
+                    <option
+                      key={record.distribution_id}
+                      value={record.distribution_id}
+                    >
+                      {record.amount !== undefined
+                        ? (beneficiaries.find(
+                            (b) => b.beneficiary_id === record.beneficiary_id,
+                          )?.household_name || record.beneficiary_id) +
+                          " (" +
+                          formatPeso(record.amount) +
+                          ") · "
+                        : ""}
+                      {record.distribution_id}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </>
+        )}
+        <details className="registry-detail">
+          <summary>Enter a receipt reference</summary>
+          <form
+            className="space-y-3 mt-3"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (manualReference.trim()) openReference(manualReference.trim());
+            }}
+          >
+            <label htmlFor="manual-receipt">Receipt reference</label>
+            <input
+              id="manual-receipt"
+              value={manualReference}
+              onChange={(event) => setManualReference(event.target.value)}
+              maxLength={128}
+              autoComplete="off"
+              required
+            />
+            <button
+              className="registry-button"
+              disabled={!manualReference.trim() || loadingRecords}
+            >
+              Open receipt
+            </button>
+          </form>
+        </details>
+      </section>
+      {activeDist && (
+        <section aria-label="Verification result" className="space-y-4">
+          {checking && <p role="status">Reading the blockchain receipt...</p>}
+          {checkError && (
+            <div role="alert" className="registry-error">
+              <p>{checkError}</p>
+              <button
+                className="registry-button"
+                disabled={checking || !online}
+                onClick={recheckReceipt}
+              >
+                Retry lookup
+              </button>
             </div>
-            <button
-              onClick={() => setRecheck((value) => value + 1)}
-              disabled={checking || !selectedId || !recordsReady}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+          )}
+          {currentResult && outcome && (
+            <div
+              role="status"
+              className={"verification-result " + outcome.style}
             >
-              <RefreshCw
-                className={checking ? "w-4 h-4 animate-spin" : "w-4 h-4"}
-              />
-              Check again
-            </button>
-          </div>
-        )}
-        {error && (
-          <div role="alert" className="text-sm text-rose-700">
-            {error}{" "}
-            <button
-              onClick={() => {
-                setReload((value) => value + 1);
-                setRecheck((value) => value + 1);
-              }}
-              className="underline"
-            >
-              Retry
-            </button>
-          </div>
-        )}
-        {checking && recordsReady && (
-          <p role="status" className="text-sm text-slate-600">
-            Reading the blockchain receipt...
+              <h2>{outcome.title}</h2>
+              <p>{outcome.description}</p>
+              <p className="registry-muted">
+                Checked this session at{" "}
+                {new Date(checkedAt).toLocaleTimeString()}.
+              </p>
+            </div>
+          )}
+          <button
+            className="registry-button registry-primary"
+            disabled={checking || !online || !recordsReady}
+            onClick={recheckReceipt}
+          >
+            {checking ? "Checking receipt..." : "Check again"}
+          </button>
+          <p className="registry-muted">
+            This checks the receipt hash only. It does not prove cash delivery
+            or validate every household and document field.
           </p>
-        )}
-        {activeDist && (
+          {currentResult && (
+            <details className="registry-detail">
+              <summary>Hash comparison and lookup details</summary>
+              <dl className="receipt-references mt-3">
+                <dt>Current record hash</dt>
+                <dd className="font-mono">
+                  {currentResult.receipt_hash_local}
+                </dd>
+                <dt>Hash read from blockchain</dt>
+                <dd className="font-mono">
+                  {currentResult.receipt_hash_onchain ||
+                    "No hash returned by this lookup"}
+                </dd>
+                <dt>Network</dt>
+                <dd>{currentResult.network}</dd>
+                <dt>Configured contract</dt>
+                <dd className="font-mono">
+                  {currentResult.contract_address || "No contract configured"}
+                </dd>
+                {currentResult.timestamp && (
+                  <>
+                    <dt>Anchor timestamp</dt>
+                    <dd>
+                      {new Date(
+                        currentResult.timestamp * 1000,
+                      ).toLocaleString()}
+                    </dd>
+                  </>
+                )}
+                <dt>Lookup explanation</dt>
+                <dd>{currentResult.status_message}</dd>
+              </dl>
+            </details>
+          )}
+        </section>
+      )}
+      {activeDist && (
+        <div className="workflow-panel">
           <ReceiptDetails
             key={activeDist.distribution_id}
             record={activeDist}
             household={activeBen}
           />
-        )}
-
-        {currentResult && outcome && (
-          <div
-            role="status"
-            className={"p-5 border rounded-xl space-y-3 " + outcome.style}
-          >
-            <h2 className="text-lg font-bold flex items-center gap-2">
-              {currentResult.verification_status === "VERIFIED" ? (
-                <CheckCircle2 className="w-5 h-5" />
-              ) : (
-                <AlertTriangle className="w-5 h-5" />
-              )}
-              {outcome.title}
-            </h2>
-            <p className="text-sm">{currentResult.status_message}</p>
-            <p className="text-xs">Network: {currentResult.network}</p>
-            {currentResult.timestamp && (
-              <p className="text-xs">
-                Anchor timestamp:{" "}
-                {new Date(currentResult.timestamp * 1000).toLocaleString()}
-              </p>
-            )}
-            <details className="pt-2 border-t border-slate-200">
-              <summary className="cursor-pointer text-sm font-semibold">
-                Receipt hashes and contract
-              </summary>
-              <dl className="mt-3 text-xs space-y-3">
-                <div>
-                  <dt className="font-semibold">Locally calculated hash</dt>
-                  <dd className="font-mono break-all mt-1">
-                    {currentResult.receipt_hash_local}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="font-semibold">Hash read from blockchain</dt>
-                  <dd className="font-mono break-all mt-1">
-                    {currentResult.receipt_hash_onchain ||
-                      "No hash available for this lookup"}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="font-semibold">Configured contract</dt>
-                  <dd className="font-mono break-all mt-1">
-                    {currentResult.contract_address || "No contract configured"}
-                  </dd>
-                </div>
-              </dl>
-            </details>
-          </div>
-        )}
-      </section>
+        </div>
+      )}
     </div>
   );
 }
@@ -326,7 +414,7 @@ export default function VerifyPage() {
   return (
     <Suspense
       fallback={
-        <p className="py-12 text-center text-slate-500">
+        <p role="status" className="py-12 text-center">
           Loading verification...
         </p>
       }
