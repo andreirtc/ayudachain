@@ -4,6 +4,7 @@ Philippine Calamity Relief Digital Trail & Integrity Layer
 """
 
 import os
+import threading
 from datetime import datetime
 from typing import List, Optional
 from fastapi import FastAPI, Depends, HTTPException, Body
@@ -27,6 +28,7 @@ from app.ai.entity_resolution import EntityResolutionEngine, process_csv_batch
 from app.ai.anomaly_detection import DistributionAnomalyDetector
 from app.services.hasher import compute_receipt_hash, verify_receipt_integrity
 from app.money import to_centavos, centavos_to_pesos, format_peso
+from app.barangays import barangay_error
 from app.services.blockchain import blockchain_service
 from app.services.receipt_generator import save_sample_receipt, DEMO_OCR_TEXT
 from app.seed_demo import seed_database, seed_if_empty
@@ -212,14 +214,35 @@ def release_fund(payload: ReliefBatchCreate, db: Session = Depends(get_db)):
 # --- Allocations API ---
 @app.post("/api/allocations", response_model=AllocationResponse, status_code=201)
 def create_allocation(payload: AllocationCreate, db: Session = Depends(get_db)):
+    # Serialize allocations so two requests cannot both pass the remaining-funds check
+    with _allocation_lock:
+        return _create_allocation(payload, db)
+
+_allocation_lock = threading.Lock()
+
+def _create_allocation(payload: AllocationCreate, db: Session):
     amount_c = to_centavos(payload.amount)
     batch = db.query(ReliefBatch).filter(ReliefBatch.batch_id == payload.batch_id).first()
     if not batch:
         raise HTTPException(status_code=404, detail="Batch not found")
+    if batch.status != "ACTIVE":
+        raise HTTPException(status_code=400, detail=f"Batch {batch.batch_id} is {batch.status}, not ACTIVE.")
 
     existing = db.query(Allocation).filter(Allocation.allocation_id == payload.allocation_id).first()
     if existing:
         raise HTTPException(status_code=400, detail="Allocation ID already exists")
+
+    error = barangay_error(payload.barangay_id, payload.barangay_name)
+    if error:
+        raise HTTPException(status_code=400, detail=error)
+
+    allocated_c = sum(a.amount_centavos for a in db.query(Allocation).filter(Allocation.batch_id == batch.batch_id))
+    remaining_c = batch.amount_centavos - allocated_c
+    if amount_c > remaining_c:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Allocation of {format_peso(amount_c)} exceeds the {format_peso(remaining_c)} not yet allocated in batch {batch.batch_id}."
+        )
 
     # On-chain allocation
     bc_res = blockchain_service.allocate_fund(
@@ -303,6 +326,13 @@ def register_beneficiary(payload: BeneficiaryCreate, db: Session = Depends(get_d
     existing = db.query(Beneficiary).filter(Beneficiary.beneficiary_id == payload.beneficiary_id).first()
     if existing:
         raise HTTPException(status_code=400, detail="Beneficiary ID already exists")
+
+    if not db.query(ReliefBatch).filter(ReliefBatch.batch_id == payload.batch_id).first():
+        raise HTTPException(status_code=404, detail=f"Batch {payload.batch_id} not found")
+
+    error = barangay_error(payload.barangay_id, payload.barangay_name)
+    if error:
+        raise HTTPException(status_code=400, detail=error)
 
     # Run AI Duplicate Check against existing beneficiaries
     other_bens = db.query(Beneficiary).filter(Beneficiary.batch_id == payload.batch_id).all()

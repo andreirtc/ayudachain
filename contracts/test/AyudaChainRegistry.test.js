@@ -78,6 +78,22 @@ describe("AyudaChainRegistry Smart Contract", function () {
       const alloc = await registry.allocations(allocationId);
       expect(alloc.exists).to.be.true;
       expect(alloc.amount).to.equal(allocAmount);
+
+      const batch = await registry.batches(batchId);
+      expect(batch.allocatedAmount).to.equal(allocAmount);
+    });
+
+    it("should reject allocations that exceed the released funds", async function () {
+      await registry.releaseFund(batchId, 1000n, "Typhoon Salinlahi", "DSWD Central");
+      await registry.allocateFund(batchId, allocationId, barangayId, 600n);
+
+      const secondAllocationId = ethers.encodeBytes32String("ALLOC-0002");
+      await expect(
+        registry.allocateFund(batchId, secondAllocationId, barangayId, 401n)
+      ).to.be.revertedWith("AyudaChain: Allocation exceeds released funds");
+
+      await expect(registry.allocateFund(batchId, secondAllocationId, barangayId, 400n))
+        .to.emit(registry, "FundAllocated");
     });
 
     it("should confirm distribution and anchor cryptographic receipt hash", async function () {

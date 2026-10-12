@@ -12,6 +12,7 @@ contract AyudaChainRegistry {
     struct ReliefBatchRecord {
         bytes32 batchId;
         uint256 totalAmount;
+        uint256 allocatedAmount;
         string calamityName;
         string sourceAgency;
         uint256 timestamp;
@@ -121,6 +122,7 @@ contract AyudaChainRegistry {
         batches[batchId] = ReliefBatchRecord({
             batchId: batchId,
             totalAmount: amount,
+            allocatedAmount: 0,
             calamityName: calamityName,
             sourceAgency: sourceAgency,
             timestamp: block.timestamp,
@@ -143,6 +145,12 @@ contract AyudaChainRegistry {
         require(allocationId != bytes32(0), "AyudaChain: Invalid allocation ID");
         require(!allocations[allocationId].exists, "AyudaChain: Allocation already exists");
         require(amount > 0, "AyudaChain: Allocation must be > 0");
+        require(
+            batches[batchId].allocatedAmount + amount <= batches[batchId].totalAmount,
+            "AyudaChain: Allocation exceeds released funds"
+        );
+
+        batches[batchId].allocatedAmount += amount;
 
         allocations[allocationId] = AllocationRecord({
             batchId: batchId,
