@@ -124,6 +124,11 @@ class TestMoney(unittest.TestCase):
 class TestBlockchainEvidence(unittest.TestCase):
     def setUp(self):
         from app.services.blockchain import BlockchainService
+        from contextlib import nullcontext
+        # These pure CLI boundary units must never open the default/original DB.
+        signer = patch("app.services.payout_anchors.legacy_signer", return_value=nullcontext(True))
+        signer.start()
+        self.addCleanup(signer.stop)
         self.service = BlockchainService()
         self.service.contract_address = "0x" + "1" * 40
 

@@ -94,6 +94,27 @@ export interface Distribution {
   status: string;
   blockchain_tx_hash?: string;
   distributed_at: string;
+  anchor_job?: PayoutAnchor | null;
+}
+
+export interface PayoutAnchor {
+  state: "PENDING" | "SUBMITTED" | "CONFIRMED" | "FAILED";
+  chain_id: number;
+  contract_address: string | null;
+  candidate_tx_hash: string | null;
+  attempts: number;
+  error_code: string | null;
+  updated_at: string;
+  confirmed_at: string | null;
+  block_number: number | null;
+  block_hash: string | null;
+  receipt_timestamp: number | null;
+}
+
+export async function recoverPayoutAnchor(id: string): Promise<Distribution> {
+  const response = await authenticatedFetch(getApiBase() + "/api/distributions/" + encodeURIComponent(id) + "/anchor/retry", { method: "POST" });
+  if (!response.ok) throw await errorFrom(response, "Anchor recovery could not be completed.");
+  return response.json();
 }
 
 export interface VerifyResponse {

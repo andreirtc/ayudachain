@@ -13,6 +13,8 @@ import { useRole } from "@/lib/roleContext";
 import { receiptVerificationHref } from "@/lib/receiptNavigation";
 import { useBrowserOnline } from "@/lib/useBrowserOnline";
 import { submitOnlinePayout } from "@/lib/payoutConnection";
+import { recoverPayoutAnchor } from "@/lib/api";
+import PayoutAnchorStatus from "@/components/PayoutAnchorStatus";
 
 export default function DistributionsPage() {
   const chain = useChainStatus();
@@ -35,6 +37,23 @@ export default function DistributionsPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [confirmedResult, setConfirmedResult] = useState<Distribution | null>(null);
   const [previewReceipt, setPreviewReceipt] = useState<Distribution | null>(null);
+  const recovering = useRef(false);
+  const [anchorBusy, setAnchorBusy] = useState(false);
+  const [anchorError, setAnchorError] = useState<{ id: string; message: string } | null>(null);
+
+  const recoverAnchor = async (id: string) => {
+    if (recovering.current || role !== "DISBURSING") return;
+    recovering.current = true;
+    setAnchorBusy(true);
+    setAnchorError(null);
+    try {
+      const result = await submitOnlinePayout(navigator.onLine, () => recoverPayoutAnchor(id));
+      setDistributions((rows) => rows.map((row) => row.distribution_id === id ? result : row));
+      setConfirmedResult((current) => current?.distribution_id === id ? result : current);
+    } catch (e) {
+      setAnchorError({ id, message: e instanceof Error ? e.message : "Recovery failed. Try again." });
+    } finally { recovering.current = false; setAnchorBusy(false); }
+  };
 
   const loadData = async () => {
     try {
@@ -310,7 +329,7 @@ export default function DistributionsPage() {
                 </div>
                 <p className="text-slate-800">{beneficiaries.find((household) => household.beneficiary_id === confirmedResult.beneficiary_id)?.household_name || confirmedResult.beneficiary_id} · {formatPeso(confirmedResult.amount)}</p>
                 <p className="text-xs text-slate-600 break-all">Receipt: {confirmedResult.distribution_id}</p>
-                <p className="text-xs text-slate-700">{confirmedResult.blockchain_tx_hash ? "An anchor transaction is recorded. Check this receipt for its current integrity result." : "No anchor transaction is recorded. The payout is saved; resubmitting it will not retry anchoring."}</p>
+                <PayoutAnchorStatus anchor={confirmedResult.anchor_job} busy={anchorBusy || !browserOnline} onRecover={role === "DISBURSING" ? () => void recoverAnchor(confirmedResult.distribution_id) : undefined} error={anchorError?.id === confirmedResult.distribution_id ? anchorError.message : undefined} />
                 <p className="text-xs text-slate-600">Synthetic payout. A receipt check does not prove cash delivery.</p>
                 <Link
                   href={receiptVerificationHref(confirmedResult.distribution_id)}
@@ -343,7 +362,7 @@ export default function DistributionsPage() {
               >
                 <Lock className="w-3.5 h-3.5" />
                 {distributions.some((d) => d.beneficiary_id === selectedBenId)
-                  ? "Claim Already Completed for this Household"
+                  ? "Payout already recorded"
                   : browserOnline === null
                   ? "Checking browser connection"
                   : !browserOnline
@@ -389,10 +408,10 @@ export default function DistributionsPage() {
                   <span className="text-slate-400">{new Date(dist.distributed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
 
-                <div className="flex items-center justify-between pt-1">
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                   <span className="text-[10px] text-slate-700 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded font-semibold flex items-center gap-1">
                     <Receipt className="w-3 h-3" aria-hidden="true" />
-                    {dist.blockchain_tx_hash ? "Anchor transaction recorded" : "No anchor transaction"}
+                    {dist.anchor_job ? { PENDING: "Anchor pending", SUBMITTED: "Awaiting confirmation", CONFIRMED: "Anchor confirmed", FAILED: "Anchor needs attention" }[dist.anchor_job.state] : "Anchor not tracked"}
                   </span>
 
                   <div className="flex items-center gap-2">
@@ -410,6 +429,7 @@ export default function DistributionsPage() {
                     </Link>
                   </div>
                 </div>
+                <details className="text-xs text-slate-700"><summary className="cursor-pointer py-2">Anchor status and recovery</summary><PayoutAnchorStatus anchor={dist.anchor_job} busy={anchorBusy || !browserOnline} onRecover={role === "DISBURSING" ? () => void recoverAnchor(dist.distribution_id) : undefined} error={anchorError?.id === dist.distribution_id ? anchorError.message : undefined} /></details>
               </div>
             ))}
           </div>

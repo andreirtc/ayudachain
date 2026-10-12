@@ -162,6 +162,23 @@ class DistributionConfirmRequest(BaseModel):
     receipt_filename: Optional[str] = "sample_relief_receipt.svg"
     ocr_raw_text: Optional[str] = None
 
+class PayoutAnchorResponse(BaseModel):
+    state: Literal["PENDING", "SUBMITTED", "CONFIRMED", "FAILED"]
+    chain_id: int
+    contract_address: Optional[str]
+    candidate_tx_hash: Optional[str]
+    attempts: int
+    error_code: Optional[str]
+    updated_at: str
+    confirmed_at: Optional[str]
+    block_number: Optional[int]
+    block_hash: Optional[str]
+    receipt_timestamp: Optional[int]
+
+    class Config:
+        from_attributes = True
+
+
 class DistributionResponse(BaseModel):
     id: int
     distribution_id: str
@@ -177,6 +194,7 @@ class DistributionResponse(BaseModel):
     status: str
     blockchain_tx_hash: Optional[str]
     distributed_at: datetime
+    anchor_job: Optional[PayoutAnchorResponse] = None
 
     class Config:
         from_attributes = True

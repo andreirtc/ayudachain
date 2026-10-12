@@ -72,12 +72,14 @@ class BlockchainService:
         }
 
     def release_fund(self, batch_id: str, amount_centavos: int, calamity_name: str, source_agency: str) -> Dict[str, Any]:
-        res = self._execute_cli(["releaseFund", batch_id, str(amount_centavos), calamity_name, source_agency])
-        return res
+        from app.services.payout_anchors import legacy_signer
+        with legacy_signer() as available:
+            return self._execute_cli(["releaseFund", batch_id, str(amount_centavos), calamity_name, source_agency]) if available else {"success": False, "error_code": "SIGNER_BUSY"}
 
     def allocate_fund(self, batch_id: str, allocation_id: str, barangay_id: str, amount_centavos: int) -> Dict[str, Any]:
-        res = self._execute_cli(["allocateFund", batch_id, allocation_id, barangay_id, str(amount_centavos)])
-        return res
+        from app.services.payout_anchors import legacy_signer
+        with legacy_signer() as available:
+            return self._execute_cli(["allocateFund", batch_id, allocation_id, barangay_id, str(amount_centavos)]) if available else {"success": False, "error_code": "SIGNER_BUSY"}
 
     def confirm_distribution(
         self,
@@ -88,19 +90,34 @@ class BlockchainService:
         amount_centavos: int,
         receipt_hash: str
     ) -> Dict[str, Any]:
-        res = self._execute_cli([
-            "confirmDistribution",
-            batch_id,
-            allocation_id,
-            distribution_id,
-            beneficiary_id,
-            str(amount_centavos),
-            receipt_hash
-        ])
-        return res
+        from app.services.payout_anchors import legacy_signer
+        with legacy_signer() as available:
+            if not available:
+                return {"success": False, "error_code": "SIGNER_BUSY"}
+            return self._execute_cli([
+                "confirmDistribution", batch_id, allocation_id, distribution_id,
+                beneficiary_id, str(amount_centavos), receipt_hash
+            ])
 
     def verify_receipt(self, distribution_id: str, receipt_hash: str) -> Dict[str, Any]:
         return self._execute_cli(["verifyReceipt", distribution_id, receipt_hash])
+
+    def payout_anchor(self, action, payload, raw_transaction=None, pin=None, candidate_tx_hash=None):
+        """Signed envelopes travel over stdin, never in process arguments or logs."""
+        env = os.environ.copy()
+        env.update(CHAIN_ID=str(config.CHAIN_ID), POLYGON_RPC_URL=self.rpc_url,
+                   POLYGON_PRIVATE_KEY=self.private_key or "", CONTRACT_ADDRESS=self.contract_address or "")
+        try:
+            result = subprocess.run(
+                ["node", os.path.join(CONTRACTS_DIR, "scripts", "payout_anchor.js"), action],
+                input=json.dumps({"payload": payload, "raw_transaction": raw_transaction, "pin": pin, "candidate_tx_hash": candidate_tx_hash}),
+                cwd=CONTRACTS_DIR, env=env, capture_output=True, text=True, timeout=8,
+            )
+            if result.returncode != 0:
+                return {"success": False, "error_code": "RPC_UNAVAILABLE"}
+            return json.loads(result.stdout.strip())
+        except (subprocess.SubprocessError, OSError, ValueError):
+            return {"success": False, "error_code": "RPC_UNAVAILABLE"}
 
 
 def is_hex_hash(value) -> bool:

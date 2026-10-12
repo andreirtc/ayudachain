@@ -50,9 +50,21 @@ class FakeChain:
         from app import config
         return {"success": True, "exists": distribution_id in self.receipts, "matched": onchain == receipt_hash, "onchainHash": onchain, "timestamp": 1, "chainId": config.CHAIN_ID, "network": "Test Chain", "contractAddress": config.CONTRACT_ADDRESS}
 
+    def payout_anchor(self, action, payload, raw_transaction=None, pin=None, candidate_tx_hash=None):
+        import hashlib, json
+        candidate = "0x" + hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+        if action == "prepare":
+            return {"success": True, "tx_hash": candidate, "raw_transaction": "0x" + json.dumps(payload).encode().hex(),
+                    "chain_id": payload["chain_id"], "contract_address": payload["contract_address"],
+                    "pin": {"block_number": 1, "block_hash": "0x" + "1" * 64, "code_hash": "0x" + "2" * 64}}
+        if payload["distribution_id"] not in self.receipts:
+            self.confirm_distribution(**{key: payload[key] for key in ("batch_id", "allocation_id", "distribution_id", "beneficiary_id", "amount_centavos", "receipt_hash")})
+        return {"success": True, "state": "CONFIRMED", "tx_hash": candidate, "chain_id": payload["chain_id"],
+                "contract_address": payload["contract_address"], "block_number": 2, "block_hash": "0x" + "3" * 64, "receipt_timestamp": 1}
+
 
 fake_chain = FakeChain()
-for _name in ("get_status", "release_fund", "allocate_fund", "confirm_distribution", "verify_receipt"):
+for _name in ("get_status", "release_fund", "allocate_fund", "confirm_distribution", "verify_receipt", "payout_anchor"):
     setattr(blockchain_service, _name, getattr(fake_chain, _name))
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "tests"))
@@ -466,7 +478,7 @@ class TestAyudaChainAPI(unittest.TestCase):
         self.assertEqual(first.json(), retry.json())
         self.assertEqual(fake_chain.tx_count - before, 1)
         with SessionLocal() as db:
-            self.assertEqual(db.query(AuditEvent).filter_by(entity_id=first.json()["distribution_id"]).count(), 1)
+            self.assertEqual(db.query(AuditEvent).filter_by(entity_id=first.json()["distribution_id"], event_type="DISTRIBUTION_CONFIRMED").count(), 1)
 
     def test_changed_request_with_same_key_conflicts(self):
         self.assertEqual(self._keyed_pay().status_code, 201)
@@ -508,11 +520,11 @@ class TestAyudaChainAPI(unittest.TestCase):
     def test_payout_survives_anchor_exception_and_retry_does_not_resubmit(self):
         from app.database import SessionLocal
         from app.models.entities import Distribution
-        def fail_after_recording(**kwargs):
+        def fail_after_recording(action, payload, *args):
             with SessionLocal() as db:
-                self.assertIsNotNone(db.query(Distribution).filter_by(distribution_id=kwargs["distribution_id"]).first())
+                self.assertIsNotNone(db.query(Distribution).filter_by(distribution_id=payload["distribution_id"]).first())
             raise TimeoutError("Submission result unknown")
-        with patch.object(blockchain_service, "confirm_distribution", side_effect=fail_after_recording) as submit:
+        with patch.object(blockchain_service, "payout_anchor", side_effect=fail_after_recording) as submit:
             first = self._keyed_pay()
             retry = self._keyed_pay()
         self.assertEqual(first.status_code, 201, first.text)
@@ -522,7 +534,7 @@ class TestAyudaChainAPI(unittest.TestCase):
         self.assertEqual(submit.call_count, 1)
 
     def test_failed_anchor_does_not_store_fabricated_transaction_hash(self):
-        with patch.object(blockchain_service, "confirm_distribution", return_value={"success": False, "txHash": "0xfabricated"}) as submit:
+        with patch.object(blockchain_service, "payout_anchor", return_value={"success": False, "txHash": "0xfabricated"}) as submit:
             first = self._keyed_pay()
             retry = self._keyed_pay()
         self.assertEqual(first.status_code, 201)
@@ -532,34 +544,25 @@ class TestAyudaChainAPI(unittest.TestCase):
 
     def test_failed_database_commit_does_not_anchor(self):
         from sqlalchemy.orm import Session
-        with patch.object(blockchain_service, "confirm_distribution", wraps=fake_chain.confirm_distribution) as submit:
+        with patch.object(blockchain_service, "payout_anchor", wraps=fake_chain.payout_anchor) as submit:
             with patch.object(Session, "commit", side_effect=RuntimeError("Database failure")):
                 with self.assertRaises(RuntimeError):
                     self._keyed_pay()
             self.assertEqual(submit.call_count, 0)
         # No payout was committed, so this key can be submitted normally.
-        with patch.object(blockchain_service, "confirm_distribution", wraps=fake_chain.confirm_distribution) as submit:
+        with patch.object(blockchain_service, "payout_anchor", wraps=fake_chain.payout_anchor) as submit:
             self.assertEqual(self._keyed_pay().status_code, 201)
-        self.assertEqual(submit.call_count, 1)
+        self.assertEqual(submit.call_count, 2)
 
     def test_lost_anchor_metadata_commit_replays_without_another_submission(self):
-        from sqlalchemy.orm import Session
-        original_commit = Session.commit
-        commit_count = 0
-        def fail_second_commit(db):
-            nonlocal commit_count
-            commit_count += 1
-            if commit_count == 2:
-                raise RuntimeError("Anchor metadata commit failed")
-            return original_commit(db)
-        with patch.object(blockchain_service, "confirm_distribution", wraps=fake_chain.confirm_distribution) as submit:
-            with patch.object(Session, "commit", fail_second_commit):
+        with patch.object(blockchain_service, "payout_anchor", wraps=fake_chain.payout_anchor) as submit:
+            with patch("app.services.payout_anchors.finish", side_effect=RuntimeError("Anchor metadata commit failed")):
                 with self.assertRaises(RuntimeError):
                     self._keyed_pay()
             retry = self._keyed_pay()
         self.assertEqual(retry.status_code, 200)
         self.assertIsNone(retry.json()["blockchain_tx_hash"])
-        self.assertEqual(submit.call_count, 1)
+        self.assertEqual(submit.call_count, 2)
         # The receipt can exist on-chain despite lost local transaction metadata.
         self.assertIn(retry.json()["distribution_id"], fake_chain.receipts)
 

@@ -1,5 +1,7 @@
 # Authenticated synthetic sessions
 
+Follow-up: [PAYOUT_ANCHORS.md](PAYOUT_ANCHORS.md) adds Disbursing-only scoped recovery for new payout jobs. Its separate route is covered by role/CSRF checks; public representations remain restricted.
+
 Bounded follow-up to [PR #17](https://github.com/andreirtc/ayudachain/pull/17). This implements password-authenticated synthetic accounts, server permissions and connected sign-in, not the full workmate claims/session/outcomes system. Original receipt hashes, accounting constraints, linked-duplicate history and payout replay semantics remain intact.
 
 ## Account and workflow ownership

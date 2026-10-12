@@ -35,7 +35,8 @@ DSWD can also analyze a fictional CSV. The analyzer reports possible pairs; it d
 1. Sign in as Disbursing and open /distributions. Select an eligible household within the assigned barangay.
 2. Check the active batch and fictional grant amount. The API enforces eligibility, the batch maximum, remaining allocation budget and one payout per linked household per batch.
 3. Select **Record demo payout**. A recorded payout and a confirmed blockchain anchor are separate facts. Submission errors remain visible; uncertain retries keep the form's request identity during the current page session.
-4. Follow **Check this receipt** to inspect that exact payout. Unknown receipt links show **Receipt not found** and never substitute another payout.
+4. Check the separate anchor status. For new payouts, Disbursing can use **Recover anchor** or **Recheck anchor**; this recovers the stored transaction and does not record another payout. After refresh, expand **Anchor status and recovery** on the recorded payout. Older records have no recovery job and remain available for receipt checks.
+5. Follow **Check this receipt** to inspect that exact payout. Unknown receipt links show **Receipt not found** and never substitute another payout.
 
 Actual camera QR decoding and a persistent offline queue are not implemented. When the browser reports offline, submission is disabled and no payout is queued. Reconnecting does not submit automatically. The current retry identity is held in memory, not preserved across a page reload.
 
@@ -50,4 +51,4 @@ Open /verify or follow a payout's receipt link. The public view exposes receipt 
 - **No receipt anchor found:** the contract was read successfully and has no receipt for that reference.
 - **Verification unavailable:** a reliable lookup could not be completed. Retry after the configured service recovers.
 
-**Check again** repeats the lookup. Expand technical details for observed hashes and contract information. Names, allocation linkage and raw file contents are not yet all covered by an immutable versioned snapshot. Hashes are not a general guarantee of privacy. Recipient acknowledgement, anchor reconciliation and an interactive synthetic tampering/restoration screen remain pending. See [TRUTHFUL_VERIFICATION.md](TRUTHFUL_VERIFICATION.md) and [TODO.md](TODO.md).
+**Check again** repeats the lookup. Expand technical details for observed hashes and contract information. Names, allocation linkage and raw file contents are not yet all covered by an immutable versioned snapshot. Hashes are not a general guarantee of privacy. New payouts support [durable anchor recovery](PAYOUT_ANCHORS.md). Funding/historical recovery, recipient acknowledgement and an interactive synthetic tampering/restoration screen remain pending. See [TRUTHFUL_VERIFICATION.md](TRUTHFUL_VERIFICATION.md) and [TODO.md](TODO.md).

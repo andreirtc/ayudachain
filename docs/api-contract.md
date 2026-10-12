@@ -151,6 +151,15 @@ See [DEMO_SESSIONS.md](DEMO_SESSIONS.md) for provisioning, local configuration, 
 
 ---
 
+### Payout anchor recovery
+
+New payout responses include nullable anchor_job: state (PENDING, SUBMITTED, CONFIRMED, FAILED), pinned chain_id/contract_address, candidate_tx_hash, attempts, safe error_code, updated_at, first confirmed_at and observed block number/hash/timestamp. Raw signed transactions, snapshot JSON and private deployment pin fields are never serialized. Older/seeded records return anchor_job=null and preserve their historical transaction metadata.
+
+- POST /api/distributions/{distribution_id}/anchor/retry is Disbursing-only, requires session CSRF/origin checks and own-barangay scope. Returns 200 with the existing payout/job; out-of-scope or missing records return 404; historical records without an envelope and a busy/unresolved signer return 409.
+- Recovery reads evidence before resending the same stored signed transaction. It cannot create a new payout, replacement nonce or changed request. SUBMITTED includes prepared/uncertain transactions and never claims mining. Only observed mined/canonical/full-record evidence yields CONFIRMED.
+- Ordinary payout request replay does not invoke recovery. New payout/job/audit data commit before a first anchoring attempt. Recorded amounts remain reserved when anchoring fails.
+- Confirmation observations are historical; current receipt verification still uses its independent outcomes. Local observations are not blockchain-protected history. See [PAYOUT_ANCHORS.md](PAYOUT_ANCHORS.md).
+
 ### 6. Blockchain Verification Tool
 - **Endpoint**: `POST /api/blockchain/verify`
   - Recomputes the local receipt hash and performs a read of the configured contract. No offline, missing-record, or fabricated verification fallback.

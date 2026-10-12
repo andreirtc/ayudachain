@@ -28,7 +28,7 @@ Staff register and review households, record payouts and inspect receipt evidenc
 ### 4. Truthful receipt verification
 - An actual configured-contract read yields verified, mismatch, no anchor found or verification unavailable. Failed reads never become verified.
 - The public check omits private household context. Permitted accounts can inspect local context and technical evidence.
-- Hash matching does not prove cash delivery or all identity/document fields. Anchor lifecycle, reconciliation, immutable versioned receipts and recipient acknowledgement remain pending.
+- Hash matching does not prove cash delivery or all identity/document fields. New payouts have [durable anchor recovery](docs/PAYOUT_ANCHORS.md). Funding/historical recovery, immutable versioned receipts and recipient acknowledgement remain pending.
 - The dashboard reports configured network/contract information; its controls do not change the network. See [current user guide](docs/USER_GUIDE.md).
 
 ---

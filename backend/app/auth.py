@@ -132,7 +132,7 @@ def authorize_request(request: Request):
         return
     actor = require_actor(request)
     if method in {"GET", "HEAD"}:
-        if (path == "/api/distributions" or path.startswith("/receipts/")) and actor.role == "BARANGAY":
+        if (path.startswith("/api/distributions") or path.startswith("/receipts/")) and actor.role == "BARANGAY":
             raise HTTPException(403, "Named payout records are not part of the barangay workflow.")
         if path.endswith("/reviews") and actor.role in {"BARANGAY", "DISBURSING"}:
             raise HTTPException(403, "Review evidence is not part of this account's workflow.")
@@ -144,7 +144,7 @@ def authorize_request(request: Request):
     allowed = {"DSWD"}
     if path == "/api/beneficiaries":
         allowed = {"DSWD", "BARANGAY"}
-    elif path == "/api/distributions/confirm":
+    elif path == "/api/distributions/confirm" or (path.startswith("/api/distributions/") and path.endswith("/anchor/retry")):
         allowed = {"DISBURSING"}
     if actor.role not in allowed:
         raise HTTPException(403, "This account cannot perform that action.")

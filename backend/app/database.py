@@ -12,8 +12,8 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 def init_db():
     if _schema_is_outdated():
         raise RuntimeError(
-            "The database was created by an older version of AyudaChain. Delete backend/ayudachain.db and "
-            "restart the chain and backend (see docs/WINDOWS_LOCAL.md, Reset)."
+            "The database was created by an older version of AyudaChain. Preserve it and use a compatible "
+            "isolated copy or a new synthetic database/chain (see docs/WINDOWS_LOCAL.md)."
         )
     Base.metadata.create_all(bind=engine)
     _migrate_payout_idempotency()
