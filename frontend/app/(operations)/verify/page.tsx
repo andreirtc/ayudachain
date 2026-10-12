@@ -1,9 +1,11 @@
 "use client";
 
 import React, { Suspense, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AlertTriangle, CheckCircle2, RefreshCw, ShieldCheck } from "lucide-react";
 import { verifyBlockchain, VerifyResponse, fetchDistributions, fetchBeneficiaries, Distribution, Beneficiary, formatPeso } from "@/lib/api";
+import { receiptVerificationHref, selectReceiptId } from "@/lib/receiptNavigation";
 
 const outcomes = {
   VERIFIED: { title: "Receipt hash verified", style: "bg-emerald-50 border-emerald-300 text-emerald-950" },
@@ -14,7 +16,9 @@ const outcomes = {
 
 function VerifyContent() {
   const searchParams = useSearchParams();
-  const initialId = searchParams?.get("distribution_id") || "DIST-0001";
+  const router = useRouter();
+  const requestedId = searchParams.get("distribution_id");
+  const [loadedReference, setLoadedReference] = useState<string | null | undefined>(undefined);
   const [distributions, setDistributions] = useState<Distribution[]>([]);
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
   const [selectedId, setSelectedId] = useState("");
@@ -29,18 +33,23 @@ function VerifyContent() {
   useEffect(() => {
     let cancelled = false;
     setLoadingRecords(true);
+    setLoadedReference(undefined);
     setError(null);
+    setSelectedId("");
+    setResult(null);
+    setChecking(false);
     Promise.all([fetchDistributions(), fetchBeneficiaries({ include_historical: true })])
       .then(([records, households]) => {
         if (cancelled) return;
         setDistributions(records);
         setBeneficiaries(households);
-        setSelectedId(records.some((record) => record.distribution_id === initialId) ? initialId : records[0]?.distribution_id || "");
+        setSelectedId(selectReceiptId(records, requestedId));
+        setLoadedReference(requestedId);
       })
       .catch((err) => { if (!cancelled) setError(err instanceof Error ? err.message : String(err)); })
       .finally(() => { if (!cancelled) setLoadingRecords(false); });
     return () => { cancelled = true; };
-  }, [initialId, reload]);
+  }, [requestedId, reload]);
 
   useEffect(() => {
     if (!selectedId) return;
@@ -56,9 +65,11 @@ function VerifyContent() {
     return () => { cancelled = true; };
   }, [selectedId, recheck]);
 
-  const activeDist = distributions.find((record) => record.distribution_id === selectedId);
+  const recordsReady = !loadingRecords && loadedReference === requestedId;
+  const missingReference = recordsReady && requestedId !== null && !distributions.some((record) => record.distribution_id === requestedId);
+  const activeDist = recordsReady ? distributions.find((record) => record.distribution_id === selectedId) : undefined;
   const activeBen = beneficiaries.find((household) => household.beneficiary_id === activeDist?.beneficiary_id);
-  const currentResult = result?.record_id === selectedId ? result : null;
+  const currentResult = activeDist && result?.record_id === selectedId ? result : null;
   const outcome = currentResult ? outcomes[currentResult.verification_status] : null;
 
   return (
@@ -70,21 +81,26 @@ function VerifyContent() {
       </div>
 
       <section className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-6 space-y-4">
-        {loadingRecords ? <p role="status" className="text-sm text-slate-500">Loading receipts...</p> : distributions.length === 0 && !error ? <p className="text-sm text-slate-600">No payout receipts are recorded yet.</p> : (
+        {missingReference && <div role="alert" className="p-3 bg-amber-50 border border-amber-300 rounded-lg text-sm text-amber-950">
+          <h2 className="font-semibold">Receipt not found</h2>
+          <p className="mt-1 break-all">No recorded payout matches {requestedId || "the empty receipt reference"}. Check the link or choose a receipt below.</p>
+        </div>}
+        {loadingRecords ? <p role="status" className="text-sm text-slate-500">Loading receipts...</p> : distributions.length === 0 && !error ? <p className="text-sm text-slate-600">No payout receipts are recorded yet. <Link href="/distributions" className="underline">View payouts</Link></p> : !recordsReady && !error ? <p role="status" className="text-sm text-slate-500">Loading receipts...</p> : (
           <div className="flex flex-col sm:flex-row gap-3 sm:items-end">
             <div className="flex-1">
               <label htmlFor="receipt-record" className="block text-sm font-semibold text-slate-700 mb-1">Receipt</label>
-              <select id="receipt-record" value={selectedId} disabled={loadingRecords || distributions.length === 0} onChange={(event) => { setResult(null); setSelectedId(event.target.value); }} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+              <select id="receipt-record" value={recordsReady ? selectedId : ""} disabled={!recordsReady || distributions.length === 0} onChange={(event) => { setResult(null); setSelectedId(""); router.replace(receiptVerificationHref(event.target.value), { scroll: false }); }} className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                {!selectedId && <option value="" disabled>Choose a recorded receipt</option>}
                 {distributions.map((record) => <option key={record.distribution_id} value={record.distribution_id}>{record.distribution_id}: {record.beneficiary_id} ({formatPeso(record.amount)})</option>)}
               </select>
             </div>
-            <button onClick={() => setRecheck((value) => value + 1)} disabled={checking || !selectedId || loadingRecords} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50">
+            <button onClick={() => setRecheck((value) => value + 1)} disabled={checking || !selectedId || !recordsReady} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50">
               <RefreshCw className={checking ? "w-4 h-4 animate-spin" : "w-4 h-4"} />Check again
             </button>
           </div>
         )}
         {error && <div role="alert" className="text-sm text-rose-700">{error} <button onClick={() => { setReload((value) => value + 1); setRecheck((value) => value + 1); }} className="underline">Retry</button></div>}
-        {checking && <p role="status" className="text-sm text-slate-600">Reading the blockchain receipt...</p>}
+        {checking && recordsReady && <p role="status" className="text-sm text-slate-600">Reading the blockchain receipt...</p>}
         {activeDist && <div className="p-3 bg-slate-50 rounded-lg text-sm text-slate-700 space-y-1">
           <p className="text-xs font-semibold uppercase text-slate-500">Recorded locally</p>
           <p>{activeBen?.household_name || activeDist.beneficiary_id}</p>

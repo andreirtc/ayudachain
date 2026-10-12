@@ -10,6 +10,7 @@ import {
 import { fetchDistributions, fetchBeneficiaries, fetchBatches, confirmDistribution, DistributionConfirmPayload, Distribution, Beneficiary, ReliefBatch, apiUrl, formatPeso } from "@/lib/api";
 import { useChainStatus, chainLabel } from "@/lib/useChainStatus";
 import { useRole } from "@/lib/roleContext";
+import { receiptVerificationHref } from "@/lib/receiptNavigation";
 
 export default function DistributionsPage() {
   const chain = useChainStatus();
@@ -378,29 +379,28 @@ export default function DistributionsPage() {
 
             {/* Confirmed Success Card */}
             {confirmedResult && step === "SUCCESS" && (
-              <div className="p-3.5 bg-emerald-50 border border-emerald-300 rounded-xl space-y-2 text-xs">
-                <div className="flex items-center gap-1.5 text-emerald-800 font-bold">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+              <div role="status" className="p-4 bg-blue-50 border border-blue-200 rounded-xl space-y-3 text-sm">
+                <div className="flex items-center gap-1.5 text-blue-950 font-bold">
+                  <CheckCircle2 className="w-4 h-4" />
                   Payout recorded
                 </div>
-                <div>
-                  <span className="text-slate-500 font-mono text-[10px]">RECEIPT INTEGRITY HASH:</span>
-                  <p className="font-mono text-[11px] text-slate-900 bg-white p-1.5 rounded border border-emerald-200 break-all">
-                    {confirmedResult.receipt_hash}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-slate-500 font-mono text-[10px]">POLYGON TRANSACTION HASH:</span>
-                  <p className="font-mono text-[11px] text-emerald-700 bg-white p-1.5 rounded border border-emerald-200 break-all">
-                    {confirmedResult.blockchain_tx_hash || "No anchor transaction recorded. Retrying the payout will return this record."}
-                  </p>
-                </div>
+                <p className="text-slate-800">{beneficiaries.find((household) => household.beneficiary_id === confirmedResult.beneficiary_id)?.household_name || confirmedResult.beneficiary_id} · {formatPeso(confirmedResult.amount)}</p>
+                <p className="text-xs text-slate-600 break-all">Receipt: {confirmedResult.distribution_id}</p>
+                <p className="text-xs text-slate-700">{confirmedResult.blockchain_tx_hash ? "An anchor transaction is recorded. Check this receipt for its current integrity result." : "No anchor transaction is recorded. The payout is saved; resubmitting it will not retry anchoring."}</p>
+                <p className="text-xs text-slate-600">Synthetic payout. A receipt check does not prove cash delivery.</p>
                 <Link
-                  href="/verify"
-                  className="block text-center py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs shadow transition mt-2"
+                  href={receiptVerificationHref(confirmedResult.distribution_id)}
+                  className="flex items-center justify-center gap-2 min-h-11 px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
                 >
-                  Verify Authenticity on Blockchain Tool →
+                  Check this receipt <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </Link>
+                <details className="text-xs text-slate-700">
+                  <summary className="cursor-pointer py-2 font-semibold">Receipt hash and transaction</summary>
+                  <dl className="space-y-2 mt-2">
+                    <div><dt className="font-semibold">Receipt hash</dt><dd className="font-mono break-all">{confirmedResult.receipt_hash}</dd></div>
+                    <div><dt className="font-semibold">Anchor transaction</dt><dd className="font-mono break-all">{confirmedResult.blockchain_tx_hash || "None recorded"}</dd></div>
+                  </dl>
+                </details>
               </div>
             )}
 
@@ -434,8 +434,8 @@ export default function DistributionsPage() {
         <div className="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
           <div className="flex justify-between items-center border-b border-slate-100 pb-3">
             <div>
-              <h2 className="font-bold text-sm text-slate-900">Confirmed Household Distributions</h2>
-              <p className="text-xs text-slate-500">Public trail of confirmed relief payments with on-chain proofs</p>
+              <h2 className="font-bold text-sm text-slate-900">Recorded payouts</h2>
+              <p className="text-xs text-slate-500">Open a receipt to check its current integrity.</p>
             </div>
             <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full">
               {distributions.length} Records
@@ -460,9 +460,9 @@ export default function DistributionsPage() {
                 </div>
 
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-semibold flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                    Anchored
+                  <span className="text-[10px] text-slate-700 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded font-semibold flex items-center gap-1">
+                    <Receipt className="w-3 h-3" aria-hidden="true" />
+                    {dist.blockchain_tx_hash ? "Anchor transaction recorded" : "No anchor transaction"}
                   </span>
 
                   <div className="flex items-center gap-2">
@@ -473,7 +473,7 @@ export default function DistributionsPage() {
                       <Eye className="w-3.5 h-3.5" /> View Receipt
                     </button>
                     <Link
-                      href={`/verify?distribution_id=${dist.distribution_id}`}
+                      href={receiptVerificationHref(dist.distribution_id)}
                       className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 text-xs"
                     >
                       Verify <ArrowRight className="w-3 h-3" />
@@ -522,7 +522,7 @@ export default function DistributionsPage() {
               </p>
               <div className="pt-2 flex justify-end">
                 <Link
-                  href={`/verify?distribution_id=${previewReceipt.distribution_id}`}
+                  href={receiptVerificationHref(previewReceipt.distribution_id)}
                   className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs shadow transition"
                 >
                   Verify Integrity On-Chain →
