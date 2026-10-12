@@ -24,6 +24,8 @@ import { useBrowserOnline } from "@/lib/useBrowserOnline";
 import { submitOnlinePayout } from "@/lib/payoutConnection";
 import { recoverPayoutAnchor } from "@/lib/api";
 import PayoutAnchorStatus from "@/components/PayoutAnchorStatus";
+import RegistryDialog from "@/components/RegistryDialog";
+import ReceiptDetails from "@/components/ReceiptDetails";
 
 export default function DistributionsPage() {
   const chain = useChainStatus();
@@ -635,62 +637,28 @@ export default function DistributionsPage() {
           )}
         </section>
       </div>
-      {/* Modal: View Receipt Preview & OCR Text */}
       {previewReceipt && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
-              <div>
-                <h3 className="font-bold text-base text-slate-900">
-                  Demo payout receipt
-                </h3>
-                <p className="text-xs text-slate-400 font-mono">
-                  ID: {previewReceipt.distribution_id}
-                </p>
-              </div>
-              <button
-                onClick={() => setPreviewReceipt(null)}
-                className="text-slate-400 hover:text-slate-600 font-bold"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Receipt Preview */}
-            <div className="bg-slate-100 rounded-xl p-4 flex justify-center border border-slate-200 mb-4">
-              {previewReceipt.receipt_file_path ? (
-                <img
-                  src={apiUrl(previewReceipt.receipt_file_path)}
-                  alt="Relief Receipt"
-                  className="max-h-96 rounded-lg shadow-sm border border-slate-300"
-                />
-              ) : (
-                <p className="text-sm text-slate-600">
-                  No household receipt image is available for this record. Its
-                  saved hash can still be checked.
-                </p>
+        <RegistryDialog
+          title="Payout receipt"
+          returnFocusId="payout-heading"
+          onClose={() => setPreviewReceipt(null)}
+        >
+          <div className="registry-dialog-content">
+            <ReceiptDetails
+              record={previewReceipt}
+              household={beneficiaries.find(
+                (b) => b.beneficiary_id === previewReceipt.beneficiary_id,
               )}
-            </div>
-
-            {/* OCR Extracted Text */}
-            <div className="space-y-2 text-xs">
-              <span className="font-bold text-slate-700 uppercase tracking-wider text-[10px]">
-                Normalized Content Hash (SHA-256 Digest)
-              </span>
-              <p className="font-mono text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded border border-emerald-200 break-all font-semibold">
-                {previewReceipt.receipt_hash}
-              </p>
-              <div className="pt-2 flex justify-end">
-                <Link
-                  href={receiptVerificationHref(previewReceipt.distribution_id)}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs shadow transition"
-                >
-                  Verify Integrity On-Chain →
-                </Link>
-              </div>
-            </div>
+              checkLink
+            />
+            <button
+              className="registry-button"
+              onClick={() => setPreviewReceipt(null)}
+            >
+              Back to payouts
+            </button>
           </div>
-        </div>
+        </RegistryDialog>
       )}
     </div>
   );
