@@ -39,7 +39,7 @@ class FakeChain:
     def allocate_fund(self, *args, **kwargs):
         return self._tx()
 
-    def confirm_distribution(self, batch_id, distribution_id, beneficiary_id, amount, receipt_hash):
+    def confirm_distribution(self, batch_id, distribution_id, beneficiary_id, amount_centavos, receipt_hash):
         self.receipts[distribution_id] = receipt_hash
         return self._tx()
 
@@ -142,6 +142,30 @@ class TestAyudaChainAPI(unittest.TestCase):
         res = self.client.post("/api/beneficiaries/upload-csv", json={"csv_content": ""})
         self.assertEqual(res.status_code, 200)
         self.assertGreater(res.json()["total_records_processed"], 0)
+
+    def test_amounts_are_exact_centavos(self):
+        dist = self.client.get("/api/distributions").json()[0]
+        self.assertEqual(dist["amount_centavos"], 500_000)
+        self.assertEqual(dist["amount"], 5000.0)
+
+        res = self.client.post("/api/allocations", json={
+            "allocation_id": "ALLOC-0100",
+            "batch_id": "RELIEF-2026-001",
+            "barangay_id": "BRGY-001",
+            "barangay_name": "San Isidro",
+            "amount": 0.1,
+        })
+        self.assertEqual(res.status_code, 201)
+        self.assertEqual(res.json()["amount_centavos"], 10)
+
+    def test_fractional_centavo_rejected(self):
+        res = self.client.post("/api/distributions/confirm", json={
+            "distribution_id": "DIST-0103",
+            "beneficiary_id": "BEN-0004",
+            "batch_id": "RELIEF-2026-001",
+            "amount": 5000.001,
+        })
+        self.assertEqual(res.status_code, 422)
 
     def test_dashboard_reports_unavailable_chain(self):
         original = blockchain_service.get_status

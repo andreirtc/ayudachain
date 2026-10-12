@@ -12,6 +12,7 @@ from app.models.entities import Base, ReliefBatch, Allocation, Beneficiary, Dist
 from app.services.hasher import compute_receipt_hash
 from app.services.receipt_generator import save_sample_receipt, DEMO_OCR_TEXT
 from app.services.blockchain import blockchain_service
+from app.money import format_peso
 
 def seed_database():
     init_db()
@@ -33,12 +34,12 @@ def seed_database():
     calamity_name = "Typhoon Salinlahi"
     source_agency = "DSWD Central Office"
     recipient_lgu = "Provincial Government of Albay"
-    total_fund = 10000000.0 # ₱10,000,000.00
+    total_fund = 1_000_000_000 # centavos (₱10,000,000.00)
 
     # Submit or record blockchain fund release
     bc_release = blockchain_service.release_fund(
         batch_id=batch_id,
-        amount=total_fund,
+        amount_centavos=total_fund,
         calamity_name=calamity_name,
         source_agency=source_agency
     )
@@ -51,7 +52,7 @@ def seed_database():
         source_agency=source_agency,
         recipient_lgu=recipient_lgu,
         purpose="Emergency Calamity Cash & Relief Food Pack Assistance",
-        amount=total_fund,
+        amount_centavos=total_fund,
         status="ACTIVE",
         blockchain_tx_hash=release_tx,
         created_at=now - timedelta(hours=3)
@@ -60,10 +61,10 @@ def seed_database():
 
     # 2. Barangay Allocations
     barangays = [
-        ("BRGY-001", "San Isidro", 2500000.0, 500),
-        ("BRGY-002", "Santa Elena", 2500000.0, 500),
-        ("BRGY-003", "San Roque", 2500000.0, 500),
-        ("BRGY-004", "Maligaya", 2500000.0, 500),
+        ("BRGY-001", "San Isidro", 250_000_000, 500),
+        ("BRGY-002", "Santa Elena", 250_000_000, 500),
+        ("BRGY-003", "San Roque", 250_000_000, 500),
+        ("BRGY-004", "Maligaya", 250_000_000, 500),
     ]
 
     for b_idx, (b_id, b_name, b_amt, b_count) in enumerate(barangays):
@@ -72,7 +73,7 @@ def seed_database():
             batch_id=batch_id,
             allocation_id=alloc_id,
             barangay_id=b_id,
-            amount=b_amt
+            amount_centavos=b_amt
         )
         alloc_tx = bc_alloc.get("txHash", f"0xalloc{b_idx+1}921efb37633dbe87ff1ce347d6a2b5895055472ee4b297d8df")
 
@@ -81,7 +82,7 @@ def seed_database():
             batch_id=batch_id,
             barangay_id=b_id,
             barangay_name=b_name,
-            amount=b_amt,
+            amount_centavos=b_amt,
             beneficiary_count=b_count,
             status="ALLOCATED",
             blockchain_tx_hash=alloc_tx,
@@ -92,8 +93,8 @@ def seed_database():
         db.add(AuditEvent(
             batch_id=batch_id,
             event_type="ALLOCATION",
-            description=f"Allocated ₱{b_amt:,.2f} to Barangay {b_name}",
-            amount=b_amt,
+            description=f"Allocated {format_peso(b_amt)} to Barangay {b_name}",
+            amount_centavos=b_amt,
             entity_id=alloc_id,
             blockchain_tx_hash=alloc_tx,
             timestamp=now - timedelta(hours=2, minutes=45 - b_idx*10)
@@ -162,11 +163,11 @@ def seed_database():
     # 4. Completed Distributions with Real Anchored Hashes
     # Initial verified distributions
     distributed_bens = [
-        ("DIST-0001", "BEN-0001", 5000.0, "Roberto Ramos", "San Isidro"),
-        ("DIST-0002", "BEN-0002", 5000.0, "Juan Dela Cruz", "San Isidro"),
-        ("DIST-0003", "BEN-0003", 5000.0, "Elena Bautista", "San Isidro"),
-        ("DIST-0004", "BEN-0008", 5000.0, "Rodrigo Mendoza", "Santa Elena"),
-        ("DIST-0005", "BEN-0009", 5000.0, "Teresa Villanueva", "Santa Elena"),
+        ("DIST-0001", "BEN-0001", 500_000, "Roberto Ramos", "San Isidro"),
+        ("DIST-0002", "BEN-0002", 500_000, "Juan Dela Cruz", "San Isidro"),
+        ("DIST-0003", "BEN-0003", 500_000, "Elena Bautista", "San Isidro"),
+        ("DIST-0004", "BEN-0008", 500_000, "Rodrigo Mendoza", "Santa Elena"),
+        ("DIST-0005", "BEN-0009", 500_000, "Teresa Villanueva", "Santa Elena"),
     ]
 
     for d_id, ben_id, amt, h_name, b_name in distributed_bens:
@@ -174,7 +175,7 @@ def seed_database():
             distribution_id=d_id,
             beneficiary_id=ben_id,
             batch_id=batch_id,
-            amount=amt,
+            amount_centavos=amt,
             ocr_text=DEMO_OCR_TEXT
         )
 
@@ -182,7 +183,7 @@ def seed_database():
             batch_id=batch_id,
             distribution_id=d_id,
             beneficiary_id=ben_id,
-            amount=amt,
+            amount_centavos=amt,
             receipt_hash=r_hash
         )
         dist_tx = bc_dist.get("txHash", f"0xdist{d_id.replace('DIST-', '')}87ff1ce347d6a2b5895055472ee4b297d8df933")
@@ -191,7 +192,7 @@ def seed_database():
             distribution_id=d_id,
             beneficiary_id=ben_id,
             batch_id=batch_id,
-            amount=amt,
+            amount_centavos=amt,
             verification_method="QR_VOUCHER_PHYSICAL_RECEIPT",
             receipt_hash=r_hash,
             receipt_file_path="/receipts/sample_relief_receipt.svg",
@@ -205,8 +206,8 @@ def seed_database():
         db.add(AuditEvent(
             batch_id=batch_id,
             event_type="DISTRIBUTION_CONFIRMED",
-            description=f"Disbursed ₱{amt:,.2f} to {h_name} ({ben_id}) — Receipt anchored on-chain",
-            amount=amt,
+            description=f"Disbursed {format_peso(amt)} to {h_name} ({ben_id}) — Receipt anchored on-chain",
+            amount_centavos=amt,
             entity_id=d_id,
             blockchain_tx_hash=dist_tx,
             timestamp=now - timedelta(minutes=45 - int(d_id[-1])*5)
