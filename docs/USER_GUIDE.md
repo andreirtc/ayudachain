@@ -22,7 +22,7 @@ In the top navigation bar, click the **Role Selector Dropdown** to toggle betwee
 
 ---
 
-### 1. Public Transparency Dashboard (`/`)
+### 1. Public Transparency Dashboard (`/dashboard`)
 
 The central command center providing macro-level transparency for active disaster operations (e.g., *Typhoon Salinlahi*, Province of Albay).
 

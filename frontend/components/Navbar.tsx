@@ -31,7 +31,7 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { name: "Public Dashboard", filipino: "Buod ng Ayuda", href: "/", icon: Layers },
+    { name: "Public Dashboard", filipino: "Buod ng Ayuda", href: "/dashboard", icon: Layers },
     { name: "Relief Batch", filipino: "Pondo ng Calamity", href: "/batch/RELIEF-2026-001", icon: ShieldCheck },
     { name: "Beneficiaries (AI)", filipino: "Listahan ng Evacuees", href: "/beneficiaries", icon: Users },
     { name: "Distributions", filipino: "Pamamahagi ng Pera", href: "/distributions", icon: Receipt },
