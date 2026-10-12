@@ -1,5 +1,7 @@
 # Payout retries
 
+Follow-up: [PAYOUT_ANCHORS.md](PAYOUT_ANCHORS.md) adds separate durable recovery for new payout anchors. Ordinary payout replay still never resubmits anchoring; older receipt hashes and accounting reservations remain preserved.
+
 Implemented 2026-10-12 as the next bounded section 3 task. Predecessor: [one payout per household per batch, PR #11](https://github.com/andreirtc/ayudachain/pull/11). All records and amounts remain synthetic.
 
 ## Request behavior

@@ -23,7 +23,7 @@ def unavailable(*args, **kwargs):
     return {"success": False, "error": "Isolated authentication test: chain not connected", "network": "Isolated auth test", "chainId": 31337, "contractAddress": config.CONTRACT_ADDRESS}
 
 
-for name in ("get_status", "release_fund", "allocate_fund", "confirm_distribution", "verify_receipt"):
+for name in ("get_status", "release_fund", "allocate_fund", "confirm_distribution", "verify_receipt", "payout_anchor"):
     setattr(blockchain_service, name, unavailable)
 
 from app.main import app

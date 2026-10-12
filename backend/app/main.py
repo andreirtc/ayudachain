@@ -19,7 +19,8 @@ from sqlalchemy.orm import Session
 from app import config
 from app.auth import router as auth_router, authorize_request, require_actor, optional_actor, scope_query, assert_household_scope, bind_reviewer
 from app.database import init_db, get_db
-from app.models.entities import ReliefBatch, Allocation, Beneficiary, BeneficiaryReview, Distribution, AuditEvent
+from app.models.entities import ReliefBatch, Allocation, Beneficiary, BeneficiaryReview, Distribution, AuditEvent, PayoutAnchorJob
+from app.services.payout_anchors import new_job, process_job
 from app.schemas.schemas import (
     DashboardStats, ReliefBatchCreate, ReliefBatchResponse,
     AllocationCreate, AllocationResponse,
@@ -751,6 +752,7 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session, idem
         status="CONFIRMED"
     )
     db.add(dist)
+    db.add(new_job(dist))
     audit = AuditEvent(
         batch_id=payload.batch_id,
         event_type="DISTRIBUTION_CONFIRMED",
@@ -780,27 +782,27 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session, idem
             return existing
         raise HTTPException(status_code=409, detail="A payout already exists for this household and batch.")
 
-    # Once recorded, retries return this payout and never submit another anchor.
-    # Anchor retry/reconciliation is a separate lifecycle operation (backlog 4).
-    try:
-        bc_res = blockchain_service.confirm_distribution(
-            batch_id=payload.batch_id,
-            allocation_id=allocation.allocation_id,
-            distribution_id=distribution_id,
-            beneficiary_id=payload.beneficiary_id,
-            amount_centavos=amount_c,
-            receipt_hash=receipt_hash
-        )
-    except Exception:
-        logging.getLogger(__name__).exception("Payout recorded but blockchain submission failed")
-        bc_res = {"success": False}
-    tx_hash = confirmed_transaction_hash(bc_res)
-    if tx_hash:
-        dist.blockchain_tx_hash = tx_hash
-        audit.blockchain_tx_hash = tx_hash
-        db.commit()
+    # Business replay never processes a job. Recovery has its own authorized route.
+    process_job(distribution_id)
     db.refresh(dist)
     return dist
+
+
+@app.post("/api/distributions/{distribution_id}/anchor/retry", response_model=DistributionResponse)
+def retry_payout_anchor(distribution_id: str, request: Request, db: Session = Depends(get_db)):
+    actor = require_actor(request)
+    dist = db.query(Distribution).filter_by(distribution_id=distribution_id).first()
+    if not dist:
+        raise HTTPException(404, "Payout not available to this account.")
+    assert_household_scope(actor, db.query(Beneficiary).filter_by(beneficiary_id=dist.beneficiary_id).first())
+    if not db.get(PayoutAnchorJob, distribution_id):
+        raise HTTPException(409, "This historical payout has no recovery envelope. Its receipt can still be verified.")
+    # Release the read session before another session claims/writes the durable lease.
+    db.rollback()
+    if not process_job(distribution_id):
+        raise HTTPException(409, "Another unresolved anchor owns the signer. Reconcile it before retrying this one.")
+    db.expire_all()
+    return distribution_projection(db.query(Distribution).filter_by(distribution_id=distribution_id).one(), actor)
 
 # --- Blockchain Verification API ---
 @app.post("/api/blockchain/verify", response_model=BlockchainVerifyResponse)

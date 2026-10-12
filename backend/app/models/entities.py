@@ -140,6 +140,46 @@ class Distribution(CentavoAmount, Base):
 
     batch = relationship("ReliefBatch", back_populates="distributions")
     beneficiary = relationship("Beneficiary", back_populates="distribution")
+    anchor_job = relationship("PayoutAnchorJob", uselist=False, lazy="select")
+
+
+class PayoutAnchorJob(Base):
+    """Durable payout submission; private envelope is never part of API schemas."""
+    __tablename__ = "payout_anchor_jobs"
+    distribution_id = Column(String(64), ForeignKey("distributions.distribution_id"), primary_key=True)
+    state = Column(String(16), nullable=False, default="PENDING")
+    snapshot_json = Column(Text, nullable=False)
+    chain_id = Column(Integer, nullable=False)
+    contract_address = Column(String(42), nullable=True)
+    pin_json = Column(Text, nullable=True)
+    raw_transaction = Column(Text, nullable=True)
+    candidate_tx_hash = Column(String(66), nullable=True)
+    attempts = Column(Integer, nullable=False, default=0)
+    error_code = Column(String(40), nullable=True)
+    updated_at = Column(String(40), nullable=False)
+    confirmed_at = Column(String(40), nullable=True)
+    block_number = Column(Integer, nullable=True)
+    block_hash = Column(String(66), nullable=True)
+    receipt_timestamp = Column(Integer, nullable=True)
+
+
+class AnchorSignerLease(Base):
+    __tablename__ = "anchor_signer_lease"
+    id = Column(Integer, primary_key=True)
+    owner = Column(String(64), nullable=False)
+    expires_at = Column(Integer, nullable=False)
+
+
+class AnchorObservation(Base):
+    __tablename__ = "anchor_observations"
+    id = Column(Integer, primary_key=True)
+    distribution_id = Column(String(64), nullable=False, index=True)
+    state = Column(String(16), nullable=False)
+    error_code = Column(String(40), nullable=True)
+    checked_at = Column(String(40), nullable=False)
+    transaction_hash = Column(String(66), nullable=True)
+    block_number = Column(Integer, nullable=True)
+    block_hash = Column(String(66), nullable=True)
 
 
 class AuditEvent(CentavoAmount, Base):
