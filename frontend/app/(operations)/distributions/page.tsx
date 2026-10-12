@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Receipt, CheckCircle2, Lock, ArrowRight, ShieldCheck, Upload,
   FileCheck, Sparkles, ExternalLink, RefreshCw, Eye, AlertTriangle, AlertCircle,
   Camera, QrCode, Wifi, WifiOff, X
 } from "lucide-react";
-import { fetchDistributions, fetchBeneficiaries, fetchBatches, confirmDistribution, Distribution, Beneficiary, ReliefBatch, apiUrl, formatPeso } from "@/lib/api";
+import { fetchDistributions, fetchBeneficiaries, fetchBatches, confirmDistribution, DistributionConfirmPayload, Distribution, Beneficiary, ReliefBatch, apiUrl, formatPeso } from "@/lib/api";
 import { useChainStatus, chainLabel } from "@/lib/useChainStatus";
 import { useRole } from "@/lib/roleContext";
 
@@ -24,7 +24,10 @@ export default function DistributionsPage() {
   const [amountStr, setAmountStr] = useState("");
   const numericAmount = parseFloat(amountStr) || 0;
   const [selectedReceipt, setSelectedReceipt] = useState("sample_relief_receipt.svg");
-  const [step, setStep] = useState<"IDLE" | "PREPARING" | "OFFCHAIN_STORED" | "ANCHORING" | "SUCCESS">("IDLE");
+  const [step, setStep] = useState<"IDLE" | "SUBMITTING" | "SUCCESS">("IDLE");
+  const submitting = useRef(false);
+  const pendingSubmission = useRef<{ key: string; payload: DistributionConfirmPayload; serialized: string } | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [confirmedResult, setConfirmedResult] = useState<Distribution | null>(null);
   const [previewReceipt, setPreviewReceipt] = useState<Distribution | null>(null);
 
@@ -46,8 +49,8 @@ export default function DistributionsPage() {
       setBatches(batchList);
       if (bList.length > 0) {
         // Find an un-distributed verified beneficiary or default to first
-        const candidate = bList.find((b) => b.verification_status === "VERIFIED") || bList[0];
-        setSelectedBenId(candidate.beneficiary_id);
+        const candidate = bList.find((b) => b.verification_status === "VERIFIED" && b.review_status === "APPROVED" && !dList.some((d) => d.beneficiary_id === b.beneficiary_id && d.batch_id === b.batch_id)) || bList[0];
+        setSelectedBenId((current) => current || candidate.beneficiary_id);
       }
     } catch (err) {
       console.error(err);
@@ -62,31 +65,35 @@ export default function DistributionsPage() {
 
   const handleDisburse = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedBenId) return;
+    if (!selectedBenId || submitting.current) return;
 
-    setStep("PREPARING");
+    submitting.current = true;
+    setSubmitError(null);
+    setConfirmedResult(null);
+    setStep("SUBMITTING");
     try {
-      await new Promise((r) => setTimeout(r, 400));
-      setStep("OFFCHAIN_STORED");
-      await new Promise((r) => setTimeout(r, 400));
-      setStep("ANCHORING");
-
-      const distId = `DIST-${Date.now().toString().slice(-4)}`;
-      const result = await confirmDistribution({
-        distribution_id: distId,
+      const payload: DistributionConfirmPayload = {
         beneficiary_id: selectedBenId,
         batch_id: selectedBeneficiaryObj?.batch_id || "",
         amount: numericAmount,
         receipt_filename: selectedReceipt
-      });
-
+      };
+      const serialized = JSON.stringify(payload);
+      if (pendingSubmission.current?.serialized !== serialized) {
+        const bytes = crypto.getRandomValues(new Uint8Array(16));
+        const key = "payout-" + Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+        pendingSubmission.current = { key, payload, serialized };
+      }
+      const request = pendingSubmission.current;
+      const result = await confirmDistribution(request.payload, request.key);
       setConfirmedResult(result);
       setStep("SUCCESS");
       await loadData();
     } catch (err) {
-      alert("Distribution failed: " + (err instanceof Error ? err.message : String(err)));
+      setSubmitError(err instanceof Error ? err.message : String(err));
+      setStep("IDLE");
     } finally {
-      if (step !== "SUCCESS") setStep("IDLE");
+      submitting.current = false;
     }
   };
 
@@ -227,6 +234,7 @@ export default function DistributionsPage() {
                 <label className="font-semibold text-slate-700">Select Beneficiary Household</label>
                 <button
                   type="button"
+                  disabled={step === "SUBMITTING"}
                   onClick={() => setShowScanner(true)}
                   className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded-lg border border-blue-200 transition cursor-pointer"
                 >
@@ -236,6 +244,7 @@ export default function DistributionsPage() {
               </div>
               <select
                 value={selectedBenId}
+                disabled={step === "SUBMITTING"}
                 onChange={(e) => setSelectedBenId(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
               >
@@ -273,6 +282,7 @@ export default function DistributionsPage() {
               <input
                 type="number"
                 value={amountStr}
+                disabled={step === "SUBMITTING"}
                 onChange={(e) => setAmountStr(e.target.value)}
                 placeholder={String(standardGrant || "")}
                 className={`w-full px-3 py-2 border rounded-lg text-sm font-bold focus:outline-none focus:ring-2 ${
@@ -354,12 +364,16 @@ export default function DistributionsPage() {
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl space-y-1.5 text-[11px]">
                 <div className="flex items-center gap-2 text-blue-900 font-bold">
                   {step !== "SUCCESS" && <RefreshCw className="w-3.5 h-3.5 animate-spin text-blue-600" />}
-                  {step === "PREPARING" && "1. Normalizing OCR text payload..."}
-                  {step === "OFFCHAIN_STORED" && "2. Storing receipt off-chain in database..."}
-                  {step === "ANCHORING" && "3. Submitting SHA-256 hash to the smart contract..."}
-                  {step === "SUCCESS" && "4. ✓ Successfully confirmed on-chain!"}
+                  {step === "SUBMITTING" && "Saving payout..."}
+                  {step === "SUCCESS" && "Payout recorded."}
                 </div>
               </div>
+            )}
+
+            {submitError && (
+              <p role="alert" className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-900">
+                {submitError} Retry the same details to retrieve an existing payout if the response was lost.
+              </p>
             )}
 
             {/* Confirmed Success Card */}
@@ -367,7 +381,7 @@ export default function DistributionsPage() {
               <div className="p-3.5 bg-emerald-50 border border-emerald-300 rounded-xl space-y-2 text-xs">
                 <div className="flex items-center gap-1.5 text-emerald-800 font-bold">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  Disbursement Confirmed &amp; Anchored!
+                  Payout recorded
                 </div>
                 <div>
                   <span className="text-slate-500 font-mono text-[10px]">RECEIPT INTEGRITY HASH:</span>
@@ -378,7 +392,7 @@ export default function DistributionsPage() {
                 <div>
                   <span className="text-slate-500 font-mono text-[10px]">POLYGON TRANSACTION HASH:</span>
                   <p className="font-mono text-[11px] text-emerald-700 bg-white p-1.5 rounded border border-emerald-200 break-all">
-                    {confirmedResult.blockchain_tx_hash || "Confirmed in Block"}
+                    {confirmedResult.blockchain_tx_hash || "No anchor transaction recorded. Retrying the payout will return this record."}
                   </p>
                 </div>
                 <Link
@@ -410,7 +424,7 @@ export default function DistributionsPage() {
                   ? "Household Not Approved for Payout"
                   : numericAmount > maxGrant
                   ? `Cannot Disburse: Above ${formatPeso(maxGrant)} Maximum`
-                  : "Confirm Aid & Anchor on Blockchain"}
+                  : submitError ? "Retry payout request" : "Record demo payout"}
               </button>
             )}
           </form>

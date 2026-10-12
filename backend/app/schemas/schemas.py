@@ -115,12 +115,12 @@ class BeneficiaryResponse(BaseModel):
 
 # --- Distribution ---
 class DistributionConfirmRequest(BaseModel):
-    distribution_id: str = Field(..., example="DIST-0001")
+    distribution_id: Optional[str] = Field(None, min_length=1, max_length=64, pattern=r"^[A-Za-z0-9][A-Za-z0-9._:-]*$", example="DIST-0001")
     beneficiary_id: str = Field(..., example="BEN-0001")
     batch_id: str = Field(..., example="RELIEF-2026-001")
     amount: Decimal = Field(..., gt=0, max_digits=15, decimal_places=2, example=5000.0)
     verification_method: str = "QR_VOUCHER_PHYSICAL_RECEIPT"
-    receipt_filename: Optional[str] = "sample_relief_receipt.jpg"
+    receipt_filename: Optional[str] = "sample_relief_receipt.svg"
     ocr_raw_text: Optional[str] = None
 
 class DistributionResponse(BaseModel):

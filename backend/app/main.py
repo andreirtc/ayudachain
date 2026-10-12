@@ -3,11 +3,13 @@ AyudaChain Main FastAPI Application
 Philippine Calamity Relief Digital Trail & Integrity Layer
 """
 
+import logging
 import os
 import threading
 from datetime import datetime
 from typing import List, Optional
-from fastapi import FastAPI, Depends, HTTPException, Body
+from uuid import uuid4
+from fastapi import FastAPI, Depends, HTTPException, Body, Header, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import PlainTextResponse
@@ -27,7 +29,7 @@ from app.schemas.schemas import (
 )
 from app.ai.entity_resolution import EntityResolutionEngine, process_csv_batch
 from app.ai.anomaly_detection import DistributionAnomalyDetector
-from app.services.hasher import compute_receipt_hash, verify_receipt_integrity
+from app.services.hasher import canonical_json, compute_sha256_hex, compute_receipt_hash, verify_receipt_integrity
 from app.money import to_centavos, centavos_to_pesos, format_peso
 from app.barangays import barangay_error
 from app.services.blockchain import blockchain_service
@@ -451,20 +453,59 @@ def get_distributions(batch_id: Optional[str] = None, db: Session = Depends(get_
         query = query.filter(Distribution.batch_id == batch_id)
     return query.order_by(Distribution.distributed_at.desc()).all()
 
-@app.post("/api/distributions/confirm", response_model=DistributionResponse, status_code=201)
-def confirm_distribution(payload: DistributionConfirmRequest, db: Session = Depends(get_db)):
-    with _funds_lock:
-        return _confirm_distribution(payload, db)
+def _payout_fingerprint(payload: DistributionConfirmRequest):
+    # Compare effective inputs, including receipt contents that are not hashed yet.
+    return compute_sha256_hex(canonical_json({
+        "distribution_id": payload.distribution_id,
+        "beneficiary_id": payload.beneficiary_id,
+        "batch_id": payload.batch_id,
+        "amount_centavos": to_centavos(payload.amount),
+        "verification_method": payload.verification_method,
+        "receipt_filename": payload.receipt_filename or "sample_relief_receipt.svg",
+        "ocr_raw_text": payload.ocr_raw_text or DEMO_OCR_TEXT,
+    }))
 
-def _confirm_distribution(payload: DistributionConfirmRequest, db: Session):
+
+def _replayed_payout(payload, db, idempotency_key, fingerprint):
+    existing = None
+    if idempotency_key:
+        existing = db.query(Distribution).filter(Distribution.idempotency_key == idempotency_key).first()
+    if existing is None and payload.distribution_id:
+        existing = db.query(Distribution).filter(Distribution.distribution_id == payload.distribution_id).first()
+    if existing is None:
+        return None
+    if existing.request_fingerprint != fingerprint:
+        raise HTTPException(status_code=409, detail="Idempotency key or distribution ID already used for a different request.")
+    if idempotency_key and existing.idempotency_key != idempotency_key:
+        raise HTTPException(status_code=409, detail="Distribution ID already used with another idempotency key.")
+    return existing
+
+
+@app.post("/api/distributions/confirm", response_model=DistributionResponse, status_code=201)
+def confirm_distribution(
+    payload: DistributionConfirmRequest,
+    response: Response,
+    db: Session = Depends(get_db),
+    idempotency_key: Optional[str] = Header(None, min_length=1, max_length=128, pattern=r"^[A-Za-z0-9][A-Za-z0-9._:-]*$"),
+):
+    if not idempotency_key and not payload.distribution_id:
+        raise HTTPException(status_code=422, detail="Supply Idempotency-Key or a stable distribution_id to retry safely.")
+    with _funds_lock:
+        return _confirm_distribution(payload, db, idempotency_key, response)
+
+
+def _confirm_distribution(payload: DistributionConfirmRequest, db: Session, idempotency_key: Optional[str], response: Response):
+    fingerprint = _payout_fingerprint(payload)
+    existing = _replayed_payout(payload, db, idempotency_key, fingerprint)
+    if existing is not None:
+        response.status_code = 200
+        return existing
+
+    distribution_id = payload.distribution_id or f"DIST-{uuid4()}"
     amount_c = to_centavos(payload.amount)
     ben = db.query(Beneficiary).filter(Beneficiary.beneficiary_id == payload.beneficiary_id).first()
     if not ben:
         raise HTTPException(status_code=404, detail="Beneficiary not found")
-
-    existing_dist = db.query(Distribution).filter(Distribution.distribution_id == payload.distribution_id).first()
-    if existing_dist:
-        raise HTTPException(status_code=400, detail="Distribution ID already exists")
 
     prior_payout = db.query(Distribution).filter(
         Distribution.beneficiary_id == payload.beneficiary_id,
@@ -517,7 +558,7 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session):
 
     # Compute Canonical SHA-256 Hash
     receipt_hash = compute_receipt_hash(
-        distribution_id=payload.distribution_id,
+        distribution_id=distribution_id,
         beneficiary_id=payload.beneficiary_id,
         batch_id=payload.batch_id,
         amount_centavos=amount_c,
@@ -525,12 +566,12 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session):
         verification_method=payload.verification_method
     )
 
-    # Store off-chain record first. The flush claims the (batch, beneficiary) unique
-    # constraint and holds the SQLite write lock, so a concurrent duplicate payout
-    # fails here instead of after anchoring.
+    # Reserve the payout and its retry identity before any blockchain side effect.
     receipt_filename = payload.receipt_filename or "sample_relief_receipt.svg"
     dist = Distribution(
-        distribution_id=payload.distribution_id,
+        distribution_id=distribution_id,
+        idempotency_key=idempotency_key,
+        request_fingerprint=fingerprint,
         beneficiary_id=payload.beneficiary_id,
         batch_id=payload.batch_id,
         allocation_id=allocation.allocation_id,
@@ -542,34 +583,12 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session):
         status="CONFIRMED"
     )
     db.add(dist)
-    try:
-        db.flush()
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(
-            status_code=409,
-            detail=f"Duplicate disbursement rejected: Beneficiary {payload.beneficiary_id} already has a payout in batch {ben.batch_id}."
-        )
-
-    # Submit anchor to the smart contract
-    bc_res = blockchain_service.confirm_distribution(
-        batch_id=payload.batch_id,
-        allocation_id=allocation.allocation_id,
-        distribution_id=payload.distribution_id,
-        beneficiary_id=payload.beneficiary_id,
-        amount_centavos=amount_c,
-        receipt_hash=receipt_hash
-    )
-    tx_hash = bc_res.get("txHash")
-    dist.blockchain_tx_hash = tx_hash
-
     audit = AuditEvent(
         batch_id=payload.batch_id,
         event_type="DISTRIBUTION_CONFIRMED",
-        description=f"Disbursed {format_peso(amount_c)} to {ben.household_name} ({payload.beneficiary_id}) — Receipt anchored on-chain",
+        description=f"Recorded fictional payout of {format_peso(amount_c)} to {ben.household_name} ({payload.beneficiary_id})",
         amount_centavos=amount_c,
-        entity_id=payload.distribution_id,
-        blockchain_tx_hash=tx_hash
+        entity_id=distribution_id,
     )
     db.add(audit)
 
@@ -582,7 +601,35 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session):
             entity_id=payload.beneficiary_id
         ))
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        # A different worker may have persisted the same request first.
+        existing = _replayed_payout(payload, db, idempotency_key, fingerprint)
+        if existing is not None:
+            response.status_code = 200
+            return existing
+        raise HTTPException(status_code=409, detail="A payout already exists for this household and batch.")
+
+    # Once recorded, retries return this payout and never submit another anchor.
+    # Anchor retry/reconciliation is a separate lifecycle operation (backlog 4).
+    try:
+        bc_res = blockchain_service.confirm_distribution(
+            batch_id=payload.batch_id,
+            allocation_id=allocation.allocation_id,
+            distribution_id=distribution_id,
+            beneficiary_id=payload.beneficiary_id,
+            amount_centavos=amount_c,
+            receipt_hash=receipt_hash
+        )
+    except Exception:
+        logging.getLogger(__name__).exception("Payout recorded but blockchain submission failed")
+        bc_res = {"success": False}
+    if bc_res.get("success") and bc_res.get("txHash"):
+        dist.blockchain_tx_hash = bc_res["txHash"]
+        audit.blockchain_tx_hash = bc_res["txHash"]
+        db.commit()
     db.refresh(dist)
     return dist
 
