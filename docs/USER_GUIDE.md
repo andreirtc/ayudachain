@@ -34,11 +34,11 @@ DSWD can also open **Analyze a CSV** under **More registry options**. Choose a f
 
 ## Record a synthetic payout
 
-1. Sign in as Disbursing and open /distributions. Select an eligible household within the assigned barangay.
-2. Check the active batch and fictional grant amount. The API enforces eligibility, the batch maximum, remaining allocation budget and one payout per linked household per batch.
+1. Sign in as Disbursing and open /distributions. Choose an eligible household within the assigned barangay. The form starts without a selected household. Other permitted roles inspect payout records without an entry form.
+2. Check the active batch, grant limit and remaining recorded allocation. The displayed allocation is a recorded budget, not cash on hand. The API enforces current eligibility, the batch maximum, remaining allocation budget and one payout per linked household per batch.
 3. Select **Record demo payout**. A recorded payout and a confirmed blockchain anchor are separate facts. Submission errors remain visible; uncertain retries keep the form's request identity during the current page session.
 4. Check the separate anchor status. For new payouts, Disbursing can use **Recover anchor** or **Recheck anchor**; this recovers the stored transaction and does not record another payout. After refresh, expand **Anchor status and recovery** on the recorded payout. Older records have no recovery job and remain available for receipt checks.
-5. Follow **Check this receipt** to inspect that exact payout. Unknown receipt links show **Receipt not found** and never substitute another payout.
+5. Follow **Check this receipt** to inspect that exact payout. Unknown receipt links show **Receipt not found** and never substitute another payout. **Record another payout** opens an empty entry form. Readers can search **Recorded payouts**, open their permitted receipts and refresh the list. See [payout UI behavior](UI_PAYOUT.md).
 
 Actual camera QR decoding and a persistent offline queue are not implemented. When the browser reports offline, submission is disabled and no payout is queued. Reconnecting does not submit automatically. The current retry identity is held in memory, not preserved across a page reload.
 

@@ -58,6 +58,7 @@ The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were 
 - [ ] Implement real QR decoding for synthetic DAFAC cards; retain clearly labeled sample selection as a demo convenience.
 - [ ] Implement persistent offline queue/cached required data, reconnect sync, retries, and conflict handling; clearly distinguish queued payouts from confirmed anchors.
 - [ ] Make registration, review, payout, and citizen verification a connected understandable journey; preserve useful existing styling.
+  - [x] Focus payout entry on Disbursing, show existing-API batch/allocation constraints, keep reader records separate, and retain saved payouts and same-request retries after lost responses. See [UI_PAYOUT.md](UI_PAYOUT.md).
   - [x] Connect a recorded payout to its exact receipt check; reject unknown receipt links without substituting another household's receipt. See [RECEIPT_HANDOFF.md](RECEIPT_HANDOFF.md). The wider journey and browser QA remain open.
   - [x] Add connected sign-in and role-relevant registration/review/payout/own-household/Auditor journeys, validated in real headless desktop and phone browsers. See [DEMO_SESSIONS.md](DEMO_SESSIONS.md). Complete claim/session/recipient workflows remain open.
 - [ ] Test mobile layouts, readable text, touch targets, keyboard/focus accessibility, loading/empty/error states, and prevention of accidental repeat submissions.

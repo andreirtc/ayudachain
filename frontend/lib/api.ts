@@ -52,6 +52,7 @@ export interface Allocation {
   barangay_id: string;
   barangay_name: string;
   amount: number;
+  amount_centavos?: number;
   beneficiary_count: number;
   status: string;
   blockchain_tx_hash?: string;

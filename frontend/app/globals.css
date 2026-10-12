@@ -111,6 +111,26 @@ h1, h2, h3 { font-weight: 700; }
 .registry-references { margin-top: 12px; display: grid; grid-template-columns: 130px 1fr; gap: 8px 12px; }
 .registry-references dt { color: #475569; }
 .registry-references dd { overflow-wrap: anywhere; }
+.workflow { font-size: 16px; }
+.workflow h2 { font-size: 21px; font-weight: 650; }
+.workflow h3 { font-size: 17px; font-weight: 650; overflow-wrap: anywhere; }
+.workflow-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 28px; align-items: start; }
+.workflow-panel { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; min-width: 0; }
+.workflow-context { background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 8px; color: #334155; }
+.workflow-facts { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px 16px; font-size: 14px; }
+.workflow-facts dt { color: #475569; }
+.workflow-facts dd { text-align: right; font-weight: 600; overflow-wrap: anywhere; }
+.workflow-amount { font-family: var(--font-heading), sans-serif; font-size: 30px; font-weight: 650; }
+.workflow-amount-small { font-size: 18px; font-weight: 650; white-space: nowrap; }
+.workflow-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.workflow-section-heading h3 { min-width: 0; }
+.workflow-record { padding: 20px 0; border-top: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 10px; }
+.workflow-record:first-child { border-top: 0; padding-top: 0; }
+.workflow-panel .registry-button { font-size: 15px; }
+@media (max-width: 900px) {
+  .workflow-columns { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .workflow-panel { padding: 20px; }
+}
 @media (max-width: 760px) {
   .registry-header { flex-direction: column; align-items: flex-start; gap: 16px; }
   .registry h1 { font-size: 26px; }
