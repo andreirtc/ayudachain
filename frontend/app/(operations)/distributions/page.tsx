@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { formatRecordedDate } from "@/lib/recordedDate";
 import Link from "next/link";
 import { RefreshCw } from "lucide-react";
 import {
@@ -579,7 +580,7 @@ export default function DistributionsPage() {
                     </p>
                   </div>
                   <p className="registry-muted">
-                    Recorded {new Date(dist.distributed_at).toLocaleString()}
+                    Recorded {formatRecordedDate(dist.distributed_at)}
                   </p>
                   <p className="registry-record-id break-all">
                     {dist.distribution_id}

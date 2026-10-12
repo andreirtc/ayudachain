@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { formatRecordedDate } from "@/lib/recordedDate";
 import Link from "next/link";
 import RegistryDialog from "@/components/RegistryDialog";
 import { useBrowserOnline } from "@/lib/useBrowserOnline";
@@ -783,7 +784,7 @@ export default function BeneficiariesPage() {
                         </p>
                         <p className="registry-muted">
                           {review.reviewed_by} ·{" "}
-                          {new Date(review.reviewed_at).toLocaleString()}
+                          {formatRecordedDate(review.reviewed_at)}
                         </p>
                         <p className="whitespace-pre-wrap break-words">
                           {review.reason}
