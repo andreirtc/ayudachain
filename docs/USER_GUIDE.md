@@ -22,13 +22,15 @@ Expand blockchain details for the configured network and contract. These values 
 
 ## Register and review a household
 
-1. Sign in as DSWD or Barangay and open /beneficiaries. **Register a household** accepts a fictional household name and barangay. Barangay accounts use their assigned area; their registrations stay pending for DSWD review.
+1. Sign in as DSWD or Barangay and open /beneficiaries. Search households or select **Needs review** for pending decisions, including registrations without duplicate flags. **Register a household** accepts a fictional household name and barangay. Barangay accounts use their assigned area; their registrations stay pending for DSWD review. A saved confirmation opens the household's current status.
 2. Registration checks for possible duplicate records. A similarity score is a suggestion for human review, not proof of a duplicate.
 3. DSWD inspects a household, enters a reason and chooses **Approve household**, **Reject household** or **Keep for review**. The server records the authenticated reviewer, time and prior evidence. Failure retains the reason; a saved review updates eligibility.
-4. For a confirmed duplicate, expand **Resolve as a duplicate**, choose another active household in the same batch and select **Mark duplicate and retain history**. The original ID, payouts and decisions remain retained. Enable **Include historical duplicates** to inspect those rows. A historical duplicate cannot receive a new payout or ordinary reapproval.
+4. For a confirmed duplicate, expand **Resolve as a duplicate**, choose another active household in the same batch and select **Mark duplicate and retain history**. The original ID, payouts and decisions remain retained. Under **More registry options**, enable **Include historical duplicates** to inspect those rows. A historical duplicate cannot receive a new payout or ordinary reapproval.
 5. DSWD, Auditor and the linked Beneficiary can expand permitted **Review history**. History is local database evidence, not blockchain-protected history.
 
-DSWD can also analyze a fictional CSV. The analyzer reports possible pairs; it does not import the masterlist. Validation, preview and explicit import remain future work. See [HUMAN_REVIEW.md](HUMAN_REVIEW.md) and [RETAINED_DUPLICATES.md](RETAINED_DUPLICATES.md).
+Expand **Review evidence** for permitted matching scores and saved notes, or **Record references** for household/DAFAC/batch IDs. Approved status still requires Disbursing to check batch, funding and prior payouts; approval alone does not record a payout. Office readers can follow **View payout records**. Disbursing explicitly selects the household on the payout screen.
+
+DSWD can also open **Analyze a CSV** under **More registry options**. Choose a fictional file or explicitly analyze the sample. The analyzer reports possible pairs; it does not import the masterlist. Validation, preview and explicit import remain future work. See [HUMAN_REVIEW.md](HUMAN_REVIEW.md), [RETAINED_DUPLICATES.md](RETAINED_DUPLICATES.md) and [registry UI behavior](REGISTRY_REVIEW_UX.md).
 
 ## Record a synthetic payout
 

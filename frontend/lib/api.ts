@@ -203,7 +203,7 @@ export async function registerBeneficiary(payload: {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error("Failed to register beneficiary");
+  if (!res.ok) throw await errorFrom(res, "Registration failed. Try again.");
   return res.json();
 }
 
@@ -332,7 +332,7 @@ export async function uploadBeneficiaryCsv(csvContent?: string): Promise<CsvBatc
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ csv_content: csvContent || "" })
   });
-  if (!res.ok) throw new Error("Failed to upload and analyze CSV");
+  if (!res.ok) throw await errorFrom(res, "CSV analysis failed. Try again.");
   return res.json();
 }
 
