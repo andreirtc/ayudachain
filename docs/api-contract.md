@@ -2,7 +2,7 @@
 
 Base URL: `http://127.0.0.1:8000`
 
-All endpoints return JSON and include CORS headers allowing multi-origin access.
+All endpoints return JSON (except the sample CSV) and include CORS headers allowing multi-origin access. The server is the FastAPI app in `backend/app/main.py`; interactive docs are at `/docs`. Errors use FastAPI's `{"detail": "..."}` shape.
 
 ---
 
@@ -82,6 +82,12 @@ All endpoints return JSON and include CORS headers allowing multi-origin access.
   ```
 - **Endpoint**: `POST /api/beneficiaries/{beneficiary_id}/verify`
   - Manually review & update status (`VERIFIED` or `REJECTED`).
+- **Endpoint**: `GET /api/beneficiaries/sample-csv`
+  - Returns the fictional sample masterlist as `text/csv`.
+- **Endpoint**: `POST /api/beneficiaries/upload-csv`
+  - Body: `{"csv_content": "..."}`. Runs pairwise duplicate analysis and returns flagged pairs. An empty body analyzes the sample CSV. Does not import records.
+- **Endpoint**: `DELETE /api/beneficiaries/{beneficiary_id}` (fallback: `POST /api/beneficiaries/{beneficiary_id}/delete`)
+  - Removes a beneficiary record and logs a `BENEFICIARY_DELETED` audit event.
 
 ---
 

@@ -114,12 +114,13 @@ npx hardhat run scripts/deploy.js --network localhost
 ```
 *Deployed Contract Address:* `0x5FbDB2315678afecb367f032d93F642f64180aa3`
 
-### 4. Start the Python Backend Server (Port 8000)
+### 4. Start the FastAPI Backend (Port 8000)
 ```bash
 cd backend
-python3 server.py 8000
+python3 -m pip install -r requirements.txt
+python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
-*Auto-initializes SQLite database with Typhoon Salinlahi (RELIEF-2026-001) test masterlist.*
+*Creates the SQLite database with the fictional Typhoon Salinlahi (RELIEF-2026-001) batch if it is empty. API docs: http://127.0.0.1:8000/docs*
 
 ### 5. Start the Next.js Frontend (Port 3000)
 ```bash
@@ -144,6 +145,7 @@ npx hardhat test
 ```bash
 cd backend
 python3 test_backend.py
+python3 test_api.py
 ```
 *Passes 100% of test cases: Levenshtein token sort matching, duplicate resolution, statistical anomaly detection, and cryptographic integrity verification.*
 

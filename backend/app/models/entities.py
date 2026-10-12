@@ -46,6 +46,7 @@ class Beneficiary(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     beneficiary_id = Column(String(64), unique=True, index=True, nullable=False) # e.g. BEN-0001
+    dafac_id = Column(String(64), nullable=True) # e.g. DFC-2026-0001
     household_name = Column(String(128), nullable=False) # e.g. Juan Dela Cruz
     barangay_id = Column(String(32), index=True, nullable=False)
     barangay_name = Column(String(128), nullable=False)

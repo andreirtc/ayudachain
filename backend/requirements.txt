@@ -1,22 +1,12 @@
-# AyudaChain Backend Requirements
-# 
-# NOTE: The primary backend server (server.py) runs out-of-the-box using 
-# Python 3.10+ standard library (http.server, sqlite3, json, urllib, hashlib)
-# with ZERO external pip dependencies required!
+# AyudaChain backend (FastAPI)
 #
-# To run with zero dependencies:
-#   python3 server.py 8000
-#
-# To run unit tests:
-#   python3 test_backend.py
-#
-# =========================================================================
-# Optional: Dependencies for the extended FastAPI server (app/main.py)
-# =========================================================================
+# Install:  python -m pip install -r requirements.txt
+# Run:      python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+# Test:     python test_backend.py && python test_api.py
 fastapi>=0.109.0,<1.0.0
 uvicorn[standard]>=0.27.0,<1.0.0
 pydantic>=2.6.0,<3.0.0
 sqlalchemy>=2.0.0,<3.0.0
-web3>=6.0.0,<7.0.0
-requests>=2.31.0,<3.0.0
-python-multipart>=0.0.9
+
+# Test only (FastAPI TestClient)
+httpx>=0.27.0,<1.0.0

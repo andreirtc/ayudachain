@@ -12,7 +12,7 @@ Status: unchecked items are planned, not implemented. Work through one numbered 
 - [x] Run existing tests and separate TypeScript checking (build currently ignores type errors); record baseline failures. Contract tests: 9 passing. Backend tests: 8 passing. Separate frontend TypeScript check passes. See [landing-page validation](PUBLIC_LANDING.md).
 
 ## 1. Select and consolidate the backend
-- [ ] Choose one supported API implementation: server.py versus FastAPI app/main.py; reconcile DAFAC/schema/endpoint differences and remove ambiguity in docs.
+- [x] Choose one supported API implementation: server.py versus FastAPI app/main.py; reconcile DAFAC/schema/endpoint differences and remove ambiguity in docs. Chose FastAPI (2026-10-12); ported CSV, delete, payout checks, and `dafac_id`; removed server.py; added `backend/test_api.py`.
 - [ ] Load configuration consistently; make frontend API URL and backend blockchain status authoritative. Choose local SQLite for development; decide hosted persistence when deploying.
 
 ## 2. Correct fictional fund accounting
