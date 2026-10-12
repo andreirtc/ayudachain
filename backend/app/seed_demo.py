@@ -11,7 +11,7 @@ from app.database import SessionLocal, init_db, engine
 from app.models.entities import Base, ReliefBatch, Allocation, Beneficiary, Distribution, AuditEvent
 from app.services.hasher import compute_receipt_hash
 from app.services.receipt_generator import save_sample_receipt, DEMO_OCR_TEXT
-from app.services.blockchain import blockchain_service
+from app.services.blockchain import blockchain_service, confirmed_transaction_hash
 from app.money import format_peso
 from app.barangays import DEMO_BARANGAYS
 
@@ -44,7 +44,7 @@ def seed_database():
         calamity_name=calamity_name,
         source_agency=source_agency
     )
-    release_tx = bc_release.get("txHash", "0x5f27ce6ea3d921efb37633dbe87ff1ce347d6a2b5895055472ee4b297d8df933")
+    release_tx = confirmed_transaction_hash(bc_release)
 
     batch = ReliefBatch(
         batch_id=batch_id,
@@ -75,7 +75,7 @@ def seed_database():
             barangay_id=b_id,
             amount_centavos=b_amt
         )
-        alloc_tx = bc_alloc.get("txHash", f"0xalloc{b_idx+1}921efb37633dbe87ff1ce347d6a2b5895055472ee4b297d8df")
+        alloc_tx = confirmed_transaction_hash(bc_alloc)
 
         alloc = Allocation(
             allocation_id=alloc_id,
@@ -160,8 +160,7 @@ def seed_database():
         )
         db.add(ben)
 
-    # 4. Completed Distributions with Real Anchored Hashes
-    # Initial verified distributions
+    # 4. Fictional payout records, with anchoring attempted on the configured chain
     distributed_bens = [
         ("DIST-0001", "BEN-0001", 500_000, "Roberto Ramos", "San Isidro"),
         ("DIST-0002", "BEN-0002", 500_000, "Juan Dela Cruz", "San Isidro"),
@@ -188,7 +187,7 @@ def seed_database():
             amount_centavos=amt,
             receipt_hash=r_hash
         )
-        dist_tx = bc_dist.get("txHash", f"0xdist{d_id.replace('DIST-', '')}87ff1ce347d6a2b5895055472ee4b297d8df933")
+        dist_tx = confirmed_transaction_hash(bc_dist)
 
         dist = Distribution(
             distribution_id=d_id,
@@ -209,7 +208,7 @@ def seed_database():
         db.add(AuditEvent(
             batch_id=batch_id,
             event_type="DISTRIBUTION_CONFIRMED",
-            description=f"Disbursed {format_peso(amt)} to {h_name} ({ben_id}) — Receipt anchored on-chain",
+            description=f"Recorded fictional payout of {format_peso(amt)} to {h_name} ({ben_id})",
             amount_centavos=amt,
             entity_id=d_id,
             blockchain_tx_hash=dist_tx,

@@ -75,12 +75,11 @@ AyudaChain creates a closed-loop, verifiable pipeline:
 - Field tablets cache signed distribution vouchers locally in browser storage (`IndexedDB` / Service Worker).
 - Vouchers queue locally and automatically batch-sync cryptographic hashes to Polygon as soon as Starlink or municipal hall internet reconnects.
 
-### 5. 🛡️ Public Blockchain Verification & Live Fraud Simulator (`/verify`)
-- Allows any citizen or auditor to verify receipt integrity against the immutable Polygon Smart Contract.
-- **Interactive Pitch Demonstrations**:
-  - **Scenario A: Pocketing Cash (Kupit sa Pera)** — Simulates an insider reducing a database record from ₱5,000 to ₱2,000 after payout. The system computes the current hash, detects the mismatch against the original on-chain seal, and raises an instant **RED CORRUPTION ALERT**.
-  - **Scenario B: Ghost Beneficiary Swap (Multong Claim)** — Simulates secretly swapping an evacuee's name in the database. Instantly caught by the cryptographic signature.
-  - **Restore Authentic Record** — Restores the genuine ₱5,000 record and confirms a 100% cryptographic match.
+### 5. Receipt hash verification (/verify)
+- Compares the locally calculated receipt hash with an actual read of the configured local-chain or testnet contract.
+- Shows **verified**, **mismatch**, **no anchor found**, or **verification unavailable**. Failed reads and missing anchors never become successful verification.
+- Identifies locally recorded household/amount information and provides observed hashes in optional technical details. A matching receipt hash does not prove physical cash delivery or household-name integrity.
+- The hardcoded fraud-scenario buttons have been removed. An interactive synthetic tampering/restoration workflow is still planned. See [truthful verification and validation](docs/TRUTHFUL_VERIFICATION.md).
 
 ### 6. ⚙️ Interactive Blockchain Ledger Customization Card (`/dashboard`)
 - Accessible directly on the homepage dashboard.

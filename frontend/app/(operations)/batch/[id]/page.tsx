@@ -109,7 +109,7 @@ export default function BatchDetailPage() {
         </div>
         <div className="font-mono text-xs text-slate-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex items-center gap-2">
           <span>TX:</span>
-          <span className="text-blue-300 font-semibold">{batch.blockchain_tx_hash || "0x5f27ce6ea3d921efb37633dbe87ff1ce347d6a2b5895055472ee4b297d8df933"}</span>
+          <span className="text-blue-300 font-semibold">{batch.blockchain_tx_hash || "No anchor transaction recorded"}</span>
         </div>
       </div>
 
@@ -151,7 +151,7 @@ export default function BatchDetailPage() {
                   </td>
                   <td className="px-5 py-3.5">
                     <span className="font-mono text-[11px] text-slate-500 bg-slate-100 px-2 py-1 rounded border border-slate-200">
-                      {alloc.blockchain_tx_hash ? `${alloc.blockchain_tx_hash.slice(0, 10)}...` : "Confirmed"}
+                      {alloc.blockchain_tx_hash ? `${alloc.blockchain_tx_hash.slice(0, 10)}...` : "No anchor recorded"}
                     </span>
                   </td>
                 </tr>

@@ -14,7 +14,7 @@ In the top navigation bar, click the **Role Selector Dropdown** to toggle betwee
 | :--- | :--- | :--- |
 | **Public Citizen (Mamamayan)** | Calamity survivors, evacuees, journalists, watchdog NGOs | • Read-only access to LGU allocations and national batch fund.<br>• Verify family voucher authenticity on the blockchain.<br>• Inspect public audit timeline. *(Cannot delete or disburse).* |
 | **Barangay Officer (Kawani)** | Barangay captains, kagawads, DSWD field workers, evacuation center desk | • Scan DAFAC QR codes with camera viewfinder.<br>• Record fictional payouts under each batch's grant policy.<br>• Cache vouchers offline during downed connectivity.<br>• Review suggested matches and retain linked duplicate records with their history. |
-| **COA / Auditor (Tagasuri)** | Commission on Audit officials, municipal internal auditors | • Full investigative audit access.<br>• Trigger real-world fraud simulations (Scenario A & B).<br>• Resolve confirmed duplicate matches with retained history.<br>• Inspect raw cryptographic hashes on Polygon blockchain. |
+| **COA / Auditor (Tagasuri)** | Commission on Audit officials, municipal internal auditors | • Full investigative audit access.<br>• Inspect actual receipt verification outcomes.<br>• Resolve confirmed duplicate matches with retained history.<br>• Inspect raw cryptographic hashes on Polygon blockchain. |
 
 ---
 
@@ -108,30 +108,19 @@ Designed specifically for field workers distributing cash grants at evacuation c
 
 ---
 
-### 5. Public Blockchain Integrity Checker (`/verify`)
+### 5. Receipt Hash Verification (/verify)
 
-The public anti-corruption tool empowering every citizen and auditor to verify voucher integrity against the blockchain.
+Open [the current preview](http://127.0.0.1:3001/verify), select a recorded receipt, and use **Check again** to repeat the blockchain lookup.
 
-#### How to Verify:
-1. Select any distribution voucher from the dropdown (e.g., `DIST-0001` for Danilo Soriano).
-2. Click **"Re-Check Authentic Record"**.
-3. The system compares the local database hash against the on-chain smart contract seal.
-4. **Green Result**:
-   > **`✓ 100% CRYPTOGRAPHIC MATCH`**  
-   > *The database record is identical to the immutable on-chain seal created on payout day.*
+- **Receipt hash verified**: A successful read found an anchor that matches the locally calculated receipt hash.
+- **Receipt hash mismatch**: A successful read found an existing different hash. Investigate the record and its source; a mismatch alone does not identify fraud or an actor.
+- **No receipt anchor found**: The configured contract was read successfully and has no receipt for that record.
+- **Verification unavailable**: The lookup could not be completed reliably. Check the configured chain/contract and retry.
 
-#### Real-Life Fraud Demonstrations (For Judges):
-- **Scenario A: Pocketing Cash (Kupit sa Pera)**:
-  - Click the **"Scenario A: Pocketing Cash"** button.
-  - Simulates a corrupt clerk altering the database record from ₱5,000 to ₱2,000.
-  - The system recalculates the local hash and compares it to the original on-chain hash created with ₱5,000.
-  - Result: Immediate **RED CORRUPTION ALERT** — *"TAMPERING DETECTED: The local database record was modified from ₱5,000.00 to ₱2,000.00 after on-chain anchoring!"*
-- **Scenario B: Ghost Beneficiary Swap (Multong Claim)**:
-  - Click the **"Scenario B: Ghost Beneficiary"** button.
-  - Simulates secretly changing the claimant's name in the database to an unauthorized relative.
-  - Result: Immediate **RED CORRUPTION ALERT** — *"TAMPERING DETECTED: The claimant name was secretly changed in the database!"*
-- **Restore Authentic Record**:
-  - Click **"✓ Restore Authentic Record"** to return to the genuine, verified ₱5,000 voucher.
+Household and amount information is labeled **Recorded locally**. Expand **Receipt hashes and contract** to inspect the calculated and observed hashes. Matching hashes do not prove physical cash delivery or household-name integrity. Missing data is shown as unavailable rather than filled with sample names, amounts, hashes, or timestamps.
+
+The previous fraud-scenario and restore buttons were hardcoded and have been removed. An interactive synthetic tampering/restoration workflow is still planned. See [verification scope and limits](TRUTHFUL_VERIFICATION.md).
+
 
 ---
 

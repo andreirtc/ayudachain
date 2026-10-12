@@ -46,7 +46,8 @@ class FakeChain:
 
     def verify_receipt(self, distribution_id, receipt_hash):
         onchain = self.receipts.get(distribution_id, "0x" + "0" * 64)
-        return {"success": True, "matched": onchain == receipt_hash, "onchainHash": onchain, "timestamp": 1}
+        from app import config
+        return {"success": True, "exists": distribution_id in self.receipts, "matched": onchain == receipt_hash, "onchainHash": onchain, "timestamp": 1, "chainId": config.CHAIN_ID, "network": "Test Chain", "contractAddress": config.CONTRACT_ADDRESS}
 
 
 fake_chain = FakeChain()
@@ -109,6 +110,7 @@ class TestAyudaChainAPI(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         data = res.json()
         self.assertTrue(data["is_verified"])
+        self.assertEqual(data["verification_status"], "VERIFIED")
         self.assertEqual(data["beneficiary_id"], "BEN-0004")
 
     def test_second_payout_to_same_household_rejected(self):
@@ -134,6 +136,103 @@ class TestAyudaChainAPI(unittest.TestCase):
         res = self.client.post("/api/blockchain/verify", json={"distribution_id": "DIST-0001"})
         self.assertEqual(res.status_code, 200)
         self.assertFalse(res.json()["is_verified"])
+        self.assertEqual(res.json()["verification_status"], "MISMATCH")
+
+    def test_unavailable_chain_never_verifies_local_receipt(self):
+        with patch.object(blockchain_service, "verify_receipt", return_value={"success": False, "error": "Offline", "matched": True}):
+            response = self.client.post("/api/blockchain/verify", json={"distribution_id": "DIST-0001"})
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["verification_status"], "UNAVAILABLE")
+        self.assertFalse(data["is_verified"])
+        self.assertIsNone(data["receipt_hash_onchain"])
+        self.assertIsNone(data["timestamp"])
+        self.assertIsNone(data["explorer_url"])
+
+    def test_successful_lookup_of_missing_anchor_is_unanchored(self):
+        fake_chain.receipts.pop("DIST-0001")
+        data = self.client.post("/api/blockchain/verify", json={"distribution_id": "DIST-0001"}).json()
+        self.assertEqual(data["verification_status"], "UNANCHORED")
+        self.assertFalse(data["is_verified"])
+        self.assertIsNone(data["receipt_hash_onchain"])
+        self.assertIsNone(data["timestamp"])
+
+    def test_receipt_lookup_exception_returns_unavailable(self):
+        with patch.object(blockchain_service, "verify_receipt", side_effect=TimeoutError("Unavailable")), self.assertLogs("app.main", level="ERROR"):
+            data = self.client.post("/api/blockchain/verify", json={"distribution_id": "DIST-0001"}).json()
+        self.assertEqual(data["verification_status"], "UNAVAILABLE")
+        self.assertFalse(data["is_verified"])
+
+    def test_malformed_or_inconsistent_chain_evidence_never_verifies(self):
+        from app import config
+        local = fake_chain.receipts["DIST-0001"]
+        valid = {"success": True, "exists": True, "matched": True, "onchainHash": local, "timestamp": 1, "chainId": config.CHAIN_ID, "contractAddress": config.CONTRACT_ADDRESS}
+        mutations = (
+            {"success": "true"}, {"exists": "true"}, {"onchainHash": "0xmalformed"},
+            {"matched": "true"}, {"timestamp": None}, {"timestamp": 0}, {"matched": False},
+            {"onchainHash": "0x" + "a" * 64}, {"chainId": None}, {"contractAddress": None},
+        )
+        for changed in mutations:
+            with self.subTest(changed=changed), patch.object(blockchain_service, "verify_receipt", return_value={**valid, **changed}):
+                data = self.client.post("/api/blockchain/verify", json={"distribution_id": "DIST-0001"}).json()
+                self.assertEqual(data["verification_status"], "UNAVAILABLE")
+                self.assertFalse(data["is_verified"])
+
+    def test_missing_record_cannot_verify_even_if_bridge_claims_match(self):
+        from app import config
+        response = {"success": True, "exists": False, "matched": True, "onchainHash": fake_chain.receipts["DIST-0001"], "timestamp": 1, "chainId": config.CHAIN_ID, "contractAddress": config.CONTRACT_ADDRESS}
+        with patch.object(blockchain_service, "verify_receipt", return_value=response):
+            data = self.client.post("/api/blockchain/verify", json={"distribution_id": "DIST-0001"}).json()
+        self.assertEqual(data["verification_status"], "UNANCHORED")
+        self.assertFalse(data["is_verified"])
+        self.assertIsNone(data["receipt_hash_onchain"])
+
+    def test_wrong_chain_or_contract_cannot_verify_matching_hash(self):
+        from app import config
+        valid = {"success": True, "exists": True, "matched": True, "onchainHash": fake_chain.receipts["DIST-0001"], "timestamp": 1, "chainId": config.CHAIN_ID, "contractAddress": config.CONTRACT_ADDRESS}
+        for changed in ({"chainId": 1}, {"contractAddress": "0x" + "f" * 40}):
+            with self.subTest(changed=changed), patch.object(blockchain_service, "verify_receipt", return_value={**valid, **changed}):
+                data = self.client.post("/api/blockchain/verify", json={"distribution_id": "DIST-0001"}).json()
+                self.assertEqual(data["verification_status"], "UNAVAILABLE")
+                self.assertFalse(data["is_verified"])
+                self.assertIsNone(data["receipt_hash_onchain"])
+
+    def test_real_local_record_tamper_yields_mismatch(self):
+        from app.database import SessionLocal
+        from app.models.entities import Distribution
+        with SessionLocal() as db:
+            db.query(Distribution).filter_by(distribution_id="DIST-0001").update({"amount_centavos": 200_000})
+            db.commit()
+        data = self.client.post("/api/blockchain/verify", json={"distribution_id": "DIST-0001"}).json()
+        self.assertEqual(data["verification_status"], "MISMATCH")
+        self.assertFalse(data["is_verified"])
+        self.assertNotEqual(data["receipt_hash_local"], data["receipt_hash_onchain"])
+
+    def test_unknown_local_record_is_not_a_missing_chain_anchor(self):
+        response = self.client.post("/api/blockchain/verify", json={"distribution_id": "DIST-NOPE"})
+        self.assertEqual(response.status_code, 404)
+
+    def test_failed_release_and_allocation_do_not_store_fake_hashes(self):
+        with patch.object(blockchain_service, "release_fund", return_value={"success": False, "txHash": "0x" + "f" * 64}):
+            self._release("RELIEF-OFFLINE", 10000)
+        batch = self.client.get("/api/batches/RELIEF-OFFLINE").json()["batch"]
+        self.assertIsNone(batch["blockchain_tx_hash"])
+        with patch.object(blockchain_service, "allocate_fund", return_value={"success": False, "txHash": "0x" + "f" * 64}):
+            allocation = self._allocate("ALLOC-OFFLINE", "RELIEF-OFFLINE", 1000)
+        self.assertEqual(allocation.status_code, 201)
+        self.assertIsNone(allocation.json()["blockchain_tx_hash"])
+
+    def test_seed_with_failed_chain_keeps_records_without_fabricated_anchors(self):
+        failed = {"success": False, "txHash": "0x" + "f" * 64}
+        with patch.object(blockchain_service, "release_fund", return_value=failed), patch.object(blockchain_service, "allocate_fund", return_value=failed), patch.object(blockchain_service, "confirm_distribution", return_value=failed):
+            self.assertEqual(self.client.post("/api/demo/reset").status_code, 200)
+        batch = self.client.get("/api/batches/RELIEF-2026-001").json()
+        self.assertIsNone(batch["batch"]["blockchain_tx_hash"])
+        self.assertTrue(all(a["blockchain_tx_hash"] is None for a in batch["allocations"]))
+        self.assertTrue(all(d["blockchain_tx_hash"] is None for d in self.client.get("/api/distributions").json()))
+        events = self.client.get("/api/audit-trail/RELIEF-2026-001").json()
+        self.assertTrue(all(e["blockchain_tx_hash"] is None for e in events))
+        self.assertFalse(any("anchored on-chain" in e["description"] for e in events))
 
     def test_csv_sample_and_upload(self):
         res = self.client.get("/api/beneficiaries/sample-csv")

@@ -32,7 +32,7 @@ from app.ai.anomaly_detection import DistributionAnomalyDetector
 from app.services.hasher import canonical_json, compute_sha256_hex, compute_receipt_hash, verify_receipt_integrity
 from app.money import to_centavos, centavos_to_pesos, format_peso
 from app.barangays import barangay_error
-from app.services.blockchain import blockchain_service
+from app.services.blockchain import blockchain_service, confirmed_transaction_hash, is_hex_hash
 from app.services.receipt_generator import save_sample_receipt, DEMO_OCR_TEXT
 from app.seed_demo import seed_database, seed_if_empty
 
@@ -188,7 +188,7 @@ def release_fund(payload: ReliefBatchCreate, db: Session = Depends(get_db)):
         calamity_name=payload.calamity_name,
         source_agency=payload.source_agency
     )
-    tx_hash = bc_res.get("txHash")
+    tx_hash = confirmed_transaction_hash(bc_res)
 
     batch = ReliefBatch(
         batch_id=payload.batch_id,
@@ -269,7 +269,7 @@ def _create_allocation(payload: AllocationCreate, db: Session):
         barangay_id=payload.barangay_id,
         amount_centavos=amount_c
     )
-    tx_hash = bc_res.get("txHash")
+    tx_hash = confirmed_transaction_hash(bc_res)
 
     alloc = Allocation(
         allocation_id=payload.allocation_id,
@@ -706,9 +706,10 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session, idem
     except Exception:
         logging.getLogger(__name__).exception("Payout recorded but blockchain submission failed")
         bc_res = {"success": False}
-    if bc_res.get("success") and bc_res.get("txHash"):
-        dist.blockchain_tx_hash = bc_res["txHash"]
-        audit.blockchain_tx_hash = bc_res["txHash"]
+    tx_hash = confirmed_transaction_hash(bc_res)
+    if tx_hash:
+        dist.blockchain_tx_hash = tx_hash
+        audit.blockchain_tx_hash = tx_hash
         db.commit()
     db.refresh(dist)
     return dist
@@ -737,28 +738,56 @@ def verify_blockchain_record(payload: BlockchainVerifyRequest, db: Session = Dep
         verification_method=dist.verification_method
     )
 
-    # 2. Query smart contract for anchored hash
-    bc_res = blockchain_service.verify_receipt(dist.distribution_id, local_recalculated_hash)
-    onchain_hash = bc_res.get("onchainHash", "0x" + "0"*64)
-    matched = bc_res.get("matched", False)
+    # A successful contract read is required; local hashes alone prove no anchor.
+    try:
+        bc_res = blockchain_service.verify_receipt(dist.distribution_id, local_recalculated_hash)
+    except Exception:
+        logging.getLogger(__name__).exception("Blockchain receipt lookup failed")
+        bc_res = {"success": False}
 
-    # Compare
-    is_valid, msg = verify_receipt_integrity(local_recalculated_hash, onchain_hash)
-
-    status_info = blockchain_service.get_status()
+    outcome = "UNAVAILABLE"
+    message = "Blockchain verification is unavailable. Check the configured chain and contract, then retry."
+    onchain_hash = None
+    timestamp = None
+    observed_chain = bc_res.get("chainId")
+    correct_chain = type(observed_chain) is int and observed_chain == config.CHAIN_ID
+    observed_contract = bc_res.get("contractAddress")
+    correct_contract = isinstance(observed_contract, str) and bool(config.CONTRACT_ADDRESS) and observed_contract.lower() == config.CONTRACT_ADDRESS.lower()
+    if bc_res.get("success") is True and correct_chain and correct_contract:
+        if bc_res.get("exists") is False:
+            outcome = "UNANCHORED"
+            message = "No receipt anchor exists for this record on the configured blockchain."
+        elif bc_res.get("exists") is True and is_hex_hash(bc_res.get("onchainHash")) and type(bc_res.get("matched")) is bool and type(bc_res.get("timestamp")) is int and bc_res["timestamp"] > 0:
+            onchain_hash = bc_res["onchainHash"]
+            timestamp = bc_res["timestamp"]
+            hashes_match, _ = verify_receipt_integrity(local_recalculated_hash, onchain_hash)
+            if hashes_match and bc_res["matched"]:
+                outcome = "VERIFIED"
+                message = "The locally calculated receipt hash matches the blockchain anchor."
+            elif not hashes_match and not bc_res["matched"]:
+                outcome = "MISMATCH"
+                message = "The locally calculated receipt hash differs from the blockchain anchor."
+            else:
+                message = "The blockchain lookup returned inconsistent evidence. Retry verification."
+    elif observed_chain is not None and not correct_chain:
+        message = "The connected chain differs from the configured chain. Verification is unavailable."
+    elif observed_contract is not None and not correct_contract:
+        message = "The lookup did not use the configured contract. Verification is unavailable."
 
     return BlockchainVerifyResponse(
         record_id=dist.distribution_id,
         beneficiary_id=dist.beneficiary_id,
         receipt_hash_local=local_recalculated_hash,
         receipt_hash_onchain=onchain_hash,
-        is_verified=matched and is_valid,
+        verification_status=outcome,
+        is_verified=outcome == "VERIFIED",
+        # Historical transaction metadata is not proof of an anchor or transaction confirmation.
         blockchain_tx_hash=dist.blockchain_tx_hash,
-        timestamp=bc_res.get("timestamp"),
-        network=status_info.get("network", config.NETWORK_NAME),
-        contract_address=bc_res.get("contractAddress") or status_info.get("contractAddress"),
-        explorer_url=f"{config.EXPLORER_TX_URL}{dist.blockchain_tx_hash}" if dist.blockchain_tx_hash and config.EXPLORER_TX_URL else None,
-        status_message=msg
+        timestamp=timestamp,
+        network=bc_res.get("network", config.NETWORK_NAME),
+        contract_address=bc_res.get("contractAddress", config.CONTRACT_ADDRESS),
+        explorer_url=None,
+        status_message=message,
     )
 
 # --- Audit Trail API ---

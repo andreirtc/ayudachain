@@ -4,6 +4,9 @@ Tests AI entity resolution, anomaly detection, hashing pipeline, and API models.
 """
 
 import unittest
+from unittest.mock import patch
+from types import SimpleNamespace
+import subprocess
 import os
 import sys
 
@@ -117,6 +120,84 @@ class TestMoney(unittest.TestCase):
         self.assertEqual(centavos_to_str(500_000), "5000.00")
         self.assertEqual(centavos_to_str(5), "0.05")
         self.assertEqual(format_peso(1_000_000_000), "₱10,000,000.00")
+
+class TestBlockchainEvidence(unittest.TestCase):
+    def setUp(self):
+        from app.services.blockchain import BlockchainService
+        self.service = BlockchainService()
+        self.service.contract_address = "0x" + "1" * 40
+
+    def test_failed_writes_preserve_failure_without_hash(self):
+        failure = {"success": False, "error": "Chain unavailable"}
+        with patch.object(self.service, "_execute_cli", return_value=failure):
+            results = [
+                self.service.release_fund("BATCH", 100, "Fictional flood", "Demo agency"),
+                self.service.allocate_fund("BATCH", "ALLOC", "BRGY", 100),
+                self.service.confirm_distribution("BATCH", "ALLOC", "DIST", "BEN", 100, "0x" + "1" * 64),
+            ]
+        for result in results:
+            self.assertEqual(result, failure)
+            self.assertNotIn("txHash", result)
+
+    def test_missing_anchor_is_not_verified(self):
+        observed = {"success": True, "exists": False, "matched": False, "onchainHash": "0x" + "0" * 64, "timestamp": 0}
+        with patch.object(self.service, "_execute_cli", return_value=observed):
+            result = self.service.verify_receipt("DIST", "0x" + "a" * 64)
+        self.assertEqual(result, observed)
+        self.assertFalse(result["matched"])
+        self.assertFalse(result["exists"])
+
+    def test_offline_receipt_lookup_never_claims_evidence(self):
+        observed = {"success": False, "error": "Offline"}
+        with patch.object(self.service, "_execute_cli", return_value=observed):
+            result = self.service.verify_receipt("DIST", "0x" + "a" * 64)
+        self.assertEqual(result, observed)
+        self.assertNotIn("matched", result)
+        self.assertNotIn("onchainHash", result)
+        self.assertNotIn("timestamp", result)
+
+    def test_cli_timeout_returns_explicit_failure(self):
+        with patch("app.services.blockchain.subprocess.run", side_effect=subprocess.TimeoutExpired("node", 8)):
+            result = self.service.verify_receipt("DIST", "0x" + "a" * 64)
+        self.assertFalse(result["success"])
+        self.assertIn("timed out", result["error"])
+        self.assertNotIn("txHash", result)
+
+    def test_nonzero_process_success_output_is_rejected(self):
+        response = SimpleNamespace(returncode=1, stdout='{"success":true,"txHash":"0xpretend"}', stderr="Failed")
+        with patch("app.services.blockchain.subprocess.run", return_value=response):
+            result = self.service.get_status()
+        self.assertFalse(result["success"])
+        self.assertNotIn("txHash", result)
+
+    def test_malformed_process_output_is_rejected(self):
+        for stdout in ("no result", '{"success": "true"}', '{invalid JSON}', '{"matched":true}'):
+            with self.subTest(stdout=stdout), patch("app.services.blockchain.subprocess.run", return_value=SimpleNamespace(returncode=0, stdout=stdout, stderr="")):
+                self.assertFalse(self.service.verify_receipt("DIST", "0x" + "a" * 64)["success"])
+
+    def test_missing_contract_configuration_does_not_spawn_guessing_client(self):
+        self.service.contract_address = None
+        with patch("app.services.blockchain.subprocess.run") as execute:
+            result = self.service.get_status()
+        self.assertFalse(result["success"])
+        execute.assert_not_called()
+
+    def test_transaction_hash_requires_success_and_valid_shape(self):
+        from app.services.blockchain import confirmed_transaction_hash
+        valid = "0x" + "a" * 64
+        self.assertEqual(confirmed_transaction_hash({"success": True, "txHash": valid}), valid)
+        for payload in ({"success": False, "txHash": valid}, {"success": "true", "txHash": valid}, {"success": 1, "txHash": valid}, {"success": True}, {"success": True, "txHash": "0xpretend"}):
+            self.assertIsNone(confirmed_transaction_hash(payload))
+
+    def test_successful_process_evidence_is_passed_through(self):
+        from app import config
+        observed = {"success": True, "exists": False, "matched": False, "chainId": config.CHAIN_ID}
+        response = SimpleNamespace(returncode=0, stdout="log line\n" + canonical_json(observed), stderr="")
+        with patch("app.services.blockchain.subprocess.run", return_value=response) as execute:
+            result = self.service.verify_receipt("DIST", "0x" + "a" * 64)
+        self.assertEqual(result, observed)
+        self.assertEqual(execute.call_args.kwargs["env"]["CHAIN_ID"], str(config.CHAIN_ID))
+
 
 if __name__ == "__main__":
     unittest.main()

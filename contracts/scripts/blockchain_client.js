@@ -40,11 +40,27 @@ function toBytes32(str) {
   return ethers.encodeBytes32String(str.slice(0, 31));
 }
 
-async function getContract() {
+let chainContext = { contractAddress: CONTRACT_ADDRESS };
+
+async function getContract(readOnly = false) {
   const provider = new ethers.JsonRpcProvider(RPC_URL);
-  const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
-  const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, wallet);
-  return { provider, wallet, contract };
+  const network = await provider.getNetwork();
+  const chainId = Number(network.chainId);
+  chainContext = {
+    chainId,
+    network: chainId === 31337 ? "Local EVM" : chainId === 80002 ? "Polygon Amoy" : "Chain " + chainId,
+    contractAddress: CONTRACT_ADDRESS,
+  };
+  if (process.env.CHAIN_ID && chainId !== Number(process.env.CHAIN_ID)) {
+    throw new Error("Connected chain does not match configured CHAIN_ID.");
+  }
+  if (!abi.length) throw new Error("Contract ABI is unavailable.");
+  if (await provider.getCode(CONTRACT_ADDRESS) === "0x") {
+    throw new Error("No contract is deployed at the configured address.");
+  }
+  const runner = readOnly ? provider : new ethers.Wallet(PRIVATE_KEY, provider);
+  const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, runner);
+  return { provider, contract };
 }
 
 async function main() {
@@ -52,22 +68,12 @@ async function main() {
   const command = args[0];
 
   try {
+    const { provider, contract } = await getContract(command === "status" || command === "verifyReceipt");
     if (command === "status") {
-      const provider = new ethers.JsonRpcProvider(RPC_URL);
-      const network = await provider.getNetwork();
       const blockNumber = await provider.getBlockNumber();
-      console.log(JSON.stringify({
-        success: true,
-        network: RPC_URL.includes("amoy") ? "Polygon Amoy" : "Local EVM",
-        chainId: Number(network.chainId),
-        blockNumber: Number(blockNumber),
-        contractAddress: CONTRACT_ADDRESS,
-        explorerUrl: RPC_URL.includes("amoy") ? `https://amoy.polygonscan.com/address/${CONTRACT_ADDRESS}` : null
-      }));
+      console.log(JSON.stringify({ success: true, ...chainContext, blockNumber: Number(blockNumber) }));
       return;
     }
-
-    const { provider, wallet, contract } = await getContract();
 
     if (command === "releaseFund") {
       // args: batchId, amount (integer centavos), calamityName, sourceAgency
@@ -76,6 +82,7 @@ async function main() {
       const amtCentavos = BigInt(amount);
       const tx = await contract.releaseFund(bId, amtCentavos, calamityName, sourceAgency);
       const receipt = await tx.wait();
+      if (!receipt || receipt.status !== 1) throw new Error("Transaction was not confirmed successfully.");
 
       console.log(JSON.stringify({
         success: true,
@@ -94,6 +101,7 @@ async function main() {
       const amtCentavos = BigInt(amount);
       const tx = await contract.allocateFund(bId, aId, brgyId, amtCentavos);
       const receipt = await tx.wait();
+      if (!receipt || receipt.status !== 1) throw new Error("Transaction was not confirmed successfully.");
 
       console.log(JSON.stringify({
         success: true,
@@ -114,6 +122,7 @@ async function main() {
 
       const tx = await contract.confirmDistribution(bId, aId, dId, benId, amtCentavos, rHash);
       const receipt = await tx.wait();
+      if (!receipt || receipt.status !== 1) throw new Error("Transaction was not confirmed successfully.");
 
       console.log(JSON.stringify({
         success: true,
@@ -134,6 +143,7 @@ async function main() {
 
       console.log(JSON.stringify({
         success: true,
+        ...chainContext,
         distributionId: distributionId,
         matched: Boolean(matched),
         onchainHash: record.receiptHash,
@@ -148,7 +158,8 @@ async function main() {
   } catch (err) {
     console.log(JSON.stringify({
       success: false,
-      error: err.message || String(err)
+      ...chainContext,
+      error: err.shortMessage || err.message || String(err)
     }));
   }
 }

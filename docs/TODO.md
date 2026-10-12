@@ -29,11 +29,11 @@ Status: unchecked items are planned, not implemented. Work through one numbered 
 - [x] Replace destructive duplicate deletion with historical status/linking that preserves prior payouts and receipts. Done 2026-10-12: reviewed duplicate links retain original IDs, payouts, receipts, and decisions; historical records remain readable; delete routes are disabled; payout eligibility checks include linked aliases and serialize with review/link changes in SQLite. See [RETAINED_DUPLICATES.md](RETAINED_DUPLICATES.md).
 
 ## 4. Truthful blockchain anchoring and verification
-- [ ] Remove fabricated transaction hashes and successful verification fallbacks; distinguish unavailable, unanchored, mismatch, and verified outcomes.
+- [x] Remove fabricated transaction hashes and successful verification fallbacks; distinguish unavailable, unanchored, mismatch, and verified outcomes. Done 2026-10-12: service/seeder/UI no longer invent evidence; strict contract reads return four explicit states; chain/contract checks and mined transaction receipts are required. Verified all states against an isolated local chain. See [TRUTHFUL_VERIFICATION.md](TRUTHFUL_VERIFICATION.md).
 - [ ] Separate payout recorded state from anchor pending/submitted/confirmed/failed; record receipt confirmation and support safe retry/reconciliation.
 - [ ] Recover consistently when database writes or blockchain operations fail; handle restarted local chains and synchronized demo reset without contradictory records.
 - [ ] Use an immutable versioned receipt snapshot covering intended household identity, batch, amount, allocation, and receipt contents; retain deterministic hashing.
-- [ ] Replace hardcoded fraud UI outcomes with actual synthetic record tampering and backend/contract verification; test restoration.
+- [ ] Replace hardcoded fraud UI outcomes with actual synthetic record tampering and backend/contract verification; test restoration. Old hardcoded scenario controls were removed on 2026-10-12; an interactive tampering/restoration workflow is still pending.
 - [ ] Protect and anchor relevant audit history; accurately describe which logs are local versus blockchain-protected.
 
 ## 5. Connected data and permissions
@@ -92,3 +92,7 @@ Started 2026-10-12. Node 24 / Python 3.13. Frontend: http://127.0.0.1:3000. Back
 ## Public landing page follow-up
 
 The public landing page is implemented at `/`, with the existing operational dashboard moved to `/dashboard`. See [PUBLIC_LANDING.md](PUBLIC_LANDING.md) for scope, validation, and pending visual/comprehension checks. This bounded task was selected ahead of backend changes because the landing page does not consume APIs or display live success/verification states. The remaining operational UI work still depends on backend correctness.
+
+## Truthful verification preview
+
+Updated 2026-10-12: http://127.0.0.1:3001/verify uses the copied synthetic database and a separate current-contract local chain at http://127.0.0.1:8546 (chain 31337). Six copied receipts were anchored with real local test transactions and verified. The original provider pane, database, and older chain on 8545 remain unchanged. That older contract has an incompatible receipt getter and now correctly produces unavailable verification instead of fallback success. Automatic chain recovery/reconciliation remains pending. See [TRUTHFUL_VERIFICATION.md](TRUTHFUL_VERIFICATION.md).

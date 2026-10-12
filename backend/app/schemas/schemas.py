@@ -190,7 +190,8 @@ class BlockchainVerifyResponse(BaseModel):
     record_id: str
     beneficiary_id: str
     receipt_hash_local: str
-    receipt_hash_onchain: str
+    receipt_hash_onchain: Optional[str]
+    verification_status: Literal["UNAVAILABLE", "UNANCHORED", "MISMATCH", "VERIFIED"]
     is_verified: bool
     blockchain_tx_hash: Optional[str]
     timestamp: Optional[int]

@@ -1,14 +1,13 @@
 """
 AyudaChain Centralized Blockchain Service
 Interacts with the AyudaChainRegistry smart contract on Polygon Amoy or Local EVM.
-Includes ultra-resilient fallback and clear human-readable error messages.
+Returns observed results and explicit failures; no simulated blockchain evidence.
 """
 
 import os
 import json
 import subprocess
-import hashlib
-import time
+import re
 from typing import Dict, Any
 
 from app import config
@@ -23,12 +22,11 @@ class BlockchainService:
         self.private_key = config.PRIVATE_KEY
         self.contract_address = config.CONTRACT_ADDRESS
 
-    def _generate_fallback_hash(self, seed: str) -> str:
-        h = hashlib.sha256(f"{seed}-{time.time()}".encode()).hexdigest()
-        return f"0x{h}"
-
     def _execute_cli(self, args: list) -> Dict[str, Any]:
+        if not self.contract_address:
+            return {"success": False, "error": "No contract address configured."}
         env = os.environ.copy()
+        env["CHAIN_ID"] = str(config.CHAIN_ID)
         env["POLYGON_RPC_URL"] = self.rpc_url
         env["POLYGON_PRIVATE_KEY"] = self.private_key
         if self.contract_address:
@@ -49,9 +47,12 @@ class BlockchainService:
             for line in reversed(lines):
                 line = line.strip()
                 if line.startswith("{") and line.endswith("}"):
-                    return json.loads(line)
+                    result = json.loads(line)
+                    if res.returncode != 0 or type(result.get("success")) is not bool:
+                        return {"success": False, "error": "Blockchain process failed or returned an invalid result."}
+                    return result
             
-            # If node had error, construct clean fallback response
+            # Preserve failure instead of inventing transaction or receipt evidence.
             return {
                 "success": False,
                 "error": f"Blockchain process output: {stdout or res.stderr}"
@@ -63,27 +64,19 @@ class BlockchainService:
 
     def get_status(self) -> Dict[str, Any]:
         res = self._execute_cli(["status"])
-        if res.get("success"):
-            return res
         return {
-            "success": False,
             "network": config.NETWORK_NAME,
             "chainId": config.CHAIN_ID,
             "contractAddress": self.contract_address,
-            "error": res.get("error", "Blockchain node unreachable")
+            **res,
         }
 
     def release_fund(self, batch_id: str, amount_centavos: int, calamity_name: str, source_agency: str) -> Dict[str, Any]:
         res = self._execute_cli(["releaseFund", batch_id, str(amount_centavos), calamity_name, source_agency])
-        if not res.get("success"):
-            res["txHash"] = self._generate_fallback_hash(f"release-{batch_id}")
-            res["contractAddress"] = self.contract_address
         return res
 
     def allocate_fund(self, batch_id: str, allocation_id: str, barangay_id: str, amount_centavos: int) -> Dict[str, Any]:
         res = self._execute_cli(["allocateFund", batch_id, allocation_id, barangay_id, str(amount_centavos)])
-        if not res.get("success"):
-            res["txHash"] = self._generate_fallback_hash(f"alloc-{allocation_id}")
         return res
 
     def confirm_distribution(
@@ -104,25 +97,20 @@ class BlockchainService:
             str(amount_centavos),
             receipt_hash
         ])
-        if not res.get("success"):
-            res["txHash"] = self._generate_fallback_hash(f"dist-{distribution_id}")
-            res["receiptHash"] = receipt_hash
         return res
 
     def verify_receipt(self, distribution_id: str, receipt_hash: str) -> Dict[str, Any]:
-        res = self._execute_cli(["verifyReceipt", distribution_id, receipt_hash])
-        if not res.get("success") or not res.get("exists"):
-            # If offline or simulated, check if hash matches stored format
-            return {
-                "success": True,
-                "distributionId": distribution_id,
-                "matched": True,
-                "onchainHash": receipt_hash,
-                "queriedHash": receipt_hash,
-                "timestamp": int(time.time()),
-                "exists": True,
-                "contractAddress": self.contract_address
-            }
-        return res
+        return self._execute_cli(["verifyReceipt", distribution_id, receipt_hash])
+
+
+def is_hex_hash(value) -> bool:
+    return isinstance(value, str) and re.fullmatch(r"0x[0-9a-fA-F]{64}", value) is not None
+
+
+def confirmed_transaction_hash(result: Dict[str, Any]):
+    """Only persist a valid transaction hash from a successful CLI confirmation."""
+    value = result.get("txHash")
+    return value if result.get("success") is True and is_hex_hash(value) else None
+
 
 blockchain_service = BlockchainService()
