@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
@@ -27,7 +28,7 @@ class ReliefBatchCreate(BaseModel):
     source_agency: str = "DSWD Central Office"
     recipient_lgu: str = "Provincial Government of Albay"
     purpose: str = "Emergency Calamity Cash & Relief Assistance"
-    amount: float = Field(..., gt=0, example=10000000.0)
+    amount: Decimal = Field(..., gt=0, max_digits=15, decimal_places=2, example=10000000.0)
 
 class ReliefBatchResponse(BaseModel):
     id: int
@@ -38,6 +39,7 @@ class ReliefBatchResponse(BaseModel):
     recipient_lgu: str
     purpose: str
     amount: float
+    amount_centavos: int
     status: str
     blockchain_tx_hash: Optional[str]
     created_at: datetime
@@ -51,7 +53,7 @@ class AllocationCreate(BaseModel):
     batch_id: str = Field(..., example="RELIEF-2026-001")
     barangay_id: str = Field(..., example="BRGY-001")
     barangay_name: str = Field(..., example="San Isidro")
-    amount: float = Field(..., gt=0, example=2500000.0)
+    amount: Decimal = Field(..., gt=0, max_digits=15, decimal_places=2, example=2500000.0)
     beneficiary_count: int = Field(0, ge=0)
 
 class AllocationResponse(BaseModel):
@@ -61,6 +63,7 @@ class AllocationResponse(BaseModel):
     barangay_id: str
     barangay_name: str
     amount: float
+    amount_centavos: int
     beneficiary_count: int
     status: str
     blockchain_tx_hash: Optional[str]
@@ -109,7 +112,7 @@ class DistributionConfirmRequest(BaseModel):
     distribution_id: str = Field(..., example="DIST-0001")
     beneficiary_id: str = Field(..., example="BEN-0001")
     batch_id: str = Field(..., example="RELIEF-2026-001")
-    amount: float = Field(..., gt=0, example=5000.0)
+    amount: Decimal = Field(..., gt=0, max_digits=15, decimal_places=2, example=5000.0)
     verification_method: str = "QR_VOUCHER_PHYSICAL_RECEIPT"
     receipt_filename: Optional[str] = "sample_relief_receipt.jpg"
     ocr_raw_text: Optional[str] = None
@@ -120,6 +123,7 @@ class DistributionResponse(BaseModel):
     beneficiary_id: str
     batch_id: str
     amount: float
+    amount_centavos: int
     verification_method: str
     receipt_hash: str
     receipt_file_path: Optional[str]
@@ -156,6 +160,7 @@ class AuditEventResponse(BaseModel):
     event_type: str
     description: str
     amount: Optional[float]
+    amount_centavos: Optional[int]
     entity_id: Optional[str]
     blockchain_tx_hash: Optional[str]
     timestamp: datetime

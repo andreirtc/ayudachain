@@ -70,11 +70,11 @@ async function main() {
     const { provider, wallet, contract } = await getContract();
 
     if (command === "releaseFund") {
-      // args: batchId, amount, calamityName, sourceAgency
+      // args: batchId, amount (integer centavos), calamityName, sourceAgency
       const [_, batchId, amount, calamityName, sourceAgency] = args;
       const bId = toBytes32(batchId);
-      const amtWei = ethers.parseEther(amount.toString());
-      const tx = await contract.releaseFund(bId, amtWei, calamityName, sourceAgency);
+      const amtCentavos = BigInt(amount);
+      const tx = await contract.releaseFund(bId, amtCentavos, calamityName, sourceAgency);
       const receipt = await tx.wait();
 
       console.log(JSON.stringify({
@@ -86,13 +86,13 @@ async function main() {
         contractAddress: CONTRACT_ADDRESS
       }));
     } else if (command === "allocateFund") {
-      // args: batchId, allocationId, barangayId, amount
+      // args: batchId, allocationId, barangayId, amount (integer centavos)
       const [_, batchId, allocationId, barangayId, amount] = args;
       const bId = toBytes32(batchId);
       const aId = toBytes32(allocationId);
       const brgyId = toBytes32(barangayId);
-      const amtWei = ethers.parseEther(amount.toString());
-      const tx = await contract.allocateFund(bId, aId, brgyId, amtWei);
+      const amtCentavos = BigInt(amount);
+      const tx = await contract.allocateFund(bId, aId, brgyId, amtCentavos);
       const receipt = await tx.wait();
 
       console.log(JSON.stringify({
@@ -103,15 +103,15 @@ async function main() {
         gasUsed: receipt.gasUsed.toString()
       }));
     } else if (command === "confirmDistribution") {
-      // args: batchId, distributionId, beneficiaryId, amount, receiptHash
+      // args: batchId, distributionId, beneficiaryId, amount (integer centavos), receiptHash
       const [_, batchId, distributionId, beneficiaryId, amount, receiptHash] = args;
       const bId = toBytes32(batchId);
       const dId = toBytes32(distributionId);
       const benId = toBytes32(beneficiaryId);
-      const amtWei = ethers.parseEther(amount.toString());
+      const amtCentavos = BigInt(amount);
       const rHash = receiptHash.startsWith("0x") ? receiptHash : `0x${receiptHash}`;
 
-      const tx = await contract.confirmDistribution(bId, dId, benId, amtWei, rHash);
+      const tx = await contract.confirmDistribution(bId, dId, benId, amtCentavos, rHash);
       const receipt = await tx.wait();
 
       console.log(JSON.stringify({

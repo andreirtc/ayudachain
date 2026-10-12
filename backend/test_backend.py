@@ -11,7 +11,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from app.ai.entity_resolution import EntityResolutionEngine, normalize_name, token_similarity
 from app.ai.anomaly_detection import DistributionAnomalyDetector
-from app.services.hasher import compute_receipt_hash, verify_receipt_integrity, canonical_json
+from app.services.hasher import compute_receipt_hash, verify_receipt_integrity, canonical_json, compute_sha256_hex
+from app.money import to_centavos, centavos_to_str, format_peso
 
 class TestAyudaChainAI(unittest.TestCase):
     def setUp(self):
@@ -72,20 +73,50 @@ class TestHashingPipeline(unittest.TestCase):
         self.assertEqual(canonical_json(d1), canonical_json(d2))
 
     def test_receipt_hash_reproducibility(self):
-        h1 = compute_receipt_hash("DIST-0001", "BEN-0001", "RELIEF-2026-001", 5000.0, "Sample OCR Text")
-        h2 = compute_receipt_hash("DIST-0001", "BEN-0001", "RELIEF-2026-001", 5000.0, "Sample OCR Text")
+        h1 = compute_receipt_hash("DIST-0001", "BEN-0001", "RELIEF-2026-001", 500_000, "Sample OCR Text")
+        h2 = compute_receipt_hash("DIST-0001", "BEN-0001", "RELIEF-2026-001", 500_000, "Sample OCR Text")
         self.assertEqual(h1, h2)
         self.assertTrue(h1.startswith("0x"))
         self.assertEqual(len(h1), 66)
 
     def test_hash_tamper_detection(self):
-        h_orig = compute_receipt_hash("DIST-0001", "BEN-0001", "RELIEF-2026-001", 5000.0, "Original Data")
-        h_tampered = compute_receipt_hash("DIST-0001", "BEN-0001", "RELIEF-2026-001", 5000.0, "Tampered Data")
+        h_orig = compute_receipt_hash("DIST-0001", "BEN-0001", "RELIEF-2026-001", 500_000, "Original Data")
+        h_tampered = compute_receipt_hash("DIST-0001", "BEN-0001", "RELIEF-2026-001", 500_000, "Tampered Data")
         self.assertNotEqual(h_orig, h_tampered)
 
         valid, msg = verify_receipt_integrity(h_orig, h_tampered)
         self.assertFalse(valid)
         self.assertIn("mismatch", msg.lower())
+
+    def test_receipt_hash_matches_peso_string_format(self):
+        # Receipts anchored before the switch to centavos used f"{amount:.2f}"
+        payload = {
+            "amount": "5000.00",
+            "batch_id": "RELIEF-2026-001",
+            "beneficiary_id": "BEN-0001",
+            "distribution_id": "DIST-0001",
+            "ocr_content": "Sample OCR Text",
+            "verification_method": "QR_VOUCHER_PHYSICAL_RECEIPT",
+        }
+        expected = compute_sha256_hex(canonical_json(payload))
+        actual = compute_receipt_hash("DIST-0001", "BEN-0001", "RELIEF-2026-001", 500_000, "Sample OCR Text")
+        self.assertEqual(actual, expected)
+
+
+class TestMoney(unittest.TestCase):
+    def test_to_centavos_is_exact(self):
+        self.assertEqual(to_centavos("5000"), 500_000)
+        self.assertEqual(to_centavos("0.10"), 10)
+        self.assertEqual(to_centavos("1234567.89"), 123_456_789)
+
+    def test_to_centavos_rejects_fractional_centavos(self):
+        with self.assertRaises(ValueError):
+            to_centavos("0.001")
+
+    def test_formatting(self):
+        self.assertEqual(centavos_to_str(500_000), "5000.00")
+        self.assertEqual(centavos_to_str(5), "0.05")
+        self.assertEqual(format_peso(1_000_000_000), "₱10,000,000.00")
 
 if __name__ == "__main__":
     unittest.main()

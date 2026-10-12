@@ -8,6 +8,8 @@ import hashlib
 import json
 from typing import Any, Dict, Tuple
 
+from app.money import centavos_to_str
+
 def canonical_json(data: Dict[str, Any]) -> str:
     """
     Serializes a dictionary into deterministic canonical JSON
@@ -26,7 +28,7 @@ def compute_receipt_hash(
     distribution_id: str,
     beneficiary_id: str,
     batch_id: str,
-    amount: float,
+    amount_centavos: int,
     ocr_text: str,
     verification_method: str = "QR_VOUCHER_PHYSICAL_RECEIPT"
 ) -> str:
@@ -38,7 +40,7 @@ def compute_receipt_hash(
     normalized_ocr = " ".join([line.strip() for line in (ocr_text or "").splitlines() if line.strip()])
     
     payload = {
-        "amount": f"{amount:.2f}",
+        "amount": centavos_to_str(amount_centavos),
         "batch_id": batch_id.strip(),
         "beneficiary_id": beneficiary_id.strip(),
         "distribution_id": distribution_id.strip(),

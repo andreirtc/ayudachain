@@ -26,6 +26,7 @@ from app.schemas.schemas import (
 from app.ai.entity_resolution import EntityResolutionEngine, process_csv_batch
 from app.ai.anomaly_detection import DistributionAnomalyDetector
 from app.services.hasher import compute_receipt_hash, verify_receipt_integrity
+from app.money import to_centavos, centavos_to_pesos, format_peso
 from app.services.blockchain import blockchain_service
 from app.services.receipt_generator import save_sample_receipt, DEMO_OCR_TEXT
 from app.seed_demo import seed_database, seed_if_empty
@@ -58,6 +59,9 @@ app.mount("/receipts", StaticFiles(directory=RECEIPTS_DIR), name="receipts")
 entity_resolver = EntityResolutionEngine(confidence_threshold=0.78)
 anomaly_detector = DistributionAnomalyDetector(standard_grant_amount=5000.0)
 
+STANDARD_GRANT_CENTAVOS = 500_000  # ₱5,000.00 demo grant
+MAX_GRANT_CENTAVOS = 1_000_000  # ₱10,000.00 demo maximum
+
 @app.on_event("startup")
 def on_startup():
     init_db()
@@ -88,10 +92,13 @@ def get_dashboard(db: Session = Depends(get_db)):
         Distribution.status == "CONFIRMED"
     ).all()
 
-    total_released = batch.amount
-    total_allocated = sum(a.amount for a in allocations)
-    total_distributed = sum(d.amount for d in distributions)
-    unallocated_funds = max(0.0, total_released - total_allocated)
+    released_c = batch.amount_centavos
+    allocated_c = sum(a.amount_centavos for a in allocations)
+    distributed_c = sum(d.amount_centavos for d in distributions)
+    total_released = centavos_to_pesos(released_c)
+    total_allocated = centavos_to_pesos(allocated_c)
+    total_distributed = centavos_to_pesos(distributed_c)
+    unallocated_funds = centavos_to_pesos(max(0, released_c - allocated_c))
 
     total_bens = len(beneficiaries)
     verified_bens = len([b for b in beneficiaries if b.verification_status == "VERIFIED"])
@@ -155,12 +162,13 @@ def get_batch_detail(batch_id: str, db: Session = Depends(get_db)):
         "batch": ReliefBatchResponse.from_orm(batch),
         "allocations": [AllocationResponse.from_orm(a) for a in allocations],
         "total_distributions": len(distributions),
-        "distributed_amount": sum(d.amount for d in distributions),
+        "distributed_amount": centavos_to_pesos(sum(d.amount_centavos for d in distributions)),
         "timeline": [AuditEventResponse.from_orm(e) for e in events]
     }
 
 @app.post("/api/funds/releases", response_model=ReliefBatchResponse, status_code=201)
 def release_fund(payload: ReliefBatchCreate, db: Session = Depends(get_db)):
+    amount_c = to_centavos(payload.amount)
     existing = db.query(ReliefBatch).filter(ReliefBatch.batch_id == payload.batch_id).first()
     if existing:
         raise HTTPException(status_code=400, detail="Batch ID already exists")
@@ -168,7 +176,7 @@ def release_fund(payload: ReliefBatchCreate, db: Session = Depends(get_db)):
     # On-chain release
     bc_res = blockchain_service.release_fund(
         batch_id=payload.batch_id,
-        amount=payload.amount,
+        amount_centavos=amount_c,
         calamity_name=payload.calamity_name,
         source_agency=payload.source_agency
     )
@@ -181,7 +189,7 @@ def release_fund(payload: ReliefBatchCreate, db: Session = Depends(get_db)):
         source_agency=payload.source_agency,
         recipient_lgu=payload.recipient_lgu,
         purpose=payload.purpose,
-        amount=payload.amount,
+        amount_centavos=amount_c,
         status="ACTIVE",
         blockchain_tx_hash=tx_hash
     )
@@ -191,8 +199,8 @@ def release_fund(payload: ReliefBatchCreate, db: Session = Depends(get_db)):
     audit = AuditEvent(
         batch_id=payload.batch_id,
         event_type="FUND_RELEASE",
-        description=f"Fund released: ₱{payload.amount:,.2f} for {payload.calamity_name}",
-        amount=payload.amount,
+        description=f"Fund released: {format_peso(amount_c)} for {payload.calamity_name}",
+        amount_centavos=amount_c,
         entity_id=payload.batch_id,
         blockchain_tx_hash=tx_hash
     )
@@ -204,6 +212,7 @@ def release_fund(payload: ReliefBatchCreate, db: Session = Depends(get_db)):
 # --- Allocations API ---
 @app.post("/api/allocations", response_model=AllocationResponse, status_code=201)
 def create_allocation(payload: AllocationCreate, db: Session = Depends(get_db)):
+    amount_c = to_centavos(payload.amount)
     batch = db.query(ReliefBatch).filter(ReliefBatch.batch_id == payload.batch_id).first()
     if not batch:
         raise HTTPException(status_code=404, detail="Batch not found")
@@ -217,7 +226,7 @@ def create_allocation(payload: AllocationCreate, db: Session = Depends(get_db)):
         batch_id=payload.batch_id,
         allocation_id=payload.allocation_id,
         barangay_id=payload.barangay_id,
-        amount=payload.amount
+        amount_centavos=amount_c
     )
     tx_hash = bc_res.get("txHash")
 
@@ -226,7 +235,7 @@ def create_allocation(payload: AllocationCreate, db: Session = Depends(get_db)):
         batch_id=payload.batch_id,
         barangay_id=payload.barangay_id,
         barangay_name=payload.barangay_name,
-        amount=payload.amount,
+        amount_centavos=amount_c,
         beneficiary_count=payload.beneficiary_count,
         status="ALLOCATED",
         blockchain_tx_hash=tx_hash
@@ -236,8 +245,8 @@ def create_allocation(payload: AllocationCreate, db: Session = Depends(get_db)):
     audit = AuditEvent(
         batch_id=payload.batch_id,
         event_type="ALLOCATION",
-        description=f"Allocated ₱{payload.amount:,.2f} to Barangay {payload.barangay_name}",
-        amount=payload.amount,
+        description=f"Allocated {format_peso(amount_c)} to Barangay {payload.barangay_name}",
+        amount_centavos=amount_c,
         entity_id=payload.allocation_id,
         blockchain_tx_hash=tx_hash
     )
@@ -400,6 +409,7 @@ def get_distributions(batch_id: Optional[str] = None, db: Session = Depends(get_
 
 @app.post("/api/distributions/confirm", response_model=DistributionResponse, status_code=201)
 def confirm_distribution(payload: DistributionConfirmRequest, db: Session = Depends(get_db)):
+    amount_c = to_centavos(payload.amount)
     ben = db.query(Beneficiary).filter(Beneficiary.beneficiary_id == payload.beneficiary_id).first()
     if not ben:
         raise HTTPException(status_code=404, detail="Beneficiary not found")
@@ -408,18 +418,18 @@ def confirm_distribution(payload: DistributionConfirmRequest, db: Session = Depe
     if existing_dist:
         raise HTTPException(status_code=400, detail="Distribution ID already exists")
 
-    if payload.amount > 10000.0:
-        raise HTTPException(status_code=400, detail=f"Amount ₱{payload.amount:,.2f} exceeds the demo maximum grant of ₱10,000.00.")
+    if amount_c > MAX_GRANT_CENTAVOS:
+        raise HTTPException(status_code=400, detail=f"Amount {format_peso(amount_c)} exceeds the demo maximum grant of {format_peso(MAX_GRANT_CENTAVOS)}.")
 
     prior_payout = db.query(Distribution).filter(Distribution.beneficiary_id == payload.beneficiary_id).first()
     if prior_payout:
         raise HTTPException(status_code=400, detail=f"Duplicate disbursement rejected: Beneficiary {payload.beneficiary_id} ({ben.household_name}) has already claimed aid.")
 
     # Flag non-standard amounts (standard demo grant is ₱5,000)
-    is_anomalous_amount = payload.amount != 5000.0
+    is_anomalous_amount = amount_c != STANDARD_GRANT_CENTAVOS
     if is_anomalous_amount:
         ben.anomaly_flag = True
-        ben.review_notes = f"AI Anomaly: Non-standard grant amount ₱{payload.amount:,.2f} (expected standard ₱5,000.00). Flagged for COA audit."
+        ben.review_notes = f"AI Anomaly: Non-standard grant amount {format_peso(amount_c)} (expected standard ₱5,000.00). Flagged for COA audit."
 
     # Generate or normalize OCR text
     ocr_content = payload.ocr_raw_text or DEMO_OCR_TEXT
@@ -429,7 +439,7 @@ def confirm_distribution(payload: DistributionConfirmRequest, db: Session = Depe
         distribution_id=payload.distribution_id,
         beneficiary_id=payload.beneficiary_id,
         batch_id=payload.batch_id,
-        amount=payload.amount,
+        amount_centavos=amount_c,
         ocr_text=ocr_content,
         verification_method=payload.verification_method
     )
@@ -439,7 +449,7 @@ def confirm_distribution(payload: DistributionConfirmRequest, db: Session = Depe
         batch_id=payload.batch_id,
         distribution_id=payload.distribution_id,
         beneficiary_id=payload.beneficiary_id,
-        amount=payload.amount,
+        amount_centavos=amount_c,
         receipt_hash=receipt_hash
     )
     tx_hash = bc_res.get("txHash")
@@ -450,7 +460,7 @@ def confirm_distribution(payload: DistributionConfirmRequest, db: Session = Depe
         distribution_id=payload.distribution_id,
         beneficiary_id=payload.beneficiary_id,
         batch_id=payload.batch_id,
-        amount=payload.amount,
+        amount_centavos=amount_c,
         verification_method=payload.verification_method,
         receipt_hash=receipt_hash,
         receipt_file_path=f"/receipts/{receipt_filename}",
@@ -463,8 +473,8 @@ def confirm_distribution(payload: DistributionConfirmRequest, db: Session = Depe
     audit = AuditEvent(
         batch_id=payload.batch_id,
         event_type="DISTRIBUTION_CONFIRMED",
-        description=f"Disbursed ₱{payload.amount:,.2f} to {ben.household_name} ({payload.beneficiary_id}) — Receipt anchored on-chain",
-        amount=payload.amount,
+        description=f"Disbursed {format_peso(amount_c)} to {ben.household_name} ({payload.beneficiary_id}) — Receipt anchored on-chain",
+        amount_centavos=amount_c,
         entity_id=payload.distribution_id,
         blockchain_tx_hash=tx_hash
     )
@@ -474,8 +484,8 @@ def confirm_distribution(payload: DistributionConfirmRequest, db: Session = Depe
         db.add(AuditEvent(
             batch_id=payload.batch_id,
             event_type="AI_ANOMALY_FLAG",
-            description=f"AI Anomaly Engine: Non-standard disbursement of ₱{payload.amount:,.2f} to {payload.beneficiary_id} flagged for COA review (Expected ₱5,000.00)",
-            amount=payload.amount,
+            description=f"AI Anomaly Engine: Non-standard disbursement of {format_peso(amount_c)} to {payload.beneficiary_id} flagged for COA review (Expected ₱5,000.00)",
+            amount_centavos=amount_c,
             entity_id=payload.beneficiary_id
         ))
 
@@ -502,7 +512,7 @@ def verify_blockchain_record(payload: BlockchainVerifyRequest, db: Session = Dep
         distribution_id=dist.distribution_id,
         beneficiary_id=dist.beneficiary_id,
         batch_id=dist.batch_id,
-        amount=dist.amount,
+        amount_centavos=dist.amount_centavos,
         ocr_text=dist.ocr_text,
         verification_method=dist.verification_method
     )

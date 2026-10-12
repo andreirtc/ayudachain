@@ -107,6 +107,8 @@ The Hardhat chain keeps everything in memory, so stopping it erases all anchored
 
 The dashboard's demo reset button (`POST /api/demo/reset`) only reseeds the database. It does not reset the chain, which already holds the demo records, so the chain rejects the new copies and the database stores placeholder transaction hashes that do not exist on the chain. Use the full reset above when you need the two to match.
 
+If the backend stops at startup with "The database uses the old peso amount format", your `ayudachain.db` was created before amounts moved to centavos. Do the full reset above.
+
 ## Tests
 
 ```powershell

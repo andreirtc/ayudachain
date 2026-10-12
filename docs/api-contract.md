@@ -4,6 +4,8 @@ Base URL: `http://127.0.0.1:8000`
 
 All endpoints return JSON (except the sample CSV) and include CORS headers allowing multi-origin access. The server is the FastAPI app in `backend/app/main.py`; interactive docs are at `/docs`. Errors use FastAPI's `{"detail": "..."}` shape.
 
+Amounts: requests send pesos with at most two decimal places (`5000` or `5000.50`); more precision is rejected with 422. Responses include `amount` (pesos) and `amount_centavos` (exact integer). The database and smart contract store integer centavos.
+
 ---
 
 ### 1. Dashboard Summary

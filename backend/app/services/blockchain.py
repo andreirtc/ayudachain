@@ -73,15 +73,15 @@ class BlockchainService:
             "error": res.get("error", "Blockchain node unreachable")
         }
 
-    def release_fund(self, batch_id: str, amount: float, calamity_name: str, source_agency: str) -> Dict[str, Any]:
-        res = self._execute_cli(["releaseFund", batch_id, str(amount), calamity_name, source_agency])
+    def release_fund(self, batch_id: str, amount_centavos: int, calamity_name: str, source_agency: str) -> Dict[str, Any]:
+        res = self._execute_cli(["releaseFund", batch_id, str(amount_centavos), calamity_name, source_agency])
         if not res.get("success"):
             res["txHash"] = self._generate_fallback_hash(f"release-{batch_id}")
             res["contractAddress"] = self.contract_address
         return res
 
-    def allocate_fund(self, batch_id: str, allocation_id: str, barangay_id: str, amount: float) -> Dict[str, Any]:
-        res = self._execute_cli(["allocateFund", batch_id, allocation_id, barangay_id, str(amount)])
+    def allocate_fund(self, batch_id: str, allocation_id: str, barangay_id: str, amount_centavos: int) -> Dict[str, Any]:
+        res = self._execute_cli(["allocateFund", batch_id, allocation_id, barangay_id, str(amount_centavos)])
         if not res.get("success"):
             res["txHash"] = self._generate_fallback_hash(f"alloc-{allocation_id}")
         return res
@@ -91,7 +91,7 @@ class BlockchainService:
         batch_id: str,
         distribution_id: str,
         beneficiary_id: str,
-        amount: float,
+        amount_centavos: int,
         receipt_hash: str
     ) -> Dict[str, Any]:
         res = self._execute_cli([
@@ -99,7 +99,7 @@ class BlockchainService:
             batch_id,
             distribution_id,
             beneficiary_id,
-            str(amount),
+            str(amount_centavos),
             receipt_hash
         ])
         if not res.get("success"):
