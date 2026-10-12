@@ -1,0 +1,322 @@
+[
+  {
+    "name": "document",
+    "input": {
+      "protocol": "ayudachain.evidence.v1",
+      "kind": "document",
+      "public_id": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "owner": "00000000-0000-4000-8000-000000000001",
+      "context": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "predecessor": null,
+      "related": null,
+      "effective_at": "2026-10-10T00:00:00.000Z",
+      "actor": {
+        "display_name": "Invented José\nSilong",
+        "position": null,
+        "identity_assurance": "claimed_unverified"
+      },
+      "evidence": [
+        {
+          "byte_sha256": "0x3333333333333333333333333333333333333333333333333333333333333333",
+          "byte_length": "123",
+          "mime_type": "application/pdf"
+        }
+      ],
+      "payload": {
+        "amount_centavos": "9000000000000000000",
+        "answer": null
+      },
+      "private_nonce": "0x4444444444444444444444444444444444444444444444444444444444444444"
+    },
+    "canonical_utf8": "{\"actor\":{\"display_name\":\"Invented José\\nSilong\",\"identity_assurance\":\"claimed_unverified\",\"position\":null},\"context\":\"0x2222222222222222222222222222222222222222222222222222222222222222\",\"effective_at\":\"2026-10-10T00:00:00.000Z\",\"evidence\":[{\"byte_length\":\"123\",\"byte_sha256\":\"0x3333333333333333333333333333333333333333333333333333333333333333\",\"mime_type\":\"application/pdf\"}],\"kind\":\"document\",\"owner\":\"00000000-0000-4000-8000-000000000001\",\"payload\":{\"amount_centavos\":\"9000000000000000000\",\"answer\":null},\"predecessor\":null,\"private_nonce\":\"0x4444444444444444444444444444444444444444444444444444444444444444\",\"protocol\":\"ayudachain.evidence.v1\",\"public_id\":\"0x1111111111111111111111111111111111111111111111111111111111111111\",\"related\":null}",
+    "sha256": "0xcb4c6a44d5a13787448cf2a85d1f4bff71feb0182a9622d3f7784d45a0595e89"
+  },
+  {
+    "name": "amount_input",
+    "input": {
+      "protocol": "ayudachain.evidence.v1",
+      "kind": "amount_input",
+      "public_id": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "owner": "00000000-0000-4000-8000-000000000001",
+      "context": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "predecessor": null,
+      "related": null,
+      "effective_at": "2026-10-10T00:00:00.000Z",
+      "actor": {
+        "display_name": "Invented José\nSilong",
+        "position": null,
+        "identity_assurance": "claimed_unverified"
+      },
+      "evidence": [
+        {
+          "byte_sha256": "0x3333333333333333333333333333333333333333333333333333333333333333",
+          "byte_length": "123",
+          "mime_type": "application/pdf"
+        }
+      ],
+      "payload": {
+        "amount_centavos": "9000000000000000000",
+        "answer": null
+      },
+      "private_nonce": "0x4444444444444444444444444444444444444444444444444444444444444444"
+    },
+    "canonical_utf8": "{\"actor\":{\"display_name\":\"Invented José\\nSilong\",\"identity_assurance\":\"claimed_unverified\",\"position\":null},\"context\":\"0x2222222222222222222222222222222222222222222222222222222222222222\",\"effective_at\":\"2026-10-10T00:00:00.000Z\",\"evidence\":[{\"byte_length\":\"123\",\"byte_sha256\":\"0x3333333333333333333333333333333333333333333333333333333333333333\",\"mime_type\":\"application/pdf\"}],\"kind\":\"amount_input\",\"owner\":\"00000000-0000-4000-8000-000000000001\",\"payload\":{\"amount_centavos\":\"9000000000000000000\",\"answer\":null},\"predecessor\":null,\"private_nonce\":\"0x4444444444444444444444444444444444444444444444444444444444444444\",\"protocol\":\"ayudachain.evidence.v1\",\"public_id\":\"0x1111111111111111111111111111111111111111111111111111111111111111\",\"related\":null}",
+    "sha256": "0x0d4425187c9d27d76891cb9be179e69751b38f528f0da28960f3807f225b2aa1"
+  },
+  {
+    "name": "barangay_submission",
+    "input": {
+      "protocol": "ayudachain.evidence.v1",
+      "kind": "barangay_submission",
+      "public_id": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "owner": "00000000-0000-4000-8000-000000000001",
+      "context": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "predecessor": null,
+      "related": null,
+      "effective_at": "2026-10-10T00:00:00.000Z",
+      "actor": {
+        "display_name": "Invented José\nSilong",
+        "position": null,
+        "identity_assurance": "claimed_unverified"
+      },
+      "evidence": [
+        {
+          "byte_sha256": "0x3333333333333333333333333333333333333333333333333333333333333333",
+          "byte_length": "123",
+          "mime_type": "application/pdf"
+        }
+      ],
+      "payload": {
+        "amount_centavos": "9000000000000000000",
+        "answer": null
+      },
+      "private_nonce": "0x4444444444444444444444444444444444444444444444444444444444444444"
+    },
+    "canonical_utf8": "{\"actor\":{\"display_name\":\"Invented José\\nSilong\",\"identity_assurance\":\"claimed_unverified\",\"position\":null},\"context\":\"0x2222222222222222222222222222222222222222222222222222222222222222\",\"effective_at\":\"2026-10-10T00:00:00.000Z\",\"evidence\":[{\"byte_length\":\"123\",\"byte_sha256\":\"0x3333333333333333333333333333333333333333333333333333333333333333\",\"mime_type\":\"application/pdf\"}],\"kind\":\"barangay_submission\",\"owner\":\"00000000-0000-4000-8000-000000000001\",\"payload\":{\"amount_centavos\":\"9000000000000000000\",\"answer\":null},\"predecessor\":null,\"private_nonce\":\"0x4444444444444444444444444444444444444444444444444444444444444444\",\"protocol\":\"ayudachain.evidence.v1\",\"public_id\":\"0x1111111111111111111111111111111111111111111111111111111111111111\",\"related\":null}",
+    "sha256": "0xe0778e3054eeb3773eb030a8023645783521221a8d890e43a8f006df8dfad22e"
+  },
+  {
+    "name": "system_fallback",
+    "input": {
+      "protocol": "ayudachain.evidence.v1",
+      "kind": "system_fallback",
+      "public_id": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "owner": "00000000-0000-4000-8000-000000000001",
+      "context": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "predecessor": null,
+      "related": null,
+      "effective_at": "2026-10-10T00:00:00.000Z",
+      "actor": {
+        "display_name": "Invented José\nSilong",
+        "position": null,
+        "identity_assurance": "claimed_unverified"
+      },
+      "evidence": [
+        {
+          "byte_sha256": "0x3333333333333333333333333333333333333333333333333333333333333333",
+          "byte_length": "123",
+          "mime_type": "application/pdf"
+        }
+      ],
+      "payload": {
+        "amount_centavos": "9000000000000000000",
+        "answer": null
+      },
+      "private_nonce": "0x4444444444444444444444444444444444444444444444444444444444444444"
+    },
+    "canonical_utf8": "{\"actor\":{\"display_name\":\"Invented José\\nSilong\",\"identity_assurance\":\"claimed_unverified\",\"position\":null},\"context\":\"0x2222222222222222222222222222222222222222222222222222222222222222\",\"effective_at\":\"2026-10-10T00:00:00.000Z\",\"evidence\":[{\"byte_length\":\"123\",\"byte_sha256\":\"0x3333333333333333333333333333333333333333333333333333333333333333\",\"mime_type\":\"application/pdf\"}],\"kind\":\"system_fallback\",\"owner\":\"00000000-0000-4000-8000-000000000001\",\"payload\":{\"amount_centavos\":\"9000000000000000000\",\"answer\":null},\"predecessor\":null,\"private_nonce\":\"0x4444444444444444444444444444444444444444444444444444444444444444\",\"protocol\":\"ayudachain.evidence.v1\",\"public_id\":\"0x1111111111111111111111111111111111111111111111111111111111111111\",\"related\":null}",
+    "sha256": "0xe7bf6671695d640ca0b1437f0ef3622f4c9cca3891a2246dbb3ba32155462abb"
+  },
+  {
+    "name": "approved_list",
+    "input": {
+      "protocol": "ayudachain.evidence.v1",
+      "kind": "approved_list",
+      "public_id": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "owner": "00000000-0000-4000-8000-000000000001",
+      "context": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "predecessor": null,
+      "related": null,
+      "effective_at": "2026-10-10T00:00:00.000Z",
+      "actor": {
+        "display_name": "Invented José\nSilong",
+        "position": null,
+        "identity_assurance": "claimed_unverified"
+      },
+      "evidence": [
+        {
+          "byte_sha256": "0x3333333333333333333333333333333333333333333333333333333333333333",
+          "byte_length": "123",
+          "mime_type": "application/pdf"
+        }
+      ],
+      "payload": {
+        "amount_centavos": "9000000000000000000",
+        "answer": null
+      },
+      "private_nonce": "0x4444444444444444444444444444444444444444444444444444444444444444"
+    },
+    "canonical_utf8": "{\"actor\":{\"display_name\":\"Invented José\\nSilong\",\"identity_assurance\":\"claimed_unverified\",\"position\":null},\"context\":\"0x2222222222222222222222222222222222222222222222222222222222222222\",\"effective_at\":\"2026-10-10T00:00:00.000Z\",\"evidence\":[{\"byte_length\":\"123\",\"byte_sha256\":\"0x3333333333333333333333333333333333333333333333333333333333333333\",\"mime_type\":\"application/pdf\"}],\"kind\":\"approved_list\",\"owner\":\"00000000-0000-4000-8000-000000000001\",\"payload\":{\"amount_centavos\":\"9000000000000000000\",\"answer\":null},\"predecessor\":null,\"private_nonce\":\"0x4444444444444444444444444444444444444444444444444444444444444444\",\"protocol\":\"ayudachain.evidence.v1\",\"public_id\":\"0x1111111111111111111111111111111111111111111111111111111111111111\",\"related\":null}",
+    "sha256": "0x8303a9b7fe883e89f795e9de4a8b51e80a834dec975616e83f8dd20aa2b1e78c"
+  },
+  {
+    "name": "handover",
+    "input": {
+      "protocol": "ayudachain.evidence.v1",
+      "kind": "handover",
+      "public_id": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "owner": "00000000-0000-4000-8000-000000000001",
+      "context": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "predecessor": null,
+      "related": null,
+      "effective_at": "2026-10-10T00:00:00.000Z",
+      "actor": {
+        "display_name": "Invented José\nSilong",
+        "position": null,
+        "identity_assurance": "claimed_unverified"
+      },
+      "evidence": [
+        {
+          "byte_sha256": "0x3333333333333333333333333333333333333333333333333333333333333333",
+          "byte_length": "123",
+          "mime_type": "application/pdf"
+        }
+      ],
+      "payload": {
+        "amount_centavos": "9000000000000000000",
+        "answer": null
+      },
+      "private_nonce": "0x4444444444444444444444444444444444444444444444444444444444444444"
+    },
+    "canonical_utf8": "{\"actor\":{\"display_name\":\"Invented José\\nSilong\",\"identity_assurance\":\"claimed_unverified\",\"position\":null},\"context\":\"0x2222222222222222222222222222222222222222222222222222222222222222\",\"effective_at\":\"2026-10-10T00:00:00.000Z\",\"evidence\":[{\"byte_length\":\"123\",\"byte_sha256\":\"0x3333333333333333333333333333333333333333333333333333333333333333\",\"mime_type\":\"application/pdf\"}],\"kind\":\"handover\",\"owner\":\"00000000-0000-4000-8000-000000000001\",\"payload\":{\"amount_centavos\":\"9000000000000000000\",\"answer\":null},\"predecessor\":null,\"private_nonce\":\"0x4444444444444444444444444444444444444444444444444444444444444444\",\"protocol\":\"ayudachain.evidence.v1\",\"public_id\":\"0x1111111111111111111111111111111111111111111111111111111111111111\",\"related\":null}",
+    "sha256": "0x08d3230f9d0460559e2ef7d3bd60e2bcdb4fdd710ac5716ca7935f93400efb55"
+  },
+  {
+    "name": "outcome",
+    "input": {
+      "protocol": "ayudachain.evidence.v1",
+      "kind": "outcome",
+      "public_id": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "owner": "00000000-0000-4000-8000-000000000001",
+      "context": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "predecessor": null,
+      "related": null,
+      "effective_at": "2026-10-10T00:00:00.000Z",
+      "actor": {
+        "display_name": "Invented José\nSilong",
+        "position": null,
+        "identity_assurance": "claimed_unverified"
+      },
+      "evidence": [
+        {
+          "byte_sha256": "0x3333333333333333333333333333333333333333333333333333333333333333",
+          "byte_length": "123",
+          "mime_type": "application/pdf"
+        }
+      ],
+      "payload": {
+        "amount_centavos": "9000000000000000000",
+        "answer": "received_less"
+      },
+      "private_nonce": "0x4444444444444444444444444444444444444444444444444444444444444444"
+    },
+    "canonical_utf8": "{\"actor\":{\"display_name\":\"Invented José\\nSilong\",\"identity_assurance\":\"claimed_unverified\",\"position\":null},\"context\":\"0x2222222222222222222222222222222222222222222222222222222222222222\",\"effective_at\":\"2026-10-10T00:00:00.000Z\",\"evidence\":[{\"byte_length\":\"123\",\"byte_sha256\":\"0x3333333333333333333333333333333333333333333333333333333333333333\",\"mime_type\":\"application/pdf\"}],\"kind\":\"outcome\",\"owner\":\"00000000-0000-4000-8000-000000000001\",\"payload\":{\"amount_centavos\":\"9000000000000000000\",\"answer\":\"received_less\"},\"predecessor\":null,\"private_nonce\":\"0x4444444444444444444444444444444444444444444444444444444444444444\",\"protocol\":\"ayudachain.evidence.v1\",\"public_id\":\"0x1111111111111111111111111111111111111111111111111111111111111111\",\"related\":null}",
+    "sha256": "0xfd5362f5326e01da10aed1896634b44d6f3f6cb8a5eab3c4fb5dd30761db9c92"
+  },
+  {
+    "name": "fund_release",
+    "input": {
+      "protocol": "ayudachain.evidence.v1",
+      "kind": "fund_release",
+      "public_id": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "owner": "00000000-0000-4000-8000-000000000001",
+      "context": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "predecessor": null,
+      "related": null,
+      "effective_at": "2026-10-10T00:00:00.000Z",
+      "actor": {
+        "display_name": "Invented José\nSilong",
+        "position": null,
+        "identity_assurance": "claimed_unverified"
+      },
+      "evidence": [
+        {
+          "byte_sha256": "0x3333333333333333333333333333333333333333333333333333333333333333",
+          "byte_length": "123",
+          "mime_type": "application/pdf"
+        }
+      ],
+      "payload": {
+        "amount_centavos": "9000000000000000000",
+        "answer": null
+      },
+      "private_nonce": "0x4444444444444444444444444444444444444444444444444444444444444444"
+    },
+    "canonical_utf8": "{\"actor\":{\"display_name\":\"Invented José\\nSilong\",\"identity_assurance\":\"claimed_unverified\",\"position\":null},\"context\":\"0x2222222222222222222222222222222222222222222222222222222222222222\",\"effective_at\":\"2026-10-10T00:00:00.000Z\",\"evidence\":[{\"byte_length\":\"123\",\"byte_sha256\":\"0x3333333333333333333333333333333333333333333333333333333333333333\",\"mime_type\":\"application/pdf\"}],\"kind\":\"fund_release\",\"owner\":\"00000000-0000-4000-8000-000000000001\",\"payload\":{\"amount_centavos\":\"9000000000000000000\",\"answer\":null},\"predecessor\":null,\"private_nonce\":\"0x4444444444444444444444444444444444444444444444444444444444444444\",\"protocol\":\"ayudachain.evidence.v1\",\"public_id\":\"0x1111111111111111111111111111111111111111111111111111111111111111\",\"related\":null}",
+    "sha256": "0x7c981087a49b13a0aa55b2026b6b88e1238467668be911c19697917e16b5068c"
+  },
+  {
+    "name": "fund_reversal",
+    "input": {
+      "protocol": "ayudachain.evidence.v1",
+      "kind": "fund_reversal",
+      "public_id": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "owner": "00000000-0000-4000-8000-000000000001",
+      "context": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "predecessor": null,
+      "related": null,
+      "effective_at": "2026-10-10T00:00:00.000Z",
+      "actor": {
+        "display_name": "Invented José\nSilong",
+        "position": null,
+        "identity_assurance": "claimed_unverified"
+      },
+      "evidence": [
+        {
+          "byte_sha256": "0x3333333333333333333333333333333333333333333333333333333333333333",
+          "byte_length": "123",
+          "mime_type": "application/pdf"
+        }
+      ],
+      "payload": {
+        "amount_centavos": "9000000000000000000",
+        "answer": null
+      },
+      "private_nonce": "0x4444444444444444444444444444444444444444444444444444444444444444"
+    },
+    "canonical_utf8": "{\"actor\":{\"display_name\":\"Invented José\\nSilong\",\"identity_assurance\":\"claimed_unverified\",\"position\":null},\"context\":\"0x2222222222222222222222222222222222222222222222222222222222222222\",\"effective_at\":\"2026-10-10T00:00:00.000Z\",\"evidence\":[{\"byte_length\":\"123\",\"byte_sha256\":\"0x3333333333333333333333333333333333333333333333333333333333333333\",\"mime_type\":\"application/pdf\"}],\"kind\":\"fund_reversal\",\"owner\":\"00000000-0000-4000-8000-000000000001\",\"payload\":{\"amount_centavos\":\"9000000000000000000\",\"answer\":null},\"predecessor\":null,\"private_nonce\":\"0x4444444444444444444444444444444444444444444444444444444444444444\",\"protocol\":\"ayudachain.evidence.v1\",\"public_id\":\"0x1111111111111111111111111111111111111111111111111111111111111111\",\"related\":null}",
+    "sha256": "0x51ba748a6267b2c367765925d208895d48a3a40ce1e8072b9f4a791fe28c4111"
+  },
+  {
+    "name": "fund_replacement",
+    "input": {
+      "protocol": "ayudachain.evidence.v1",
+      "kind": "fund_replacement",
+      "public_id": "0x1111111111111111111111111111111111111111111111111111111111111111",
+      "owner": "00000000-0000-4000-8000-000000000001",
+      "context": "0x2222222222222222222222222222222222222222222222222222222222222222",
+      "predecessor": null,
+      "related": null,
+      "effective_at": "2026-10-10T00:00:00.000Z",
+      "actor": {
+        "display_name": "Invented José\nSilong",
+        "position": null,
+        "identity_assurance": "claimed_unverified"
+      },
+      "evidence": [
+        {
+          "byte_sha256": "0x3333333333333333333333333333333333333333333333333333333333333333",
+          "byte_length": "123",
+          "mime_type": "application/pdf"
+        }
+      ],
+      "payload": {
+        "amount_centavos": "9000000000000000000",
+        "answer": null
+      },
+      "private_nonce": "0x4444444444444444444444444444444444444444444444444444444444444444"
+    },
+    "canonical_utf8": "{\"actor\":{\"display_name\":\"Invented José\\nSilong\",\"identity_assurance\":\"claimed_unverified\",\"position\":null},\"context\":\"0x2222222222222222222222222222222222222222222222222222222222222222\",\"effective_at\":\"2026-10-10T00:00:00.000Z\",\"evidence\":[{\"byte_length\":\"123\",\"byte_sha256\":\"0x3333333333333333333333333333333333333333333333333333333333333333\",\"mime_type\":\"application/pdf\"}],\"kind\":\"fund_replacement\",\"owner\":\"00000000-0000-4000-8000-000000000001\",\"payload\":{\"amount_centavos\":\"9000000000000000000\",\"answer\":null},\"predecessor\":null,\"private_nonce\":\"0x4444444444444444444444444444444444444444444444444444444444444444\",\"protocol\":\"ayudachain.evidence.v1\",\"public_id\":\"0x1111111111111111111111111111111111111111111111111111111111111111\",\"related\":null}",
+    "sha256": "0xf19fffb3c5fbcab1732fe1a4f1f8edc629dc9c45d26bb73ced4187dcd9691e19"
+  }
+]

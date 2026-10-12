@@ -1,0 +1,16 @@
+[
+  {
+    "path": "docs/product/drafts/finance-officer-responsibilities.md",
+    "bytes": 4306,
+    "sha256": "3f942a5d93da3f24d492a48a76ba1bdba80031ad7905d4a51b4ce5e245d04736",
+    "first_seen": "final inventory 2026-10-08",
+    "provenance": "Concurrent workspace addition; not created or edited by investigation; explicitly scratch/planned"
+  },
+  {
+    "path": "docs/product/drafts/finance-officer-user-flow.md",
+    "bytes": 8208,
+    "sha256": "e6b5389a8a328860f56242bdfef571734faf511f008fc6e9a28a1b6d72647b83",
+    "first_seen": "final inventory 2026-10-08",
+    "provenance": "Concurrent workspace addition; not created or edited by investigation; explicitly scratch/planned"
+  }
+]

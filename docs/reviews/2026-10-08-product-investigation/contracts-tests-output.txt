@@ -1,0 +1,30 @@
+Command: npm.cmd test
+CWD: C:\Users\Yushin\AppData\Local\Temp\ayudachain-investigation-ba4heaqr\contracts
+Exit: 0
+
+
+> ayudachain-contracts@1.0.0 test
+> hardhat test
+
+
+
+Compiled 1 Solidity file successfully (evm target: paris).
+
+
+  AyudaChainRegistry Smart Contract
+    Access Control & Initialization
+      √ should set deployer as owner and default operator (74ms)
+      √ should allow owner to authorize new operators
+      √ should prevent unauthorized accounts from releasing funds
+    P0 Workflow: Fund Release -> Allocation -> Distribution
+      √ should successfully record fund release and emit event
+      √ should prevent duplicate batch creation (append-only integrity)
+      √ should record barangay allocation under an active batch (55ms)
+      √ should confirm distribution and anchor cryptographic receipt hash (121ms)
+      √ should verify matching receipt hash and reject mismatched/altered hash
+      √ should anchor generic audit report hashes
+
+
+  9 passing (3s)
+
+WARNING: You are currently using Node.js v25.4.0, which is not supported by Hardhat. This can lead to unexpected behavior. See https://v2.hardhat.org/nodejs-versions

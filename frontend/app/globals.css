@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./mvp.css";
 
 :root {
   --primary: #0f172a;

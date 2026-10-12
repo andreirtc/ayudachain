@@ -1,0 +1,374 @@
+{
+  "root": "C:\\Users\\Yushin\\orca\\workspaces\\ayudachain\\main-2",
+  "snapshot": "C:\\Users\\Yushin\\AppData\\Local\\Temp\\ayudachain-investigation-ba4heaqr",
+  "head": "6d92882dcbc4496645b4379561f457d1504aed53",
+  "branch": "main-2",
+  "status": " M README.md\n M backend/app/blockchain/AyudaChainRegistry.json\nR  docs/demo-script.md -> docs/guides/demo-script.md\nR  docs/USER_GUIDE.md -> docs/guides/user-guide.md\nR  docs/api-contract.md -> docs/system/api-contract.md\nR  docs/architecture.md -> docs/system/architecture.md\nR  docs/blockchain-spec.md -> docs/system/blockchain-spec.md\n M shared/contracts/AyudaChainRegistry.json\n?? AGENTS.md\n?? CLAUDE.md\n?? docs/adr/\n?? docs/product/\n?? docs/reviews/\n",
+  "files": [
+    {
+      "path": ".env.example",
+      "bytes": 653,
+      "sha256": "5419ef61b5e8950307a3a08ef46f288726cdab29cdab199a45dd98047ecb9e87"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/bug_report.md",
+      "bytes": 1059,
+      "sha256": "a366883466f16de2b395ceba3a1b93a16b3d6f2f9da6dde52a61f4019d5a2284"
+    },
+    {
+      "path": ".github/ISSUE_TEMPLATE/feature_request.md",
+      "bytes": 964,
+      "sha256": "c72b402bf8b89a66176ccc6fd5364fe21b5d4ba41047384b9dfb381d76fcdf99"
+    },
+    {
+      "path": ".github/PULL_REQUEST_TEMPLATE.md",
+      "bytes": 1021,
+      "sha256": "5e0999b4ad11c86eb5d6d4a4df55fd0732d7a5b859471eaaaebda069dc75f8c1"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "bytes": 1955,
+      "sha256": "47cda46d044b97d8e5e1ad10ad4dfc93693c79d65146a535894281e2ee1a1b1e"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 2132,
+      "sha256": "d69a90e2fe8d1cc47516d99f31fa5cc35f997ceab576163425d3cecc0310e237"
+    },
+    {
+      "path": "AGENTS.md",
+      "bytes": 6087,
+      "sha256": "257bbd1fb27638e28a326b6f7a45ffa5acf0e0e44badd30ddac883ac86281e60"
+    },
+    {
+      "path": "CLAUDE.md",
+      "bytes": 11,
+      "sha256": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49"
+    },
+    {
+      "path": "CODE_OF_CONDUCT.md",
+      "bytes": 2990,
+      "sha256": "074ee4fcca7cc66ef20fd23cddfc10b7dfa55d320ef1ffa7fc110e500e24fdf0"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "bytes": 2775,
+      "sha256": "de76d2b175cb79b07862e73f4e29372929a5e92e32abc7fcbc3825ce51c8103f"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1101,
+      "sha256": "d1c42d2edecc9846b2b0acf0f65035635a40167a0c8d95f3253682bc578f511c"
+    },
+    {
+      "path": "README.md",
+      "bytes": 9330,
+      "sha256": "d99397484e2602d081b779b721b9d61bbf1df8c3f1dffb584f7122323f68ec39"
+    },
+    {
+      "path": "SECURITY.md",
+      "bytes": 1503,
+      "sha256": "b24a6cfe813185a5f41c40e6df441bde0b93a62a7ccd71f1e12a9f914b7219ee"
+    },
+    {
+      "path": "backend/app/ai/anomaly_detection.py",
+      "bytes": 3926,
+      "sha256": "4596cc76b2d0dd5cd29794164ee27cf061b6efff5309e55cb2894c0aa70bf642"
+    },
+    {
+      "path": "backend/app/ai/entity_resolution.py",
+      "bytes": 9713,
+      "sha256": "c3972dec252a9feb36757c798d9d49830f6197d483822735cf82e3dc272fc952"
+    },
+    {
+      "path": "backend/app/blockchain/AyudaChainRegistry.json",
+      "bytes": 12052,
+      "sha256": "fc2e343bd75d53204e4829366cd267bbfed77683450ad9bcdfa477126c1e1ce5"
+    },
+    {
+      "path": "backend/app/data/receipts/sample_relief_receipt.svg",
+      "bytes": 6275,
+      "sha256": "81baa75c9afe8e03a7eeaa42e1036e71a84ee098b8dd44264f42a0cb0c1e701c"
+    },
+    {
+      "path": "backend/app/data/seed_beneficiaries.csv",
+      "bytes": 980,
+      "sha256": "08b2025a6d49a8ab0a76855db3cf688cb6b1da650947e8d62c5e2b156cb27fb1"
+    },
+    {
+      "path": "backend/app/database.py",
+      "bytes": 644,
+      "sha256": "12738681eeccab619aa7676ca2a02028544355b505fdf4aa35c891b0b4d243f5"
+    },
+    {
+      "path": "backend/app/main.py",
+      "bytes": 18701,
+      "sha256": "7234e91c20570d42d210f270eacc21797be8b5423f08a751bb809232fbc79423"
+    },
+    {
+      "path": "backend/app/models/entities.py",
+      "bytes": 5218,
+      "sha256": "f115ac4b2b2296c474945939f7f0139942086b9e82dc57305c61a620a099d7d9"
+    },
+    {
+      "path": "backend/app/schemas/schemas.py",
+      "bytes": 4860,
+      "sha256": "497f2d95363f59be240dfb73bdc633faa467f90c0f4570eaf635930673e62231"
+    },
+    {
+      "path": "backend/app/seed_demo.py",
+      "bytes": 10881,
+      "sha256": "ac16d74c31e56c19e3919e5f85a3cbe6f62c9b3a03829c9a4835b7a2d8f8d34b"
+    },
+    {
+      "path": "backend/app/services/blockchain.py",
+      "bytes": 4960,
+      "sha256": "ed2969b79a9339d21397ec2dd5c01e7993228df22097f4e6646c0cc2d2a8319f"
+    },
+    {
+      "path": "backend/app/services/hasher.py",
+      "bytes": 2392,
+      "sha256": "ce9865032004393757ac00702f4158bdb4b2fe3bb242a2d5701ac7b939aa2be5"
+    },
+    {
+      "path": "backend/app/services/receipt_generator.py",
+      "bytes": 8425,
+      "sha256": "55b631342e4f177aeaf8edcceb628f609ea8c229e184df8f601f70bbf7e5935a"
+    },
+    {
+      "path": "backend/requirements.txt",
+      "bytes": 769,
+      "sha256": "c4104e9d2c111288d8e56d87dd6601c2c7b44b37c295fad71e777a69cbf9e32f"
+    },
+    {
+      "path": "backend/server.py",
+      "bytes": 42707,
+      "sha256": "79b45332088a0f26add363e855bd7fed9c4865aadb95d0597caa171605f99823"
+    },
+    {
+      "path": "backend/test_backend.py",
+      "bytes": 3863,
+      "sha256": "4f730a79c48c8c466a0fcc0dc9c9e2efbda27b051532f9f8c63fc1fa0a4a9c80"
+    },
+    {
+      "path": "contracts/contracts/AyudaChainRegistry.sol",
+      "bytes": 7228,
+      "sha256": "7e3c8b74f71f37f71ad2210187c2d9c29c3225c1d7abeb2ca645c82ee05c77e4"
+    },
+    {
+      "path": "contracts/hardhat.config.js",
+      "bytes": 936,
+      "sha256": "bdb05a6512282de71f9a9ae3d939dc78c0a97446141246b38987e799c260a39d"
+    },
+    {
+      "path": "contracts/package-lock.json",
+      "bytes": 333903,
+      "sha256": "a28023017daf4688d8ee76a190de72bb1cef0080c5053a972043b81cb9c0dd2c"
+    },
+    {
+      "path": "contracts/package.json",
+      "bytes": 748,
+      "sha256": "7797ce2a5a19092bff007c3d8d80355dffd60dace42e6da533d037f449cc2be3"
+    },
+    {
+      "path": "contracts/scripts/blockchain_client.js",
+      "bytes": 5834,
+      "sha256": "2b68a7498946a6bb97bb10394a38158adcf52df57ecac5125df321feadeadd1b"
+    },
+    {
+      "path": "contracts/scripts/deploy.js",
+      "bytes": 2000,
+      "sha256": "757c981846dece25c625f76af7d83540cd35296047029b58c17441c09b9f7fc2"
+    },
+    {
+      "path": "contracts/test/AyudaChainRegistry.test.js",
+      "bytes": 5760,
+      "sha256": "d570f741cd9acc80d47875c365a22f9eec200abc1e8917663e991e2b68a9b507"
+    },
+    {
+      "path": "docs/adr/.gitkeep",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/guides/demo-script.md",
+      "bytes": 6048,
+      "sha256": "d16efe06bd181d83a57bc4529e6c0266741d4987bb2541dbc55984d19ea3996c"
+    },
+    {
+      "path": "docs/guides/user-guide.md",
+      "bytes": 10030,
+      "sha256": "d8f16a231d9f0b787ce9dd35f00a58b37debcbe0dec330c41bdee92aee3cffbf"
+    },
+    {
+      "path": "docs/product/sitemap.md",
+      "bytes": 7508,
+      "sha256": "75d31815e3a03f9d083c7134a78689b1214bcee56e1f5a5d923d6d93d9af4785"
+    },
+    {
+      "path": "docs/product/user-flow.md",
+      "bytes": 12746,
+      "sha256": "aba39dcd40f8838839f3411ef2a3b6f8374f939607acb85f8836b016640ccfe9"
+    },
+    {
+      "path": "docs/system/api-contract.md",
+      "bytes": 3146,
+      "sha256": "c02613d888ac26cf01ff34adc88c1e04cd2cc4efb4f1c6cc65a65242f9b10c39"
+    },
+    {
+      "path": "docs/system/architecture.md",
+      "bytes": 6765,
+      "sha256": "a3e1954ce1c896d4efd934814bd1413eb1d57a7838fb46bd71916d40a6be4c3e"
+    },
+    {
+      "path": "docs/system/blockchain-spec.md",
+      "bytes": 2428,
+      "sha256": "a648bf3e69c40dab507c840a869b8535d2cfd951dafd4b717202604a8e796904"
+    },
+    {
+      "path": "frontend/app/batch/[id]/page.tsx",
+      "bytes": 9426,
+      "sha256": "6dafa2ccd80139cb78d6c2186155c06926511407dc0b8039ce6210e5927a63be"
+    },
+    {
+      "path": "frontend/app/beneficiaries/page.tsx",
+      "bytes": 32030,
+      "sha256": "398e9394c814ead3a6727339a878359596b2af58ea57ea139202c7c4a2d686b6"
+    },
+    {
+      "path": "frontend/app/distributions/page.tsx",
+      "bytes": 30348,
+      "sha256": "cd1f7d1f179fce7f1c20d1aa95628adb4d4655331894edb0b83f6a82e11408e6"
+    },
+    {
+      "path": "frontend/app/globals.css",
+      "bytes": 537,
+      "sha256": "08900952f76334892ea40950987fe76e182fe928e56459edf85a6a1c601e6351"
+    },
+    {
+      "path": "frontend/app/layout.tsx",
+      "bytes": 1999,
+      "sha256": "b3593b87c3450c1aaae073f1f7005f02dd8e4bda931acd0efafe4ef6a300c06f"
+    },
+    {
+      "path": "frontend/app/page.tsx",
+      "bytes": 25664,
+      "sha256": "78a09a62020d94ca1ba0473e5156399fe4e3d7806e6b2cf33745ac7932fe4543"
+    },
+    {
+      "path": "frontend/app/verify/page.tsx",
+      "bytes": 19488,
+      "sha256": "2acdb6dbca91087c75967273f818e171ca7fd298c31552e8e40ffbde48cc8ed2"
+    },
+    {
+      "path": "frontend/components/DemoPitchBar.tsx",
+      "bytes": 2804,
+      "sha256": "34350564d6fc89bc3bec92e91429763c4b4dcc8d36188fec2d419385f61d6df8"
+    },
+    {
+      "path": "frontend/components/Navbar.tsx",
+      "bytes": 7645,
+      "sha256": "0133f725a01844774957863acffddd30075fab63ad9a32553942268be87bf113"
+    },
+    {
+      "path": "frontend/components/RoleIndicatorBanner.tsx",
+      "bytes": 3653,
+      "sha256": "0bb661b1812f1220754f3645818214829901b36389aa4955850f84a86b4a5c96"
+    },
+    {
+      "path": "frontend/lib/api.ts",
+      "bytes": 8293,
+      "sha256": "cc6f45c3c94253b3669d78deb18f0d8dc7941bfa8a1db5a5f2760e4a0d64722f"
+    },
+    {
+      "path": "frontend/lib/roleContext.tsx",
+      "bytes": 1092,
+      "sha256": "b50f93337ddd6e3c653aaa55eb4522ad5d373826b712df982ad87c943a04f8a5"
+    },
+    {
+      "path": "frontend/next-env.d.ts",
+      "bytes": 268,
+      "sha256": "f4e8976c19fc926644d72610bf1058bd6bf52add97e46a02bc0b912a751625c0"
+    },
+    {
+      "path": "frontend/next.config.mjs",
+      "bytes": 227,
+      "sha256": "ae09c4a5f7461940a82a55c44c6a817d1e82a978ae7fc7e3307278de6575f689"
+    },
+    {
+      "path": "frontend/package-lock.json",
+      "bytes": 58119,
+      "sha256": "3f4d30e37f81a4c8efd3d47427bd2f5ea83e2e2492bfad59c40caf97c7f891f7"
+    },
+    {
+      "path": "frontend/package.json",
+      "bytes": 561,
+      "sha256": "c19eb9b7db5694188bec3470b69966f01bb8d115a828a29cd8113e0152f40c7c"
+    },
+    {
+      "path": "frontend/postcss.config.mjs",
+      "bytes": 84,
+      "sha256": "9685bec8c68559920ca730e83d60c0a1259e8c19d7cebaf1029e253eb9c3ffb6"
+    },
+    {
+      "path": "frontend/public/logo-emblem-transparent.png",
+      "bytes": 104213,
+      "sha256": "11195cefa119bb30b854a0356531697c18df214d727db8c7fac8d68f6e23e065"
+    },
+    {
+      "path": "frontend/public/logo-emblem.png",
+      "bytes": 104196,
+      "sha256": "a859a7391dca5cb05317eb860bff6a538c4d9231a2c3ccb102e0f9e92c50271f"
+    },
+    {
+      "path": "frontend/public/logo-transparent.png",
+      "bytes": 300476,
+      "sha256": "582a05c067fce1e059e0f4b5e1ee944eb83f5981d701e0fe0a764cc063d1a9da"
+    },
+    {
+      "path": "frontend/public/logo-trimmed.png",
+      "bytes": 300331,
+      "sha256": "877e44adc7194888f67f41a8cb2a5e7ac93c2ecc43d71c052e11b8792f8ea5f6"
+    },
+    {
+      "path": "frontend/public/logo.png",
+      "bytes": 300331,
+      "sha256": "877e44adc7194888f67f41a8cb2a5e7ac93c2ecc43d71c052e11b8792f8ea5f6"
+    },
+    {
+      "path": "frontend/public/sample_relief_receipt.svg",
+      "bytes": 6275,
+      "sha256": "81baa75c9afe8e03a7eeaa42e1036e71a84ee098b8dd44264f42a0cb0c1e701c"
+    },
+    {
+      "path": "frontend/public/seed_beneficiaries.csv",
+      "bytes": 980,
+      "sha256": "08b2025a6d49a8ab0a76855db3cf688cb6b1da650947e8d62c5e2b156cb27fb1"
+    },
+    {
+      "path": "frontend/tsconfig.json",
+      "bytes": 625,
+      "sha256": "86c4fd7c9e5b33668b0166e7109016504850b69eb5fdfb095068662be17cd034"
+    },
+    {
+      "path": "frontend/types/lucide-react.d.ts",
+      "bytes": 32,
+      "sha256": "46fbe0c1443901e776c04580be697031a20d8e85a815accd904187aadab73601"
+    },
+    {
+      "path": "package.json",
+      "bytes": 1293,
+      "sha256": "3bbb1a03f73723f84c322ae7a645daf334fb33886d6e813d7c8a46598f4f1720"
+    },
+    {
+      "path": "shared/contracts/AyudaChainRegistry.json",
+      "bytes": 12052,
+      "sha256": "fc2e343bd75d53204e4829366cd267bbfed77683450ad9bcdfa477126c1e1ce5"
+    },
+    {
+      "path": "start_ayudachain.sh",
+      "bytes": 3357,
+      "sha256": "101ebbfb61abb4d5a6e07f591f2b9b19bcac5d90dd8f2781fdd2eb5c1a5f6b10"
+    }
+  ]
+}

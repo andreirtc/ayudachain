@@ -1,0 +1,9 @@
+Command: C:\Users\Yushin\AppData\Local\Programs\Python\Python314\python.exe backend/test_backend.py
+CWD: C:\Users\Yushin\AppData\Local\Temp\ayudachain-investigation-ba4heaqr
+Exit: 0
+
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.001s
+
+OK

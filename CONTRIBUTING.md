@@ -1,67 +1,32 @@
-# Contributing to AyudaChain 🇵🇭
+# Contributing to AyudaChain
 
-Thank you for your interest in contributing to **AyudaChain**! We are building an immutable, transparent, and resilient digital trail for disaster relief and public aid distribution in the Philippines.
+Follow [AGENTS.md](AGENTS.md) and the maintainer's direct instructions. Read the [PRD](docs/product/prd.md), [ERD](docs/system/erd.md) and applicable system/API/compatibility documents before designing behavior. Historical ideation remains unchanged; proposals are not additional execution authorization. Respect the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-## Code of Conduct
+## Runtime and scope
 
-All contributors are expected to adhere to our [Code of Conduct](CODE_OF_CONDUCT.md). Please treat all community members with respect and professionalism.
+`backend/app/main.py` is the authoritative FastAPI/PostgreSQL five-role MVP. `backend/server.py`, SQLite, the original receipt hasher and original registry remain separate without dual writes. `contracts/` contains the separate evidence-v1 Solidity registry and real local deployment/read/recovery worker. `frontend/` contains Next.js 15/React 19 forms at `/mvp`, with claimed actor selection, actual uploads and persistent workflows. Authentication is Pending; real household data is prohibited in evaluation.
 
-## Repository Architecture
+Use Python 3.14, supported Node 22/24 and local PostgreSQL 18. Install `backend/requirements-mvp.lock`, `npm --prefix contracts ci` and `npm --prefix frontend ci`. Stop owned development processes before npm ci on Windows. Follow [local setup, supervision and recovery](docs/guides/local-mvp.md) for the owned cluster, explicit migrations, private configuration, pinned manifests and isolated fault node. `start_ayudachain.sh` and legacy root scripts describe the retained old stack; they do not start the MVP.
 
-AyudaChain is structured into three primary domains:
-- **`contracts/`**: Solidity 0.8.20 smart contracts deployed on EVM / Polygon Amoy testnet. Manages immutable relief fund batch releases, barangay allocations, and SHA-256 receipt integrity anchors.
-- **`backend/`**: Python REST API with SQLite persistence. Implements AI entity resolution (fuzzy matching, token-set Levenshtein distance), anomaly detection, and receipt hashing.
-- **`frontend/`**: Next.js 15 App Router + React 19 + TypeScript + Tailwind CSS application featuring the public transparency portal, DAFAC QR scanner, and fraud simulator.
-- **`docs/`**: Architectural specifications, blockchain gas analysis, user guide, and demo scripts.
+Run `python -m backend.scripts.local_mvp serve`, adding `--with-chain` only when no node occupies 8545. It refuses occupied ports and lost pinned deployments. Explicit reset retires namespaces and preserves records/files/manifests. No public deployment is authorized. Keep keys and ignored environment files, originals, recovery bundles and signed submission bytes private.
 
-## Development Workflow
+## Changes and checks
 
-### 1. Fork & Clone
-```bash
-git clone https://github.com/andreirtc/ayudachain.git
-cd ayudachain
+Branch from main using `feat/description`, `fix/description` or `docs/description`. Preserve unrelated branches, stashes and worktrees. Use Conventional Commits (`feat:`, `fix:`, `docs:`, `test:`, `refactor:`) only when explicitly asked to commit. The current MVP implementation request authorizes no commit or push.
+
+Behavior changes require meaningful regressions that fail before the fix, then actual touched-layer checks. Backend integration requires the distinct node on 8555, its retained manifest and explicit isolated test database. Run one fault suite at a time: overlapping independent cases share its local signer and invalidate controlled nonce/checkpoint assumptions. No fixture or transport failure can supply blockchain success.
+
+```powershell
+.venv/Scripts/python -m unittest discover -s backend/tests -v
+.venv/Scripts/python backend/test_backend.py
+npm --prefix contracts test
+npm --prefix frontend run typecheck
+npm --prefix frontend run build
+npm --prefix frontend run test:mvp
 ```
 
-### 2. Environment Configuration
-Copy the example environment configuration:
-```bash
-cp .env.example .env
-```
+Browser checks require the running MVP and use explicit reference-only reset while retaining previous histories. Report actual results, failures and unrun checks. Production build checks TypeScript. ESLint is not installed/configured; its retained build skip is disclosed. Dependencies outside the approved plan require discussion.
 
-### 3. Running the Entire Stack Locally
-You can start all three layers (Hardhat node + Python API + Next.js frontend) with one script:
-```bash
-bash start_ayudachain.sh
-```
-Or start components independently:
-- **Blockchain**: `npm --prefix contracts run node` and `npm --prefix contracts run deploy:local`
-- **Backend**: `python3 backend/server.py 8000`
-- **Frontend**: `npm --prefix frontend run dev`
+Protect once-only handover, current versions/recusal, fixed paid amounts, private outcomes and Auditor inspection logs, atomic business/audit/intent writes and fail-closed verification. Use invented people and `DFC-2026-XXXX` identifiers. All chain values must be observed; core success is never simulated.
 
-## Testing Guidelines
-
-Before opening a Pull Request, make sure all test suites pass:
-
-```bash
-# 1. Run all unit tests from root
-npm test
-
-# 2. Smart contract tests (100% passing required)
-npm run test:contracts
-
-# 3. Python backend unit & AI tests
-npm run test:backend
-
-# 4. Frontend TypeScript compilation audit
-npm run typecheck
-```
-
-## Pull Request Guidelines
-
-1. **Branch Naming**: Use clear prefixes:
-   - `feat/your-feature-name`
-   - `fix/issue-description`
-   - `docs/documentation-update`
-2. **Commit Messages**: Follow Conventional Commits format (`feat:`, `fix:`, `docs:`, `test:`, `refactor:`).
-3. **Privacy First**: Never commit personally identifiable information (PII) or real citizen data to tests or repositories. Use synthetic DAFAC identifiers (e.g. `DFC-2026-XXXX`).
-4. **Gas Efficiency**: Any changes to `AyudaChainRegistry.sol` must be accompanied by updated gas benchmarks and test coverage.
+Generate OpenAPI with `python -m backend.scripts.export_openapi`, TypeScript with the locked openapi-typescript CLI, and protocol vectors with `python -m backend.scripts.protocol_vectors`. Schema source is the approved metadata/migration catalogue. Registry artifacts/manifests are generated by deployment scripts. Preserve original registry artifacts and receipt hashing compatibility. Changes beyond approved interfaces/schema need a new decision. Update current docs with behavior, preserving historical sources. See [validation](docs/implementation/validation.md) for actual evidence and real-use limitations.
