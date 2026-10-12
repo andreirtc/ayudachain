@@ -100,7 +100,8 @@ export interface VerifyResponse {
   record_id: string;
   beneficiary_id?: string;
   receipt_hash_local: string;
-  receipt_hash_onchain: string;
+  receipt_hash_onchain: string | null;
+  verification_status: "UNAVAILABLE" | "UNANCHORED" | "MISMATCH" | "VERIFIED";
   is_verified: boolean;
   blockchain_tx_hash?: string;
   timestamp?: number;
@@ -256,7 +257,7 @@ export async function verifyBlockchain(distributionId?: string, receiptHash?: st
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ distribution_id: distributionId, receipt_hash: receiptHash })
   });
-  if (!res.ok) throw new Error("Failed to verify record on blockchain");
+  if (!res.ok) throw await errorFrom(res, "Failed to load verification result");
   return res.json();
 }
 

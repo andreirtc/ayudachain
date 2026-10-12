@@ -138,13 +138,18 @@ Amounts: requests send pesos with at most two decimal places (`5000` or `5000.50
 
 ### 6. Blockchain Verification Tool
 - **Endpoint**: `POST /api/blockchain/verify`
-  - Recomputes hash from database content and verifies against `AyudaChainRegistry.verifyReceipt(...)`.
+  - Recomputes the local receipt hash and performs a read of the configured contract. No offline, missing-record, or fabricated verification fallback.
   - Body:
   ```json
   {
     "distribution_id": "DIST-0001"
   }
   ```
+  - Response includes `verification_status`: `VERIFIED` for a consistent matching anchor; `MISMATCH` for a successful read of an existing different anchor; `UNANCHORED` for a successful read reporting no receipt; or `UNAVAILABLE` for failed/malformed/inconsistent reads, a missing/incompatible contract, or a wrong configured chain/contract. `is_verified` is true only for `VERIFIED`.
+  - `receipt_hash_onchain` is nullable and is never replaced by the local hash. `timestamp` is nullable and is read from the actual existing receipt, not generated on lookup. Unknown local record IDs still return 404. The four verification outcomes return 200 as results of the requested check.
+  - Verification requires observed chain ID and contract address to match backend configuration, an explicit existing receipt, a valid hash, a boolean contract match result, and a positive receipt timestamp. Conflicting evidence returns `UNAVAILABLE`.
+  - `blockchain_tx_hash` is saved historical metadata, not independently verified by this comparison. `explorer_url` remains null until transaction metadata reconciliation is implemented. New release/allocation/payout/seed writes save a hash only from a successful CLI confirmation with a valid hash; failed operations store no invented hash.
+  - Matching the current receipt hash cannot prove physical cash delivery, household names, allocation linkage, or file contents that are not yet covered by the versioned receipt snapshot. See [Truthful verification](TRUTHFUL_VERIFICATION.md).
 
 ---
 
