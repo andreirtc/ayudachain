@@ -44,6 +44,8 @@ Actual camera QR decoding and a persistent offline queue are not implemented. Wh
 
 Older fixtures reuse one sample receipt image/OCR containing another fictional household's details. Scoped accounts do not receive that shared template. A record without a household-specific image shows that limitation and still offers hash verification. Office readers retain access to historical template evidence; stored hashes are unchanged.
 
+**View receipt** opens the exact payout's details in a keyboard-accessible dialog. Its amount and household label come from the permitted local records. Office readers can expand **Saved receipt image** and **Saved extracted text**. A shared template is clearly labeled; image failures offer **Retry image** without losing the reference. **Check this receipt** opens the same record on the verification page. See [receipt UI behavior](UI_RECEIPTS.md).
+
 ## Check receipt integrity
 
 Open /verify or follow a payout's receipt link. The public view exposes receipt references and hash evidence. Authorized accounts can also see their permitted local household and amount context.

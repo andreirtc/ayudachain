@@ -11,6 +11,7 @@ export default function RegistryDialog({
   busy = false,
   initialFocus,
   wide = false,
+  returnFocusId = "registry-heading",
 }: {
   title: string;
   children: ReactNode;
@@ -18,6 +19,7 @@ export default function RegistryDialog({
   busy?: boolean;
   initialFocus?: string;
   wide?: boolean;
+  returnFocusId?: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -31,9 +33,9 @@ export default function RegistryDialog({
       element.close();
       document.body.style.overflow = overflow;
       if (opener?.isConnected) opener.focus();
-      else document.getElementById("registry-heading")?.focus();
+      else document.getElementById(returnFocusId)?.focus();
     };
-  }, [initialFocus]);
+  }, [initialFocus, returnFocusId]);
 
   return (
     <dialog

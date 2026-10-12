@@ -84,7 +84,7 @@ h1, h2, h3 { font-weight: 700; }
 .registry-dialog { margin: auto; width: calc(100% - 32px); max-width: 580px; max-height: calc(100dvh - 32px); border: 1px solid #cbd5e1; border-radius: 14px; padding: 0; color: #0f172a; background: #fff; box-shadow: 0 24px 64px #0f172a30; overflow-y: auto; }
 .registry-dialog::backdrop { background: #0f172a99; }
 .registry-dialog-wide { max-width: 760px; }
-.registry-dialog-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 24px; border-bottom: 1px solid #e2e8f0; }
+.registry-dialog-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 24px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; background: white; z-index: 2; }
 .registry-dialog-heading h2 { font-size: 20px; font-weight: 700; }
 .registry-dialog-heading h2:focus { outline: none; }
 .registry-icon-button { min-width: 44px; min-height: 44px; display: grid; place-items: center; cursor: pointer; border-radius: 7px; color: #475569; }
@@ -127,6 +127,14 @@ h1, h2, h3 { font-weight: 700; }
 .workflow-record { padding: 20px 0; border-top: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 10px; }
 .workflow-record:first-child { border-top: 0; padding-top: 0; }
 .workflow-panel .registry-button { font-size: 15px; }
+.receipt-summary { padding: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; }
+.receipt-summary h3 { margin-top: 6px; font-size: 20px; font-weight: 650; overflow-wrap: anywhere; }
+.receipt-references { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 10px 16px; font-size: 15px; }
+.receipt-references dt { color: #475569; }
+.receipt-references dd { overflow-wrap: anywhere; }
+.receipt-image { display: block; max-width: 100%; max-height: 540px; margin-inline: auto; border: 1px solid #cbd5e1; border-radius: 6px; }
+.receipt-extracted { font-family: var(--font-body), sans-serif; white-space: pre-wrap; overflow-wrap: anywhere; padding: 16px; background: #f8fafc; border-radius: 8px; margin-top: 12px; font-size: 14px; }
+@media (max-width: 480px) { .receipt-references { grid-template-columns: minmax(0, 1fr); gap: 4px; } .receipt-references dd { margin-bottom: 10px; } }
 @media (max-width: 900px) {
   .workflow-columns { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .workflow-panel { padding: 20px; }
