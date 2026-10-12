@@ -7,10 +7,12 @@ import {
   FileCheck, Sparkles, ExternalLink, RefreshCw, Eye, AlertTriangle, AlertCircle,
   Camera, QrCode, Wifi, WifiOff, X
 } from "lucide-react";
-import { fetchDistributions, fetchBeneficiaries, confirmDistribution, Distribution, Beneficiary } from "@/lib/api";
+import { fetchDistributions, fetchBeneficiaries, confirmDistribution, Distribution, Beneficiary, apiUrl } from "@/lib/api";
+import { useChainStatus, chainLabel } from "@/lib/useChainStatus";
 import { useRole } from "@/lib/roleContext";
 
 export default function DistributionsPage() {
+  const chain = useChainStatus();
   const { role } = useRole();
   const [distributions, setDistributions] = useState<Distribution[]>([]);
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
@@ -156,12 +158,14 @@ export default function DistributionsPage() {
               )}
               <div>
                 <span className="font-bold text-slate-800 text-[11px] block">
-                  {offlineSimulated ? "Evacuation Center Mode: Offline Caching" : "Network Status: Connected to Polygon"}
+                  {offlineSimulated ? "Evacuation Center Mode: Offline Caching" : `Network Status: ${chainLabel(chain)}`}
                 </span>
                 <p className="text-[10px] text-slate-500">
                   {offlineSimulated
                     ? "Cell towers down. Vouchers queue in local device storage and batch-sync when reconnected."
-                    : "Real-time on-chain confirmation active on Polygon Amoy / Local EVM."}
+                    : chain.kind === "connected"
+                      ? "Payouts are anchored on the chain as they are recorded."
+                      : "Payouts cannot be anchored until the blockchain is reachable."}
                 </p>
               </div>
             </div>
@@ -339,7 +343,7 @@ export default function DistributionsPage() {
                   {step !== "SUCCESS" && <RefreshCw className="w-3.5 h-3.5 animate-spin text-blue-600" />}
                   {step === "PREPARING" && "1. Normalizing OCR text payload..."}
                   {step === "OFFCHAIN_STORED" && "2. Storing receipt off-chain in database..."}
-                  {step === "ANCHORING" && "3. Submitting SHA-256 hash to Polygon contract..."}
+                  {step === "ANCHORING" && "3. Submitting SHA-256 hash to the smart contract..."}
                   {step === "SUCCESS" && "4. ✓ Successfully confirmed on-chain!"}
                 </div>
               </div>
@@ -391,7 +395,7 @@ export default function DistributionsPage() {
                   ? "Claim Already Completed for this Household"
                   : numericAmount > 10000
                   ? "Cannot Disburse: Exceeds ₱10,000 Limit"
-                  : "Confirm Aid & Anchor on Polygon"}
+                  : "Confirm Aid & Anchor on Blockchain"}
               </button>
             )}
           </form>
@@ -429,7 +433,7 @@ export default function DistributionsPage() {
                 <div className="flex items-center justify-between pt-1">
                   <span className="text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-semibold flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                    Polygon Anchored
+                    Anchored
                   </span>
 
                   <div className="flex items-center gap-2">
@@ -473,7 +477,7 @@ export default function DistributionsPage() {
             {/* Receipt Preview */}
             <div className="bg-slate-100 rounded-xl p-4 flex justify-center border border-slate-200 mb-4">
               <img
-                src={previewReceipt.receipt_file_path || "http://127.0.0.1:8000/receipts/sample_relief_receipt.svg"}
+                src={apiUrl(previewReceipt.receipt_file_path || "/receipts/sample_relief_receipt.svg")}
                 alt="Relief Receipt"
                 className="max-h-96 rounded-lg shadow-sm border border-slate-300"
               />

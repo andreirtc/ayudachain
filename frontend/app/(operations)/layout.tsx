@@ -23,13 +23,11 @@ export default function OperationsLayout({
             <div>
               <p className="font-bold text-slate-300">AYUDACHAIN — NATIONAL RELIEF INTEGRITY &amp; AUDIT INFRASTRUCTURE</p>
               <p className="text-slate-500 mt-0.5">
-                Architecture: Off-chain operational storage + On-chain Polygon cryptographic integrity proofs.
+                Architecture: Off-chain operational storage + on-chain receipt integrity proofs.
               </p>
             </div>
             <div className="flex items-center gap-4 text-slate-400">
               <span>Fictional Demonstration Calamity: Typhoon Salinlahi</span>
-              <span className="text-slate-600">•</span>
-              <span className="font-mono text-emerald-400">Polygon Amoy / EVM</span>
             </div>
           </div>
         </footer>

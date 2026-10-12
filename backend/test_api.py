@@ -143,6 +143,22 @@ class TestAyudaChainAPI(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertGreater(res.json()["total_records_processed"], 0)
 
+    def test_dashboard_reports_unavailable_chain(self):
+        original = blockchain_service.get_status
+        blockchain_service.get_status = lambda: {"success": False, "network": "Local EVM", "chainId": 31337}
+        try:
+            data = self.client.get("/api/dashboard").json()
+        finally:
+            blockchain_service.get_status = original
+        self.assertEqual(data["blockchain_status"], "UNAVAILABLE")
+
+    def test_contract_address_comes_from_deployment_file(self):
+        from app import config
+        deployment = config._load_deployment(config.DEPLOYMENT_FILE)
+        if "CONTRACT_ADDRESS" not in os.environ:
+            self.assertEqual(config.CONTRACT_ADDRESS, deployment.get("contractAddress"))
+        self.assertEqual(config.CHAIN_ID, int(os.getenv("CHAIN_ID") or deployment.get("chainId") or 31337))
+
     def test_delete_beneficiary(self):
         res = self.client.delete("/api/beneficiaries/BEN-0007")
         self.assertEqual(res.status_code, 200)

@@ -104,7 +104,7 @@ export default function BatchDetailPage() {
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            This batch was formally initialized and anchored on the Polygon EVM testnet.
+            This batch was formally initialized and anchored on the blockchain.
           </p>
         </div>
         <div className="font-mono text-xs text-slate-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex items-center gap-2">
@@ -183,7 +183,7 @@ export default function BatchDetailPage() {
               <p className="text-sm font-semibold text-slate-900 mt-1">{ev.description}</p>
               {ev.blockchain_tx_hash && (
                 <p className="text-xs font-mono text-emerald-600 mt-1 flex items-center gap-1">
-                  <Lock className="w-3 h-3" /> Polygon Tx: {ev.blockchain_tx_hash}
+                  <Lock className="w-3 h-3" /> Tx: {ev.blockchain_tx_hash}
                 </p>
               )}
             </div>

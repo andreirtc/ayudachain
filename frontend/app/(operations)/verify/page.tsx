@@ -7,8 +7,10 @@ import {
   ExternalLink, FileText, Database, UserCheck, HelpCircle, ChevronDown, ChevronUp, Info
 } from "lucide-react";
 import { verifyBlockchain, VerifyResponse, fetchDistributions, fetchBeneficiaries, Distribution, Beneficiary } from "@/lib/api";
+import { useChainStatus, chainLabel } from "@/lib/useChainStatus";
 
 function VerifyContent() {
+  const chain = useChainStatus();
   const searchParams = useSearchParams();
   const initialDistId = searchParams?.get("distribution_id") || "DIST-0001";
 
@@ -249,7 +251,7 @@ function VerifyContent() {
                 )}
               </div>
 
-              {/* Box 2: What is permanently sealed in the Polygon Blockchain */}
+              {/* Box 2: What is permanently sealed on the blockchain */}
               <div className="bg-white/90 p-4 rounded-xl border border-slate-200 space-y-2">
                 <span className="text-[10px] font-bold tracking-wider uppercase text-slate-500 block">
                   2. Permanent Seal Stamped on Blockchain
@@ -265,7 +267,7 @@ function VerifyContent() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Blockchain Witness:</span>
-                    <span className="font-mono text-emerald-700 text-[11px]">Polygon Amoy / EVM</span>
+                    <span className="font-mono text-emerald-700 text-[11px]">{chainLabel(chain)}</span>
                   </div>
                 </div>
                 <div className="p-2 bg-emerald-50 rounded text-[11px] text-emerald-800 font-semibold border border-emerald-200">
