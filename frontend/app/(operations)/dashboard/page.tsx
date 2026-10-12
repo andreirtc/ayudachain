@@ -4,8 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ShieldCheck, Banknote, Building2, Users, AlertTriangle, CheckCircle2,
-  ArrowRight, ExternalLink, Activity, RefreshCw, Lock, Sparkles, FileText,
-  Copy, Check, Settings2, HelpCircle, Globe, ChevronDown, ChevronUp
+  ArrowRight, Activity, RefreshCw, Lock, Sparkles, FileText
 } from "lucide-react";
 import { fetchDashboard, DashboardStats } from "@/lib/api";
 
@@ -13,14 +12,6 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Customizable Blockchain Network & Contract Configuration
-  const [selectedNetwork, setSelectedNetwork] = useState<string>("Local EVM");
-  const [customContract, setCustomContract] = useState<string>("0x5FbDB2315678afecb367f032d93F642f64180aa3");
-  const [isEditingContract, setIsEditingContract] = useState(false);
-  const [tempContract, setTempContract] = useState(customContract);
-  const [copiedContract, setCopiedContract] = useState(false);
-  const [showExplanation, setShowExplanation] = useState(false);
 
   const loadData = async () => {
     try {
@@ -72,6 +63,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {error && <p role="alert" className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-950">The latest refresh failed. Totals below are from the last successful read. <button type="button" onClick={() => void loadData()} className="underline font-semibold">Refresh</button></p>}
       {/* Hero Calamity Banner */}
       <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 rounded-2xl p-6 sm:p-8 text-white shadow-xl border border-slate-800 relative overflow-hidden">
         <div className="absolute right-0 top-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -84,13 +76,13 @@ export default function DashboardPage() {
             <div>
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="bg-rose-500 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider animate-pulse">
-                  Active Calamity Response
+                  Fictional relief batch
                 </span>
                 <span className="text-xs text-slate-400">Batch Ref: {stats?.batch_id}</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black tracking-tight">{stats?.calamity_name}</h1>
               <p className="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl">
-                Province of Albay Emergency Cash &amp; Relief Assistance. Full lifecycle transparency from DSWD fund release to household disbursement.
+                Recorded fictional funds, household reviews and payout receipts.
               </p>
             </div>
           </div>
@@ -113,58 +105,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 5-Step Transparency Pipeline */}
-        <div className="mt-8 pt-6 border-t border-slate-800/80">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-4">
-            Auditable End-to-End Pipeline (Proseso ng Ayuda Mula DSWD Hanggang Pamilya)
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
-            <div className="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60 flex flex-col justify-between">
-              <div>
-                <span className="text-white font-bold text-xs block">1. Fund Release</span>
-                <span className="text-[10px] text-slate-400">Paglabas ng pondo ng DSWD</span>
-              </div>
-              <span className="font-black text-white text-base mt-2">₱10,000,000</span>
-              <span className="text-[10px] text-emerald-400 mt-1 flex items-center gap-1">✓ On-Chain Anchored</span>
-            </div>
-
-            <div className="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60 flex flex-col justify-between">
-              <div>
-                <span className="text-white font-bold text-xs block">2. Barangay Allocation</span>
-                <span className="text-[10px] text-slate-400">Alokasyon sa mga barangay</span>
-              </div>
-              <span className="font-black text-white text-base mt-2">4 Barangays</span>
-              <span className="text-[10px] text-emerald-400 mt-1 flex items-center gap-1">✓ 100% Allocated</span>
-            </div>
-
-            <div className="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60 flex flex-col justify-between">
-              <div>
-                <span className="text-white font-bold text-xs block">3. AI Entity Resolution</span>
-                <span className="text-[10px] text-slate-400">Pagsala sa dobleng listahan</span>
-              </div>
-              <span className="font-black text-amber-400 text-base mt-2">4 Flagged Records</span>
-              <span className="text-[10px] text-amber-300 mt-1 flex items-center gap-1">⚠ Requires Officer Review</span>
-            </div>
-
-            <div className="bg-slate-800/60 p-3 rounded-xl border border-slate-700/60 flex flex-col justify-between">
-              <div>
-                <span className="text-white font-bold text-xs block">4. Relief Distribution</span>
-                <span className="text-[10px] text-slate-400">Pamamahagi sa evacuees</span>
-              </div>
-              <span className="font-black text-white text-base mt-2">{stats?.confirmed_distributions} Households</span>
-              <span className="text-[10px] text-blue-400 mt-1 flex items-center gap-1">✓ DAFAC QR &amp; Receipt OCR</span>
-            </div>
-
-            <div className="bg-emerald-950/40 p-3 rounded-xl border border-emerald-800/60 flex flex-col justify-between">
-              <div>
-                <span className="text-emerald-300 font-bold text-xs block">5. Blockchain Seal</span>
-                <span className="text-[10px] text-emerald-500">Selyado at hindi mababago</span>
-              </div>
-              <span className="font-black text-emerald-400 text-base mt-2">Immutable Hash</span>
-              <span className="text-[10px] text-emerald-400 mt-1 flex items-center gap-1">✓ Publicly Verifiable</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Top Level Metric Cards */}
@@ -208,7 +148,7 @@ export default function DashboardPage() {
         {/* Total Distributed */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
           <div className="flex justify-between items-start">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Confirmed Aid Disbursed</span>
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Recorded payouts</span>
             <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
               <CheckCircle2 className="w-5 h-5" />
             </div>
@@ -222,7 +162,7 @@ export default function DashboardPage() {
         {/* Beneficiaries & AI Flags */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
           <div className="flex justify-between items-start">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Beneficiaries &amp; AI Flags</span>
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Households and review flags</span>
             <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
               <Users className="w-5 h-5" />
             </div>
@@ -267,7 +207,7 @@ export default function DashboardPage() {
                       <span className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">DC</span>
                     )}
                     {tx.event_type.includes("FLAG") && (
-                      <span className="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs">AI</span>
+                      <span className="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-xs">!</span>
                     )}
                   </div>
                   <div>
@@ -286,7 +226,7 @@ export default function DashboardPage() {
                     </span>
                   ) : (
                     <span className="text-[11px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded font-medium border border-amber-200">
-                      Off-Chain AI Flag
+                      Review flag
                     </span>
                   )}
                 </div>
@@ -314,141 +254,25 @@ export default function DashboardPage() {
               </div>
               <span
                 className={`flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded border ${
-                  stats?.blockchain_status === "CONNECTED"
+                  !error && stats?.blockchain_status === "CONNECTED"
                     ? "text-emerald-400 bg-emerald-950/80 border-emerald-700/60"
                     : "text-amber-300 bg-amber-950/60 border-amber-700/60"
                 }`}
               >
-                <span className={`w-2 h-2 rounded-full ${stats?.blockchain_status === "CONNECTED" ? "bg-emerald-400" : "bg-amber-400"}`}></span>
-                {stats?.blockchain_status || "CHECKING"}
+                <span className={`w-2 h-2 rounded-full ${!error && stats?.blockchain_status === "CONNECTED" ? "bg-emerald-400" : "bg-amber-400"}`}></span>
+                {error ? "REFRESH UNAVAILABLE" : stats?.blockchain_status || "CHECKING"}
               </span>
             </div>
 
-            {/* Customizable Network Selector */}
-            <div>
-              <div className="flex items-center justify-between">
-                <label className="text-xs text-slate-400 font-semibold">Active Blockchain Network:</label>
-                <span className="text-[10px] text-emerald-400 font-mono flex items-center gap-1">
-                  <Globe className="w-3 h-3" /> Live
-                </span>
-              </div>
-              <select
-                value={selectedNetwork}
-                onChange={(e) => setSelectedNetwork(e.target.value)}
-                className="mt-1.5 w-full bg-slate-800 text-white text-xs font-semibold rounded-lg border border-slate-700 p-2 focus:ring-2 focus:ring-blue-500 cursor-pointer"
-              >
-                <option value="Local EVM">Local EVM (Fast Offline Demo • Port 8545)</option>
-                <option value="Polygon Amoy Testnet">Polygon Amoy Testnet (Public Web3 Explorer)</option>
-                <option value="Hardhat Sandbox">Hardhat In-Memory Sandbox</option>
-              </select>
-            </div>
-
-            {/* Smart Contract Address with Copy & Customization */}
-            <div>
-              <div className="flex items-center justify-between">
-                <label className="text-xs text-slate-400 font-semibold">Smart Contract Address:</label>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(customContract);
-                      setCopiedContract(true);
-                      setTimeout(() => setCopiedContract(false), 2000);
-                    }}
-                    className="text-[11px] text-blue-400 hover:text-blue-300 flex items-center gap-1 cursor-pointer"
-                    title="Copy contract address"
-                  >
-                    {copiedContract ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                    <span>{copiedContract ? "Copied!" : "Copy"}</span>
-                  </button>
-                  <span className="text-slate-600">•</span>
-                  <button
-                    onClick={() => setIsEditingContract(!isEditingContract)}
-                    className="text-[11px] text-slate-400 hover:text-white flex items-center gap-1 cursor-pointer"
-                    title="Customize address for custom deployments"
-                  >
-                    <Settings2 className="w-3 h-3" />
-                    <span>{isEditingContract ? "Cancel" : "Customize"}</span>
-                  </button>
-                </div>
-              </div>
-
-              {isEditingContract ? (
-                <div className="mt-1.5 space-y-2 bg-slate-950/90 p-2.5 rounded-lg border border-blue-500/50">
-                  <span className="text-[10px] text-slate-400 block">
-                    Enter custom contract address (e.g. deployed Polygon Amoy address):
-                  </span>
-                  <input
-                    type="text"
-                    value={tempContract}
-                    onChange={(e) => setTempContract(e.target.value)}
-                    placeholder="0x..."
-                    className="w-full bg-slate-900 text-blue-300 font-mono text-xs p-2 rounded border border-slate-700 focus:outline-none focus:border-blue-400"
-                  />
-                  <div className="flex items-center gap-2 pt-1">
-                    <button
-                      onClick={() => {
-                        setCustomContract(tempContract.trim() || stats?.contract_address || "0x5FbDB2315678afecb367f032d93F642f64180aa3");
-                        setIsEditingContract(false);
-                      }}
-                      className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold rounded cursor-pointer"
-                    >
-                      Save Address
-                    </button>
-                    <button
-                      onClick={() => {
-                        setTempContract("0x5FbDB2315678afecb367f032d93F642f64180aa3");
-                        setCustomContract("0x5FbDB2315678afecb367f032d93F642f64180aa3");
-                        setIsEditingContract(false);
-                      }}
-                      className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] rounded cursor-pointer"
-                    >
-                      Reset Default
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-1.5 p-2 bg-slate-950/90 rounded-lg border border-slate-800 flex items-center justify-between gap-2">
-                  <p className="font-mono text-xs text-blue-300 truncate" title={customContract}>
-                    {customContract}
-                  </p>
-                  {selectedNetwork.includes("Polygon") && (
-                    <a
-                      href={`https://amoy.polygonscan.com/address/${customContract}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      title="Open on Polygonscan Block Explorer"
-                      className="text-slate-400 hover:text-white shrink-0 p-1 hover:bg-slate-800 rounded"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Explanatory Collapsible for Citizens & Judges */}
-            <div className="border-t border-slate-800 pt-3">
-              <button
-                onClick={() => setShowExplanation(!showExplanation)}
-                className="w-full flex items-center justify-between text-xs text-slate-400 hover:text-slate-200 transition cursor-pointer"
-              >
-                <span className="flex items-center gap-1.5 font-medium">
-                  <HelpCircle className="w-3.5 h-3.5 text-blue-400" />
-                  What is a Smart Contract? (Bakit may address?)
-                </span>
-                {showExplanation ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-              </button>
-              {showExplanation && (
-                <div className="mt-2.5 p-3 bg-slate-950/95 rounded-xl border border-slate-800 text-[11px] text-slate-300 leading-relaxed space-y-2 animate-in fade-in">
-                  <p>
-                    📖 <strong>Digital Registry Book Analogy:</strong> Parang Land Title o PSA registry book sa pamahalaan. Ang address na ito ang opisyal na tahanan ng AyudaChain sa blockchain.
-                  </p>
-                  <p>
-                    🔒 <strong>Bakit hindi nababago?</strong> Tuwing may pamilyang bibigyan ng ₱5,000, ang digital hash (fingerprint) ng resibo ay isinusulat sa kontratang ito. Kahit subukan ng sinumang opisyal o hacker na i-edit ang lokal na database, hinding-hindi nila mapapalitan ang nakatatak dito.
-                  </p>
-                </div>
-              )}
-            </div>
+            <p className="text-xs text-slate-300">Connection status is separate from receipt verification.</p>
+            <details className="text-sm text-slate-300">
+              <summary className="cursor-pointer py-2 font-semibold">Reported network and contract</summary>
+              <dl className="mt-2 space-y-3 text-xs">
+                <div><dt className="font-semibold">Network</dt><dd>{error ? "Refresh unavailable" : stats?.active_network || "Not reported"}</dd></div>
+                <div><dt className="font-semibold">Contract</dt><dd className="font-mono break-all">{error ? "Refresh unavailable" : stats?.contract_address || "Not reported"}</dd></div>
+              </dl>
+              <p className="mt-3 text-xs">Configuration comes from the backend. This dashboard does not change the network or deployment.</p>
+            </details>
 
             <div className="pt-1">
               <Link
@@ -468,10 +292,10 @@ export default function DashboardPage() {
               Hybrid Storage Principle
             </h4>
             <p className="text-slate-600 leading-relaxed">
-              <strong>Off-Chain:</strong> Heavy receipts, photos, and private PII remain securely in off-chain databases.
+              <strong>Local records:</strong> Synthetic household details and receipt files are stored in the database and local files. Authenticated privacy remains unfinished.
             </p>
             <p className="text-slate-600 leading-relaxed mt-1">
-              <strong>On-Chain:</strong> Only 32-byte cryptographic SHA-256 integrity hashes are committed to the blockchain. Zero private data is leaked.
+              <strong>Blockchain:</strong> The current registry stores record references, amounts and receipt hashes. A receipt check covers only the fields included in its hash.
             </p>
           </div>
         </div>

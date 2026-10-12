@@ -6,6 +6,8 @@ PR workflow: see [STACKED_PRS.md](STACKED_PRS.md). This planning session is the 
 
 Status: unchecked items are planned, not implemented. Work through one numbered item at a time. First establish a runnable baseline; then backend/contracts correctness; then frontend workflow and usability.
 
+The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were compared with PR #16 on 2026-10-12. See [BLUEPRINT_COMPARISON.md](BLUEPRINT_COMPARISON.md) for selected ideas, contradictions and remaining integration gates. Keep the corrected accounting and historical proofs; evaluate the five-role journeys and durable evidence implementation before rebuilding equivalents. Preserve this stacked workflow rather than restarting from the blueprint's older #14 baseline.
+
 ## 0. Runnable baseline
 - [x] Install dependencies and run local blockchain, backend, and frontend; verify dashboard and all routes via HTTP. Browser visual/interactivity review remains pending.
 - [x] Document Windows startup and shutdown, environment setup, and database/blockchain reset together. See [WINDOWS_LOCAL.md](WINDOWS_LOCAL.md); validated with a full reset on 2026-10-12.
@@ -45,7 +47,9 @@ Status: unchecked items are planned, not implemented. Work through one numbered 
 ## 6. Frontend workflow and features
 - [ ] Apply the UI design priorities below, including a simple landing page, less copy, focused screens, and natural wording without em dashes.
 - [ ] Reflect authoritative budgets, eligibility, API validation errors, payout state, and anchor state; remove misleading success/network labels and hardcoded summary assumptions.
+  - [x] Remove mock offline queue/camera controls and unsupported claims from the demo shell/payout screen; show actual browser connectivity, preserve API errors and keep receipt evidence distinct from recorded payouts. See [TRUTHFUL_DEMO_WORKFLOW.md](TRUTHFUL_DEMO_WORKFLOW.md). Full authoritative anchor lifecycle and remaining screens still need follow-up.
 - [ ] Make network controls truthful: read actual configured network/contract, or implement real authorized configuration; keep technical settings outside ordinary citizen/field-worker flows.
+  - [x] Remove cosmetic dashboard network/address editors and show expandable backend-reported configuration, with visible refresh failures. Authorized network reconfiguration is not a product capability.
 - [ ] Implement real QR decoding for synthetic DAFAC cards; retain clearly labeled sample selection as a demo convenience.
 - [ ] Implement persistent offline queue/cached required data, reconnect sync, retries, and conflict handling; clearly distinguish queued payouts from confirmed anchors.
 - [ ] Make registration, review, payout, and citizen verification a connected understandable journey; preserve useful existing styling.
