@@ -275,6 +275,33 @@ class TestAyudaChainAPI(unittest.TestCase):
         self.assertEqual(batch["standard_grant_centavos"], 500_000)
         self.assertEqual(batch["max_grant_centavos"], 1_000_000)
 
+    def test_payout_requires_approved_beneficiary(self):
+        # BEN-0007 is a seeded possible duplicate awaiting review
+        res = self._pay("DIST-3001", "BEN-0007", "RELIEF-2026-001", 5000)
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("not approved", res.json()["detail"])
+
+        res = self.client.post("/api/beneficiaries/BEN-0007/verify", json={"status": "VERIFIED", "review_notes": "Different household"})
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(self._pay("DIST-3001", "BEN-0007", "RELIEF-2026-001", 5000).status_code, 201)
+
+    def test_payout_rejected_for_rejected_beneficiary(self):
+        self.client.post("/api/beneficiaries/BEN-0014/verify", json={"status": "REJECTED", "review_notes": "Same as BEN-0013"})
+        self.assertEqual(self._pay("DIST-3002", "BEN-0014", "RELIEF-2026-001", 5000).status_code, 400)
+
+    def test_payout_requires_active_batch(self):
+        from app.database import SessionLocal
+        from app.models.entities import ReliefBatch
+        db = SessionLocal()
+        try:
+            db.query(ReliefBatch).filter(ReliefBatch.batch_id == "RELIEF-2026-001").update({"status": "SUSPENDED"})
+            db.commit()
+        finally:
+            db.close()
+        res = self._pay("DIST-3003", "BEN-0004", "RELIEF-2026-001", 5000)
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("SUSPENDED", res.json()["detail"])
+
     def test_seeded_payouts_link_to_allocations(self):
         dists = {d["distribution_id"]: d["allocation_id"] for d in self.client.get("/api/distributions").json()}
         self.assertEqual(dists["DIST-0001"], "ALLOC-0001")
