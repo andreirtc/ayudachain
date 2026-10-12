@@ -12,6 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.orm import Session
 
+from app import config
 from app.database import init_db, get_db
 from app.models.entities import ReliefBatch, Allocation, Beneficiary, Distribution, AuditEvent
 from app.schemas.schemas import (
@@ -38,7 +39,7 @@ app = FastAPI(
 # CORS middleware for Next.js frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=config.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -129,8 +130,8 @@ def get_dashboard(db: Session = Depends(get_db)):
         verified_beneficiaries=verified_bens,
         flagged_records=flagged_recs,
         confirmed_distributions=confirmed_dists,
-        blockchain_status="CONNECTED" if bc_info.get("success") else "STANDBY",
-        active_network=bc_info.get("network", "Polygon Amoy"),
+        blockchain_status="CONNECTED" if bc_info.get("success") else "UNAVAILABLE",
+        active_network=bc_info.get("network", config.NETWORK_NAME),
         contract_address=bc_info.get("contractAddress"),
         recent_transactions=recent_txs
     )
@@ -524,9 +525,9 @@ def verify_blockchain_record(payload: BlockchainVerifyRequest, db: Session = Dep
         is_verified=matched and is_valid,
         blockchain_tx_hash=dist.blockchain_tx_hash,
         timestamp=bc_res.get("timestamp"),
-        network=status_info.get("network", "Polygon Amoy"),
+        network=status_info.get("network", config.NETWORK_NAME),
         contract_address=bc_res.get("contractAddress") or status_info.get("contractAddress"),
-        explorer_url=f"https://amoy.polygonscan.com/tx/{dist.blockchain_tx_hash}" if dist.blockchain_tx_hash and "amoy" in status_info.get("network", "").lower() else None,
+        explorer_url=f"{config.EXPLORER_TX_URL}{dist.blockchain_tx_hash}" if dist.blockchain_tx_hash and config.EXPLORER_TX_URL else None,
         status_message=msg
     )
 

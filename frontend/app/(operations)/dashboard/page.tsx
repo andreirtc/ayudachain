@@ -45,7 +45,7 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
         <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
-        <p className="text-sm text-slate-500 font-medium">Connecting to AyudaChain database &amp; Polygon node...</p>
+        <p className="text-sm text-slate-500 font-medium">Connecting to AyudaChain database &amp; blockchain node...</p>
       </div>
     );
   }
@@ -186,7 +186,7 @@ export default function DashboardPage() {
             </span>
             <div className="flex items-center gap-1.5 mt-2 text-xs text-emerald-700 font-semibold">
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Selyado sa Polygon Block #1</span>
+              <span>Selyado sa blockchain</span>
             </div>
           </div>
         </div>
@@ -312,9 +312,15 @@ export default function DashboardPage() {
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">Blockchain Ledger Status</span>
                 <span className="text-[10px] text-slate-500">Selyo ng Ayuda sa Smart Contract</span>
               </div>
-              <span className="flex items-center gap-1.5 text-xs text-emerald-400 font-semibold bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-700/60">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span>
-                {stats?.blockchain_status || "CONNECTED"}
+              <span
+                className={`flex items-center gap-1.5 text-xs font-semibold px-2 py-0.5 rounded border ${
+                  stats?.blockchain_status === "CONNECTED"
+                    ? "text-emerald-400 bg-emerald-950/80 border-emerald-700/60"
+                    : "text-amber-300 bg-amber-950/60 border-amber-700/60"
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${stats?.blockchain_status === "CONNECTED" ? "bg-emerald-400" : "bg-amber-400"}`}></span>
+                {stats?.blockchain_status || "CHECKING"}
               </span>
             </div>
 
@@ -465,7 +471,7 @@ export default function DashboardPage() {
               <strong>Off-Chain:</strong> Heavy receipts, photos, and private PII remain securely in off-chain databases.
             </p>
             <p className="text-slate-600 leading-relaxed mt-1">
-              <strong>On-Chain:</strong> Only 32-byte cryptographic SHA-256 integrity hashes are committed to Polygon. Zero private data is leaked.
+              <strong>On-Chain:</strong> Only 32-byte cryptographic SHA-256 integrity hashes are committed to the blockchain. Zero private data is leaked.
             </p>
           </div>
         </div>

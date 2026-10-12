@@ -13,7 +13,7 @@ Status: unchecked items are planned, not implemented. Work through one numbered 
 
 ## 1. Select and consolidate the backend
 - [x] Choose one supported API implementation: server.py versus FastAPI app/main.py; reconcile DAFAC/schema/endpoint differences and remove ambiguity in docs. Chose FastAPI (2026-10-12); ported CSV, delete, payout checks, and `dafac_id`; removed server.py; added `backend/test_api.py`.
-- [ ] Load configuration consistently; make frontend API URL and backend blockchain status authoritative. Choose local SQLite for development; decide hosted persistence when deploying.
+- [x] Load configuration consistently; make frontend API URL and backend blockchain status authoritative. Choose local SQLite for development; decide hosted persistence when deploying. Done 2026-10-12: `backend/app/config.py`, `.env.example` files, truthful chain status in API and UI, receipt URLs use the API base. SQLite stays for development; hosted persistence is decided in section 7.
 
 ## 2. Correct fictional fund accounting
 - [ ] Use integer centavos (or exact decimals) consistently in database, API, hashing, and contract integration.

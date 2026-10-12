@@ -6,10 +6,13 @@ import { usePathname } from "next/navigation";
 import { ShieldCheck, Layers, Users, Receipt, RefreshCw, CheckCircle2, UserCheck } from "lucide-react";
 import { resetDemoData } from "@/lib/api";
 import { useRole, UserRole } from "@/lib/roleContext";
+import { useChainStatus, chainLabel } from "@/lib/useChainStatus";
 
 export default function Navbar() {
   const pathname = usePathname();
   const { role, setRole } = useRole();
+  const chain = useChainStatus();
+  const chainConnected = chain.kind === "connected";
   const [isResetting, setIsResetting] = useState(false);
   const [resetMessage, setResetMessage] = useState<string | null>(null);
 
@@ -43,13 +46,18 @@ export default function Navbar() {
       {/* Top Government Transparency Header */}
       <div className="bg-slate-950 px-4 py-1 text-xs text-slate-400 border-b border-slate-800/80 flex flex-wrap justify-between items-center">
         <div className="flex items-center gap-2">
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 pulse-dot"></span>
           <span>REPUBLIC OF THE PHILIPPINES — DISASTER RELIEF TRANSPARENCY PORTAL</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="hidden sm:inline text-slate-500">Polygon Amoy Integrity Layer Active</span>
-          <span className="font-mono text-emerald-400 text-[11px] bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/60">
-            Chain ID: 80002 / 31337
+          <span
+            className={`flex items-center gap-1.5 font-mono text-[11px] px-2 py-0.5 rounded border ${
+              chainConnected
+                ? "text-emerald-400 bg-emerald-950/80 border-emerald-800/60"
+                : "text-amber-300 bg-amber-950/60 border-amber-800/60"
+            }`}
+          >
+            <span className={`inline-block w-2 h-2 rounded-full ${chainConnected ? "bg-emerald-400" : "bg-amber-400"}`}></span>
+            {chainLabel(chain)}
           </span>
         </div>
       </div>

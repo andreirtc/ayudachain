@@ -11,15 +11,17 @@ import hashlib
 import time
 from typing import Dict, Any
 
+from app import config
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 CONTRACTS_DIR = os.path.join(BASE_DIR, "contracts")
 SCRIPT_PATH = os.path.join(CONTRACTS_DIR, "scripts", "blockchain_client.js")
 
 class BlockchainService:
     def __init__(self):
-        self.rpc_url = os.getenv("POLYGON_RPC_URL", "http://127.0.0.1:8545")
-        self.private_key = os.getenv("POLYGON_PRIVATE_KEY", "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
-        self.contract_address = os.getenv("CONTRACT_ADDRESS", "0x5FbDB2315678afecb367f032d93F642f64180aa3")
+        self.rpc_url = config.RPC_URL
+        self.private_key = config.PRIVATE_KEY
+        self.contract_address = config.CONTRACT_ADDRESS
 
     def _generate_fallback_hash(self, seed: str) -> str:
         h = hashlib.sha256(f"{seed}-{time.time()}".encode()).hexdigest()
@@ -29,7 +31,8 @@ class BlockchainService:
         env = os.environ.copy()
         env["POLYGON_RPC_URL"] = self.rpc_url
         env["POLYGON_PRIVATE_KEY"] = self.private_key
-        env["CONTRACT_ADDRESS"] = self.contract_address
+        if self.contract_address:
+            env["CONTRACT_ADDRESS"] = self.contract_address
 
         cmd = ["node", SCRIPT_PATH] + args
         try:
@@ -63,11 +66,11 @@ class BlockchainService:
         if res.get("success"):
             return res
         return {
-            "success": True,
-            "network": "Polygon Amoy Testnet (Standby)",
-            "chainId": 80002,
+            "success": False,
+            "network": config.NETWORK_NAME,
+            "chainId": config.CHAIN_ID,
             "contractAddress": self.contract_address,
-            "explorerUrl": f"https://amoy.polygonscan.com/address/{self.contract_address}"
+            "error": res.get("error", "Blockchain node unreachable")
         }
 
     def release_fund(self, batch_id: str, amount: float, calamity_name: str, source_agency: str) -> Dict[str, Any]:

@@ -268,3 +268,22 @@ export async function deleteBeneficiary(beneficiaryId: string): Promise<{ succes
   }
   return res.json();
 }
+
+export function apiUrl(path: string): string {
+  return path.startsWith("http") ? path : `${getApiBase()}${path}`;
+}
+
+export interface ChainStatus {
+  success: boolean;
+  network: string;
+  chainId?: number;
+  contractAddress?: string;
+  error?: string;
+}
+
+export async function fetchChainStatus(): Promise<ChainStatus> {
+  const res = await fetch(`${getApiBase()}/api/health`, { cache: 'no-store' });
+  if (!res.ok) throw new Error("Failed to fetch backend health");
+  const data = await res.json();
+  return data.blockchain;
+}

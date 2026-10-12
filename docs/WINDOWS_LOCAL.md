@@ -23,13 +23,16 @@ cd ..
 
 ## Configuration
 
-There is no `.env.example` yet. The defaults below work for the local chain, so no configuration is needed. To override them, set them in the window that runs the service.
+The defaults below work for the local chain, so no configuration is needed. To override them, copy `backend/.env.example` to `backend/.env` and `frontend/.env.example` to `frontend/.env.local`, or set variables in the window that runs the service. Variables set in the window win over the files. The backend reads all of its settings in `backend/app/config.py`.
 
 | Variable | Used by | Default |
 | --- | --- | --- |
 | `POLYGON_RPC_URL` | backend | `http://127.0.0.1:8545` |
 | `POLYGON_PRIVATE_KEY` | backend | Hardhat test account #0 (public, local only) |
-| `CONTRACT_ADDRESS` | backend | `0x5FbDB2315678afecb367f032d93F642f64180aa3` |
+| `CONTRACT_ADDRESS` | backend | Address in `backend/app/blockchain/AyudaChainRegistry.json`, written by the deploy script |
+| `CHAIN_ID` | backend | Chain ID in the same file (31337 locally) |
+| `DATABASE_URL` | backend | `backend/ayudachain.db` |
+| `CORS_ORIGINS` | backend | All origins |
 | `NEXT_PUBLIC_API_URL` | frontend | `http://<page host>:8000` |
 
 Example: `$env:NEXT_PUBLIC_API_URL = "http://127.0.0.1:8000"`. Next.js reads `NEXT_PUBLIC_*` values at build time, so rebuild the frontend after changing it.
