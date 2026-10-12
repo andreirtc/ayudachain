@@ -76,6 +76,7 @@ class BeneficiaryCreate(BaseModel):
     barangay_id: str = Field(..., example="BRGY-001")
     barangay_name: str = Field(..., example="San Isidro")
     batch_id: str = Field(..., example="RELIEF-2026-001")
+    dafac_id: Optional[str] = None
     contact_number: Optional[str] = "0917-123-4567"
 
 class BeneficiaryVerifyRequest(BaseModel):
@@ -85,6 +86,7 @@ class BeneficiaryVerifyRequest(BaseModel):
 class BeneficiaryResponse(BaseModel):
     id: int
     beneficiary_id: str
+    dafac_id: Optional[str]
     household_name: str
     barangay_id: str
     barangay_name: str
@@ -136,6 +138,7 @@ class BlockchainVerifyRequest(BaseModel):
 
 class BlockchainVerifyResponse(BaseModel):
     record_id: str
+    beneficiary_id: str
     receipt_hash_local: str
     receipt_hash_onchain: str
     is_verified: bool

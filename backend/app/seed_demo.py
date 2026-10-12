@@ -142,6 +142,7 @@ def seed_database():
 
         ben = Beneficiary(
             beneficiary_id=ben_id,
+            dafac_id=f"DFC-2026-{ben_id[-4:]}",
             household_name=name,
             barangay_id=brgy_id,
             barangay_name=brgy_name,
@@ -239,6 +240,16 @@ def seed_database():
     db.commit()
     db.close()
     print("Database seeded successfully with Typhoon Salinlahi (RELIEF-2026-001)!")
+
+def seed_if_empty():
+    init_db()
+    db = SessionLocal()
+    try:
+        has_batch = db.query(ReliefBatch).first() is not None
+    finally:
+        db.close()
+    if not has_batch:
+        seed_database()
 
 if __name__ == "__main__":
     seed_database()

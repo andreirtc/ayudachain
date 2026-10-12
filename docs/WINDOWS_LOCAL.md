@@ -15,9 +15,11 @@ Install dependencies once:
 ```powershell
 npm --prefix contracts install
 npm --prefix frontend install
+cd backend
+python -m venv .venv
+.venv\Scripts\python -m pip install -r requirements.txt
+cd ..
 ```
-
-`backend/server.py` uses only the Python standard library. `backend/requirements.txt` is for the separate FastAPI app and is not needed for this guide.
 
 ## Configuration
 
@@ -63,10 +65,10 @@ git restore shared/contracts/AyudaChainRegistry.json backend/app/blockchain/Ayud
 
 ```powershell
 cd backend
-python server.py 8000
+.venv\Scripts\python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-If `backend/ayudachain.db` is missing or empty, the server creates it with the Typhoon Salinlahi demo batch. Check it with `curl.exe http://127.0.0.1:8000/api/dashboard`.
+If `backend/ayudachain.db` is missing or empty, the server creates it with the Typhoon Salinlahi demo batch. Check it with `curl.exe http://127.0.0.1:8000/api/dashboard`, or open http://127.0.0.1:8000/docs to try the API.
 
 **Window 3: frontend**
 
@@ -100,17 +102,17 @@ The Hardhat chain keeps everything in memory, so stopping it erases all anchored
 2. Delete the database: `Remove-Item backend/ayudachain.db`
 3. Start the chain, deploy the contract, then start the backend and frontend as above.
 
-The dashboard's demo reset button (`POST /api/demo/reset`) only reseeds the database. It does not reset the chain, so the chain keeps records from earlier runs. Use the full reset above when you need the two to match.
+The dashboard's demo reset button (`POST /api/demo/reset`) only reseeds the database. It does not reset the chain, which already holds the demo records, so the chain rejects the new copies and the database stores placeholder transaction hashes that do not exist on the chain. Use the full reset above when you need the two to match.
 
 ## Tests
 
 ```powershell
 npm --prefix contracts test
-python backend/test_backend.py
-cd frontend; npx tsc --noEmit
+cd backend; .venv\Scripts\python test_backend.py; .venv\Scripts\python test_api.py; cd ..
+cd frontend; npx tsc --noEmit; cd ..
 ```
 
-Run the contract tests from the repository as shown (or from `contracts/`). Running `npx hardhat test` from the repository root fails with HH1 because no Hardhat project is found there. The root `npm test` and `npm run typecheck` scripts use `python3` and `./node_modules/.bin/tsc`, which may not work in PowerShell.
+Run the contract tests from the repository as shown (or from `contracts/`). Running `npx hardhat test` from the repository root fails with HH1 because no Hardhat project is found there. `test_api.py` uses a temporary database and a fake chain, so it does not need the local chain running. The root `npm test` and `npm run typecheck` scripts use `python3` and `./node_modules/.bin/tsc`, which may not work in PowerShell.
 
 ## Known gaps
 

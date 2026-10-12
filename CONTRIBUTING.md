@@ -35,7 +35,7 @@ bash start_ayudachain.sh
 ```
 Or start components independently:
 - **Blockchain**: `npm --prefix contracts run node` and `npm --prefix contracts run deploy:local`
-- **Backend**: `python3 backend/server.py 8000`
+- **Backend**: `cd backend && python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000` (install `backend/requirements.txt` first)
 - **Frontend**: `npm --prefix frontend run dev`
 
 ## Testing Guidelines

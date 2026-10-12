@@ -6,10 +6,10 @@ Philippine Calamity Relief Digital Trail & Integrity Layer
 import os
 from datetime import datetime
 from typing import List, Optional
-from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi import FastAPI, Depends, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
+from fastapi.responses import PlainTextResponse
 from sqlalchemy.orm import Session
 
 from app.database import init_db, get_db
@@ -22,11 +22,12 @@ from app.schemas.schemas import (
     BlockchainVerifyRequest, BlockchainVerifyResponse,
     AuditEventResponse
 )
-from app.ai.entity_resolution import EntityResolutionEngine
+from app.ai.entity_resolution import EntityResolutionEngine, process_csv_batch
 from app.ai.anomaly_detection import DistributionAnomalyDetector
 from app.services.hasher import compute_receipt_hash, verify_receipt_integrity
 from app.services.blockchain import blockchain_service
 from app.services.receipt_generator import save_sample_receipt, DEMO_OCR_TEXT
+from app.seed_demo import seed_database, seed_if_empty
 
 app = FastAPI(
     title="AyudaChain API",
@@ -43,8 +44,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
+SAMPLE_CSV_PATH = os.path.join(APP_DIR, "data", "seed_beneficiaries.csv")
+
 # Static files for sample receipts
-RECEIPTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "receipts")
+RECEIPTS_DIR = os.path.join(APP_DIR, "data", "receipts")
 os.makedirs(RECEIPTS_DIR, exist_ok=True)
 save_sample_receipt(RECEIPTS_DIR)
 app.mount("/receipts", StaticFiles(directory=RECEIPTS_DIR), name="receipts")
@@ -56,6 +60,7 @@ anomaly_detector = DistributionAnomalyDetector(standard_grant_amount=5000.0)
 @app.on_event("startup")
 def on_startup():
     init_db()
+    seed_if_empty()
 
 # --- Health Check ---
 @app.get("/api/health")
@@ -77,7 +82,10 @@ def get_dashboard(db: Session = Depends(get_db)):
 
     allocations = db.query(Allocation).filter(Allocation.batch_id == batch.batch_id).all()
     beneficiaries = db.query(Beneficiary).filter(Beneficiary.batch_id == batch.batch_id).all()
-    distributions = db.query(Distribution).filter(Distribution.batch_id == batch.batch_id).all()
+    distributions = db.query(Distribution).filter(
+        Distribution.batch_id == batch.batch_id,
+        Distribution.status == "CONFIRMED"
+    ).all()
 
     total_released = batch.amount
     total_allocated = sum(a.amount for a in allocations)
@@ -87,12 +95,18 @@ def get_dashboard(db: Session = Depends(get_db)):
     total_bens = len(beneficiaries)
     verified_bens = len([b for b in beneficiaries if b.verification_status == "VERIFIED"])
     flagged_recs = len([b for b in beneficiaries if b.verification_status == "FLAGGED_FOR_REVIEW" or b.duplicate_flag or b.anomaly_flag])
-    confirmed_dists = len([d for d in distributions if d.status == "CONFIRMED"])
+    confirmed_dists = len(distributions)
 
     bc_info = blockchain_service.get_status()
 
     # Recent activity
-    recent_events = db.query(AuditEvent).order_by(AuditEvent.timestamp.desc()).limit(8).all()
+    recent_events = (
+        db.query(AuditEvent)
+        .filter(AuditEvent.batch_id == batch.batch_id)
+        .order_by(AuditEvent.timestamp.desc())
+        .limit(8)
+        .all()
+    )
     recent_txs = [
         {
             "event_type": ev.event_type,
@@ -124,7 +138,7 @@ def get_dashboard(db: Session = Depends(get_db)):
 # --- Batches API ---
 @app.get("/api/batches", response_model=List[ReliefBatchResponse])
 def get_batches(db: Session = Depends(get_db)):
-    return db.query(ReliefBatch).all()
+    return db.query(ReliefBatch).order_by(ReliefBatch.id.desc()).all()
 
 @app.get("/api/batches/{batch_id}")
 def get_batch_detail(batch_id: str, db: Session = Depends(get_db)):
@@ -144,7 +158,7 @@ def get_batch_detail(batch_id: str, db: Session = Depends(get_db)):
         "timeline": [AuditEventResponse.from_orm(e) for e in events]
     }
 
-@app.post("/api/funds/releases", response_model=ReliefBatchResponse)
+@app.post("/api/funds/releases", response_model=ReliefBatchResponse, status_code=201)
 def release_fund(payload: ReliefBatchCreate, db: Session = Depends(get_db)):
     existing = db.query(ReliefBatch).filter(ReliefBatch.batch_id == payload.batch_id).first()
     if existing:
@@ -187,7 +201,7 @@ def release_fund(payload: ReliefBatchCreate, db: Session = Depends(get_db)):
     return batch
 
 # --- Allocations API ---
-@app.post("/api/allocations", response_model=AllocationResponse)
+@app.post("/api/allocations", response_model=AllocationResponse, status_code=201)
 def create_allocation(payload: AllocationCreate, db: Session = Depends(get_db)):
     batch = db.query(ReliefBatch).filter(ReliefBatch.batch_id == payload.batch_id).first()
     if not batch:
@@ -252,6 +266,21 @@ def get_beneficiaries(
         )
     return query.order_by(Beneficiary.id.asc()).all()
 
+@app.get("/api/beneficiaries/sample-csv", response_class=PlainTextResponse)
+def get_sample_csv():
+    if not os.path.exists(SAMPLE_CSV_PATH):
+        raise HTTPException(status_code=404, detail="Sample CSV not found")
+    with open(SAMPLE_CSV_PATH, "r", encoding="utf-8") as f:
+        return PlainTextResponse(f.read(), media_type="text/csv; charset=utf-8")
+
+@app.post("/api/beneficiaries/upload-csv")
+def upload_beneficiary_csv(payload: dict = Body(default={})):
+    csv_text = payload.get("csv_content") or ""
+    if not csv_text and os.path.exists(SAMPLE_CSV_PATH):
+        with open(SAMPLE_CSV_PATH, "r", encoding="utf-8") as f:
+            csv_text = f.read()
+    return process_csv_batch(csv_text)
+
 @app.get("/api/beneficiaries/{beneficiary_id}", response_model=BeneficiaryResponse)
 def get_beneficiary(beneficiary_id: str, db: Session = Depends(get_db)):
     ben = db.query(Beneficiary).filter(Beneficiary.beneficiary_id == beneficiary_id).first()
@@ -259,7 +288,7 @@ def get_beneficiary(beneficiary_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Beneficiary not found")
     return ben
 
-@app.post("/api/beneficiaries", response_model=BeneficiaryResponse)
+@app.post("/api/beneficiaries", response_model=BeneficiaryResponse, status_code=201)
 def register_beneficiary(payload: BeneficiaryCreate, db: Session = Depends(get_db)):
     existing = db.query(Beneficiary).filter(Beneficiary.beneficiary_id == payload.beneficiary_id).first()
     if existing:
@@ -288,6 +317,7 @@ def register_beneficiary(payload: BeneficiaryCreate, db: Session = Depends(get_d
 
     ben = Beneficiary(
         beneficiary_id=payload.beneficiary_id,
+        dafac_id=payload.dafac_id or f"DFC-2026-{payload.beneficiary_id[-4:]}",
         household_name=payload.household_name,
         barangay_id=payload.barangay_id,
         barangay_name=payload.barangay_name,
@@ -336,6 +366,29 @@ def verify_beneficiary(beneficiary_id: str, payload: BeneficiaryVerifyRequest, d
     db.refresh(ben)
     return ben
 
+def _delete_beneficiary(beneficiary_id: str, db: Session):
+    ben = db.query(Beneficiary).filter(Beneficiary.beneficiary_id == beneficiary_id).first()
+    if not ben:
+        raise HTTPException(status_code=404, detail="Beneficiary not found")
+
+    db.delete(ben)
+    db.add(AuditEvent(
+        batch_id=ben.batch_id,
+        event_type="BENEFICIARY_DELETED",
+        description=f"Deleted duplicate beneficiary {beneficiary_id} ({ben.household_name})",
+        entity_id=beneficiary_id
+    ))
+    db.commit()
+    return {"success": True, "message": f"Beneficiary {beneficiary_id} deleted successfully."}
+
+@app.delete("/api/beneficiaries/{beneficiary_id}")
+def delete_beneficiary(beneficiary_id: str, db: Session = Depends(get_db)):
+    return _delete_beneficiary(beneficiary_id, db)
+
+@app.post("/api/beneficiaries/{beneficiary_id}/delete")
+def delete_beneficiary_fallback(beneficiary_id: str, db: Session = Depends(get_db)):
+    return _delete_beneficiary(beneficiary_id, db)
+
 # --- Distributions API ---
 @app.get("/api/distributions", response_model=List[DistributionResponse])
 def get_distributions(batch_id: Optional[str] = None, db: Session = Depends(get_db)):
@@ -344,7 +397,7 @@ def get_distributions(batch_id: Optional[str] = None, db: Session = Depends(get_
         query = query.filter(Distribution.batch_id == batch_id)
     return query.order_by(Distribution.distributed_at.desc()).all()
 
-@app.post("/api/distributions/confirm", response_model=DistributionResponse)
+@app.post("/api/distributions/confirm", response_model=DistributionResponse, status_code=201)
 def confirm_distribution(payload: DistributionConfirmRequest, db: Session = Depends(get_db)):
     ben = db.query(Beneficiary).filter(Beneficiary.beneficiary_id == payload.beneficiary_id).first()
     if not ben:
@@ -353,6 +406,19 @@ def confirm_distribution(payload: DistributionConfirmRequest, db: Session = Depe
     existing_dist = db.query(Distribution).filter(Distribution.distribution_id == payload.distribution_id).first()
     if existing_dist:
         raise HTTPException(status_code=400, detail="Distribution ID already exists")
+
+    if payload.amount > 10000.0:
+        raise HTTPException(status_code=400, detail=f"Amount ₱{payload.amount:,.2f} exceeds the demo maximum grant of ₱10,000.00.")
+
+    prior_payout = db.query(Distribution).filter(Distribution.beneficiary_id == payload.beneficiary_id).first()
+    if prior_payout:
+        raise HTTPException(status_code=400, detail=f"Duplicate disbursement rejected: Beneficiary {payload.beneficiary_id} ({ben.household_name}) has already claimed aid.")
+
+    # Flag non-standard amounts (standard demo grant is ₱5,000)
+    is_anomalous_amount = payload.amount != 5000.0
+    if is_anomalous_amount:
+        ben.anomaly_flag = True
+        ben.review_notes = f"AI Anomaly: Non-standard grant amount ₱{payload.amount:,.2f} (expected standard ₱5,000.00). Flagged for COA audit."
 
     # Generate or normalize OCR text
     ocr_content = payload.ocr_raw_text or DEMO_OCR_TEXT
@@ -402,6 +468,16 @@ def confirm_distribution(payload: DistributionConfirmRequest, db: Session = Depe
         blockchain_tx_hash=tx_hash
     )
     db.add(audit)
+
+    if is_anomalous_amount:
+        db.add(AuditEvent(
+            batch_id=payload.batch_id,
+            event_type="AI_ANOMALY_FLAG",
+            description=f"AI Anomaly Engine: Non-standard disbursement of ₱{payload.amount:,.2f} to {payload.beneficiary_id} flagged for COA review (Expected ₱5,000.00)",
+            amount=payload.amount,
+            entity_id=payload.beneficiary_id
+        ))
+
     db.commit()
     db.refresh(dist)
     return dist
@@ -414,6 +490,8 @@ def verify_blockchain_record(payload: BlockchainVerifyRequest, db: Session = Dep
         dist = db.query(Distribution).filter(Distribution.distribution_id == payload.distribution_id).first()
     elif payload.receipt_hash:
         dist = db.query(Distribution).filter(Distribution.receipt_hash == payload.receipt_hash).first()
+    else:
+        dist = db.query(Distribution).order_by(Distribution.id.desc()).first()
 
     if not dist:
         raise HTTPException(status_code=404, detail="Distribution record not found in off-chain database.")
@@ -440,6 +518,7 @@ def verify_blockchain_record(payload: BlockchainVerifyRequest, db: Session = Dep
 
     return BlockchainVerifyResponse(
         record_id=dist.distribution_id,
+        beneficiary_id=dist.beneficiary_id,
         receipt_hash_local=local_recalculated_hash,
         receipt_hash_onchain=onchain_hash,
         is_verified=matched and is_valid,
@@ -458,7 +537,6 @@ def get_audit_trail(batch_id: str, db: Session = Depends(get_db)):
 
 # --- Demo Reset API ---
 @app.post("/api/demo/reset")
-def reset_demo(db: Session = Depends(get_db)):
-    from app.seed_demo import seed_database
+def reset_demo():
     seed_database()
     return {"success": True, "message": "Demo data reset to Typhoon Salinlahi (Batch RELIEF-2026-001) successfully."}

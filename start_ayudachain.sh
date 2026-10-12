@@ -35,7 +35,7 @@ def kill_port(target_port):
 for p in [8000, 8545, 3000]:
     kill_port(p)
 ' 2>/dev/null || true
-    pkill -f "python3.*server.py" 2>/dev/null || true
+    pkill -f "uvicorn app.main:app" 2>/dev/null || true
     pkill -f "hardhat.*node" 2>/dev/null || true
     pkill -f "next.*start" 2>/dev/null || true
 }
@@ -72,9 +72,11 @@ echo "📜       Deploying AyudaChainRegistry Smart Contract..."
 npx hardhat run scripts/deploy.js --network localhost > /tmp/ayudachain_deploy.log 2>&1
 
 # 2. Start Python Backend
-echo "🐍 [2/3] Starting Python REST API Server (Port 8000)..."
+echo "🐍 [2/3] Starting FastAPI Backend (Port 8000)..."
 cd "$ROOT_DIR/backend"
-python3 server.py 8000 > /tmp/ayudachain_backend.log 2>&1 &
+PYTHON_BIN="python3"
+[ -x .venv/bin/python ] && PYTHON_BIN=".venv/bin/python"
+"$PYTHON_BIN" -m uvicorn app.main:app --host 127.0.0.1 --port 8000 > /tmp/ayudachain_backend.log 2>&1 &
 for i in {1..15}; do
     if curl -s http://127.0.0.1:8000/api/dashboard > /dev/null 2>&1; then
         echo "       ✓ Backend API is healthy and responding (Port 8000)"
