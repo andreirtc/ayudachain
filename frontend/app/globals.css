@@ -24,6 +24,106 @@ body {
   animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* Household tasks retain the operational palette and use one responsive list. */
+.registry { font-size: 14px; line-height: 1.6; }
+.registry :is(button, input, select, textarea, summary, a):focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+.registry-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.registry-eyebrow { font-size: 12px; color: #475569; font-weight: 650; }
+.registry h1 { font-size: 28px; font-weight: 750; letter-spacing: -0.7px; }
+.registry-description { color: #475569; margin-top: 5px; max-width: 620px; }
+.registry-button { display: inline-flex; justify-content: center; align-items: center; gap: 8px; min-height: 44px; padding: 9px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; font-weight: 600; background: #fff; color: #334155; cursor: pointer; line-height: 1.4; }
+.registry-button:hover { background: #f1f5f9; }
+.registry-button:disabled { opacity: 0.55; cursor: default; }
+.registry-primary { background: #1d4ed8; border-color: #1d4ed8; color: white; }
+.registry-primary:hover { background: #1e40af; }
+.registry-text-button { color: #1d4ed8; border-color: transparent; background: transparent; }
+.registry-reject { color: #9f1239; }
+.registry-panel { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+.registry-list-tools { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding: 20px 24px; }
+.registry label { display: block; font-weight: 600; margin-bottom: 7px; }
+.registry :is(input:not([type=checkbox]), select, textarea) { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid #94a3b8; border-radius: 7px; background: #fff; color: #0f172a; font-size: 16px; }
+.registry :is(input, select, textarea):disabled { background: #f1f5f9; color: #475569; }
+.registry-search { width: min(100%, 400px); }
+.registry-search svg { position: absolute; left: 12px; top: 14px; color: #64748b; }
+.registry-search input { padding-left: 39px !important; }
+.registry-filters { display: flex; gap: 8px; flex-wrap: wrap; }
+.registry-filter-selected { background: #eff6ff; border-color: #1d4ed8; color: #1e40af; }
+.registry-list-caption { padding: 8px 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; color: #475569; border-top: 1px solid #e2e8f0; }
+.registry-list-caption .registry-button { border: 0; }
+.registry-table { width: 100%; text-align: left; border-collapse: collapse; table-layout: fixed; }
+.registry-table th { padding: 12px 24px; font-weight: 600; color: #475569; background: #f8fafc; border-block: 1px solid #e2e8f0; }
+.registry-table th:first-child { width: 40%; }
+.registry-table th:last-child { width: 152px; }
+.registry-table .registry-button { white-space: nowrap; }
+.registry-button svg { flex-shrink: 0; }
+.registry-table td { padding: 16px 24px; border-bottom: 1px solid #e2e8f0; overflow-wrap: anywhere; vertical-align: middle; }
+.registry-table tr:last-child td { border-bottom: 0; }
+.registry-table td:last-child { text-align: right; padding-left: 0; }
+.registry-household-name { font-weight: 650; font-size: 15px; color: #0f172a; }
+.registry-record-id { font-size: 12px; color: #64748b; margin-top: 3px; }
+.registry-badge { display: inline-block; font-size: 12px; line-height: 1.5; font-weight: 650; border-radius: 6px; padding: 4px 8px; }
+.registry-approved { background: #ecfdf5; color: #065f46; }
+.registry-pending { background: #fffbeb; color: #92400e; }
+.registry-neutral { background: #f1f5f9; color: #334155; }
+.registry-flag { font-size: 12px; color: #92400e; margin-top: 5px; }
+.registry-empty { padding: 36px 24px; text-align: center; color: #475569; }
+.registry-empty h2 { font-size: 18px; font-weight: 650; color: #0f172a; margin-bottom: 8px; }
+.registry-empty .registry-button { margin-top: 16px; }
+.registry-secondary { color: #475569; }
+.registry summary { min-height: 44px; cursor: pointer; align-content: center; font-weight: 600; }
+.registry-secondary-options { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; padding: 12px 0; }
+.registry label.registry-checkbox { display: flex; gap: 10px; align-items: center; min-height: 44px; margin: 0; font-weight: 400; }
+.registry-checkbox input { width: 20px; height: 20px; }
+.registry-dialog { margin: auto; width: calc(100% - 32px); max-width: 580px; max-height: calc(100dvh - 32px); border: 1px solid #cbd5e1; border-radius: 14px; padding: 0; color: #0f172a; background: #fff; box-shadow: 0 24px 64px #0f172a30; overflow-y: auto; }
+.registry-dialog::backdrop { background: #0f172a99; }
+.registry-dialog-wide { max-width: 760px; }
+.registry-dialog-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 24px; border-bottom: 1px solid #e2e8f0; }
+.registry-dialog-heading h2 { font-size: 20px; font-weight: 700; }
+.registry-dialog-heading h2:focus { outline: none; }
+.registry-icon-button { min-width: 44px; min-height: 44px; display: grid; place-items: center; cursor: pointer; border-radius: 7px; color: #475569; }
+.registry-icon-button:hover { background: #f1f5f9; }
+.registry-icon-button:disabled { opacity: 0.5; }
+.registry-dialog-content { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+.registry-household-summary h3 { font-size: 22px; font-weight: 700; overflow-wrap: anywhere; }
+.registry-household-summary > p { color: #475569; margin: 3px 0 12px; }
+.registry-next-step { padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; }
+.registry-next-step .registry-button { margin-top: 8px; padding-left: 0; }
+.registry-notice, .registry-error, .registry-success { padding: 12px 16px; border-radius: 8px; overflow-wrap: anywhere; }
+.registry-notice { background: #fffbeb; border: 1px solid #fcd34d; color: #78350f; }
+.registry-error { background: #fff1f2; border: 1px solid #fecdd3; color: #9f1239; }
+.registry-success { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+.registry-muted { color: #475569; font-size: 13px; }
+.registry-decision { display: flex; flex-direction: column; gap: 12px; border-top: 1px solid #e2e8f0; padding-top: 20px; }
+.registry-decision h3 { font-size: 17px; font-weight: 700; }
+.registry-decision label { margin-bottom: 0; }
+.registry-decision-actions, .registry-form-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.registry-form-actions { justify-content: flex-end; }
+.registry-detail { border-top: 1px solid #e2e8f0; padding-top: 6px; }
+.registry-detail > summary { color: #334155; }
+.registry-history-entry, .registry-csv-pair { padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; }
+.registry-references { margin-top: 12px; display: grid; grid-template-columns: 130px 1fr; gap: 8px 12px; }
+.registry-references dt { color: #475569; }
+.registry-references dd { overflow-wrap: anywhere; }
+@media (max-width: 760px) {
+  .registry-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .registry h1 { font-size: 26px; }
+  .registry-list-tools { flex-direction: column; align-items: stretch; gap: 16px; padding: 20px; }
+  .registry-search { width: 100%; }
+  .registry-list-caption { padding-inline: 20px; }
+  .registry-table, .registry-table tbody, .registry-table tr, .registry-table td { display: block; width: 100%; }
+  .registry-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .registry-table tr { border-top: 1px solid #e2e8f0; padding: 16px 20px 8px; }
+  .registry-table td { padding: 0 0 10px; border: 0; }
+  .registry-table td[data-label]::before { content: attr(data-label); display: inline-block; width: 85px; color: #475569; font-size: 13px; }
+  .registry-table td:last-child { padding: 0; }
+  .registry-flag { margin-left: 85px; }
+  .registry-dialog-content { padding: 20px; gap: 18px; }
+  .registry-dialog-heading { padding: 14px 20px; }
+  .registry-decision-actions { flex-direction: column; }
+  .registry-references { grid-template-columns: 1fr; gap: 3px; }
+  .registry-references dd { margin-bottom: 9px; }
+}
+
 /* Public landing page: independent from the operational dashboard. */
 .landing { background: #f7f8f4; color: #172b3a; min-height: 100vh; }
 .landing-width { max-width: 1180px; margin-inline: auto; padding-inline: 32px; }

@@ -6,6 +6,8 @@ PR workflow: see [STACKED_PRS.md](STACKED_PRS.md). This planning session is the 
 
 Status: unchecked items are planned, not implemented. Work through one numbered item at a time. First establish a runnable baseline; then backend/contracts correctness; then frontend workflow and usability.
 
+Current direction, 2026-10-13: the synthetic backend supports the core demo. Prioritize bounded frontend journeys now; remaining backend features are not prerequisites for UI work. Follow-up tasks still use the PR stack.
+
 The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were compared with PR #16 on 2026-10-12. See [BLUEPRINT_COMPARISON.md](BLUEPRINT_COMPARISON.md) for selected ideas, contradictions and remaining integration gates. Keep the corrected accounting and historical proofs; evaluate the five-role journeys and durable evidence implementation before rebuilding equivalents. Preserve this stacked workflow rather than restarting from the blueprint's older #14 baseline.
 
 ## 0. Runnable baseline
@@ -47,6 +49,7 @@ The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were 
 
 ## 6. Frontend workflow and features
 - [ ] Apply the UI design priorities below, including a simple landing page, less copy, focused screens, and natural wording without em dashes.
+  - [x] Simplify `/beneficiaries` for registration and DSWD review: role-specific tasks, readable phone rows, pending-review filters, expandable evidence/history, truthful next steps, loading/empty/error/success feedback and keyboard dialogs. See [REGISTRY_REVIEW_UX.md](REGISTRY_REVIEW_UX.md). Other screens and new-viewer comprehension remain separate.
 - [ ] Reflect authoritative budgets, eligibility, API validation errors, payout state, and anchor state; remove misleading success/network labels and hardcoded summary assumptions.
   - [x] Remove mock offline queue/camera controls and unsupported claims from the demo shell/payout screen; show actual browser connectivity, preserve API errors and keep receipt evidence distinct from recorded payouts. See [TRUTHFUL_DEMO_WORKFLOW.md](TRUTHFUL_DEMO_WORKFLOW.md). Full authoritative anchor lifecycle and remaining screens still need follow-up.
 - [ ] Make network controls truthful: read actual configured network/contract, or implement real authorized configuration; keep technical settings outside ordinary citizen/field-worker flows.
