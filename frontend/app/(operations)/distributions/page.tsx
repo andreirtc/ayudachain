@@ -16,7 +16,7 @@ import { submitOnlinePayout } from "@/lib/payoutConnection";
 
 export default function DistributionsPage() {
   const chain = useChainStatus();
-  const { role } = useRole();
+  const { role, account } = useRole();
   const browserOnline = useBrowserOnline();
   const [distributions, setDistributions] = useState<Distribution[]>([]);
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
@@ -62,13 +62,13 @@ export default function DistributionsPage() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [account?.id]);
 
   const handleDisburse = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedBenId || submitting.current) return;
-    if (role !== "Barangay Officer" || loading || loadError) {
-      setSubmitError("Choose the staff demo view and refresh the household records before recording a payout.");
+    if (role !== "DISBURSING" || loading || loadError) {
+      setSubmitError("Sign in as a disbursing officer and refresh the household records before recording a payout.");
       return;
     }
 
@@ -328,11 +328,11 @@ export default function DistributionsPage() {
               </div>
             )}
 
-            {role !== "Barangay Officer" ? (
+            {role !== "DISBURSING" ? (
               <div className="p-3 bg-slate-100 rounded-xl border border-slate-200 text-center text-slate-500 text-xs space-y-1">
-                <p className="font-semibold text-slate-700">Payout entry is in the staff demo view</p>
+                <p className="font-semibold text-slate-700">Payout entry is for disbursing officers</p>
                 <p className="text-[11px]">
-                  Choose <strong>Staff</strong> above to try a synthetic payout. Switching views is not authenticated access.
+                  Your signed-in role can inspect these records. A disbursing officer records the payout.
                 </p>
               </div>
             ) : (
@@ -435,11 +435,11 @@ export default function DistributionsPage() {
 
             {/* Receipt Preview */}
             <div className="bg-slate-100 rounded-xl p-4 flex justify-center border border-slate-200 mb-4">
-              <img
-                src={apiUrl(previewReceipt.receipt_file_path || "/receipts/sample_relief_receipt.svg")}
+              {previewReceipt.receipt_file_path ? <img
+                src={apiUrl(previewReceipt.receipt_file_path)}
                 alt="Relief Receipt"
                 className="max-h-96 rounded-lg shadow-sm border border-slate-300"
-              />
+              /> : <p className="text-sm text-slate-600">No household receipt image is available for this record. Its saved hash can still be checked.</p>}
             </div>
 
             {/* OCR Extracted Text */}

@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 _tmp_dir = tempfile.mkdtemp(prefix="ayudachain-test-")
 os.environ["DATABASE_URL"] = f"sqlite:///{os.path.join(_tmp_dir, 'test.db')}"
+os.environ["RECEIPTS_DIR"] = os.path.join(_tmp_dir, "receipts")
 
 from fastapi.testclient import TestClient
 
@@ -54,13 +55,19 @@ fake_chain = FakeChain()
 for _name in ("get_status", "release_fund", "allocate_fund", "confirm_distribution", "verify_receipt"):
     setattr(blockchain_service, _name, getattr(fake_chain, _name))
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "tests"))
+from auth_support import accounts_fixture, WorkflowClient
+_accounts_path = accounts_fixture(_tmp_dir)
+from app import config
+config.DEMO_ACCOUNTS_FILE = str(_accounts_path)
+config.CORS_ORIGINS = ["http://127.0.0.1:3001"]
 from app.main import app
 
 
 class TestAyudaChainAPI(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.client = TestClient(app)
+        cls.client = WorkflowClient(app)
         cls.client.__enter__()
 
     @classmethod
@@ -68,8 +75,12 @@ class TestAyudaChainAPI(unittest.TestCase):
         cls.client.__exit__(None, None, None)
 
     def setUp(self):
-        res = self.client.post("/api/demo/reset")
-        self.assertEqual(res.status_code, 200)
+        self.reset_fixture()
+
+    def reset_fixture(self):
+        from app.seed_demo import seed_database
+        seed_database()
+        self.client.authenticate_all()
 
     def test_startup_seeds_demo_batch(self):
         res = self.client.get("/api/dashboard")
@@ -225,7 +236,7 @@ class TestAyudaChainAPI(unittest.TestCase):
     def test_seed_with_failed_chain_keeps_records_without_fabricated_anchors(self):
         failed = {"success": False, "txHash": "0x" + "f" * 64}
         with patch.object(blockchain_service, "release_fund", return_value=failed), patch.object(blockchain_service, "allocate_fund", return_value=failed), patch.object(blockchain_service, "confirm_distribution", return_value=failed):
-            self.assertEqual(self.client.post("/api/demo/reset").status_code, 200)
+            self.reset_fixture()
         batch = self.client.get("/api/batches/RELIEF-2026-001").json()
         self.assertIsNone(batch["batch"]["blockchain_tx_hash"])
         self.assertTrue(all(a["blockchain_tx_hash"] is None for a in batch["allocations"]))
@@ -381,12 +392,12 @@ class TestAyudaChainAPI(unittest.TestCase):
         self.assertEqual(res.status_code, 400)
         self.assertIn("not approved", res.json()["detail"])
 
-        res = self.client.post("/api/beneficiaries/BEN-0007/verify", json={"status": "VERIFIED", "review_notes": "Different household", "reviewed_by": "demo-auditor-01"})
+        res = self.client.post("/api/beneficiaries/BEN-0007/verify", json={"status": "VERIFIED", "review_notes": "Different household", "reviewed_by": "demo-officer-01"})
         self.assertEqual(res.status_code, 200)
         self.assertEqual(self._pay("DIST-3001", "BEN-0007", "RELIEF-2026-001", 5000).status_code, 201)
 
     def test_payout_rejected_for_rejected_beneficiary(self):
-        self.client.post("/api/beneficiaries/BEN-0014/verify", json={"status": "REJECTED", "review_notes": "Same as BEN-0013", "reviewed_by": "demo-auditor-01"})
+        self.client.post("/api/beneficiaries/BEN-0014/verify", json={"status": "REJECTED", "review_notes": "Same as BEN-0013", "reviewed_by": "demo-officer-01"})
         self.assertEqual(self._pay("DIST-3002", "BEN-0014", "RELIEF-2026-001", 5000).status_code, 400)
 
     def test_payout_requires_active_batch(self):
@@ -448,7 +459,7 @@ class TestAyudaChainAPI(unittest.TestCase):
             db.query(ReliefBatch).filter_by(batch_id="RELIEF-2026-001").update({"status": "SUSPENDED"})
             db.commit()
         # Use a new client/session to establish that replay is not an in-memory cache.
-        retry = TestClient(app).post("/api/distributions/confirm", headers={"Idempotency-Key": "payout-test"}, json={
+        retry = WorkflowClient(app).post("/api/distributions/confirm", headers={"Idempotency-Key": "payout-test"}, json={
             "beneficiary_id": "BEN-0004", "batch_id": "RELIEF-2026-001", "amount": "5000.00",
         })
         self.assertEqual(retry.status_code, 200, retry.text)
@@ -646,7 +657,7 @@ class TestAyudaChainAPI(unittest.TestCase):
             self.assertEqual(config.CONTRACT_ADDRESS, deployment.get("contractAddress"))
         self.assertEqual(config.CHAIN_ID, int(os.getenv("CHAIN_ID") or deployment.get("chainId") or 31337))
 
-    def _review(self, ben_id="BEN-0007", status="VERIFIED", reason="Different fictional household", actor="demo-auditor-01"):
+    def _review(self, ben_id="BEN-0007", status="VERIFIED", reason="Different fictional household", actor="demo-officer-01"):
         return self.client.post(f"/api/beneficiaries/{ben_id}/verify", json={
             "status": status, "review_notes": reason, "reviewed_by": actor,
         })
@@ -673,7 +684,7 @@ class TestAyudaChainAPI(unittest.TestCase):
         review = self._reviews()[0]
         UUID(review["review_id"].removeprefix("REVIEW-"))
         self.assertEqual(review["reason"], "Different fictional household")
-        self.assertEqual(review["reviewed_by"], "demo-auditor-01")
+        self.assertEqual(review["reviewed_by"], "demo-officer-01")
         timestamp = datetime.fromisoformat(review["reviewed_at"].replace("Z", "+00:00"))
         self.assertGreaterEqual(timestamp, started)
         self.assertLessEqual(timestamp, datetime.now(timezone.utc))
@@ -727,11 +738,11 @@ class TestAyudaChainAPI(unittest.TestCase):
 
     def test_invalid_review_input_cannot_change_state_or_create_history(self):
         before = self.client.get("/api/beneficiaries/BEN-0007").json()
-        payload = {"status": "VERIFIED", "review_notes": "Different household", "reviewed_by": "demo-auditor-01"}
-        for changed in ({"status": "APPROVED"}, {"status": "UNKNOWN"}, {"review_notes": "   "}, {"review_notes": None}, {"review_notes": "x" * 2001}, {"reviewed_by": ""}, {"reviewed_by": "unknown-person"}):
+        payload = {"status": "VERIFIED", "review_notes": "Different household", "reviewed_by": "demo-officer-01"}
+        for changed in ({"status": "APPROVED"}, {"status": "UNKNOWN"}, {"review_notes": "   "}, {"review_notes": None}, {"review_notes": "x" * 2001}, {"reviewed_by": ""}):
             with self.subTest(changed=changed):
                 self.assertEqual(self.client.post("/api/beneficiaries/BEN-0007/verify", json={**payload, **changed}).status_code, 422)
-        for missing in ("review_notes", "reviewed_by"):
+        for missing in ("review_notes",):
             partial = {key: value for key, value in payload.items() if key != missing}
             self.assertEqual(self.client.post("/api/beneficiaries/BEN-0007/verify", json=partial).status_code, 422)
         self.assertEqual(self.client.get("/api/beneficiaries/BEN-0007").json(), before)
@@ -792,7 +803,7 @@ class TestAyudaChainAPI(unittest.TestCase):
         self.assertEqual(self.client.get("/api/distributions").json(), before)
         self.assertEqual(self._reviews(), [])
 
-    def _resolve_duplicate(self, ben_id="BEN-0007", canonical="BEN-0002", reason="Same fictional household", actor="demo-auditor-01"):
+    def _resolve_duplicate(self, ben_id="BEN-0007", canonical="BEN-0002", reason="Same fictional household", actor="demo-officer-01"):
         return self.client.post(f"/api/beneficiaries/{ben_id}/resolve-duplicate", json={
             "canonical_beneficiary_id": canonical, "review_notes": reason, "reviewed_by": actor,
         })
@@ -829,7 +840,7 @@ class TestAyudaChainAPI(unittest.TestCase):
         self.assertEqual(history[1], prior)
         self.assertEqual(history[0]["decision"], "DUPLICATE")
         self.assertEqual(history[0]["linked_beneficiary_id"], "BEN-0002")
-        self.assertEqual(history[0]["reviewed_by"], "demo-auditor-01")
+        self.assertEqual(history[0]["reviewed_by"], "demo-officer-01")
         self.assertEqual(history[0]["reason"], "Same fictional household")
         self.assertEqual(self.client.get("/api/distributions").json(), payouts)
         self.assertEqual(fake_chain.tx_count, tx_before)
@@ -900,12 +911,12 @@ class TestAyudaChainAPI(unittest.TestCase):
         self.assertEqual(len(self._reviews()), 1)
 
     def test_duplicate_resolution_requires_reason_and_named_reviewer(self):
-        payload = {"canonical_beneficiary_id": "BEN-0002", "review_notes": "Same household", "reviewed_by": "demo-auditor-01"}
-        for field in payload:
+        payload = {"canonical_beneficiary_id": "BEN-0002", "review_notes": "Same household", "reviewed_by": "demo-officer-01"}
+        for field in ("canonical_beneficiary_id", "review_notes"):
             incomplete = {key: value for key, value in payload.items() if key != field}
             self.assertEqual(self.client.post("/api/beneficiaries/BEN-0007/resolve-duplicate", json=incomplete).status_code, 422)
         self.assertEqual(self._resolve_duplicate(reason=" ").status_code, 422)
-        self.assertEqual(self._resolve_duplicate(actor="unknown").status_code, 422)
+        self.assertEqual(self._resolve_duplicate(actor="unknown").status_code, 403)
         self.assertEqual(self._resolve_duplicate(canonical="").status_code, 422)
         self.assertEqual(self._reviews(), [])
 

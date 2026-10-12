@@ -1,5 +1,7 @@
 # Truthful demo workflow
 
+Follow-up: [DEMO_SESSIONS.md](DEMO_SESSIONS.md) implements authenticated five-role permissions, limited public responses, disabled HTTP reset and actual headless desktop/phone checks. The comparisons and validation below describe the earlier PR #17 boundary.
+
 Bounded follow-up to [PR #16](https://github.com/andreirtc/ayudachain/pull/16), based on [the three-source comparison](BLUEPRINT_COMPARISON.md). All records and money remain synthetic; no workmate branch merge, database migration, contract change or deployment was performed.
 
 ## Corrected behavior

@@ -9,14 +9,15 @@ import threading
 from datetime import datetime
 from typing import List, Optional
 from uuid import uuid4
-from fastapi import FastAPI, Depends, HTTPException, Body, Header, Response
+from fastapi import FastAPI, Depends, HTTPException, Body, Header, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, FileResponse, JSONResponse
+from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import config
+from app.auth import router as auth_router, authorize_request, require_actor, optional_actor, scope_query, assert_household_scope, bind_reviewer
 from app.database import init_db, get_db
 from app.models.entities import ReliefBatch, Allocation, Beneficiary, BeneficiaryReview, Distribution, AuditEvent
 from app.schemas.schemas import (
@@ -34,12 +35,13 @@ from app.money import to_centavos, centavos_to_pesos, format_peso
 from app.barangays import barangay_error
 from app.services.blockchain import blockchain_service, confirmed_transaction_hash, is_hex_hash
 from app.services.receipt_generator import save_sample_receipt, DEMO_OCR_TEXT
-from app.seed_demo import seed_database, seed_if_empty
+from app.seed_demo import seed_if_empty
 
 app = FastAPI(
     title="AyudaChain API",
     description="Calamity Relief Verification, Entity-Resolution & Blockchain Integrity Layer",
-    version="1.0.0"
+    version="1.0.0",
+    dependencies=[Depends(authorize_request)]
 )
 
 # CORS middleware for Next.js frontend
@@ -55,10 +57,69 @@ APP_DIR = os.path.dirname(os.path.abspath(__file__))
 SAMPLE_CSV_PATH = os.path.join(APP_DIR, "data", "seed_beneficiaries.csv")
 
 # Static files for sample receipts
-RECEIPTS_DIR = os.path.join(APP_DIR, "data", "receipts")
+RECEIPTS_DIR = config.RECEIPTS_DIR
 os.makedirs(RECEIPTS_DIR, exist_ok=True)
 save_sample_receipt(RECEIPTS_DIR)
-app.mount("/receipts", StaticFiles(directory=RECEIPTS_DIR), name="receipts")
+app.include_router(auth_router)
+
+@app.middleware("http")
+async def no_store(request, call_next):
+    response = await call_next(request)
+    if request.url.path.startswith(("/api/", "/receipts/")):
+        response.headers["Cache-Control"] = "no-store"
+    return response
+
+@app.exception_handler(RequestValidationError)
+async def invalid_input(request, exc):
+    return JSONResponse(status_code=422, content={"detail": "Invalid request fields", "errors": [{"loc": list(e["loc"]), "type": e["type"]} for e in exc.errors()]})
+
+
+def public_actor(request):
+    try:
+        return optional_actor(request)
+    except HTTPException:
+        return None
+
+
+def household_projection(ben, actor):
+    result = BeneficiaryResponse.model_validate(ben).model_dump()
+    if actor.role in {"BARANGAY", "DISBURSING"}:
+        result.update(contact_number=None, review_notes=None, duplicate_matched_id=None)
+    return result
+
+
+def distribution_projection(dist, actor):
+    result = DistributionResponse.model_validate(dist).model_dump()
+    # Older fixtures reuse a template containing a different household's details.
+    # Preserve stored evidence/hashes, but do not disclose that template to scoped accounts.
+    if actor.role in {"DISBURSING", "BENEFICIARY"}:
+        if dist.receipt_file_path == "/receipts/sample_relief_receipt.svg":
+            result["receipt_file_path"] = None
+        if dist.ocr_text == DEMO_OCR_TEXT:
+            result["ocr_text"] = None
+    return result
+
+
+@app.get("/receipts/{filename}")
+def receipt_file(filename: str, request: Request, db: Session = Depends(get_db)):
+    actor = require_actor(request)
+    if os.path.basename(filename) != filename or "/" in filename or "\\" in filename or filename in {".", ".."}:
+        raise HTTPException(404, "Receipt not available")
+    records = db.query(Distribution).filter(Distribution.receipt_file_path == "/receipts/" + filename).all()
+    if filename == "sample_relief_receipt.svg":
+        if actor.role not in {"DSWD", "AUDITOR"}:
+            raise HTTPException(404, "Shared sample template is not a household receipt")
+        records = db.query(Distribution).all()
+    for dist in records:
+        ben = db.query(Beneficiary).filter_by(beneficiary_id=dist.beneficiary_id).first()
+        try:
+            assert_household_scope(actor, ben)
+        except HTTPException:
+            continue
+        full_path = os.path.join(RECEIPTS_DIR, filename)
+        if os.path.isfile(full_path):
+            return FileResponse(full_path)
+    raise HTTPException(404, "Receipt not available to this account")
 
 # AI Engines
 entity_resolver = EntityResolutionEngine(confidence_threshold=0.78)
@@ -82,7 +143,7 @@ def health_check():
 
 # --- Dashboard API ---
 @app.get("/api/dashboard", response_model=DashboardStats)
-def get_dashboard(db: Session = Depends(get_db)):
+def get_dashboard(request: Request, db: Session = Depends(get_db)):
     batch = db.query(ReliefBatch).first()
     if not batch:
         raise HTTPException(status_code=404, detail="No active relief batch found. Run seed script.")
@@ -110,9 +171,13 @@ def get_dashboard(db: Session = Depends(get_db)):
 
     bc_info = blockchain_service.get_status()
 
-    # Recent activity
+    # Public activity omits household/review/payout narratives.
+    actor = public_actor(request)
+    visible_events = db.query(AuditEvent)
+    if not actor or actor.role not in {"DSWD", "AUDITOR"}:
+        visible_events = visible_events.filter(AuditEvent.event_type.in_(["FUND_RELEASE", "ALLOCATION"]))
     recent_events = (
-        db.query(AuditEvent)
+        visible_events
         .filter(AuditEvent.batch_id == batch.batch_id)
         .order_by(AuditEvent.timestamp.desc())
         .limit(8)
@@ -153,7 +218,7 @@ def get_batches(db: Session = Depends(get_db)):
     return db.query(ReliefBatch).order_by(ReliefBatch.id.desc()).all()
 
 @app.get("/api/batches/{batch_id}")
-def get_batch_detail(batch_id: str, db: Session = Depends(get_db)):
+def get_batch_detail(batch_id: str, request: Request, db: Session = Depends(get_db)):
     batch = db.query(ReliefBatch).filter(ReliefBatch.batch_id == batch_id).first()
     if not batch:
         raise HTTPException(status_code=404, detail="Batch not found")
@@ -162,6 +227,9 @@ def get_batch_detail(batch_id: str, db: Session = Depends(get_db)):
     distributions = db.query(Distribution).filter(Distribution.batch_id == batch_id).all()
     events = db.query(AuditEvent).filter(AuditEvent.batch_id == batch_id).order_by(AuditEvent.timestamp.asc()).all()
 
+    actor = public_actor(request)
+    if not actor or actor.role not in {"DSWD", "AUDITOR"}:
+        events = [event for event in events if event.event_type in {"FUND_RELEASE", "ALLOCATION"}]
     return {
         "batch": ReliefBatchResponse.from_orm(batch),
         "allocations": [AllocationResponse.from_orm(a) for a in allocations],
@@ -299,13 +367,15 @@ def _create_allocation(payload: AllocationCreate, db: Session):
 # --- Beneficiaries API ---
 @app.get("/api/beneficiaries", response_model=List[BeneficiaryResponse])
 def get_beneficiaries(
+    request: Request,
     batch_id: Optional[str] = None,
     status: Optional[str] = None,
     flagged_only: bool = False,
     include_historical: bool = False,
     db: Session = Depends(get_db)
 ):
-    query = db.query(Beneficiary)
+    actor = require_actor(request)
+    query = scope_query(db.query(Beneficiary), actor, Beneficiary)
     if not include_historical:
         query = query.filter(Beneficiary.record_status == "ACTIVE")
     if batch_id:
@@ -318,7 +388,7 @@ def get_beneficiaries(
             (Beneficiary.duplicate_flag == True) |
             (Beneficiary.anomaly_flag == True)
         )
-    return query.order_by(Beneficiary.id.asc()).all()
+    return [household_projection(ben, actor) for ben in query.order_by(Beneficiary.id.asc()).all()]
 
 @app.get("/api/beneficiaries/sample-csv", response_class=PlainTextResponse)
 def get_sample_csv():
@@ -336,14 +406,19 @@ def upload_beneficiary_csv(payload: dict = Body(default={})):
     return process_csv_batch(csv_text)
 
 @app.get("/api/beneficiaries/{beneficiary_id}", response_model=BeneficiaryResponse)
-def get_beneficiary(beneficiary_id: str, db: Session = Depends(get_db)):
+def get_beneficiary(beneficiary_id: str, request: Request, db: Session = Depends(get_db)):
     ben = db.query(Beneficiary).filter(Beneficiary.beneficiary_id == beneficiary_id).first()
     if not ben:
         raise HTTPException(status_code=404, detail="Beneficiary not found")
-    return ben
+    actor = require_actor(request)
+    assert_household_scope(actor, ben)
+    return household_projection(ben, actor)
 
 @app.post("/api/beneficiaries", response_model=BeneficiaryResponse, status_code=201)
-def register_beneficiary(payload: BeneficiaryCreate, db: Session = Depends(get_db)):
+def register_beneficiary(payload: BeneficiaryCreate, request: Request, db: Session = Depends(get_db)):
+    actor = require_actor(request)
+    if actor.role == "BARANGAY" and payload.barangay_id != actor.barangay_id:
+        raise HTTPException(403, "Register households only in your assigned barangay.")
     existing = db.query(Beneficiary).filter(Beneficiary.beneficiary_id == payload.beneficiary_id).first()
     if existing:
         raise HTTPException(status_code=400, detail="Beneficiary ID already exists")
@@ -375,6 +450,10 @@ def register_beneficiary(payload: BeneficiaryCreate, db: Session = Depends(get_d
     verification_status = "FLAGGED_FOR_REVIEW" if is_dup else "VERIFIED"
     review_status = "PENDING" if is_dup else "APPROVED"
     review_notes = f"AI Flag: {int(conf*100)}% match with {matched_id} ({dup_eval.get('matched_name')})" if is_dup else "Auto-verified: Zero duplicate matches found"
+    if actor.role == "BARANGAY":
+        verification_status, review_status = "FLAGGED_FOR_REVIEW", "PENDING"
+        if not is_dup:
+            review_notes = "Registered for DSWD eligibility review"
 
     ben = Beneficiary(
         beneficiary_id=payload.beneficiary_id,
@@ -404,10 +483,12 @@ def register_beneficiary(payload: BeneficiaryCreate, db: Session = Depends(get_d
 
     db.commit()
     db.refresh(ben)
-    return ben
+    return household_projection(ben, actor)
 
 @app.get("/api/beneficiaries/{beneficiary_id}/reviews", response_model=List[BeneficiaryReviewResponse])
-def get_beneficiary_reviews(beneficiary_id: str, db: Session = Depends(get_db)):
+def get_beneficiary_reviews(beneficiary_id: str, request: Request, db: Session = Depends(get_db)):
+    ben = db.query(Beneficiary).filter_by(beneficiary_id=beneficiary_id).first()
+    assert_household_scope(require_actor(request), ben)
     reviews = db.query(BeneficiaryReview).filter_by(beneficiary_id=beneficiary_id).order_by(BeneficiaryReview.id.desc()).all()
     if not reviews and not db.query(Beneficiary).filter_by(beneficiary_id=beneficiary_id).first():
         raise HTTPException(status_code=404, detail="Beneficiary not found")
@@ -433,7 +514,8 @@ def _review_record(ben, payload, decision, duplicate_after=False, anomaly_after=
 
 
 @app.post("/api/beneficiaries/{beneficiary_id}/verify", response_model=BeneficiaryResponse)
-def verify_beneficiary(beneficiary_id: str, payload: BeneficiaryVerifyRequest, db: Session = Depends(get_db)):
+def verify_beneficiary(beneficiary_id: str, payload: BeneficiaryVerifyRequest, request: Request, db: Session = Depends(get_db)):
+    bind_reviewer(request, payload)
     with _funds_lock:
         _registry_write_lock(db)
         ben = db.query(Beneficiary).filter_by(beneficiary_id=beneficiary_id).with_for_update().first()
@@ -469,7 +551,8 @@ def verify_beneficiary(beneficiary_id: str, payload: BeneficiaryVerifyRequest, d
         return ben
 
 @app.post("/api/beneficiaries/{beneficiary_id}/resolve-duplicate", response_model=BeneficiaryResponse)
-def resolve_duplicate(beneficiary_id: str, payload: BeneficiaryDuplicateRequest, db: Session = Depends(get_db)):
+def resolve_duplicate(beneficiary_id: str, payload: BeneficiaryDuplicateRequest, request: Request, db: Session = Depends(get_db)):
+    bind_reviewer(request, payload)
     with _funds_lock:
         _registry_write_lock(db)
         records = db.query(Beneficiary).filter(
@@ -519,11 +602,13 @@ def delete_beneficiary_retired(beneficiary_id: str):
 
 # --- Distributions API ---
 @app.get("/api/distributions", response_model=List[DistributionResponse])
-def get_distributions(batch_id: Optional[str] = None, db: Session = Depends(get_db)):
-    query = db.query(Distribution)
+def get_distributions(request: Request, batch_id: Optional[str] = None, db: Session = Depends(get_db)):
+    actor = require_actor(request)
+    households = scope_query(db.query(Beneficiary.beneficiary_id), actor, Beneficiary)
+    query = db.query(Distribution).filter(Distribution.beneficiary_id.in_(households))
     if batch_id:
         query = query.filter(Distribution.batch_id == batch_id)
-    return query.order_by(Distribution.distributed_at.desc()).all()
+    return [distribution_projection(dist, actor) for dist in query.order_by(Distribution.distributed_at.desc()).all()]
 
 def _payout_fingerprint(payload: DistributionConfirmRequest):
     # Compare effective inputs, including receipt contents that are not hashed yet.
@@ -555,6 +640,7 @@ def _replayed_payout(payload, db, idempotency_key, fingerprint):
 
 @app.post("/api/distributions/confirm", response_model=DistributionResponse, status_code=201)
 def confirm_distribution(
+    request: Request,
     payload: DistributionConfirmRequest,
     response: Response,
     db: Session = Depends(get_db),
@@ -563,7 +649,9 @@ def confirm_distribution(
     if not idempotency_key and not payload.distribution_id:
         raise HTTPException(status_code=422, detail="Supply Idempotency-Key or a stable distribution_id to retry safely.")
     with _funds_lock:
-        return _confirm_distribution(payload, db, idempotency_key, response)
+        actor = require_actor(request)
+        assert_household_scope(actor, db.query(Beneficiary).filter_by(beneficiary_id=payload.beneficiary_id).first())
+        return distribution_projection(_confirm_distribution(payload, db, idempotency_key, response), actor)
 
 
 def _confirm_distribution(payload: DistributionConfirmRequest, db: Session, idempotency_key: Optional[str], response: Response):
@@ -716,7 +804,7 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session, idem
 
 # --- Blockchain Verification API ---
 @app.post("/api/blockchain/verify", response_model=BlockchainVerifyResponse)
-def verify_blockchain_record(payload: BlockchainVerifyRequest, db: Session = Depends(get_db)):
+def verify_blockchain_record(payload: BlockchainVerifyRequest, request: Request, db: Session = Depends(get_db)):
     dist = None
     if payload.distribution_id:
         dist = db.query(Distribution).filter(Distribution.distribution_id == payload.distribution_id).first()
@@ -774,9 +862,10 @@ def verify_blockchain_record(payload: BlockchainVerifyRequest, db: Session = Dep
     elif observed_contract is not None and not correct_contract:
         message = "The lookup did not use the configured contract. Verification is unavailable."
 
+    viewer = public_actor(request)
     return BlockchainVerifyResponse(
         record_id=dist.distribution_id,
-        beneficiary_id=dist.beneficiary_id,
+        beneficiary_id=dist.beneficiary_id if viewer and viewer.role in {"DSWD", "AUDITOR"} else None,
         receipt_hash_local=local_recalculated_hash,
         receipt_hash_onchain=onchain_hash,
         verification_status=outcome,
@@ -798,5 +887,9 @@ def get_audit_trail(batch_id: str, db: Session = Depends(get_db)):
 # --- Demo Reset API ---
 @app.post("/api/demo/reset")
 def reset_demo():
-    seed_database()
-    return {"success": True, "message": "Demo data reset to Typhoon Salinlahi (Batch RELIEF-2026-001) successfully."}
+    raise HTTPException(410, "HTTP demo reset is disabled. Use an explicit local synthetic reset procedure.")
+
+
+@app.get("/api/public/receipts")
+def public_receipts(db: Session = Depends(get_db)):
+    return [{"distribution_id": row.distribution_id, "batch_id": row.batch_id} for row in db.query(Distribution).order_by(Distribution.id).all()]

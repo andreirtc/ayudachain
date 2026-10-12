@@ -1,145 +1,53 @@
-# AYUDACHAIN USER GUIDE 📖
-### Complete Operations Manual for Citizens, Barangay Field Workers, and COA Auditors
+# AyudaChain user guide
 
----
+AyudaChain is a fictional disaster-relief prototype. Use invented households and simulated payouts only. A matching blockchain receipt hash establishes integrity of the fields currently hashed; it does not establish cash delivery, government affiliation or the identity of a real recipient.
 
-## 🧭 System Overview & User Roles
+## Sign in and choose a task
 
-AyudaChain is built to address the **₱10-billion annual disaster relief trust gap** in the Philippines. It connects the national government (DSWD/NDRRMC), local government units (LGUs), frontline relief workers, state auditors (COA), and disaster survivors through an auditable, transparent digital pipeline.
+The public landing, funding summaries and limited receipt checks do not require sign-in. Private records require a provisioned synthetic account at /sign-in. Account credentials come from local provisioning, not a role dropdown. The server enforces each account's role and scope.
 
-### Switching Your Role
-In the top navigation bar, click the **Role Selector Dropdown** to toggle between three distinct operating modes:
+- **DSWD Officer:** review households, register records, analyze CSV and manage fictional funding. Eligibility decisions record the signed-in account. This role cannot record payouts.
+- **Barangay Officer:** register and inspect household status within the assigned barangay. Eligibility decisions and private review evidence belong to DSWD.
+- **Disbursing Officer:** select an eligible household in the assigned barangay and record its payout. This role cannot approve eligibility or create funding.
+- **Beneficiary:** inspect the household linked to the account and its recorded payouts. Other household records are unavailable.
+- **Auditor:** inspect private office records and evidence, with no business mutations.
 
-| Role | Target User | Permitted Actions |
-| :--- | :--- | :--- |
-| **Public Citizen (Mamamayan)** | Calamity survivors, evacuees, journalists, watchdog NGOs | • Read-only access to LGU allocations and national batch fund.<br>• Verify family voucher authenticity on the blockchain.<br>• Inspect public audit timeline. *(Cannot delete or disburse).* |
-| **Barangay Officer (Kawani)** | Barangay captains, kagawads, DSWD field workers, evacuation center desk | • Scan DAFAC QR codes with camera viewfinder.<br>• Record fictional payouts under each batch's grant policy.<br>• Cache vouchers offline during downed connectivity.<br>• Review suggested matches and retain linked duplicate records with their history. |
-| **COA / Auditor (Tagasuri)** | Commission on Audit officials, municipal internal auditors | • Full investigative audit access.<br>• Inspect actual receipt verification outcomes.<br>• Resolve confirmed duplicate matches with retained history.<br>• Inspect raw cryptographic hashes on Polygon blockchain. |
+The account banner offers a relevant next action and **Sign out**. Refresh restores the server session. Expired or revoked sessions require sign-in again. Provisioning and permission details are in [DEMO_SESSIONS.md](DEMO_SESSIONS.md).
 
----
+## Funding summaries
 
-## 🖥️ Screen-by-Screen Walkthrough
+Open /dashboard to inspect stored releases, allocations, recorded payouts and aggregate registry counts. The public activity feed shows funding and allocation events; it excludes household, review and payout narratives. A batch link opens /batch/[id] for its funding and allocation details.
 
----
+Expand blockchain details for the configured network and contract. These values come from the backend. No dashboard control changes the network. A connection indicator is not evidence that every payout has an anchor. Failed refreshes are visible; older totals should not be treated as newly loaded data.
 
-### 1. Public Transparency Dashboard (`/dashboard`)
+## Register and review a household
 
-The central command center providing macro-level transparency for active disaster operations (e.g., *Typhoon Salinlahi*, Province of Albay).
+1. Sign in as DSWD or Barangay and open /beneficiaries. **Register a household** accepts a fictional household name and barangay. Barangay accounts use their assigned area; their registrations stay pending for DSWD review.
+2. Registration checks for possible duplicate records. A similarity score is a suggestion for human review, not proof of a duplicate.
+3. DSWD inspects a household, enters a reason and chooses **Approve household**, **Reject household** or **Keep for review**. The server records the authenticated reviewer, time and prior evidence. Failure retains the reason; a saved review updates eligibility.
+4. For a confirmed duplicate, expand **Resolve as a duplicate**, choose another active household in the same batch and select **Mark duplicate and retain history**. The original ID, payouts and decisions remain retained. Enable **Include historical duplicates** to inspect those rows. A historical duplicate cannot receive a new payout or ordinary reapproval.
+5. DSWD, Auditor and the linked Beneficiary can expand permitted **Review history**. History is local database evidence, not blockchain-protected history.
 
-#### Key Components:
-1. **5-Step Auditable Pipeline**:
-   - `1. Fund Release`: ₱10,000,000 released by DSWD Central, anchored on-chain.
-   - `2. Barangay Allocation`: 100% allocated across 4 barangays in Albay.
-   - `3. AI Entity Resolution`: AI pre-screens masterlists for duplicate claimants.
-   - `4. Relief Distribution`: Real-time count of households who claimed aid.
-   - `5. Blockchain Seal`: Cryptographic SHA-256 seal guarantees unalterability.
-2. **Top-Level Metric Cards**:
-   - **Total Fund Released**: Total cash allocation from the National Treasury.
-   - **Total LGU Allocation**: Amount transferred to local barangay relief accounts.
-   - **Total Distributed**: Confirmed payouts backed by signed vouchers.
-   - **AI Flagged Records**: Suspicious records requiring human officer inspection.
-3. **Live Calamity Relief Audit Timeline**:
-   - Real-time chronological audit trail showing every fund release, allocation, and payout with corresponding transaction hashes.
-4. **Interactive Blockchain Ledger Card**:
-   - **Network Selector**: Toggle between `Local EVM (Port 8545)` and `Polygon Amoy Testnet`.
-   - **Smart Contract Address**: Displays `0x5FbDB2315678afecb367f032d93F642f64180aa3` with 1-click copy and custom address editing.
-   - **"What is a Smart Contract?"**: Expandable explainer in plain Filipino and English.
+DSWD can also analyze a fictional CSV. The analyzer reports possible pairs; it does not import the masterlist. Validation, preview and explicit import remain future work. See [HUMAN_REVIEW.md](HUMAN_REVIEW.md) and [RETAINED_DUPLICATES.md](RETAINED_DUPLICATES.md).
 
----
+## Record a synthetic payout
 
-### 2. Relief Batch Detail (`/batch/[id]`)
+1. Sign in as Disbursing and open /distributions. Select an eligible household within the assigned barangay.
+2. Check the active batch and fictional grant amount. The API enforces eligibility, the batch maximum, remaining allocation budget and one payout per linked household per batch.
+3. Select **Record demo payout**. A recorded payout and a confirmed blockchain anchor are separate facts. Submission errors remain visible; uncertain retries keep the form's request identity during the current page session.
+4. Follow **Check this receipt** to inspect that exact payout. Unknown receipt links show **Receipt not found** and never substitute another payout.
 
-Deep-dive operational view of a specific calamity batch (e.g., `RELIEF-2026-001`).
+Actual camera QR decoding and a persistent offline queue are not implemented. When the browser reports offline, submission is disabled and no payout is queued. Reconnecting does not submit automatically. The current retry identity is held in memory, not preserved across a page reload.
 
-#### Key Components:
-- **DSWD Sub-Allotment Advice (SAA)**: Official national government authorization document reference.
-- **Barangay Allocations Table**: Breakdown of funds disbursed to each barangay (*San Isidro*, *Santa Elena*, *San Roque*, *Maligaya*).
-- **Audit Event Log**: Chronological record of administrative changes and field activities.
+Older fixtures reuse one sample receipt image/OCR containing another fictional household's details. Scoped accounts do not receive that shared template. A record without a household-specific image shows that limitation and still offers hash verification. Office readers retain access to historical template evidence; stored hashes are unchanged.
 
----
+## Check receipt integrity
 
-### 3. AI Beneficiary Registry & CSV Analyzer (`/beneficiaries`)
+Open /verify or follow a payout's receipt link. The public view exposes receipt references and hash evidence. Authorized accounts can also see their permitted local household and amount context.
 
-Uses fictional DAFAC records and similarity scores to suggest matches for human review. Demo roles and reviewer identities are simulated; backend authentication is not implemented yet.
+- **Receipt hash verified:** an actual successful contract read found a matching anchor.
+- **Receipt hash mismatch:** an actual read found a different existing hash. This alone does not identify fraud or an actor.
+- **No receipt anchor found:** the contract was read successfully and has no receipt for that reference.
+- **Verification unavailable:** a reliable lookup could not be completed. Retry after the configured service recovers.
 
-#### How to Use:
-1. **Bulk LGU CSV Masterlist Analyzer**:
-   - Click **"Batch CSV AI Analyzer"** in the top-right corner.
-   - Click **"Run 1-Click Test Masterlist"** (loads `seed_beneficiaries.csv` with 10 fictional calamity households), or upload your own CSV.
-   - The AI displays a pairwise comparison table with four sample matching patterns:
-     - **Clerical Typo**: *Juan Dela Cruz* ↔ *Jhon Dela Cruz* (95.0% match).
-     - **Swapped Name Fields**: *Maria Santos* ↔ *Santos Maria* (95.6% match).
-     - **Cross-Barangay Duplicate Claim**: *Ricardo Reyes (Brgy 628)* ↔ *Riccardo Reyes (Brgy 630)* (92.8% match).
-     - **Exact Duplicate**: Direct double-claim attempt.
-2. **Inspecting Flagged Records**:
-   - Click **"Inspect"** on any flagged row (e.g., *Juan D. Cruz `BEN-0007`*).
-   - The drawer displays the similarity score %, matched record ID, and phonetic reasoning.
-3. **Reviewing and Retaining Duplicate Records**:
-   - Select an officer or auditor demo view in the navigation, then inspect the household.
-   - Choose a demo reviewer and enter a reason. Approve, reject, or keep the record for review when the match is uncertain.
-   - To resolve a confirmed duplicate, expand **"Resolve as a duplicate"**, select the surviving household, and click **"Mark duplicate and retain history"**. Use another active record from the same batch.
-   - Enable **"Include historical duplicates"** to inspect the retained record. Its original ID, payouts, receipt hashes, and review history remain available. It cannot receive another payout or be reapproved through the ordinary review action.
-   - Expand **"Review history"** to see the reason, demo reviewer, timestamp, and surviving household. History and audit events are local; they are not blockchain protected.
-
-
----
-
-### 4. Point-of-Payout Relief Distribution (`/distributions`)
-
-Designed specifically for field workers distributing cash grants at evacuation covered courts.
-
-#### Step-by-Step Distribution Protocol:
-1. **Step 1: Scan or Select Evacuee**:
-   - Click **"Scan DAFAC QR Code"** to open the simulated camera viewfinder modal.
-   - Click any sample voucher (*Danilo Soriano `DFC-2026-0004`*, *Antonio Mercado `DFC-2026-0006`*, *Carmencita Reyes `DFC-2026-0005`*).
-   - The app simulates instant QR detection, auto-selects the evacuee, and locks the grant to **₱5,000.00**.
-2. **Step 2: Hand Out ₱5,000.00 Ayuda**:
-   - The field officer physically releases the cash to the family head.
-   - The evacuee signs or thumbmarks the physical paper DAFAC voucher.
-3. **Step 3: Confirm & Anchor On-Chain**:
-   - Click **"Confirm & Anchor Disbursement (₱5,000.00)"**.
-   - The app computes the SHA-256 hash of the transaction and immediately stamps it into the Polygon Smart Contract.
-   - An instant digital receipt with a QR code and Transaction Hash is generated for the family.
-
-#### Evacuation Center Offline Mode:
-- If typhoon winds knock down cellular towers, toggle the **"Test Offline Mode"** button.
-- The status pill switches to **"Evacuation Center Mode: Offline Caching"**.
-- Payouts continue uninterrupted. Signed vouchers are stored locally on the tablet and automatically sync with the blockchain as soon as internet is restored.
-
----
-
-### 5. Receipt Hash Verification (/verify)
-
-Open [the current preview](http://127.0.0.1:3001/verify), select a recorded receipt, and use **Check again** to repeat the blockchain lookup.
-
-- **Receipt hash verified**: A successful read found an anchor that matches the locally calculated receipt hash.
-- **Receipt hash mismatch**: A successful read found an existing different hash. Investigate the record and its source; a mismatch alone does not identify fraud or an actor.
-- **No receipt anchor found**: The configured contract was read successfully and has no receipt for that record.
-- **Verification unavailable**: The lookup could not be completed reliably. Check the configured chain/contract and retry.
-
-Household and amount information is labeled **Recorded locally**. Expand **Receipt hashes and contract** to inspect the calculated and observed hashes. Matching hashes do not prove physical cash delivery or household-name integrity. Missing data is shown as unavailable rather than filled with sample names, amounts, hashes, or timestamps.
-
-The previous fraud-scenario and restore buttons were hardcoded and have been removed. An interactive synthetic tampering/restoration workflow is still planned. See [verification scope and limits](TRUTHFUL_VERIFICATION.md).
-
-
----
-
-## ❓ Frequently Asked Questions & Pitch Defense
-
-### Q1: "What if cell towers are destroyed by the typhoon?"
-**AyudaChain Answer:** We built an **Offline-First Caching Architecture**. Field tablets cache signed distribution vouchers locally in browser storage (`IndexedDB`). When connectivity returns via municipal satellite/Starlink or field worker transit, queued transactions batch-commit their hashes to Polygon.
-
-### Q2: "Doesn't storing citizen names on a public blockchain violate the Data Privacy Act (RA 10173)?"
-**AyudaChain Answer:** **Yes, putting raw names on-chain is illegal in the Philippines.** This is why AyudaChain uses a **Hybrid Off-Chain/On-Chain Architecture**:
-- **Off-Chain (Protected Database):** Full names, contact numbers, and voucher photos remain strictly in secure operational databases.
-- **On-Chain (Polygon Blockchain):** Only a **32-byte cryptographic SHA-256 hash** is anchored. A hash is mathematical one-way; zero private information can ever be decoded from it.
-
-### Q3: "What if a citizen lies and claims they only got ₱2,000 when they really got ₱5,000?"
-**AyudaChain Answer:** The system uses **Dual-Binding Verification**:
-1. Statutory entitlement is pre-set to ₱5,000 on-chain.
-2. The physical signed DAFAC voucher with the evacuee's thumbmark/signature is photographed and bound to the payout receipt hash.
-3. COA auditors compare the physical paper signature against the on-chain timestamp, refuting false claims immediately.
-
----
-
-*AyudaChain — Bringing mathematical integrity and public trust to Philippine disaster relief.* 🇵🇭
+**Check again** repeats the lookup. Expand technical details for observed hashes and contract information. Names, allocation linkage and raw file contents are not yet all covered by an immutable versioned snapshot. Hashes are not a general guarantee of privacy. Recipient acknowledgement, anchor reconciliation and an interactive synthetic tampering/restoration screen remain pending. See [TRUTHFUL_VERIFICATION.md](TRUTHFUL_VERIFICATION.md) and [TODO.md](TODO.md).

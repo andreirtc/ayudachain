@@ -4,13 +4,13 @@ Completed 2026-10-12 as the final bounded section 3 task, based on [human review
 
 ## Resolution workflow
 
-Open [the preview registry](http://127.0.0.1:3001/beneficiaries), choose an officer or auditor demo view, and inspect a household. Enter the demo reviewer and reason, expand **Resolve as a duplicate**, choose the surviving household, and select **Mark duplicate and retain history**. A suggested match can populate the selector, but only this explicit human action resolves the duplicate.
+Open [the preview registry](http://127.0.0.1:3001/beneficiaries), sign in as DSWD, and inspect a household. Enter the reason, expand **Resolve as a duplicate**, choose the surviving household, and select **Mark duplicate and retain history**. A suggested match can populate the selector, but only this explicit human action resolves the duplicate.
 
 The duplicate keeps its original ID, household details, DAFAC ID, match evidence, payout records, receipt files/hashes, and earlier reviews. Its `record_status` becomes `DUPLICATE`, its `canonical_beneficiary_id` identifies the surviving household, and its verification/review statuses become `REJECTED`. Active detection flags clear. A new decision records the chosen survivor separately from the original detection match, together with the reason, demo reviewer, UTC timestamp, prior notes/state, and flags. A local audit event accompanies the decision.
 
 The default registry shows active records. Enable **Include historical duplicates** to inspect retained records and their histories. Individual detail and review-history URLs continue to return those records. The dashboard counts active households separately from historical duplicates, while payout counts, amounts, and allocation budgets continue to include all historical payouts.
 
-Deletion buttons and automatic delete fallbacks are removed. The old DELETE endpoint and POST /delete fallback return 410 without changing any records. Resolution requires explicit target/reason/reviewer inputs.
+Deletion buttons and automatic delete fallbacks are removed. The old DELETE endpoint and POST /delete fallback return 410 without changing any records. Resolution requires an explicit target/reason and an authenticated DSWD account.
 
 ## Consistency rules
 
@@ -22,6 +22,8 @@ SQLite claims the write lock before payout eligibility, review, or link checks. 
 
 Startup adds retained-status and survivor-link fields to beneficiaries and a nullable decision target to review history without deleting prior rows. Existing rows default to ACTIVE. SQLite upgrades and required indexes are safe to run repeatedly.
 
+Current authenticated-role and browser validation is recorded in [DEMO_SESSIONS.md](DEMO_SESSIONS.md). The counts below describe the original implementation PR.
+
 ## Validation
 
 - API suite: 66 tests pass. Added coverage includes disabled delete routes, retained registry/reviews/receipts, paid and unpaid linked groups, payout replay after resolution, invalid/self/cross-batch links, chains/cycles/reparenting, input validation, transaction rollback, repeated concurrent requests, payout/link races without the process lock, and preserved prior rows during migration.
@@ -32,4 +34,4 @@ Startup adds retained-status and survivor-link fields to beneficiaries and a nul
 
 ## Remaining limits
 
-Reviewer identities are caller supplied demo labels; authenticated permissions remain section 5. History and links are local and are not blockchain protected. There is no reversal or reparenting workflow for a mistaken link, and previously deleted records cannot be recovered by this change. SQLite is the supported demo persistence layer; hosted database coordination still requires its own validation. Demo reset intentionally removes all synthetic records and history. [Truthful verification](TRUTHFUL_VERIFICATION.md) now removes generated fallback evidence and distinguishes the four lookup outcomes. Explicit anchoring states and safe reconciliation remain the next task.
+New reviewer identities are bound to authenticated DSWD sessions. Auditor accounts are read-only; historical caller-supplied labels remain preserved. See [DEMO_SESSIONS.md](DEMO_SESSIONS.md). History and links are local and are not blockchain protected. There is no reversal or reparenting workflow for a mistaken link, and previously deleted records cannot be recovered by this change. SQLite is the supported demo persistence layer; hosted database coordination still requires its own validation. HTTP demo reset is disabled; isolated operator fixtures can still deliberately reseed their own data. [Truthful verification](TRUTHFUL_VERIFICATION.md) now removes generated fallback evidence and distinguishes the four lookup outcomes. Explicit anchoring states and safe reconciliation remain the next task.

@@ -2,9 +2,24 @@
 
 Base URL: `http://127.0.0.1:8000`
 
-All endpoints return JSON (except the sample CSV) and include CORS headers allowing multi-origin access. The server is the FastAPI app in `backend/app/main.py`; interactive docs are at `/docs`. Errors use FastAPI's `{"detail": "..."}` shape.
+API endpoints return JSON except the sample CSV; receipt files use their file content type. Credentialed CORS uses exact configured origins. Validation errors omit submitted values. The server is the FastAPI app in `backend/app/main.py`; interactive docs are at `/docs`. Errors use FastAPI's `{"detail": "..."}` shape.
 
 Amounts: requests send pesos with at most two decimal places (`5000` or `5000.50`); more precision is rejected with 422. Responses include `amount` (pesos) and `amount_centavos` (exact integer). The database and smart contract store integer centavos.
+
+### Synthetic sessions and permissions
+
+- POST /api/auth/login accepts username/password and returns account, csrf_token and synthetic=true, setting an opaque HttpOnly SameSite=Strict cookie. The raw cookie token is never returned in JSON.
+- GET /api/auth/session restores account/CSRF state; anonymous or expired sessions return 401.
+- POST /api/auth/logout revokes the stored session and clears the cookie. Mutations require X-AyudaChain-Client: web and the session's X-CSRF-Token. Supplied Origin must match exact configured frontend origins. Login also validates application header and Origin.
+- Missing/invalid local account provisioning returns 503. Non-local insecure sign-in is rejected. Expiry, logout, account disablement and account configuration changes revoke access. Failed login attempts are limited within one API process.
+- Public routes: health, dashboard, GET batches, limited receipt references, hash verification and the always-disabled reset. Public batch/dashboard activity includes funding/allocation events without household narratives.
+- GET /api/public/receipts returns distribution_id and batch_id only. Public POST /api/blockchain/verify returns beneficiary_id=null; DSWD/Auditor may receive the local ID.
+- All household, payout, sample CSV, private audit and receipt-file routes require sign-in. DSWD and Auditor have office reads. Barangay/Disbursing household queries use assigned barangay scope; Beneficiary queries use its linked household. Out-of-scope household IDs return 404.
+- Barangay cannot access named payouts/receipt files. Barangay/Disbursing cannot read review histories. Contact, review notes and matched IDs are redacted in their household responses. Private audit and sample CSV have separate office restrictions.
+- Registration permits DSWD/Barangay. Barangay registrations stay PENDING for DSWD review, even with no duplicate suggestion. Review/link/CSV/funding/allocation writes permit DSWD only. Payout writes permit Disbursing only and check household scope before business/replay logic. Auditor and Beneficiary have no business writes.
+- GET /receipts/{filename} checks private account scope and a referenced file. The older shared sample image/OCR is withheld from scoped accounts because it includes another fictional household's details. Their payout representations omit that template path/text; stored hashes/evidence stay unchanged. A missing file never substitutes a sample image.
+
+See [DEMO_SESSIONS.md](DEMO_SESSIONS.md) for provisioning, local configuration, validation and remaining identity/assignment limitations.
 
 ---
 
@@ -91,12 +106,12 @@ Amounts: requests send pesos with at most two decimal places (`5000` or `5000.50
   }
   ```
 - **Endpoint**: `POST /api/beneficiaries/{beneficiary_id}/verify`
-  - Body: `{"status":"VERIFIED","review_notes":"Different fictional household after review","reviewed_by":"demo-auditor-01"}`.
-  - Allowed decisions: `VERIFIED` -> review `APPROVED`; `REJECTED` -> review `REJECTED`; `FLAGGED_FOR_REVIEW` -> review `PENDING`. A required reason is trimmed and must contain 1–2000 characters. Reviewer must be `demo-officer-01` or `demo-auditor-01`. Invalid/missing inputs return 422; unknown beneficiary returns 404.
+  - Body: `{"status":"VERIFIED","review_notes":"Different fictional household after review"}`.
+  - Allowed decisions: `VERIFIED` -> review `APPROVED`; `REJECTED` -> review `REJECTED`; `FLAGGED_FOR_REVIEW` -> review `PENDING`. A required reason is trimmed and must contain 1–2000 characters. The reviewer is the authenticated DSWD account. An optional `reviewed_by` must match that account (403 otherwise). Invalid/missing decision/reason inputs return 422; unknown beneficiary returns 404.
   - Each accepted decision appends a UUID review record with a server-generated UTC timestamp, prior state/notes, match evidence, active flags before/after, reason, and demo reviewer. The record, registry update, and local `BENEFICIARY_REVIEWED` audit event commit atomically.
   - Approve and reject resolve active duplicate/anomaly flags; original match ID/confidence remain as evidence. Pending review restores known detection flags and blocks payout. Rejected households also remain ineligible. Existing payouts and receipt hashes are preserved.
   - Retained duplicate records cannot be approved or reopened through this action (409).
-  - Demo reviewer identity is caller supplied, not authenticated. Backend permissions remain pending in backlog section 5; review history is local and is not blockchain protected.
+  - Authenticated DSWD attribution applies to new decisions. Historical caller-supplied labels are preserved. Auditor accounts cannot submit decisions; review history is local and is not blockchain protected.
 - **Endpoint**: `GET /api/beneficiaries/{beneficiary_id}/reviews`
   - Returns recorded decisions newest first, or an empty list for an existing household with no recorded review. Each record includes `review_id`, `decision`, `reason`, `reviewed_by`, `reviewed_at`, prior state, detection evidence, and flags before/after. Unknown IDs with no history return 404. See [Human reviews](HUMAN_REVIEW.md).
 - **Endpoint**: `GET /api/beneficiaries/sample-csv`
@@ -104,8 +119,8 @@ Amounts: requests send pesos with at most two decimal places (`5000` or `5000.50
 - **Endpoint**: `POST /api/beneficiaries/upload-csv`
   - Body: `{"csv_content": "..."}`. Runs pairwise duplicate analysis and returns flagged pairs. An empty body analyzes the sample CSV. Does not import records.
 - **Endpoint**: `POST /api/beneficiaries/{beneficiary_id}/resolve-duplicate`
-  - Body: `{"canonical_beneficiary_id":"BEN-0002","review_notes":"Same fictional household after review","reviewed_by":"demo-auditor-01"}`.
-  - Requires a nonempty reason and named demo reviewer. Both records must exist (404), differ, and belong to the same batch (400). The surviving record must be active; link chains, cycles, changing a historical link, or retiring a record with linked duplicates return 409.
+  - Body: `{"canonical_beneficiary_id":"BEN-0002","review_notes":"Same fictional household after review"}`.
+  - Requires a nonempty reason and an authenticated DSWD account; optional reviewer input must match it. Both records must exist (404), differ, and belong to the same batch (400). The surviving record must be active; link chains, cycles, changing a historical link, or retiring a record with linked duplicates return 409.
   - Returns 200 with the retained record: `record_status=DUPLICATE`, `canonical_beneficiary_id` set, review/verification `REJECTED`, active flags cleared. Appends a `DUPLICATE` decision with `linked_beneficiary_id`, reason, reviewer, UTC time, and prior evidence, plus a local `BENEFICIARY_DUPLICATE_RESOLVED` audit event. An identical repeat returns the same record without another decision/event.
   - Keeps original IDs, household details, prior payouts, receipt hashes/files, and earlier reviews. Already-paid records can be linked; their payout amounts remain in budgets/totals. A surviving household cannot receive a new payout if it or any linked alias was already paid in the batch. Ordinary verify/reopen on retained duplicates returns 409.
   - See [Retained duplicates](RETAINED_DUPLICATES.md) for constraints and validation.
@@ -155,4 +170,4 @@ Amounts: requests send pesos with at most two decimal places (`5000` or `5000.50
 
 ### 7. Demo Reset
 - **Endpoint**: `POST /api/demo/reset`
-  - Restores the clean demonstration dataset for Typhoon Salinlahi.
+  - Returns 410 and performs no deletion/reset, regardless of role. Isolated test fixtures seed their own temporary data directly.
