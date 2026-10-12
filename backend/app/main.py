@@ -472,7 +472,15 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session):
     if payload.batch_id != ben.batch_id:
         raise HTTPException(status_code=400, detail=f"Beneficiary {ben.beneficiary_id} is registered in batch {ben.batch_id}, not {payload.batch_id}.")
 
+    if ben.verification_status != "VERIFIED" or ben.review_status != "APPROVED":
+        raise HTTPException(
+            status_code=400,
+            detail=f"{ben.household_name} ({ben.beneficiary_id}) is not approved for payout (status {ben.verification_status}, review {ben.review_status})."
+        )
+
     batch = db.query(ReliefBatch).filter(ReliefBatch.batch_id == ben.batch_id).first()
+    if batch.status != "ACTIVE":
+        raise HTTPException(status_code=400, detail=f"Batch {batch.batch_id} is {batch.status}, not ACTIVE.")
     if amount_c > batch.max_grant_centavos:
         raise HTTPException(
             status_code=400,

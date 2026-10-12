@@ -22,7 +22,7 @@ Status: unchecked items are planned, not implemented. Work through one numbered 
 - [x] Store per-batch grant policy rather than hardcoded amounts; label demo amounts as fictional, without unsupported statutory claims. Done 2026-10-12: `standard_grant` and `max_grant` per batch; payout page reads them; "statutory" and "official" wording removed there. Narrative copy elsewhere is part of section 6.
 
 ## 3. Eligibility, review, and duplicate payouts
-- [ ] Require approved eligible beneficiary status, active batch, and consistent beneficiary/batch/barangay/allocation relationships before payout.
+- [x] Require approved eligible beneficiary status, active batch, and consistent beneficiary/batch/barangay/allocation relationships before payout. Done 2026-10-12: payouts need `VERIFIED` + `APPROVED`, an `ACTIVE` batch, a matching batch, and the barangay's allocation (batch/allocation checks from #8).
 - [ ] Define one payout per household per batch; enforce database uniqueness and transaction-safe checks under concurrent requests.
 - [ ] Add idempotency keys, robust IDs, and safe retries; return the existing result for repeated submissions.
 - [ ] Keep potential duplicate matches as human review decisions, with reason, actor, and timestamp; correctly update flag/status after review.

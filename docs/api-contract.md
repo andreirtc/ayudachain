@@ -113,7 +113,7 @@ Amounts: requests send pesos with at most two decimal places (`5000` or `5000.50
     "receipt_filename": "sample_relief_receipt.svg"
   }
   ```
-  - Rules: `batch_id` must match the beneficiary's batch; the beneficiary's barangay must have an allocation in that batch; the amount must not exceed what is left in that allocation (400 states the remaining amount). One payout per household; ₱10,000 demo maximum. The response includes `allocation_id`. The contract enforces the allocation limit too.
+  - Rules: the beneficiary must be `VERIFIED` with review `APPROVED`; the batch must be `ACTIVE`; `batch_id` must match the beneficiary's batch; the beneficiary's barangay must have an allocation in that batch; the amount must not exceed what is left in that allocation (400 states the remaining amount). One payout per household; ₱10,000 demo maximum. The response includes `allocation_id`. The contract enforces the allocation limit too.
 
 ---
 

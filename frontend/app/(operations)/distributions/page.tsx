@@ -92,6 +92,8 @@ export default function DistributionsPage() {
 
   const selectedBeneficiaryObj = beneficiaries.find((b) => b.beneficiary_id === selectedBenId);
   const selectedBatch = batches.find((b) => b.batch_id === selectedBeneficiaryObj?.batch_id);
+  const selectedIsApproved =
+    selectedBeneficiaryObj?.verification_status === "VERIFIED" && selectedBeneficiaryObj?.review_status === "APPROVED";
   const standardGrant = selectedBatch?.standard_grant ?? 0;
   const maxGrant = selectedBatch?.max_grant ?? 0;
 
@@ -254,7 +256,7 @@ export default function DistributionsPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Status:</span>
-                  <span className="font-bold text-emerald-600">{selectedBeneficiaryObj.verification_status}</span>
+                  <span className={`font-bold ${selectedIsApproved ? "text-emerald-600" : "text-amber-600"}`}>{selectedBeneficiaryObj.verification_status}</span>
                 </div>
                 {distributions.some((d) => d.beneficiary_id === selectedBenId) && (
                   <div className="pt-1.5 border-t border-slate-200 text-rose-700 font-bold flex items-center gap-1 text-[11px]">
@@ -398,12 +400,14 @@ export default function DistributionsPage() {
             ) : (
               <button
                 type="submit"
-                disabled={step !== "IDLE" && step !== "SUCCESS" || !selectedBatch || numericAmount > maxGrant || numericAmount <= 0 || distributions.some((d) => d.beneficiary_id === selectedBenId)}
+                disabled={step !== "IDLE" && step !== "SUCCESS" || !selectedBatch || !selectedIsApproved || numericAmount > maxGrant || numericAmount <= 0 || distributions.some((d) => d.beneficiary_id === selectedBenId)}
                 className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow transition disabled:opacity-50 text-xs flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
               >
                 <Lock className="w-3.5 h-3.5" />
                 {distributions.some((d) => d.beneficiary_id === selectedBenId)
                   ? "Claim Already Completed for this Household"
+                  : selectedBeneficiaryObj && !selectedIsApproved
+                  ? "Household Not Approved for Payout"
                   : numericAmount > maxGrant
                   ? `Cannot Disburse: Above ${formatPeso(maxGrant)} Maximum`
                   : "Confirm Aid & Anchor on Blockchain"}
