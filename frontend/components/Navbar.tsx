@@ -2,49 +2,105 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShieldCheck, Layers, Users, Receipt, CheckCircle2 } from "lucide-react";
-import { useChainStatus, chainLabel } from "@/lib/useChainStatus";
+import { useEffect, useRef } from "react";
+import { useRole } from "@/lib/roleContext";
+import { AccountRole } from "@/lib/api";
 
-const navLinks = [
-  { name: "Overview", href: "/dashboard", icon: Layers },
-  { name: "Relief batch", href: "/batch/RELIEF-2026-001", icon: ShieldCheck },
-  { name: "Households", href: "/beneficiaries", icon: Users },
-  { name: "Payouts", href: "/distributions", icon: Receipt },
-  { name: "Check a receipt", href: "/verify", icon: CheckCircle2 },
-];
+const destinations = {
+  overview: { name: "Overview", href: "/dashboard" },
+  households: { name: "Households", href: "/beneficiaries" },
+  payouts: { name: "Payouts", href: "/distributions" },
+  receipts: { name: "Check a receipt", href: "/verify" },
+  signIn: { name: "Sign in", href: "/sign-in" },
+};
+const roleLinks: Record<AccountRole, (keyof typeof destinations)[]> = {
+  DSWD: ["households", "overview", "payouts", "receipts"],
+  BARANGAY: ["households", "overview", "receipts"],
+  DISBURSING: ["payouts", "households", "overview", "receipts"],
+  BENEFICIARY: ["households", "payouts", "receipts"],
+  AUDITOR: ["overview", "households", "payouts", "receipts"],
+};
 
 export default function Navbar() {
   const pathname = usePathname();
-  const chain = useChainStatus();
+  const { account } = useRole();
+  const mobile = useRef<HTMLDetailsElement>(null);
+  const focusMain = useRef(false);
+  useEffect(() => {
+    if (mobile.current) mobile.current.open = false;
+    if (focusMain.current) {
+      document.getElementById("main-content")?.focus();
+      focusMain.current = false;
+    }
+  }, [pathname, account?.id]);
+  const links = (
+    account
+      ? roleLinks[account.role]
+      : (["overview", "receipts", "signIn"] as (keyof typeof destinations)[])
+  ).map((key) => ({
+    ...destinations[key],
+    name:
+      account?.role === "BENEFICIARY" && key === "households"
+        ? "My household"
+        : account?.role === "BENEFICIARY" && key === "payouts"
+          ? "My payouts"
+          : destinations[key].name,
+  }));
+  const navigation = (isMobile: boolean) =>
+    links.map(({ name, href }) => (
+      <Link
+        key={href}
+        href={href}
+        aria-current={
+          pathname === href ||
+          (href === "/dashboard" && pathname.startsWith("/batch/"))
+            ? "page"
+            : undefined
+        }
+        onClick={() => {
+          if (!isMobile) return;
+          if (mobile.current) mobile.current.open = false;
+          if (pathname === href)
+            document.getElementById("main-content")?.focus();
+          else focusMain.current = true;
+        }}
+      >
+        {name}
+      </Link>
+    ));
   return (
-    <header className="sticky top-0 z-50 bg-slate-900 text-white border-b border-slate-800">
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:block focus:p-3 focus:bg-white focus:text-blue-800">Skip to content</a>
-      <div className="bg-slate-950 px-4 py-2 text-xs text-slate-300 border-b border-slate-800 flex flex-wrap justify-between gap-2">
-        <span>Fictional relief demo · No real money</span>
-        <span>{chainLabel(chain)}</span>
-      </div>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-wrap justify-between items-center gap-4 py-3">
-          <Link href="/" className="flex items-center gap-3 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
-            <img src="/logo-emblem.png" alt="" className="w-10 h-10 rounded-lg bg-white object-contain" />
-            <span className="app-wordmark font-semibold text-xl tracking-tight">AyudaChain</span>
-          </Link>
-          <nav aria-label="Main navigation" className="hidden md:flex flex-wrap gap-1">
-            {navLinks.map(({ name, href, icon: Icon }) => {
-              const active = pathname === href || (href.startsWith("/batch/") && pathname.startsWith("/batch/"));
-              return <Link key={href} href={href} aria-current={active ? "page" : undefined} className={"flex items-center gap-2 min-h-11 px-3 py-2 rounded-lg text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white " + (active ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-slate-800 hover:text-white")}><Icon className="w-4 h-4" aria-hidden="true" />{name}</Link>;
-            })}
-          </nav>
-          <details className="md:hidden w-full">
-            <summary className="cursor-pointer min-h-11 py-3 text-sm font-semibold">Navigation</summary>
-            <nav aria-label="Mobile navigation" className="flex flex-wrap gap-1">
-              {navLinks.map(({ name, href, icon: Icon }) => {
-              const active = pathname === href || (href.startsWith("/batch/") && pathname.startsWith("/batch/"));
-              return <Link key={href} href={href} aria-current={active ? "page" : undefined} className={"flex items-center gap-2 min-h-11 px-3 py-2 rounded-lg text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white " + (active ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-slate-800 hover:text-white")}><Icon className="w-4 h-4" aria-hidden="true" />{name}</Link>;
-            })}
-            </nav>
-          </details>
-        </div>
+    <header className="app-shell">
+      <a href="#main-content" className="app-skip-link">
+        Skip to content
+      </a>
+      <div className="app-shell-row">
+        <Link href="/" className="app-brand">
+          <img src="/logo-emblem.png" alt="" width={36} height={36} />
+          <span className="app-brand-text"><span className="app-wordmark">AyudaChain</span><span className="app-demo-tag">Synthetic demo</span></span>
+        </Link>
+        <nav aria-label="Main navigation" className="app-desktop-nav">
+          {navigation(false)}
+        </nav>
+        <details
+          ref={mobile}
+          className="app-mobile-nav"
+          onKeyDown={(event) => {
+            if (event.key === "Escape") {
+              event.preventDefault();
+              if (mobile.current) mobile.current.open = false;
+              mobile.current?.querySelector("summary")?.focus();
+            }
+          }}
+          onBlur={(event) => {
+            if (
+              !event.currentTarget.contains(event.relatedTarget as Node | null)
+            )
+              event.currentTarget.open = false;
+          }}
+        >
+          <summary>Menu</summary>
+          <nav aria-label="Mobile navigation">{navigation(true)}</nav>
+        </details>
       </div>
     </header>
   );

@@ -12,13 +12,13 @@ The public landing, funding summaries and limited receipt checks do not require 
 - **Beneficiary:** inspect the household linked to the account and its recorded payouts. Other household records are unavailable.
 - **Auditor:** inspect private office records and evidence, with no business mutations.
 
-The account banner offers a relevant next action and **Sign out**. Refresh restores the server session. Expired or revoked sessions require sign-in again. Provisioning and permission details are in [DEMO_SESSIONS.md](DEMO_SESSIONS.md).
+Navigation offers tasks relevant to the server-authenticated role. The account banner shows identity, **Sign out**, and a next action when it differs from the current task. On phones, **Menu** supports keyboard navigation and Escape. Refresh restores the server session. Expired or revoked sessions require sign-in again. Provisioning and permission details are in [DEMO_SESSIONS.md](DEMO_SESSIONS.md).
 
 ## Funding summaries
 
-Open /dashboard to inspect stored releases, allocations, recorded payouts and aggregate registry counts. The public activity feed shows funding and allocation events; it excludes household, review and payout narratives. A batch link opens /batch/[id] for its funding and allocation details.
+Open /dashboard to inspect stored releases, allocations, recorded payouts and aggregate registry counts. **Refresh overview** loads a new snapshot. A recorded payout count is not a verified receipt count. The public activity feed shows funding and allocation events; it excludes household, review and payout narratives. **View batch details** opens /batch/[id] for readable allocation rows and permitted activity. Failed batch loads offer retry and do not substitute another batch.
 
-Expand blockchain details for the configured network and contract. These values come from the backend. No dashboard control changes the network. A connection indicator is not evidence that every payout has an anchor. Failed refreshes are visible; older totals should not be treated as newly loaded data.
+Expand **Blockchain service details** for the reported network and contract, or batch/allocation references for stored transactions. These values come from the backend; a transaction reference is not current verification. No dashboard control changes the network. Failed refreshes are visible; older totals should not be treated as newly loaded data. Recorded dates display in the browser's local time, interpreting legacy UTC strings correctly. See [shared UI polish](UI_POLISH.md).
 
 ## Register and review a household
 

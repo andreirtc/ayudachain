@@ -49,6 +49,7 @@ The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were 
 
 ## 6. Frontend workflow and features
 - [ ] Apply the UI design priorities below, including a simple landing page, less copy, focused screens, and natural wording without em dashes.
+  - [x] Complete the requested existing-screen polish pass: compact role navigation, clearer landing/overview/batch screens, truthful recorded-versus-verified labels, readable phone allocations, consistent focus/reduced motion and corrected UTC date display. See [UI_POLISH.md](UI_POLISH.md). Human preference/comprehension remains unverified.
   - [x] Replace the rejected system-font treatment with locally served Manrope headings and Source Sans 3 interface text. See [UI_TYPOGRAPHY.md](UI_TYPOGRAPHY.md).
   - [x] Simplify `/beneficiaries` for registration and DSWD review: role-specific tasks, readable phone rows, pending-review filters, expandable evidence/history, truthful next steps, loading/empty/error/success feedback and keyboard dialogs. See [REGISTRY_REVIEW_UX.md](REGISTRY_REVIEW_UX.md). Other screens and new-viewer comprehension remain separate.
 - [ ] Reflect authoritative budgets, eligibility, API validation errors, payout state, and anchor state; remove misleading success/network labels and hardcoded summary assumptions.
@@ -63,7 +64,7 @@ The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were 
   - [x] Focus payout entry on Disbursing, show existing-API batch/allocation constraints, keep reader records separate, and retain saved payouts and same-request retries after lost responses. See [UI_PAYOUT.md](UI_PAYOUT.md).
   - [x] Connect a recorded payout to its exact receipt check; reject unknown receipt links without substituting another household's receipt. See [RECEIPT_HANDOFF.md](RECEIPT_HANDOFF.md). The wider journey and browser QA remain open.
   - [x] Add connected sign-in and role-relevant registration/review/payout/own-household/Auditor journeys, validated in real headless desktop and phone browsers. See [DEMO_SESSIONS.md](DEMO_SESSIONS.md). Complete claim/session/recipient workflows remain open.
-- [ ] Test mobile layouts, readable text, touch targets, keyboard/focus accessibility, loading/empty/error states, and prevention of accidental repeat submissions.
+- [x] Test current screens' phone/desktop layouts, readable text, touch targets, keyboard/focus accessibility, loading/empty/error states, and prevention of accidental repeat submissions. 56 actual Edge cases and screenshot inspection completed in this UI sequence; physical-device and full accessibility audits are not claimed. See [UI_POLISH.md](UI_POLISH.md).
 
 ## 7. Verification and deployment
 - [ ] Review dependency audit findings and upgrade vulnerable dependencies, including the installed Next.js version, before shared deployment.

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { formatRecordedDate } from "@/lib/recordedDate";
 import Link from "next/link";
 import {
   apiUrl,
@@ -45,7 +46,7 @@ export default function ReceiptDetails({
           <p className="workflow-amount">{formatPeso(record.amount)}</p>
           {record.distributed_at && (
             <p className="registry-muted">
-              Recorded {new Date(record.distributed_at).toLocaleString()}
+              Recorded {formatRecordedDate(record.distributed_at)}
             </p>
           )}
         </div>
