@@ -122,13 +122,26 @@ describe("AyudaChainRegistry Smart Contract", function () {
       await registry.confirmDistribution(batchId, allocationId, distributionId, beneficiaryId, 300n, sampleReceiptHash);
 
       const secondDistributionId = ethers.encodeBytes32String("DIST-0002");
+      const secondBeneficiaryId = ethers.encodeBytes32String("BEN-0002");
       await expect(
-        registry.confirmDistribution(batchId, allocationId, secondDistributionId, beneficiaryId, 201n, sampleReceiptHash)
+        registry.confirmDistribution(batchId, allocationId, secondDistributionId, secondBeneficiaryId, 201n, sampleReceiptHash)
       ).to.be.revertedWith("AyudaChain: Distribution exceeds remaining allocation");
 
       await expect(
-        registry.confirmDistribution(batchId, allocationId, secondDistributionId, beneficiaryId, 200n, sampleReceiptHash)
+        registry.confirmDistribution(batchId, allocationId, secondDistributionId, secondBeneficiaryId, 200n, sampleReceiptHash)
       ).to.emit(registry, "DistributionConfirmed");
+    });
+
+    it("should reject a second payout to the same beneficiary in a batch", async function () {
+      await registry.releaseFund(batchId, 1000n, "Typhoon Salinlahi", "DSWD Central");
+      await registry.allocateFund(batchId, allocationId, barangayId, 500n);
+      await registry.confirmDistribution(batchId, allocationId, distributionId, beneficiaryId, 100n, sampleReceiptHash);
+      expect(await registry.beneficiaryPaid(batchId, beneficiaryId)).to.be.true;
+
+      const secondDistributionId = ethers.encodeBytes32String("DIST-0002");
+      await expect(
+        registry.confirmDistribution(batchId, allocationId, secondDistributionId, beneficiaryId, 100n, sampleReceiptHash)
+      ).to.be.revertedWith("AyudaChain: Beneficiary already paid in this batch");
     });
 
     it("should reject distributions without a matching allocation", async function () {

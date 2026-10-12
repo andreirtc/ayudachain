@@ -52,6 +52,7 @@ contract AyudaChainRegistry {
     mapping(bytes32 => ReliefBatchRecord) public batches;
     mapping(bytes32 => AllocationRecord) public allocations;
     mapping(bytes32 => DistributionRecord) public distributions;
+    mapping(bytes32 => mapping(bytes32 => bool)) public beneficiaryPaid; // batchId => beneficiaryId => paid
     mapping(bytes32 => GeneralRecord) public anchoredRecords;
 
     // Authorized operators
@@ -183,6 +184,7 @@ contract AyudaChainRegistry {
         require(!distributions[distributionId].exists, "AyudaChain: Distribution already exists");
         require(receiptHash != bytes32(0), "AyudaChain: Invalid receipt hash");
         require(amount > 0, "AyudaChain: Amount must be greater than zero");
+        require(!beneficiaryPaid[batchId][beneficiaryId], "AyudaChain: Beneficiary already paid in this batch");
 
         AllocationRecord storage allocation = allocations[allocationId];
         require(allocation.exists, "AyudaChain: Allocation does not exist");
@@ -193,6 +195,7 @@ contract AyudaChainRegistry {
         );
 
         allocation.distributedAmount += amount;
+        beneficiaryPaid[batchId][beneficiaryId] = true;
 
         distributions[distributionId] = DistributionRecord({
             batchId: batchId,
