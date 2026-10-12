@@ -3,28 +3,32 @@
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
-  Receipt, CheckCircle2, Lock, ArrowRight, ShieldCheck, Upload,
-  FileCheck, Sparkles, ExternalLink, RefreshCw, Eye, AlertTriangle, AlertCircle,
-  Camera, QrCode, Wifi, WifiOff, X
+  Receipt, CheckCircle2, Lock, ArrowRight, ShieldCheck,
+  FileCheck, RefreshCw, Eye, AlertTriangle, AlertCircle,
+  Wifi, WifiOff, X
 } from "lucide-react";
 import { fetchDistributions, fetchBeneficiaries, fetchBatches, confirmDistribution, DistributionConfirmPayload, Distribution, Beneficiary, ReliefBatch, apiUrl, formatPeso } from "@/lib/api";
 import { useChainStatus, chainLabel } from "@/lib/useChainStatus";
 import { useRole } from "@/lib/roleContext";
 import { receiptVerificationHref } from "@/lib/receiptNavigation";
+import { useBrowserOnline } from "@/lib/useBrowserOnline";
+import { submitOnlinePayout } from "@/lib/payoutConnection";
 
 export default function DistributionsPage() {
   const chain = useChainStatus();
   const { role } = useRole();
+  const browserOnline = useBrowserOnline();
   const [distributions, setDistributions] = useState<Distribution[]>([]);
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
   const [batches, setBatches] = useState<ReliefBatch[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // New Distribution Form State
   const [selectedBenId, setSelectedBenId] = useState("");
   const [amountStr, setAmountStr] = useState("");
   const numericAmount = parseFloat(amountStr) || 0;
-  const [selectedReceipt, setSelectedReceipt] = useState("sample_relief_receipt.svg");
+  const selectedReceipt = "sample_relief_receipt.svg";
   const [step, setStep] = useState<"IDLE" | "SUBMITTING" | "SUCCESS">("IDLE");
   const submitting = useRef(false);
   const pendingSubmission = useRef<{ key: string; payload: DistributionConfirmPayload; serialized: string } | null>(null);
@@ -32,14 +36,10 @@ export default function DistributionsPage() {
   const [confirmedResult, setConfirmedResult] = useState<Distribution | null>(null);
   const [previewReceipt, setPreviewReceipt] = useState<Distribution | null>(null);
 
-  // QR Scanner & Offline Resilience State
-  const [showScanner, setShowScanner] = useState(false);
-  const [offlineSimulated, setOfflineSimulated] = useState(false);
-  const [scannedAlert, setScannedAlert] = useState<string | null>(null);
-
   const loadData = async () => {
     try {
       setLoading(true);
+      setLoadError(null);
       const [dList, bList, batchList] = await Promise.all([
         fetchDistributions(),
         fetchBeneficiaries(),
@@ -54,7 +54,7 @@ export default function DistributionsPage() {
         setSelectedBenId((current) => current || candidate.beneficiary_id);
       }
     } catch (err) {
-      console.error(err);
+      setLoadError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -67,6 +67,10 @@ export default function DistributionsPage() {
   const handleDisburse = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedBenId || submitting.current) return;
+    if (role !== "Barangay Officer" || loading || loadError) {
+      setSubmitError("Choose the staff demo view and refresh the household records before recording a payout.");
+      return;
+    }
 
     submitting.current = true;
     setSubmitError(null);
@@ -86,7 +90,7 @@ export default function DistributionsPage() {
         pendingSubmission.current = { key, payload, serialized };
       }
       const request = pendingSubmission.current;
-      const result = await confirmDistribution(request.payload, request.key);
+      const result = await submitOnlinePayout(navigator.onLine, () => confirmDistribution(request.payload, request.key));
       setConfirmedResult(result);
       setStep("SUCCESS");
       await loadData();
@@ -118,14 +122,12 @@ export default function DistributionsPage() {
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
               <Receipt className="w-6 h-6 text-blue-600" />
-              Household Relief Distribution
+              Record a demo payout
             </h1>
-            <span className="text-xs text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 font-semibold">
-              Pamamahagi ng Ayuda
-            </span>
+
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            <strong>Point-of-Payout &amp; Blockchain Seal:</strong> Scan or select the evacuee using their DAFAC ID, release the batch's cash grant, and generate an immutable on-chain receipt proof.
+            Select an approved household, record a fictional grant, then check its receipt.
           </p>
         </div>
 
@@ -135,123 +137,54 @@ export default function DistributionsPage() {
             className="px-3.5 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold rounded-lg text-xs hover:bg-emerald-100 transition flex items-center gap-1.5"
           >
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-            Verify Receipts On-Chain →
+            Check receipts
           </Link>
         </div>
       </div>
 
-      {/* 3-Step Protocol Bar for Barangay Field Workers */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-        <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl flex items-start gap-2.5">
-          <span className="w-5 h-5 rounded-full bg-blue-600 text-white font-bold text-[11px] flex items-center justify-center shrink-0">1</span>
-          <div>
-            <span className="font-bold text-blue-950 block">1. Scan or Select Evacuee</span>
-            <span className="text-[11px] text-blue-700">I-scan ang DAFAC QR code o hanapin ang pangalan.</span>
-          </div>
-        </div>
-        <div className="p-3 bg-emerald-50/70 border border-emerald-200 rounded-xl flex items-start gap-2.5">
-          <span className="w-5 h-5 rounded-full bg-emerald-600 text-white font-bold text-[11px] flex items-center justify-center shrink-0">2</span>
-          <div>
-            <span className="font-bold text-emerald-950 block">2. Hand Out the Grant</span>
-            <span className="text-[11px] text-emerald-700">Siguraduhing buo ang perang matatanggap ng pamilya.</span>
-          </div>
-        </div>
-        <div className="p-3 bg-indigo-50/70 border border-indigo-200 rounded-xl flex items-start gap-2.5">
-          <span className="w-5 h-5 rounded-full bg-indigo-600 text-white font-bold text-[11px] flex items-center justify-center shrink-0">3</span>
-          <div>
-            <span className="font-bold text-indigo-950 block">3. Confirm &amp; Anchor On-Chain</span>
-            <span className="text-[11px] text-indigo-700">Awtomatikong selyuhan ang resibo sa blockchain.</span>
-          </div>
-        </div>
-      </div>
+      {loading && <p role="status" className="text-sm text-slate-600">Loading household and payout records...</p>}
+      {loadError && <div role="alert" className="p-4 border border-rose-200 bg-rose-50 rounded-xl text-sm text-rose-900">{loadError} <button type="button" onClick={() => void loadData()} className="underline font-semibold min-h-11">Refresh records</button></div>}
+      {!loading && !loadError && beneficiaries.length === 0 && <p className="text-sm text-slate-600">No active households are available. <Link href="/beneficiaries" className="underline text-blue-700">Open the household registry</Link>.</p>}
 
       {/* Main 2-Column Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column (5 Cols): Distribution Action Form */}
         <div className="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          {/* Offline Resilience Status Pill */}
-          <div className="flex items-center justify-between p-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs">
-            <div className="flex items-center gap-2">
-              {offlineSimulated ? (
-                <WifiOff className="w-4 h-4 text-amber-600 shrink-0" />
-              ) : (
-                <Wifi className="w-4 h-4 text-emerald-600 shrink-0" />
-              )}
-              <div>
-                <span className="font-bold text-slate-800 text-[11px] block">
-                  {offlineSimulated ? "Evacuation Center Mode: Offline Caching" : `Network Status: ${chainLabel(chain)}`}
-                </span>
-                <p className="text-[10px] text-slate-500">
-                  {offlineSimulated
-                    ? "Cell towers down. Vouchers queue in local device storage and batch-sync when reconnected."
-                    : chain.kind === "connected"
-                      ? "Payouts are anchored on the chain as they are recorded."
-                      : "Payouts cannot be anchored until the blockchain is reachable."}
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setOfflineSimulated(!offlineSimulated)}
-              className={`px-2.5 py-1 rounded text-[10px] font-bold border transition cursor-pointer shrink-0 ${
-                offlineSimulated
-                  ? "bg-amber-100 text-amber-800 border-amber-300"
-                  : "bg-white text-slate-700 hover:bg-slate-100 border-slate-300"
-              }`}
-            >
-              {offlineSimulated ? "✓ Reconnect" : "Test Offline Mode"}
-            </button>
+          <div role={browserOnline === false ? "alert" : "status"} className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm text-slate-700 space-y-1">
+            <p className="flex items-center gap-2 font-semibold">{browserOnline === true ? <Wifi className="w-4 h-4" aria-hidden="true" /> : browserOnline === false ? <WifiOff className="w-4 h-4" aria-hidden="true" /> : null}{browserOnline === true ? "Browser reports a connection" : browserOnline === false ? "Browser is offline" : "Checking browser connection..."}</p>
+            <p className="text-xs">{browserOnline === false ? "Reconnect before recording a payout. This screen does not queue payouts offline." : "Record a payout through the API. Blockchain anchoring can still fail."}</p>
+            <p className="text-xs">{chainLabel(chain)}</p>
           </div>
 
           <div className="flex justify-between items-center border-b border-slate-100 pb-3">
             <div>
               <h2 className="font-bold text-sm text-slate-900 flex items-center gap-2">
                 <Receipt className="w-4 h-4 text-blue-600" />
-                Confirm Relief Disbursement
+                Payout details
               </h2>
               <span className="text-[10px] text-slate-500 block">
-                DAFAC: Disaster Assistance Family Access Card (DSWD Form)
+                Use fictional household records only.
               </span>
             </div>
-            <span className="text-[11px] font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-600">Batch 2026-001</span>
+            {selectedBatch && <span className="text-xs text-slate-600 break-all">{selectedBatch.batch_id}</span>}
           </div>
 
-          {scannedAlert && (
-            <div className="p-2.5 bg-emerald-50 border border-emerald-300 rounded-xl text-emerald-900 text-xs font-semibold flex items-center justify-between animate-in fade-in">
-              <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                {scannedAlert}
-              </span>
-              <button onClick={() => setScannedAlert(null)} className="text-emerald-700 hover:text-emerald-900 text-xs">
-                ✕
-              </button>
-            </div>
-          )}
-
           <form onSubmit={handleDisburse} className="space-y-4 text-xs">
-            {/* Beneficiary Select with QR Scanner Trigger */}
+            {/* Manual household selection */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="font-semibold text-slate-700">Select Beneficiary Household</label>
-                <button
-                  type="button"
-                  disabled={step === "SUBMITTING"}
-                  onClick={() => setShowScanner(true)}
-                  className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded-lg border border-blue-200 transition cursor-pointer"
-                >
-                  <Camera className="w-3 h-3 text-blue-600" />
-                  Scan DAFAC QR
-                </button>
+                <label htmlFor="payout-household" className="font-semibold text-slate-700">Household</label>
               </div>
               <select
+                id="payout-household"
                 value={selectedBenId}
-                disabled={step === "SUBMITTING"}
+                disabled={step === "SUBMITTING" || loading || Boolean(loadError)}
                 onChange={(e) => setSelectedBenId(e.target.value)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
               >
                 {beneficiaries.map((b) => (
                   <option key={b.beneficiary_id} value={b.beneficiary_id}>
-                    {b.beneficiary_id} ({b.dafac_id || `DFC-2026-${b.beneficiary_id.slice(-4)}`}) — {b.household_name} ({b.barangay_name})
+                    {b.beneficiary_id} ({b.dafac_id || "No demo card reference"}) · {b.household_name} ({b.barangay_name})
                   </option>
                 ))}
               </select>
@@ -271,7 +204,7 @@ export default function DistributionsPage() {
                 {distributions.some((d) => d.beneficiary_id === selectedBenId) && (
                   <div className="pt-1.5 border-t border-slate-200 text-rose-700 font-bold flex items-center gap-1 text-[11px]">
                     <AlertCircle className="w-3.5 h-3.5" />
-                    Warning: This household has already received aid! Duplicate claims will be rejected.
+                    A payout is already recorded for this household. This does not confirm cash delivery.
                   </div>
                 )}
               </div>
@@ -279,9 +212,12 @@ export default function DistributionsPage() {
 
             {/* Amount */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Disbursement Amount (PHP)</label>
+              <label htmlFor="payout-amount" className="block font-semibold text-slate-700 mb-1">Fictional amount (PHP)</label>
               <input
+                id="payout-amount"
                 type="number"
+                min="0.01"
+                step="0.01"
                 value={amountStr}
                 disabled={step === "SUBMITTING"}
                 onChange={(e) => setAmountStr(e.target.value)}
@@ -306,10 +242,10 @@ export default function DistributionsPage() {
                 <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-lg text-[11px] text-amber-900 mt-1.5 space-y-0.5 animate-in fade-in">
                   <p className="font-bold flex items-center gap-1">
                     <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                    AI Anomaly Flag: Irregular Grant Amount ({formatPeso(numericAmount)})
+                    Different from the batch standard ({formatPeso(numericAmount)})
                   </p>
                   <p className="text-amber-800 text-[10px]">
-                    This batch's standard grant is {formatPeso(standardGrant)}. The payout will be flagged for auditor review.
+                    This batch's standard grant is {formatPeso(standardGrant)}. Check the amount before recording it.
                   </p>
                 </div>
               )}
@@ -335,28 +271,16 @@ export default function DistributionsPage() {
 
             {/* Receipt Selection & Simulated OCR */}
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Official Voucher Receipt Asset</label>
+              <label className="block font-semibold text-slate-700 mb-1">Demo receipt template</label>
               <div className="p-3 border border-dashed border-slate-300 rounded-xl bg-slate-50 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <FileCheck className="w-5 h-5 text-blue-600" />
                   <div>
                     <p className="font-bold text-slate-900">sample_relief_receipt.svg</p>
-                    <p className="text-[10px] text-slate-400">DSWD Official Acknowledgement Voucher (2.4 KB)</p>
+                    <p className="text-[10px] text-slate-400">Fictional SVG template; receipt uploads are not available here.</p>
                   </div>
                 </div>
-                <span className="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">OCR Ready</span>
-              </div>
-            </div>
-
-            {/* Architectural Callout: File vs Proof */}
-            <div className="bg-slate-900 text-slate-300 p-3 rounded-xl text-[11px] space-y-1.5 font-mono">
-              <div className="flex justify-between text-slate-400">
-                <span>OFF-CHAIN STORAGE:</span>
-                <span className="text-blue-400">receipt.svg (Local File)</span>
-              </div>
-              <div className="flex justify-between text-slate-400">
-                <span>ON-CHAIN ANCHOR:</span>
-                <span className="text-emerald-400">SHA-256 (32 Bytes)</span>
+                <span className="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">Sample</span>
               </div>
             </div>
 
@@ -404,22 +328,28 @@ export default function DistributionsPage() {
               </div>
             )}
 
-            {role === "Public Citizen" ? (
+            {role !== "Barangay Officer" ? (
               <div className="p-3 bg-slate-100 rounded-xl border border-slate-200 text-center text-slate-500 text-xs space-y-1">
-                <p className="font-semibold text-slate-700">🔒 Disbursement Action Restricted</p>
+                <p className="font-semibold text-slate-700">Payout entry is in the staff demo view</p>
                 <p className="text-[11px]">
-                  Public Citizen view is read-only. Switch your role to <strong>Barangay Officer</strong> in the top navigation to test relief disbursement.
+                  Choose <strong>Staff</strong> above to try a synthetic payout. Switching views is not authenticated access.
                 </p>
               </div>
             ) : (
               <button
                 type="submit"
-                disabled={step !== "IDLE" && step !== "SUCCESS" || !selectedBatch || !selectedIsApproved || numericAmount > maxGrant || numericAmount <= 0 || distributions.some((d) => d.beneficiary_id === selectedBenId)}
+                disabled={step !== "IDLE" && step !== "SUCCESS" || !browserOnline || loading || Boolean(loadError) || selectedBatch?.status !== "ACTIVE" || !selectedBatch || !selectedIsApproved || numericAmount > maxGrant || numericAmount <= 0 || distributions.some((d) => d.beneficiary_id === selectedBenId)}
                 className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow transition disabled:opacity-50 text-xs flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
               >
                 <Lock className="w-3.5 h-3.5" />
                 {distributions.some((d) => d.beneficiary_id === selectedBenId)
                   ? "Claim Already Completed for this Household"
+                  : browserOnline === null
+                  ? "Checking browser connection"
+                  : !browserOnline
+                  ? "Reconnect to record a payout"
+                  : selectedBatch && selectedBatch.status !== "ACTIVE"
+                  ? "Batch is not active"
                   : selectedBeneficiaryObj && !selectedIsApproved
                   ? "Household Not Approved for Payout"
                   : numericAmount > maxGrant
@@ -492,7 +422,7 @@ export default function DistributionsPage() {
           <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
               <div>
-                <h3 className="font-bold text-base text-slate-900">Official Relief Disbursement Receipt</h3>
+                <h3 className="font-bold text-base text-slate-900">Demo payout receipt</h3>
                 <p className="text-xs text-slate-400 font-mono">ID: {previewReceipt.distribution_id}</p>
               </div>
               <button
@@ -533,80 +463,6 @@ export default function DistributionsPage() {
         </div>
       )}
 
-      {/* Interactive Mobile DAFAC QR Scanner Viewfinder Modal */}
-      {showScanner && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-md w-full p-6 text-white shadow-2xl relative animate-in fade-in space-y-4">
-            <button
-              onClick={() => setShowScanner(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center gap-2">
-              <Camera className="w-5 h-5 text-blue-400" />
-              <div>
-                <h3 className="font-black text-base text-white">Point-of-Payout QR Scanner</h3>
-                <p className="text-[11px] text-slate-400">Scan physical DAFAC relief acknowledgement voucher</p>
-              </div>
-            </div>
-
-            {/* Simulated Camera Viewfinder */}
-            <div className="relative bg-slate-950 rounded-2xl h-64 border border-slate-800 flex items-center justify-center overflow-hidden">
-              {/* Corner brackets */}
-              <div className="absolute top-8 left-8 w-8 h-8 border-t-2 border-l-2 border-blue-400 rounded-tl"></div>
-              <div className="absolute top-8 right-8 w-8 h-8 border-t-2 border-r-2 border-blue-400 rounded-tr"></div>
-              <div className="absolute bottom-8 left-8 w-8 h-8 border-b-2 border-l-2 border-blue-400 rounded-bl"></div>
-              <div className="absolute bottom-8 right-8 w-8 h-8 border-b-2 border-r-2 border-blue-400 rounded-br"></div>
-
-              {/* Animated scanning laser line */}
-              <div className="absolute inset-x-8 top-1/2 h-0.5 bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse"></div>
-
-              {/* Center QR watermark */}
-              <div className="text-center space-y-2 opacity-80">
-                <QrCode className="w-24 h-24 text-slate-600 mx-auto stroke-1" />
-                <span className="text-[11px] text-slate-400 block font-mono">
-                  Align DAFAC QR Code within frame
-                </span>
-              </div>
-            </div>
-
-            {/* Quick Demo Tap Vouchers for Pitching */}
-            <div className="space-y-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                Tap Sample Voucher to Simulate Real Camera Scan:
-              </span>
-              <div className="space-y-1.5">
-                {[
-                  { id: "BEN-0004", name: "Danilo Soriano", dafac: "DFC-2026-0004", brgy: "San Isidro" },
-                  { id: "BEN-0006", name: "Antonio Mercado", dafac: "DFC-2026-0006", brgy: "San Isidro" },
-                  { id: "BEN-0005", name: "Carmencita Reyes", dafac: "DFC-2026-0005", brgy: "San Isidro" },
-                ].map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setSelectedBenId(item.id);
-                      setAmountStr(String(standardGrant || ""));
-                      setScannedAlert(`✓ Scanned DAFAC Voucher: ${item.name} (${item.dafac}) — Auto-loaded for disbursement!`);
-                      setShowScanner(false);
-                    }}
-                    className="w-full text-left p-2.5 rounded-xl bg-slate-800/80 hover:bg-blue-600/30 border border-slate-700 hover:border-blue-500 transition text-xs flex items-center justify-between cursor-pointer group"
-                  >
-                    <div>
-                      <p className="font-bold text-white group-hover:text-blue-300">{item.name}</p>
-                      <p className="text-[10px] text-slate-400 font-mono">DAFAC: {item.dafac} • {item.brgy}</p>
-                    </div>
-                    <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded font-bold">
-                      Scan This Voucher →
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -1,82 +1,28 @@
 "use client";
 
-import React from "react";
-import { useRole } from "@/lib/roleContext";
-import { Eye, ShieldAlert, Wrench, Info } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { useRole, UserRole } from "@/lib/roleContext";
+
+const views = {
+  "Public Citizen": { title: "Citizen demo view", copy: "Follow the recorded aid and check a receipt.", action: "Check a receipt", href: "/verify" },
+  "Barangay Officer": { title: "Staff demo view", copy: "Review a household before recording its synthetic payout.", action: "Review households", href: "/beneficiaries" },
+  "Auditor / COA": { title: "Auditor demo view", copy: "Inspect review history and compare receipt evidence.", action: "Inspect receipt integrity", href: "/verify" },
+};
 
 export default function RoleIndicatorBanner() {
   const { role, setRole } = useRole();
-
-  if (role === "Public Citizen") {
-    return (
-      <div className="bg-blue-50 border-b border-blue-200 px-4 py-2.5 text-xs text-blue-900 flex items-center justify-between">
-        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Eye className="w-4 h-4 text-blue-600 shrink-0" />
-            <div>
-              <span className="font-bold">Modo ng Karaniwang Mamamayan (Public Citizen):</span>{" "}
-              <span className="text-slate-700">
-                Pampublikong silip kung magkano ang pondong inilabas ng gobyerno sa inyong barangay at i-check kung buo ang perang dapat mong matanggap.
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 text-slate-500 text-[11px] shrink-0 self-end sm:self-auto">
-            <span>Para sa taga-barangay?</span>
-            <button
-              onClick={() => setRole("Barangay Officer")}
-              className="text-blue-700 font-bold underline hover:text-blue-900 cursor-pointer"
-            >
-              Lumipat sa Barangay Officer Mode →
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (role === "Barangay Officer") {
-    return (
-      <div className="bg-amber-50 border-b border-amber-200 px-4 py-2.5 text-xs text-amber-950">
-        <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <Wrench className="w-4 h-4 text-amber-600 shrink-0" />
-            <div>
-              <span className="font-bold">Modo ng Kawani ng Barangay (Field Payout Mode):</span>{" "}
-              <span className="text-slate-700">
-                Para sa mga opisyal at health workers sa evacuation center — i-scan ang DAFAC QR voucher, iabot ang ₱5,000 ayuda, at i-selyo ang resibo.
-              </span>
-            </div>
-          </div>
-          <button
-            onClick={() => setRole("Auditor / COA")}
-            className="text-amber-800 font-bold underline hover:text-amber-950 text-[11px] shrink-0 cursor-pointer"
-          >
-            Tingnan ang Auditor / COA Mode →
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-purple-50 border-b border-purple-200 px-4 py-2.5 text-xs text-purple-950">
-      <div className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <ShieldAlert className="w-4 h-4 text-purple-700 shrink-0" />
-          <div>
-            <span className="font-bold">Modo ng Tagasuri (COA / Ombudsman Auditor Mode):</span>{" "}
-            <span className="text-slate-700">
-              Pagsusuri sa mga dobleng benepisyaryo, multong claims, at live simulation ng pagkahuli sa pangungupit ng pondo.
-            </span>
-          </div>
-        </div>
-        <button
-          onClick={() => setRole("Public Citizen")}
-          className="text-purple-800 font-bold underline hover:text-purple-950 text-[11px] shrink-0 cursor-pointer"
-        >
-          Bumalik sa Public Citizen →
-        </button>
+  const view = views[role];
+  return <section aria-label="Demo view" className="bg-blue-50 border-b border-blue-200 px-4 py-4 text-sm text-slate-700">
+    <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div><h2 className="font-semibold text-slate-900">{view.title}</h2><p>{view.copy}</p><p className="text-xs text-slate-600 mt-1">Views are selected without sign-in. Permissions are not authenticated.</p></div>
+      <div className="flex flex-wrap items-center gap-3">
+        <label htmlFor="demo-view" className="font-medium">Demo view</label>
+        <select id="demo-view" value={role} onChange={event => setRole(event.target.value as UserRole)} className="min-h-11 px-3 py-2 bg-white border border-slate-300 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">
+          <option value="Public Citizen">Citizen</option><option value="Barangay Officer">Staff</option><option value="Auditor / COA">Auditor</option>
+        </select>
+        <Link href={view.href} className="inline-flex items-center gap-2 min-h-11 font-semibold text-blue-800 underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">{view.action}<ArrowRight className="w-4 h-4" aria-hidden="true" /></Link>
       </div>
     </div>
-  );
+  </section>;
 }
