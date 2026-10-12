@@ -13,6 +13,7 @@ export interface DashboardStats {
   total_distributed: number;
   unallocated_funds: number;
   total_beneficiaries: number;
+  historical_beneficiaries: number;
   verified_beneficiaries: number;
   flagged_records: number;
   confirmed_distributions: number;
@@ -61,6 +62,8 @@ export interface Beneficiary {
   id: number;
   beneficiary_id: string;
   dafac_id?: string;
+  record_status: "ACTIVE" | "DUPLICATE";
+  canonical_beneficiary_id?: string;
   household_name: string;
   barangay_id: string;
   barangay_name: string;
@@ -156,10 +159,11 @@ export async function fetchBatchDetail(batchId: string): Promise<{
   return res.json();
 }
 
-export async function fetchBeneficiaries(params?: { batch_id?: string; flagged_only?: boolean }): Promise<Beneficiary[]> {
+export async function fetchBeneficiaries(params?: { batch_id?: string; flagged_only?: boolean; include_historical?: boolean }): Promise<Beneficiary[]> {
   const query = new URLSearchParams();
   if (params?.batch_id) query.set("batch_id", params.batch_id);
   if (params?.flagged_only) query.set("flagged_only", "true");
+  if (params?.include_historical) query.set("include_historical", "true");
   const res = await fetch(`${getApiBase()}/api/beneficiaries?${query.toString()}`, { cache: 'no-store' });
   if (!res.ok) throw new Error("Failed to fetch beneficiaries");
   return res.json();
@@ -188,7 +192,7 @@ export interface BeneficiaryReview {
   review_id: string;
   beneficiary_id: string;
   batch_id: string;
-  decision: ReviewDecision;
+  decision: ReviewDecision | "DUPLICATE";
   reason: string;
   reviewed_by: DemoReviewer;
   reviewed_at: string;
@@ -199,6 +203,7 @@ export interface BeneficiaryReview {
   anomaly_flag_before: boolean;
   duplicate_flag_after: boolean;
   anomaly_flag_after: boolean;
+  linked_beneficiary_id?: string;
   matched_beneficiary_id?: string;
   duplicate_confidence: number;
 }
@@ -309,17 +314,13 @@ export async function uploadBeneficiaryCsv(csvContent?: string): Promise<CsvBatc
   return res.json();
 }
 
-export async function deleteBeneficiary(beneficiaryId: string): Promise<{ success: boolean; message: string }> {
-  const res = await fetch(`${getApiBase()}/api/beneficiaries/${beneficiaryId}`, {
-    method: "DELETE"
+export async function resolveBeneficiaryDuplicate(beneficiaryId: string, canonicalId: string, notes: string, reviewedBy: DemoReviewer): Promise<Beneficiary> {
+  const res = await fetch(getApiBase() + "/api/beneficiaries/" + beneficiaryId + "/resolve-duplicate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ canonical_beneficiary_id: canonicalId, review_notes: notes, reviewed_by: reviewedBy })
   });
-  if (!res.ok) {
-    const fallbackRes = await fetch(`${getApiBase()}/api/beneficiaries/${beneficiaryId}/delete`, {
-      method: "POST"
-    });
-    if (!fallbackRes.ok) throw new Error("Failed to delete beneficiary record");
-    return fallbackRes.json();
-  }
+  if (!res.ok) throw await errorFrom(res, "Failed to retain duplicate record");
   return res.json();
 }
 

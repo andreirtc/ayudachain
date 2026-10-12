@@ -459,18 +459,13 @@ class TestAyudaChainAPI(unittest.TestCase):
         import threading
         import app.main as api
         barrier = threading.Barrier(4)
-        thread_state = threading.local()
-        original_replay = api._replayed_payout
-        def simultaneous_initial_lookup(*args):
-            existing = original_replay(*args)
-            if not getattr(thread_state, "started", False):
-                thread_state.started = True
-                barrier.wait(timeout=10)
-            return existing
+        def submit_together(_):
+            barrier.wait(timeout=10)
+            return self._keyed_pay()
         before = fake_chain.tx_count
-        with patch.object(api, "_funds_lock", nullcontext()), patch.object(api, "_replayed_payout", side_effect=simultaneous_initial_lookup):
+        with patch.object(api, "_funds_lock", nullcontext()):
             with ThreadPoolExecutor(max_workers=4) as pool:
-                results = list(pool.map(lambda _: self._keyed_pay(), range(4)))
+                results = list(pool.map(submit_together, range(4)))
         codes = [r.status_code for r in results]
         self.assertEqual(codes.count(201), 1, codes)
         self.assertEqual(codes.count(200), 3, codes)
@@ -698,13 +693,202 @@ class TestAyudaChainAPI(unittest.TestCase):
         self.assertEqual(self.client.get("/api/distributions").json(), before)
         self.assertEqual(self._reviews(), [])
 
-    def test_delete_beneficiary(self):
-        res = self.client.delete("/api/beneficiaries/BEN-0007")
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(self.client.get("/api/beneficiaries/BEN-0007").status_code, 404)
+    def _resolve_duplicate(self, ben_id="BEN-0007", canonical="BEN-0002", reason="Same fictional household", actor="demo-auditor-01"):
+        return self.client.post(f"/api/beneficiaries/{ben_id}/resolve-duplicate", json={
+            "canonical_beneficiary_id": canonical, "review_notes": reason, "reviewed_by": actor,
+        })
 
-        res = self.client.post("/api/beneficiaries/BEN-0014/delete")
-        self.assertEqual(res.status_code, 200)
+    def test_legacy_delete_routes_cannot_remove_any_household(self):
+        before = self.client.get("/api/distributions").json()
+        for ben_id in ("BEN-0001", "BEN-0007"):
+            self.assertEqual(self.client.delete(f"/api/beneficiaries/{ben_id}").status_code, 410)
+            self.assertEqual(self.client.post(f"/api/beneficiaries/{ben_id}/delete").status_code, 410)
+            self.assertEqual(self.client.get(f"/api/beneficiaries/{ben_id}").status_code, 200)
+        self.assertEqual(self.client.get("/api/distributions").json(), before)
+        self.assertEqual(len(self.client.get("/api/beneficiaries").json()), 24)
+
+    def test_duplicate_resolution_retains_identity_reviews_and_record_counts(self):
+        original = self.client.get("/api/beneficiaries/BEN-0007").json()
+        self.assertEqual(self._review(status="FLAGGED_FOR_REVIEW", reason="Need comparison evidence").status_code, 200)
+        prior = self._reviews()[0]
+        payouts = self.client.get("/api/distributions").json()
+        tx_before = fake_chain.tx_count
+        result = self._resolve_duplicate()
+        self.assertEqual(result.status_code, 200, result.text)
+        retained = result.json()
+        self.assertEqual(retained["record_status"], "DUPLICATE")
+        self.assertEqual(retained["canonical_beneficiary_id"], "BEN-0002")
+        self.assertEqual((retained["verification_status"], retained["review_status"]), ("REJECTED", "REJECTED"))
+        self.assertFalse(retained["duplicate_flag"])
+        for field in ("beneficiary_id", "household_name", "dafac_id", "created_at", "duplicate_matched_id", "duplicate_confidence"):
+            self.assertEqual(retained[field], original[field])
+        self.assertEqual(self.client.get("/api/beneficiaries/BEN-0007").json(), retained)
+        self.assertEqual(len(self.client.get("/api/beneficiaries").json()), 23)
+        self.assertEqual(len(self.client.get("/api/beneficiaries?include_historical=true").json()), 24)
+        self.assertNotIn("BEN-0007", {b["beneficiary_id"] for b in self.client.get("/api/beneficiaries?flagged_only=true").json()})
+        history = self._reviews()
+        self.assertEqual(history[1], prior)
+        self.assertEqual(history[0]["decision"], "DUPLICATE")
+        self.assertEqual(history[0]["linked_beneficiary_id"], "BEN-0002")
+        self.assertEqual(history[0]["reviewed_by"], "demo-auditor-01")
+        self.assertEqual(history[0]["reason"], "Same fictional household")
+        self.assertEqual(self.client.get("/api/distributions").json(), payouts)
+        self.assertEqual(fake_chain.tx_count, tx_before)
+        dashboard = self.client.get("/api/dashboard").json()
+        self.assertEqual(dashboard["total_beneficiaries"], 23)
+        self.assertEqual(dashboard["historical_beneficiaries"], 1)
+        self.assertEqual(dashboard["total_distributed"], 25000)
+        events = self.client.get("/api/audit-trail/RELIEF-2026-001").json()
+        self.assertEqual(len([e for e in events if e["event_type"] == "BENEFICIARY_DUPLICATE_RESOLVED"]), 1)
+
+    def test_paid_duplicate_keeps_receipt_and_blocks_surviving_record_payout(self):
+        before = self.client.get("/api/distributions").json()
+        response = self._resolve_duplicate(ben_id="BEN-0001", canonical="BEN-0004")
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(self.client.get("/api/distributions").json(), before)
+        verified = self.client.post("/api/blockchain/verify", json={"distribution_id": "DIST-0001"})
+        self.assertTrue(verified.json()["is_verified"])
+        payout = self._pay("DIST-ALIAS", "BEN-0004", "RELIEF-2026-001", 5000)
+        self.assertEqual(payout.status_code, 400)
+        self.assertIn("BEN-0001", payout.json()["detail"])
+        self.assertEqual(self._pay("DIST-HISTORY", "BEN-0001", "RELIEF-2026-001", 5000).status_code, 400)
+        self.assertEqual(self._review(ben_id="BEN-0001").status_code, 409)
+        self.assertEqual(self._review(ben_id="BEN-0001", status="FLAGGED_FOR_REVIEW").status_code, 409)
+
+    def test_payout_retry_still_returns_record_after_duplicate_resolution(self):
+        first = self._keyed_pay()
+        self.assertEqual(first.status_code, 201)
+        self.assertEqual(self._resolve_duplicate(ben_id="BEN-0004", canonical="BEN-0005").status_code, 200)
+        before = fake_chain.tx_count
+        retry = self._keyed_pay()
+        self.assertEqual(retry.status_code, 200)
+        self.assertEqual(retry.json(), first.json())
+        self.assertEqual(fake_chain.tx_count, before)
+        self.assertEqual(self._pay("DIST-SURVIVOR", "BEN-0005", "RELIEF-2026-001", 5000).status_code, 400)
+
+    def test_two_previously_paid_records_can_be_linked_without_erasing_evidence(self):
+        before = self.client.get("/api/distributions").json()
+        response = self._resolve_duplicate(ben_id="BEN-0001", canonical="BEN-0002")
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(self.client.get("/api/distributions").json(), before)
+        self.assertEqual(self.client.get("/api/dashboard").json()["total_distributed"], 25000)
+        self.assertEqual(self._pay("DIST-THIRD", "BEN-0002", "RELIEF-2026-001", 5000).status_code, 400)
+
+    def test_unpaid_group_allows_only_one_payout_to_surviving_record(self):
+        self.assertEqual(self._resolve_duplicate(canonical="BEN-0004").status_code, 200)
+        self.assertEqual(self._resolve_duplicate(ben_id="BEN-0014", canonical="BEN-0004").status_code, 200)
+        self.assertEqual(self._pay("DIST-GROUP", "BEN-0004", "RELIEF-2026-001", 5000).status_code, 201)
+        self.assertEqual(self._pay("DIST-GROUP-2", "BEN-0004", "RELIEF-2026-001", 5000).status_code, 400)
+        self.assertEqual(self._pay("DIST-GROUP-3", "BEN-0007", "RELIEF-2026-001", 5000).status_code, 400)
+        self.assertEqual(self._pay("DIST-GROUP-4", "BEN-0014", "RELIEF-2026-001", 5000).status_code, 400)
+
+    def test_duplicate_link_validation_rejects_self_unknown_and_cross_batch(self):
+        self.assertEqual(self._resolve_duplicate(canonical="BEN-0007").status_code, 400)
+        self.assertEqual(self._resolve_duplicate(canonical="BEN-NOPE").status_code, 404)
+        self.assertEqual(self._resolve_duplicate(ben_id="BEN-NOPE").status_code, 404)
+        self._release("RELIEF-LINK-OTHER", 10000)
+        self._register("BEN-LINK-OTHER", "Fictional Target", "RELIEF-LINK-OTHER")
+        self.assertEqual(self._resolve_duplicate(canonical="BEN-LINK-OTHER").status_code, 400)
+        self.assertEqual(self._reviews(), [])
+
+    def test_duplicate_link_cannot_create_chains_cycles_or_reparent_history(self):
+        self.assertEqual(self._resolve_duplicate().status_code, 200)
+        self.assertEqual(self._resolve_duplicate(ben_id="BEN-0014", canonical="BEN-0007").status_code, 409)
+        self.assertEqual(self._resolve_duplicate(ben_id="BEN-0002", canonical="BEN-0007").status_code, 409)
+        self.assertEqual(self._resolve_duplicate(ben_id="BEN-0002", canonical="BEN-0003").status_code, 409)
+        self.assertEqual(self._resolve_duplicate(canonical="BEN-0003").status_code, 409)
+        self.assertEqual(self._resolve_duplicate(reason="Changed decision").status_code, 409)
+        self.assertEqual(len(self._reviews()), 1)
+
+    def test_duplicate_resolution_requires_reason_and_named_reviewer(self):
+        payload = {"canonical_beneficiary_id": "BEN-0002", "review_notes": "Same household", "reviewed_by": "demo-auditor-01"}
+        for field in payload:
+            incomplete = {key: value for key, value in payload.items() if key != field}
+            self.assertEqual(self.client.post("/api/beneficiaries/BEN-0007/resolve-duplicate", json=incomplete).status_code, 422)
+        self.assertEqual(self._resolve_duplicate(reason=" ").status_code, 422)
+        self.assertEqual(self._resolve_duplicate(actor="unknown").status_code, 422)
+        self.assertEqual(self._resolve_duplicate(canonical="").status_code, 422)
+        self.assertEqual(self._reviews(), [])
+
+    def test_resolution_database_failure_does_not_partially_archive(self):
+        from sqlalchemy.orm import Session
+        before = self.client.get("/api/beneficiaries/BEN-0007").json()
+        with patch.object(Session, "commit", side_effect=RuntimeError("Link database failure")):
+            with self.assertRaises(RuntimeError):
+                self._resolve_duplicate()
+        self.assertEqual(self.client.get("/api/beneficiaries/BEN-0007").json(), before)
+        self.assertEqual(self._reviews(), [])
+        self.assertFalse(any(e["event_type"] == "BENEFICIARY_DUPLICATE_RESOLVED" for e in self.client.get("/api/audit-trail/RELIEF-2026-001").json()))
+
+    def test_concurrent_repeated_resolution_appends_history_once(self):
+        from concurrent.futures import ThreadPoolExecutor
+        from contextlib import nullcontext
+        import threading
+        import app.main as api
+        barrier = threading.Barrier(4)
+        def together(_):
+            barrier.wait(timeout=10)
+            return self._resolve_duplicate()
+        with patch.object(api, "_funds_lock", nullcontext()):
+            with ThreadPoolExecutor(max_workers=4) as pool:
+                responses = list(pool.map(together, range(4)))
+        self.assertEqual([r.status_code for r in responses], [200] * 4)
+        self.assertTrue(all(r.json() == responses[0].json() for r in responses))
+        self.assertEqual(len(self._reviews()), 1)
+
+    def test_payout_waits_for_duplicate_link_before_checking_group(self):
+        from concurrent.futures import ThreadPoolExecutor
+        from contextlib import nullcontext
+        import threading
+        import app.main as api
+        link_lock_held = threading.Event()
+        release_link = threading.Event()
+        payout_attempting_lock = threading.Event()
+        original_review_record = api._review_record
+        original_lock = api._registry_write_lock
+        def pause_link(*args, **kwargs):
+            link_lock_held.set()
+            if not release_link.wait(10):
+                raise RuntimeError("Link test did not release lock")
+            return original_review_record(*args, **kwargs)
+        def observed_lock(db):
+            if link_lock_held.is_set():
+                payout_attempting_lock.set()
+            return original_lock(db)
+        before = fake_chain.tx_count
+        with patch.object(api, "_funds_lock", nullcontext()), patch.object(api, "_review_record", side_effect=pause_link), patch.object(api, "_registry_write_lock", side_effect=observed_lock):
+            with ThreadPoolExecutor(max_workers=2) as pool:
+                link = pool.submit(self._resolve_duplicate, "BEN-0001", "BEN-0004")
+                self.assertTrue(link_lock_held.wait(10))
+                payout = pool.submit(self._pay, "DIST-LINK-RACE", "BEN-0004", "RELIEF-2026-001", 5000)
+                try:
+                    self.assertTrue(payout_attempting_lock.wait(10))
+                finally:
+                    release_link.set()
+                self.assertEqual(link.result().status_code, 200)
+                self.assertEqual(payout.result().status_code, 400)
+        self.assertEqual(fake_chain.tx_count, before)
+        self.assertEqual(len(self.client.get("/api/distributions").json()), 5)
+
+    def test_retained_record_migration_preserves_rows_and_prior_reviews(self):
+        from sqlalchemy import create_engine, inspect, text
+        import app.database as database
+        migration_engine = create_engine(f"sqlite:///{os.path.join(_tmp_dir, 'retained-migration.db')}")
+        with migration_engine.begin() as conn:
+            conn.execute(text("CREATE TABLE beneficiaries (id INTEGER PRIMARY KEY, beneficiary_id VARCHAR(64), household_name VARCHAR(128))"))
+            conn.execute(text("INSERT INTO beneficiaries VALUES (1, 'BEN-HISTORY', 'Fictional Household')"))
+            conn.execute(text("CREATE TABLE beneficiary_reviews (id INTEGER PRIMARY KEY, review_id VARCHAR(64), reason TEXT)"))
+            conn.execute(text("INSERT INTO beneficiary_reviews VALUES (1, 'REVIEW-HISTORY', 'Historical reason')"))
+        with patch.object(database, "engine", migration_engine):
+            database._migrate_beneficiary_history()
+            database._migrate_beneficiary_history()
+        with migration_engine.connect() as conn:
+            row = conn.execute(text("SELECT beneficiary_id, household_name, record_status, canonical_beneficiary_id FROM beneficiaries")).one()
+            self.assertEqual(tuple(row), ("BEN-HISTORY", "Fictional Household", "ACTIVE", None))
+            row = conn.execute(text("SELECT review_id, reason, linked_beneficiary_id FROM beneficiary_reviews")).one()
+            self.assertEqual(tuple(row), ("REVIEW-HISTORY", "Historical reason", None))
+        self.assertTrue(any(i["column_names"] == ["canonical_beneficiary_id"] for i in inspect(migration_engine).get_indexes("beneficiaries")))
+        migration_engine.dispose()
 
 
 if __name__ == "__main__":

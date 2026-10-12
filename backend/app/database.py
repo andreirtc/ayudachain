@@ -17,6 +17,7 @@ def init_db():
         )
     Base.metadata.create_all(bind=engine)
     _migrate_payout_idempotency()
+    _migrate_beneficiary_history()
 
 def _migrate_payout_idempotency():
     """Add retry metadata to the preceding SQLite schema without deleting payouts."""
@@ -40,6 +41,34 @@ def _migrate_payout_idempotency():
             "CREATE UNIQUE INDEX IF NOT EXISTS ix_distributions_idempotency_key "
             "ON distributions (idempotency_key)"
         ))
+
+def _migrate_beneficiary_history():
+    """Retain registry rows while adding duplicate links and decision targets."""
+    additions = {
+        "beneficiaries": {
+            "record_status": "VARCHAR(32) NOT NULL DEFAULT 'ACTIVE'",
+            "canonical_beneficiary_id": "VARCHAR(64)",
+        },
+        "beneficiary_reviews": {"linked_beneficiary_id": "VARCHAR(64)"},
+    }
+    if engine.dialect.name != "sqlite":
+        inspector = inspect(engine)
+        for table, required in additions.items():
+            columns = {c["name"] for c in inspector.get_columns(table)}
+            if not required.keys() <= columns:
+                raise RuntimeError("Migrate retained beneficiary status/link fields before startup.")
+        return
+    with engine.begin() as connection:
+        connection.exec_driver_sql("BEGIN IMMEDIATE")
+        for table, fields in additions.items():
+            columns = {c["name"] for c in inspect(connection).get_columns(table)}
+            for name, definition in fields.items():
+                if name not in columns:
+                    connection.execute(text(f"ALTER TABLE {table} ADD COLUMN {name} {definition}"))
+        for column in ("record_status", "canonical_beneficiary_id"):
+            connection.execute(text(
+                f"CREATE INDEX IF NOT EXISTS ix_beneficiaries_{column} ON beneficiaries ({column})"
+            ))
 
 REQUIRED_COLUMNS = {
     "distributions": {"amount_centavos", "allocation_id"},
