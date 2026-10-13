@@ -321,10 +321,13 @@ test("barangay registration connects to DSWD decisions, a payout and its exact r
     .click();
   await expect(page.getByText("Your signed-in role can inspect these records.", { exact: false })).toBeVisible();
   await expect(page.getByRole("button", { name: "Record demo payout", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "No payouts recorded for this household", exact: true })).toBeVisible();
   await switchAccount(page, "demo-disbursing-001");
-  await page
-    .getByLabel("Household", { exact: true })
-    .selectOption(created.beneficiary_id);
+  await page.goto("/beneficiaries");
+  await page.getByLabel("Search households", { exact: true }).fill(created.beneficiary_id);
+  await page.getByRole("button", { name: "Inspect " + name, exact: true }).click();
+  await page.getByRole("link", { name: "Open payouts", exact: true }).click();
+  await expect(page.getByLabel("Household", { exact: true })).toHaveValue(created.beneficiary_id);
   await page
     .getByRole("button", { name: "Record demo payout", exact: true })
     .click();

@@ -567,17 +567,6 @@ export default function BeneficiariesPage() {
                     active batch, funding and prior payouts before recording a
                     payout.
                   </p>
-                  {role !== "BARANGAY" && (
-                    <Link
-                      href="/distributions"
-                      className="registry-button registry-text-button"
-                    >
-                      {role === "DISBURSING"
-                        ? "Open payouts"
-                        : "View payout records"}
-                      <ArrowRight size={16} aria-hidden="true" />
-                    </Link>
-                  )}
                 </>
               ) : selectedStatus === "Rejected" ? (
                 <p>
@@ -594,6 +583,17 @@ export default function BeneficiariesPage() {
                 </p>
               )}
             </div>
+            {role !== "BARANGAY" && (
+              <Link
+                href={`/distributions?${new URLSearchParams({ beneficiary_id: selectedBen.beneficiary_id }).toString()}`}
+                className="registry-button registry-text-button"
+              >
+                {role === "DISBURSING" && selectedStatus === "Approved"
+                  ? "Open payouts"
+                  : "View payout records"}
+                <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+            )}
             {!online && (
               <p role="status" className="registry-notice">
                 Reconnect to save a review. Your reason stays here.
