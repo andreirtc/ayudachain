@@ -6,7 +6,7 @@ PR workflow: see [STACKED_PRS.md](STACKED_PRS.md). This planning session is the 
 
 Status: unchecked items are planned, not implemented. Work through one numbered item at a time. First establish a runnable baseline; then backend/contracts correctness; then frontend workflow and usability.
 
-Current direction, accepted 2026-10-14: adopt the Tonal / Material 3, Sea and Sun proposal and a shorter household journey built around staff-validated lists and organized payouts, retaining current accounting, authenticated roles and audit/receipt safeguards. See [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md) for the selected design, compatibility rules and bounded implementation sequence. The shared Tonal foundation is delivered; the subsequent household/list/arrangement tasks remain in sequence.
+Current direction, accepted 2026-10-14: adopt the Tonal / Material 3, Sea and Sun proposal and a shorter household journey built around staff-validated lists and organized payouts, retaining current accounting, authenticated roles and audit/receipt safeguards. See [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md) for the selected design, compatibility rules and bounded implementation sequence. The Tonal foundation, household starting point and versioned validated lists are delivered; arrangements and the remaining desk/receipt/concern/audit tasks stay in sequence.
 
 The previous backend feature pass completed CSV preview/import, own-account synthetic recipient acknowledgement and versioned immutable receipt snapshots. See [CSV_ONBOARDING.md](CSV_ONBOARDING.md), [RECIPIENT_ACKNOWLEDGEMENT.md](RECIPIENT_ACKNOWLEDGEMENT.md) and [RECEIPT_SNAPSHOTS.md](RECEIPT_SNAPSHOTS.md). Remaining unchecked features and production policies stay separate bounded tasks in the PR stack.
 
@@ -15,7 +15,7 @@ The previous backend feature pass completed CSV preview/import, own-account synt
 - [x] Record the accepted Tonal design and streamlined validated-list/payout direction with preservation and acceptance rules. Documentation only; see [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md).
 - [x] Apply the shared Tonal foundation to supported authenticated screens, preserving routes, states and permissions. See [TONAL_FOUNDATION.md](TONAL_FOUNDATION.md).
 - [x] Give households a grounded status/next-action starting point using actual own-household records. See [HOUSEHOLD_START.md](HOUSEHOLD_START.md).
-- [ ] Add versioned staff-validated list preparation/finalization, retaining individual approvals, flags, exclusions and history.
+- [x] Add versioned staff-validated list preparation/finalization, retaining individual approvals, flags, exclusions and history. See [VALIDATED_LISTS.md](VALIDATED_LISTS.md).
 - [ ] Add scoped payout arrangements and household instructions from actual dates/sites/requirements.
 - [ ] Adapt the focused payout/assisted desk with justified controls and existing accounting/retry safeguards.
 - [ ] Deliver concerns and staff audit layout as separately bounded connected features; retain simple public verification.

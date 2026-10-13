@@ -2,7 +2,7 @@
 
 AyudaChain is a fictional disaster-relief prototype. Use invented households and simulated payouts only. A matching blockchain receipt hash establishes integrity of the fields currently hashed; it does not establish cash delivery, government affiliation or the identity of a real recipient.
 
-The accepted next direction is the Tonal design with staff-validated lists and organized payouts; see [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md). The [shared Tonal foundation](TONAL_FOUNDATION.md) is delivered. The [household starting point](HOUSEHOLD_START.md) is also delivered; validated lists and arrangements are subsequent tasks. The instructions below describe the current implemented application.
+The accepted next direction is the Tonal design with staff-validated lists and organized payouts; see [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md). The [shared Tonal foundation](TONAL_FOUNDATION.md) is delivered. The [household starting point](HOUSEHOLD_START.md) is also delivered; [validated lists](VALIDATED_LISTS.md) are delivered; payout arrangements are the next task. The instructions below describe the current implemented application.
 
 ## Sign in and choose a task
 
@@ -37,6 +37,10 @@ Expand **Blockchain service details** for the reported network and contract, or 
 Expand **Review evidence** for permitted matching scores and saved notes, or **Record references** for household/DAFAC/batch IDs. Approved status still requires Disbursing to check batch, funding and prior payouts; approval alone does not record a payout. **View payout records** shows only the inspected household's permitted payouts, including earlier receipts for retained duplicates. For an approved household, Disbursing follows **Open payouts** with that exact household selected. Barangay remains in the registry. See [household handoff](UI_HOUSEHOLD_HANDOFF.md).
 
 DSWD can also open **Analyze a CSV** under **More registry options**. Choose a fictional file or explicitly analyze the sample. The analyzer reports possible pairs; it does not import the masterlist. **Import a CSV** now provides a separate validated onboarding path. Choose an active batch and a UTF-8 file in the documented format, inspect row errors and possible matches, then explicitly import all valid rows as pending households. Use the saved **Review** buttons to continue DSWD review. Nothing is automatically approved or overwritten. A lost import response can be retried with the same preview; stale/expired previews require a new preview. See [CSV onboarding](CSV_ONBOARDING.md). See [HUMAN_REVIEW.md](HUMAN_REVIEW.md), [RETAINED_DUPLICATES.md](RETAINED_DUPLICATES.md) and [registry UI behavior](REGISTRY_REVIEW_UX.md).
+
+## Prepare and finalize a list
+
+Staff open **Validated lists** from the registry. Prepare an active batch/area version, inspect included and excluded rows, and follow **Inspect current household** for required review. Imported rows are not approved by preparation. DSWD confirms an inspected version with a reason; Barangay can prepare its own area, and Disbursing/Auditor read permitted versions. A changed record needs a fresh version. Existing originals and decision references remain retained. A finalized list is local synthetic staff evidence and does not reserve funds or authorize payment. See [VALIDATED_LISTS.md](VALIDATED_LISTS.md).
 
 ## Record a synthetic payout
 

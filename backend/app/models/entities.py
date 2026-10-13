@@ -230,3 +230,27 @@ class ReceiptSnapshot(Base):
     snapshot_json = Column(Text, nullable=False)
     document_bytes = Column(LargeBinary, nullable=True)
     document_media_type = Column(String(64), nullable=True)
+
+
+class ValidatedList(Base):
+    __tablename__ = "validated_lists"
+    __table_args__ = (UniqueConstraint("prepared_by", "request_id", name="uq_list_preparation_retry"), UniqueConstraint("batch_id", "barangay_id", "version", name="uq_list_area_version"))
+    list_id = Column(String(64), primary_key=True)
+    batch_id = Column(String(64), nullable=False, index=True)
+    barangay_id = Column(String(32), nullable=False, index=True)
+    version = Column(Integer, nullable=False)
+    prepared_by = Column(String(64), nullable=False)
+    prepared_at = Column(String(40), nullable=False)
+    request_id = Column(String(64), nullable=False)
+    request_fingerprint = Column(String(64), nullable=False)
+    snapshot_json = Column(Text, nullable=False)
+    revision_hash = Column(String(64), nullable=False)
+
+
+class ListFinalization(Base):
+    __tablename__ = "list_finalizations"
+    list_id = Column(String(64), ForeignKey("validated_lists.list_id"), primary_key=True)
+    finalized_by = Column(String(64), nullable=False)
+    finalized_name = Column(String(128), nullable=False)
+    finalized_at = Column(String(40), nullable=False)
+    reason = Column(Text, nullable=False)

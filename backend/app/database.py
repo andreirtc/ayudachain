@@ -19,6 +19,7 @@ def init_db():
     _migrate_payout_idempotency()
     _migrate_beneficiary_history()
     _protect_receipt_snapshots()
+    _protect_validated_lists()
 
 def _migrate_payout_idempotency():
     """Add retry metadata to the preceding SQLite schema without deleting payouts."""
@@ -108,3 +109,11 @@ def _protect_receipt_snapshots():
         with engine.begin() as connection:
             for operation in ("UPDATE", "DELETE"):
                 connection.exec_driver_sql(f"CREATE TRIGGER IF NOT EXISTS receipt_snapshot_no_{operation.lower()} BEFORE {operation} ON receipt_snapshots BEGIN SELECT RAISE(ABORT, 'Receipt snapshots are immutable'); END")
+
+
+def _protect_validated_lists():
+    if engine.dialect.name == "sqlite":
+        with engine.begin() as connection:
+            for table in ("validated_lists", "list_finalizations"):
+                for operation in ("UPDATE", "DELETE"):
+                    connection.exec_driver_sql(f"CREATE TRIGGER IF NOT EXISTS {table}_no_{operation.lower()} BEFORE {operation} ON {table} BEGIN SELECT RAISE(ABORT, 'Validated list history is immutable'); END")

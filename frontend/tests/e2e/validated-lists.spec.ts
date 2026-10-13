@@ -1,0 +1,59 @@
+import {test,expect,Page} from "@playwright/test";
+const API="http://127.0.0.1:8101";
+test.beforeEach(async({page})=>{await page.route(/http:\/\/(?:127\.0\.0\.1|localhost):8000\//,r=>{const u=new URL(r.request().url());u.hostname="127.0.0.1";u.port="8101";return r.continue({url:u.toString()});});});
+async function login(page:Page,id="demo-officer-01"){await page.goto("/sign-in");await page.getByRole("textbox",{name:"Account",exact:true}).fill(id);await page.getByLabel("Password",{exact:true}).fill("synthetic-test-password-only");await page.getByRole("button",{name:"Sign in",exact:true}).click();await expect(page.getByText("Authenticated synthetic account.",{exact:false})).toBeVisible();}
+async function headers(page:Page){const s=await(await page.context().request.get(API+"/api/auth/session")).json();return {"X-AyudaChain-Client":"web","X-CSRF-Token":s.csrf_token,Origin:"http://127.0.0.1:3101"};}
+async function prepare(page:Page){await page.getByRole("button",{name:"Prepare list version",exact:true}).click();await expect(page.getByText("Preparation saved. Inspect the frozen version.",{exact:true})).toBeVisible();await expect(page).toHaveURL(/list_id=LIST-/);return new URL(page.url()).searchParams.get("list_id")!;}
+test("CSV pending rows connect to exact review and frozen list with once-only lost-response retries",async({page},info)=>{
+ await login(page);const id="BEN-LIST-UI-"+info.project.name,h=await headers(page);
+ const csv="beneficiary_id,household_name,barangay_id,barangay_name,dafac_id\n"+id+",Synthetic list review "+info.project.name+",BRGY-001,San Isidro,DFC-LIST-"+info.project.name+"\n";
+ const plan=await(await page.context().request.post(API+"/api/beneficiaries/csv/preview",{headers:h,data:{batch_id:"RELIEF-2026-001",csv_content:csv}})).json();expect(plan.valid).toBe(true);
+ expect((await page.context().request.post(API+"/api/beneficiaries/csv/"+plan.import_id+"/import",{headers:h})).status()).toBe(201);
+ await page.goto("/lists");let listId=await prepare(page);
+ await page.getByLabel("Find a listed household").fill(id);const row=page.getByRole("list",{name:"Frozen household rows"}).locator("li");await expect(row).toContainText("Eligibility not approved");
+ await row.getByRole("link",{name:"Inspect current household",exact:true}).click();await expect(page.getByRole("dialog")).toBeVisible();await expect(page.getByRole("dialog")).toContainText(id);
+ await page.getByLabel("Reason for decision").fill("Inspected synthetic CSV household for the prepared list");await page.getByRole("button",{name:"Approve household",exact:true}).click();await expect(page.getByText("Review saved.",{exact:true})).toBeVisible();
+ await page.goto("/lists?list_id="+listId);await expect(page.getByRole("region",{name:"Selected list"})).toContainText("Current records changed after preparation");
+ await page.route(/8000\/api\/validated-lists\/prepare$/,async r=>{const response=await r.fetch({url:r.request().url().replace(":8000",":8101")});expect(response.status()).toBe(201);await r.abort();},{times:1});
+ await page.getByRole("button",{name:"Prepare list version",exact:true}).click();await expect(page.getByRole("main").getByRole("alert").last()).toBeVisible();
+ const button=page.getByRole("button",{name:"Prepare list version",exact:true});await button.evaluate((b:HTMLButtonElement)=>{b.click();b.click();});await expect(page.getByText("Preparation saved. Inspect the frozen version.",{exact:true})).toBeVisible();await expect.poll(()=>new URL(page.url()).searchParams.get("list_id")).not.toBe(listId);listId=new URL(page.url()).searchParams.get("list_id")!;
+ await page.getByLabel("List result",{exact:true}).selectOption("included");await page.getByLabel("Find a listed household").fill(id);await expect(row).toContainText("✓ Included");await row.getByText("Frozen decision reference",{exact:true}).click();await expect(row).toContainText("demo-officer-01");
+ const action=page.getByRole("button",{name:"Finalize list version",exact:true});await expect(action).toBeDisabled();await page.getByLabel("Finalization reason").fill("Inspected this synthetic prepared version and its exclusions");await page.getByRole("checkbox",{name:/I inspected the included records/}).check();
+ await page.route(/8000\/api\/validated-lists\/[^/]+\/finalize$/,async r=>{const response=await r.fetch({url:r.request().url().replace(":8000",":8101")});expect(response.status()).toBe(201);await r.abort();},{times:1});await action.click();await expect(page.getByRole("main").getByRole("alert")).toBeVisible();await expect(page.getByLabel("Finalization reason")).toHaveValue("Inspected this synthetic prepared version and its exclusions");await action.evaluate((b:HTMLButtonElement)=>{b.click();b.click();});await expect(page.getByRole("heading",{name:"Finalization retained",exact:true})).toBeVisible();
+ const saved=await(await page.context().request.get(API+"/api/validated-lists/"+listId)).json();expect(saved.state).toBe("FINALIZED");expect(saved.finalization.actor).toBe("demo-officer-01");
+ await page.emulateMedia({colorScheme:info.project.name==="phone"?"dark":"light"});await page.evaluate(()=>window.scrollTo(0,0));expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:info.outputPath("finalized-list.png"),fullPage:false});await page.getByRole("heading",{name:"Finalization retained",exact:true}).scrollIntoViewIfNeeded();await page.screenshot({path:info.outputPath("retained-finalization.png"),fullPage:false});
+});
+test("a changed decision blocks stale finalization and preserves the frozen version",async({page},info)=>{
+ await login(page);const id="BEN-LIST-STALE-"+info.project.name,h=await headers(page);
+ expect((await page.context().request.post(API+"/api/beneficiaries",{headers:h,data:{beneficiary_id:id,household_name:"Synthetic stale list "+info.project.name,barangay_id:"BRGY-001",barangay_name:"San Isidro",batch_id:"RELIEF-2026-001"}})).status()).toBe(201);
+ expect((await page.context().request.post(API+"/api/beneficiaries/"+id+"/verify",{headers:h,data:{status:"VERIFIED",review_notes:"Initial synthetic approval"}})).ok()).toBe(true);
+ await page.goto("/lists");const listId=await prepare(page);const before=await(await page.context().request.get(API+"/api/validated-lists/"+listId)).json();
+ expect((await page.context().request.post(API+"/api/beneficiaries/"+id+"/verify",{headers:h,data:{status:"REJECTED",review_notes:"Later synthetic conflicting evidence"}})).ok()).toBe(true);
+ await page.getByLabel("Finalization reason").fill("Attempt on an older synthetic version");await page.getByRole("checkbox",{name:/I inspected the included records/}).check();await page.getByRole("button",{name:"Finalize list version",exact:true}).click();await expect(page.getByRole("main").getByRole("alert")).toContainText("Records changed after preparation");
+ const after=await(await page.context().request.get(API+"/api/validated-lists/"+listId)).json();expect(after.snapshot).toEqual(before.snapshot);expect(after.finalization).toBeNull();expect(after.stale).toBe(true);
+ await page.getByRole("button",{name:"Refresh lists",exact:true}).click();await expect(page.getByRole("button",{name:"Finalize list version",exact:true})).toBeDisabled();
+ await page.goto("/lists?list_id=LIST-MISSING");await expect(page.getByRole("heading",{name:"List unavailable",exact:true})).toBeVisible();await expect(page.getByRole("heading",{name:"Finalization retained",exact:true})).toHaveCount(0);
+});
+test("Barangay owns preparation scope and cannot finalize or open a foreign version",async({page})=>{
+ await login(page);const foreign=await(await page.context().request.post(API+"/api/validated-lists/prepare",{headers:await headers(page),data:{batch_id:"RELIEF-2026-001",barangay_id:"BRGY-002",request_id:crypto.randomUUID()}})).json();
+ await page.getByRole("button",{name:"Sign out",exact:true}).click();await login(page,"demo-barangay-01");await page.goto("/lists");await expect(page.getByLabel("Barangay",{exact:true})).toBeDisabled();const own=await prepare(page);await expect(page.getByRole("button",{name:"Finalize list version",exact:true})).toHaveCount(0);
+ expect((await page.context().request.post(API+"/api/validated-lists/"+own+"/finalize",{headers:await headers(page),data:{confirm:true,reason:"Unauthorized finalization"}})).status()).toBe(403);
+ await page.goto("/lists?list_id="+foreign.list_id);await expect(page.getByRole("heading",{name:"List unavailable",exact:true})).toBeVisible();expect((await page.context().request.get(API+"/api/validated-lists/"+foreign.list_id)).status()).toBe(404);
+});
+test("Auditor stays read-only and household accounts cannot inspect full lists",async({page})=>{
+ await login(page,"demo-auditor-01");await page.goto("/lists");await expect(page.getByRole("button",{name:"Prepare list version",exact:true})).toHaveCount(0);await expect(page.getByRole("button",{name:"Finalize list version",exact:true})).toHaveCount(0);
+ expect((await page.context().request.post(API+"/api/validated-lists/prepare",{headers:await headers(page),data:{batch_id:"RELIEF-2026-001",barangay_id:"BRGY-001",request_id:crypto.randomUUID()}})).status()).toBe(403);
+ await page.getByRole("button",{name:"Sign out",exact:true}).click();await login(page,"demo-beneficiary-01");await page.goto("/lists");await expect(page.getByRole("heading",{name:"Validated lists are a staff task",exact:true})).toBeVisible();expect((await page.context().request.get(API+"/api/validated-lists")).status()).toBe(403);
+ await page.goto("/beneficiaries?beneficiary_id=BEN-OUTSIDE");await expect(page.getByRole("heading",{name:"Household unavailable",exact:true})).toBeVisible();await expect(page.getByText("Danilo Soriano",{exact:true})).toHaveCount(0);
+});
+test("empty scope, loading, failed reads, offline controls and keyboard filters stay explicit",async({page})=>{
+ await login(page,"demo-disbursing-004");await page.goto("/lists");await expect(page.getByText("No list versions have been prepared in your scope.",{exact:true})).toBeVisible();await expect(page.getByRole("heading",{name:"No list version available",exact:true})).toBeVisible();
+ await page.getByRole("button",{name:"Sign out",exact:true}).click();await login(page);
+ let release!:()=>void;const held=new Promise<void>(resolve=>{release=resolve;});
+ await page.route(/8000\/api\/validated-lists$/,async r=>{await held;const u=r.request().url().replace(":8000",":8101");await r.continue({url:u});},{times:1});
+ await page.goto("/lists");await expect(page.getByText("Loading list versions...",{exact:true})).toBeVisible();release();await expect(page.getByRole("region",{name:"Selected list"})).toBeVisible();
+ await page.getByLabel("Find a listed household").fill("NO-SUCH-SYNTHETIC-LIST-ROW");await expect(page.getByText("No records match these filters.",{exact:true})).toBeVisible();await page.getByLabel("Find a listed household").fill("");
+ await page.getByLabel("List result",{exact:true}).focus();await page.keyboard.press("ArrowDown");await page.keyboard.press("Enter");await expect(page.getByLabel("List result",{exact:true})).toBeFocused();
+ await page.context().setOffline(true);await expect(page.getByRole("button",{name:"Prepare list version",exact:true})).toBeDisabled();await expect(page.getByRole("button",{name:"Refresh lists",exact:true})).toBeDisabled();await expect(page.getByRole("main").getByRole("alert")).toContainText("last loaded versions");await page.context().setOffline(false);
+ await page.route(/8000\/api\/validated-lists$/,r=>r.abort(),{times:1});await page.getByRole("button",{name:"Refresh lists",exact:true}).click();await expect(page.getByRole("main").getByRole("alert")).toBeVisible();await expect(page.getByRole("region",{name:"Selected list"})).toHaveCount(0);await page.getByRole("button",{name:"Retry lists",exact:true}).click();await expect(page.getByRole("region",{name:"Selected list"})).toBeVisible();
+});
