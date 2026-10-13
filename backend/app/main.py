@@ -70,6 +70,8 @@ from app.services.recipient_acknowledgement import router as acknowledgement_rou
 app.include_router(acknowledgement_router)
 from app.services.validated_lists import router as lists_router
 app.include_router(lists_router)
+from app.services.payout_arrangements import router as arrangements_router
+app.include_router(arrangements_router)
 
 @app.middleware("http")
 async def no_store(request, call_next):

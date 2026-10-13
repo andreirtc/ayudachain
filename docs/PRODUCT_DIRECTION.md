@@ -1,6 +1,6 @@
 # Accepted product direction
 
-Accepted by the user on 2026-10-14 after the branch/design comparison and Philippine disaster-assistance discussion. This records the chosen direction and bounded delivery sequence. The [shared Tonal foundation](TONAL_FOUNDATION.md) is implemented. The [household starting point](HOUSEHOLD_START.md) is also delivered. [Versioned validated lists](VALIDATED_LISTS.md) are delivered. Scheduling remains the next task.
+Accepted by the user on 2026-10-14 after the branch/design comparison and Philippine disaster-assistance discussion. This records the chosen direction and bounded delivery sequence. The [shared Tonal foundation](TONAL_FOUNDATION.md) is implemented. The [household starting point](HOUSEHOLD_START.md) is also delivered. [Versioned validated lists](VALIDATED_LISTS.md) and [payout arrangements](PAYOUT_ARRANGEMENTS.md) are delivered. The focused payout desk is the next task.
 
 ## Product and household journey
 

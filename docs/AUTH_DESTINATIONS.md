@@ -8,7 +8,7 @@ A link to /distributions?beneficiary_id=... returns to that same household after
 
 Direct /sign-in keeps existing defaults: Disbursing opens payouts, Beneficiary opens the own-household starting point at /household, and other roles open the registry. Return destinations do not authorize anything. Barangay payout links show the existing explicit role-denied view with a household-registry next step. Missing or out-of-scope household/receipt links show the existing unavailable/not-found view without substituting another record.
 
-Supported return routes are /lists, /household, /beneficiaries, /distributions, /verify, /dashboard and /batch/<reference>. Only the household query on registry/payouts, list_id on lists and the receipt query on verification are accepted, with one parameter each. External/protocol-relative/script URLs, backslashes, control characters, malformed escapes, fragments, path normalization, unknown routes/query keys, duplicate parameters and sign-in loops fall back to the role default. The return destination is encoded in the sign-in URL; no hidden browser storage is used.
+Supported return routes are /lists, /arrangements, /household, /beneficiaries, /distributions, /verify, /dashboard and /batch/<reference>. Only the household query on registry/payouts, list_id on lists/arrangements and the receipt query on verification are accepted, with one parameter each. External/protocol-relative/script URLs, backslashes, control characters, malformed escapes, fragments, path normalization, unknown routes/query keys, duplicate parameters and sign-in loops fall back to the role default. The return destination is encoded in the sign-in URL; no hidden browser storage is used.
 
 ## Session and privacy boundary
 

@@ -2,7 +2,7 @@
 
 AyudaChain is a fictional disaster-relief prototype. Use invented households and simulated payouts only. A matching blockchain receipt hash establishes integrity of the fields currently hashed; it does not establish cash delivery, government affiliation or the identity of a real recipient.
 
-The accepted next direction is the Tonal design with staff-validated lists and organized payouts; see [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md). The [shared Tonal foundation](TONAL_FOUNDATION.md) is delivered. The [household starting point](HOUSEHOLD_START.md) is also delivered; [validated lists](VALIDATED_LISTS.md) are delivered; payout arrangements are the next task. The instructions below describe the current implemented application.
+The accepted next direction is the Tonal design with staff-validated lists and organized payouts; see [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md). The [shared Tonal foundation](TONAL_FOUNDATION.md) is delivered. The [household starting point](HOUSEHOLD_START.md) is also delivered; [validated lists](VALIDATED_LISTS.md) and [payout arrangements](PAYOUT_ARRANGEMENTS.md) are delivered. The instructions below describe the current implemented application.
 
 ## Sign in and choose a task
 
@@ -18,7 +18,7 @@ Navigation offers tasks relevant to the server-authenticated role in a tonal des
 
 ## My household
 
-Beneficiary accounts start at /household. Read the actual linked household status and one next step: open a saved receipt, review household details, or retry an unavailable read. Approval alone does not promise a payout. No collection date, site or requirements appear until actual arrangements are implemented. Pending, rejected and retained records stay explicit; earlier receipts remain accessible. **Household details and review history** opens the original record journey. Missing or incorrect details should be checked with staff without sharing your credentials. See [HOUSEHOLD_START.md](HOUSEHOLD_START.md).
+Beneficiary accounts start at /household. Read the actual linked household status and one next step: open a saved receipt, review household details, or retry an unavailable read. Approval alone does not promise a payout. Collection date, site and requirements appear only after staff publish an arrangement for a finalized list that includes your household; a cancellation is shown as a cancellation. Pending, rejected and retained records stay explicit; earlier receipts remain accessible. **Household details and review history** opens the original record journey. Missing or incorrect details should be checked with staff without sharing your credentials. See [HOUSEHOLD_START.md](HOUSEHOLD_START.md).
 
 ## Funding summaries
 
@@ -41,6 +41,10 @@ DSWD can also open **Analyze a CSV** under **More registry options**. Choose a f
 ## Prepare and finalize a list
 
 Staff open **Validated lists** from the registry. Prepare an active batch/area version, inspect included and excluded rows, and follow **Inspect current household** for required review. Imported rows are not approved by preparation. DSWD confirms an inspected version with a reason; Barangay can prepare its own area, and Disbursing/Auditor read permitted versions. A changed record needs a fresh version. Existing originals and decision references remain retained. A finalized list is local synthetic staff evidence and does not reserve funds or authorize payment. See [VALIDATED_LISTS.md](VALIDATED_LISTS.md).
+
+## Publish collection instructions
+
+From a finalized list, choose **Payout arrangement**. Enter the collection date, time window, site, requirements (one per line) and the staff name households should ask for, then **Publish arrangement**. Use **Edit arrangement** or **Cancel arrangement** with a staff-only reason; every revision stays in **Revision history**. Included households see the current instructions on their home. An arrangement does not authorize a payout. See [PAYOUT_ARRANGEMENTS.md](PAYOUT_ARRANGEMENTS.md).
 
 ## Record a synthetic payout
 
