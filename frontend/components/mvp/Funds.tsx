@@ -1,7 +1,8 @@
 "use client";
+import {useErrorMessage} from './Language';
 import {FormEvent,useEffect,useRef,useState} from "react";
 import {getApiBase} from "@/lib/api";
-import {Ack,Actor,centavos,pesoInput,pesos,request} from "@/lib/mvp-client";
+import {Ack,Actor,centavos,pesoInput,pesos,request,rejectResponse} from "@/lib/mvp-client";
 import {DataFields,readable,manila} from "./UI";
 import IntegrityStatus,{useIntegrityChecks} from "./IntegrityStatus";
 
@@ -13,6 +14,7 @@ type Form={document_type:string;reference_number:string;issued_date:string;amoun
 const empty:Form={document_type:"Sub-ARO",reference_number:"",issued_date:new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Manila"}),amount:"",purpose:"",covered_area:"",printed_name:"",printed_role:"",document_words:"",document_figures:"",reason:"",correction_kind:"transcription",area_lines:""};
 
 export default function Funds({actor,disaster}:{actor:Actor;disaster:string}){
+  const explainError=useErrorMessage(actor.role);
   const [ledger,setLedger]=useState<Ledger|null>(null),[error,setError]=useState(""),[message,setMessage]=useState("");
   const [editing,setEditing]=useState(false),[correction,setCorrection]=useState<Entry|null>(null),[form,setForm]=useState<Form>(empty);
   const [source,setSource]=useState<Evidence|null>(null),[support,setSupport]=useState<Evidence[]>([]),[url,setURL]=useState("");
@@ -20,9 +22,9 @@ export default function Funds({actor,disaster}:{actor:Actor;disaster:string}){
   const controller=useRef<AbortController|null>(null),saveKey=useRef<string|null>(null);
   const integrity=useIntegrityChecks(actor.id,controller,setError);
   const load=async(signal?:AbortSignal)=>setLedger(await request<Ledger>(`/funds?disaster_id=${disaster}`,actor.id,signal));
-  useEffect(()=>{const c=new AbortController();controller.current=c;load(c.signal).catch(e=>{if(e.name!=="AbortError")setError(e.message);});return()=>c.abort();},[actor.id,disaster]); // component is also keyed to actor and disaster
+  useEffect(()=>{const c=new AbortController();controller.current=c;load(c.signal).catch(e=>{if(e.name!=="AbortError")setError(explainError(e));});return()=>c.abort();},[actor.id,disaster]); // component is also keyed to actor and disaster
   useEffect(()=>{if(!source){setURL("");return;}const c=new AbortController();let object="";
-    fetch(`${getApiBase()}/api/v1/evidence/${source.id}/content`,{headers:{"X-Demo-Actor-ID":actor.id},signal:c.signal,cache:"no-store"}).then(async r=>{if(!r.ok)throw new Error("Original unavailable");return r.blob();}).then(blob=>{object=URL.createObjectURL(blob);setURL(object);}).catch(e=>{if(e.name!=="AbortError")setError(e.message);});return()=>{c.abort();if(object)URL.revokeObjectURL(object);};
+    fetch(`${getApiBase()}/api/v1/evidence/${source.id}/content`,{headers:{"X-Demo-Actor-ID":actor.id},signal:c.signal,cache:"no-store"}).then(async r=>{if(!r.ok)await rejectResponse(r,`/evidence/${source.id}/content`);return r.blob();}).then(blob=>{object=URL.createObjectURL(blob);setURL(object);}).catch(e=>{if(e.name!=="AbortError")setError(explainError(e));});return()=>{c.abort();if(object)URL.revokeObjectURL(object);};
   },[source?.id,actor.id]);
   const field=(key:keyof Form,value:string)=>{setForm(v=>({...v,[key]:value}));saveKey.current=null;};
   async function upload(file:File,supporting=false){
@@ -31,7 +33,7 @@ export default function Funds({actor,disaster}:{actor:Actor;disaster:string}){
       const e=await request<Evidence>(`/evidence/${ack.resources[0].id}`,actor.id,controller.current?.signal);
       if(supporting)setSupport(v=>[...v,e]);else{setSource(e);const x=e.extracted_fields;setForm(v=>({...v,amount:x.amount_centavos?pesoInput(x.amount_centavos):v.amount,document_words:x.document_words||v.document_words}));}
       saveKey.current=null;
-    }catch(e){if(e instanceof Error&&e.name!=="AbortError")setError(e.message);}finally{setBusy(false);}
+    }catch(e){if(e instanceof Error&&e.name!=="AbortError")setError(explainError(e));}finally{setBusy(false);}
   }
   async function correct(entry:Entry){
     setCorrection(entry);setEditing(true);setSource(null);setSupport([]);setMessage("");setError("");saveKey.current=null;
@@ -40,7 +42,7 @@ export default function Funds({actor,disaster}:{actor:Actor;disaster:string}){
       const original=entry.evidence.find(e=>e.attachment_role==='release_source'||e.attachment_role==='amended_source')||entry.evidence.find(e=>!e.attachment_role&&(e.purpose==='release_source'||e.purpose==='amended_source'));
       if(!original)throw new Error("The primary release original is unavailable. Refresh the ledger before correcting.");
       setSource(await request<Evidence>(`/evidence/${original.id}`,actor.id,controller.current?.signal));
-    }catch(e){if(e instanceof Error&&e.name!=="AbortError")setError(e.message);}
+    }catch(e){if(e instanceof Error&&e.name!=="AbortError")setError(explainError(e));}
   }
   async function save(event:FormEvent){
     event.preventDefault();setBusy(true);setError("");setMessage("");try{
@@ -49,10 +51,10 @@ export default function Funds({actor,disaster}:{actor:Actor;disaster:string}){
       const body={disaster_id:disaster,source_evidence_id:source.id,supporting_evidence_ids:support.map(e=>e.id),document_type:form.document_type,reference_number:form.reference_number,issued_date:form.issued_date,amount_centavos:centavos(form.amount),purpose:form.purpose,covered_area:form.covered_area,signatories:[{printed_name:form.printed_name,printed_role:form.printed_role}],area_lines,document_words:form.document_words||null,document_figures_centavos:form.document_figures?centavos(form.document_figures):null,...(correction?{expected_revision:correction.head_revision,reason:form.reason,correction_kind:form.correction_kind}:{})};
       saveKey.current??=crypto.randomUUID();await request<Ack>(correction?`/funds/${correction.id}/corrections`:"/funds/releases",actor.id,controller.current?.signal,body,saveKey.current);
       setEditing(false);setCorrection(null);setSource(null);setSupport([]);setForm(empty);saveKey.current=null;setMessage("Saved to the ledger. Required chain proofs are queued; their status appears separately.");await load(controller.current?.signal);
-    }catch(e){if(e instanceof Error&&e.name!=="AbortError")setError(`${e.message}. If the connection failed, refresh the ledger before sending again; the same save uses its retained request key.`);}finally{setBusy(false);}
+    }catch(e){if(e instanceof Error&&e.name!=="AbortError")setError(explainError(e));}finally{setBusy(false);}
   }
   return <>
-    <div className="mvp-title"><div><h1>Disaster funds</h1><p>Recorded funding authority. Cash handovers do not reduce this ledger.</p></div><div className="mvp-actions"><button onClick={()=>load(controller.current?.signal).catch(e=>setError(e.message))}>Refresh ledger</button>{actor.role==="dswd"&&<button className="primary" onClick={()=>{setEditing(true);setCorrection(null);setForm(empty);setSource(null);setSupport([]);saveKey.current=null;}}>Record a release</button>}</div></div>
+    <div className="mvp-title"><div><h1>Disaster funds</h1><p>Recorded funding authority. Cash handovers do not reduce this ledger.</p></div><div className="mvp-actions"><button onClick={()=>load(controller.current?.signal).catch(e=>setError(explainError(e)))}>Refresh ledger</button>{actor.role==="dswd"&&<button className="primary" onClick={()=>{setEditing(true);setCorrection(null);setForm(empty);setSource(null);setSupport([]);saveKey.current=null;}}>Record a release</button>}</div></div>
     {error&&<p role="alert" className="mvp-error">{error}</p>}{message&&<p role="status" className="mvp-success">{message}</p>}
     {ledger&&<><div className="mvp-totals">{[["Recorded releases",ledger.totals.received_centavos],["Approved entitlement subtotal",ledger.totals.approved_known_subtotal_centavos],["Awaiting amount",String(ledger.totals.awaiting_amount_count)],["Recorded authority",ledger.totals.remaining_centavos]].map(([label,value])=><div key={label}><span>{label}</span><strong>{label==="Awaiting amount"?value:pesos(value)}</strong></div>)}</div><p className="mvp-note">Approved known subtotal: {pesos(ledger.totals.approved_known_subtotal_centavos)} · {ledger.totals.awaiting_amount_count} awaiting amount · {ledger.totals.approved_total_complete?"complete":"incomplete"}. This does not certify available physical cash.</p>{ledger.totals.approved_exceeds_recorded_authority&&<p className="mvp-warning">Approved amounts exceed recorded authority. Arrange funding outside the app.</p>}</>}
     {editing&&actor.role==="dswd"&&<section className="mvp-panel"><h2>{correction?"Append a linked correction":"Record a document-backed release"}</h2><p>Review the original and confirm the fields. Machine extraction is a prefill; printed signatures remain not validated.</p><div className="mvp-review"><div className="mvp-original"><label>Release original<input type="file" accept="application/pdf,image/png,image/jpeg" disabled={busy} onChange={e=>{if(e.target.files?.[0])void upload(e.target.files[0]);}}/></label>{source&&<><p>{source.extraction_state} · printed signatures not authenticated</p><DataFields data={source.extracted_fields}/></>}{url&&(source?.mime_type==="application/pdf"?<iframe title="Original release document" src={url}/>:<img alt="Uploaded synthetic release document" src={url}/>)}</div>

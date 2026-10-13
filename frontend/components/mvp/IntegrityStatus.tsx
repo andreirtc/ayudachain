@@ -1,4 +1,5 @@
 "use client";
+import {useErrorMessage} from './Language';
 import {RefObject,useRef,useState} from 'react';
 import {request} from '@/lib/mvp-client';
 import {Status,manila} from './UI';
@@ -8,6 +9,7 @@ type Check={status:'checking'|'complete'|'failed';value?:IntegrityResult;checked
 const explanations:Record<string,string>={match:'Committed content matches the chain record.',mismatch:'Committed content does not match.',required_anchor_absent:'Required anchor not found.',chain_unreachable:'Chain could not be read; not verified.',evidence_unavailable:'Required evidence unavailable; not verified.'};
 
 export function useIntegrityChecks(actor:string,control:RefObject<AbortController|null>,onError:(error:string)=>void){
+  const explainError=useErrorMessage();
   const [checks,setChecks]=useState<Record<string,Check>>({});
   const pending=useRef(new Set<string>());
   async function check(id:string,path='/integrity/check',readOnly=false){
@@ -23,7 +25,7 @@ export function useIntegrityChecks(actor:string,control:RefObject<AbortControlle
     }catch(error){
       if(signal?.aborted||error instanceof Error&&error.name==='AbortError')return;
       setChecks(previous=>({...previous,[id]:{status:'failed',lastMatchAt:previous[id]?.lastMatchAt}}));
-      onError(error instanceof Error?error.message:'Verification refresh failed');
+      onError(explainError(error));
     }finally{pending.current.delete(id);}
   }
   return {checks,check};

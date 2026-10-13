@@ -1,8 +1,9 @@
 "use client";
+import {useErrorMessage} from './Language';
 import {useEffect,useRef,useState} from 'react';
 import {useSearchParams} from 'next/navigation';
 import EvidenceContext from './EvidenceContext';
-import {Actor,request} from '@/lib/mvp-client';
+import {Actor,request,rejectResponse} from '@/lib/mvp-client';
 import {getApiBase} from '@/lib/api';
 import IntegrityStatus,{useIntegrityChecks} from './IntegrityStatus';
 import {DataFields,Status,manila,readable} from './UI';
@@ -14,19 +15,20 @@ type Overview={exceptions:Record<string,Record<string,unknown>[]>};
 type Fund={id:string;reference_number:string;exceptions:string[]};
 const targets:Record<string,string>={fallback_snapshots:'snapshot_id',pending_or_stale_publication:'list_version_id',bulk_or_category_decisions:'decision_id',changed_inputs:'input_version_id'};
 export default function Audit({actor,disaster}:{actor:Actor;disaster:string}){
+  const explainError=useErrorMessage(actor.role);
   const search=useSearchParams(),selected=search.get('record'),history=search.get('history');
   const [overview,setOverview]=useState<Overview|null>(null),[events,setEvents]=useState<Event[]>([]),[proofs,setProofs]=useState<Proof[]>([]),[originals,setOriginals]=useState<Original[]>([]),[funds,setFunds]=useState<Fund[]>([]);
   const [loading,setLoading]=useState(true),[loadError,setLoadError]=useState(''),[retry,setRetry]=useState(0),[error,setError]=useState(''),[material,setMaterial]=useState<object|null>(null),[recordEvents,setRecordEvents]=useState<Event[]|null>(null),[file,setFile]=useState<{url:string;mime:string}|null>(null),[query,setQuery]=useState(''),[proofFilter,setFilter]=useState('all'),[showAll,setShowAll]=useState(false);
   const control=useRef<AbortController|null>(null),blob=useRef('');
   const integrity=useIntegrityChecks(actor.id,control,setError);
-  useEffect(()=>{setRecordEvents(null);setMaterial(null);if(!selected||!history||history==='commitment_id')return;const c=new AbortController();request<Event[]>('/audit/timeline/'+encodeURIComponent(history)+'/'+encodeURIComponent(selected),actor.id,c.signal).then(setRecordEvents).catch(e=>{if(!c.signal.aborted)setError(e.message);});return()=>c.abort();},[actor.id,selected,history]);
+  useEffect(()=>{setRecordEvents(null);setMaterial(null);if(!selected||!history||history==='commitment_id')return;const c=new AbortController();request<Event[]>('/audit/timeline/'+encodeURIComponent(history)+'/'+encodeURIComponent(selected),actor.id,c.signal).then(setRecordEvents).catch(e=>{if(!c.signal.aborted)setError(explainError(e));});return()=>c.abort();},[actor.id,selected,history]);
   useEffect(()=>{const c=new AbortController();control.current=c;setLoading(true);setLoadError('');
     async function load(){const context=await request<{run_id:string}>('/context',actor.id,c.signal);const [o,e,p,f,l]=await Promise.all([request<Overview>('/audit/overview?disaster_id='+disaster,actor.id,c.signal),request<Event[]>('/audit/timeline/evaluation_run_id/'+context.run_id,actor.id,c.signal),request<Proof[]>('/audit/proofs',actor.id,c.signal),request<Original[]>('/audit/originals',actor.id,c.signal),request<{entries:Fund[]}>('/funds?disaster_id='+disaster,actor.id,c.signal)]);setOverview(o);setEvents(e);setProofs(p);setOriginals(f);setFunds(l.entries);}
-    void load().then(()=>{if(!c.signal.aborted)setLoading(false);}).catch(e=>{if(e.name!=='AbortError'){setLoadError('We couldn’t read the evidence records. Check your connection and try again.');setLoading(false);}});return()=>{c.abort();if(blob.current)URL.revokeObjectURL(blob.current);};
+    void load().then(()=>{if(!c.signal.aborted)setLoading(false);}).catch(e=>{if(e.name!=='AbortError'){setLoadError(explainError(e));setLoading(false);}});return()=>{c.abort();if(blob.current)URL.revokeObjectURL(blob.current);};
   },[actor.id,disaster,retry]);
-  async function readMaterial(id:string){try{setMaterial(await request<object>('/commitments/'+id+'/material',actor.id,control.current?.signal));}catch(e){if((e as Error).name!=='AbortError')setError((e as Error).message);}}
-  async function inspect(slot:string,id:string){try{setRecordEvents(await request<Event[]>('/audit/timeline/'+slot+'/'+id,actor.id,control.current?.signal));}catch(e){if((e as Error).name!=='AbortError')setError((e as Error).message);}}
-  async function original(item:Original){try{const r=await fetch(getApiBase()+'/api/v1/evidence/'+item.id+'/content',{headers:{'X-Demo-Actor-ID':actor.id},cache:'no-store',signal:control.current?.signal});if(!r.ok)throw new Error('The original file could not be opened. Try again after checking your connection.');const bytes=await r.blob();if(blob.current)URL.revokeObjectURL(blob.current);blob.current=URL.createObjectURL(bytes);setFile({url:blob.current,mime:item.mime_type});}catch(e){if((e as Error).name!=='AbortError')setError((e as Error).message);}}
+  async function readMaterial(id:string){try{setMaterial(await request<object>('/commitments/'+id+'/material',actor.id,control.current?.signal));}catch(e){if((e as Error).name!=='AbortError')setError(explainError(e));}}
+  async function inspect(slot:string,id:string){try{setRecordEvents(await request<Event[]>('/audit/timeline/'+slot+'/'+id,actor.id,control.current?.signal));}catch(e){if((e as Error).name!=='AbortError')setError(explainError(e));}}
+  async function original(item:Original){try{const r=await fetch(getApiBase()+'/api/v1/evidence/'+item.id+'/content',{headers:{'X-Demo-Actor-ID':actor.id},cache:'no-store',signal:control.current?.signal});if(!r.ok)await rejectResponse(r,'/evidence/'+item.id+'/content');const bytes=await r.blob();if(blob.current)URL.revokeObjectURL(blob.current);blob.current=URL.createObjectURL(bytes);setFile({url:blob.current,mime:item.mime_type});}catch(e){if((e as Error).name!=='AbortError')setError(explainError(e));}}
   if(loading||loadError)return <><div className="mvp-title"><div><h1>{loadError?'Evidence unavailable':'Evidence and integrity'}</h1><p>Inspect original records and check the current chain state.</p></div></div>{loading?<div className="ac-loading" role="status">Loading evidence records…</div>:<div className="ac-empty"><p role="alert">{loadError}</p><button className="primary" onClick={()=>setRetry(v=>v+1)}>Try again</button></div>}</>;
   const filtered=proofs.filter(p=>(proofFilter==='all'||proofFilter==='unconfirmed'&&p.state!=='confirmed'||proofFilter==='not_checked'&&!integrity.checks[p.id]||integrity.checks[p.id]?.status==='complete'&&integrity.checks[p.id]?.value?.result===proofFilter)&&(p.kind+' '+p.id).toLowerCase().includes(query.toLowerCase()));
   const timeline=(rows:Event[])=>rows.map(e=><article className="ac-timeline-event" key={e.id}><span className="ac-event-dot"/><div><div className="ac-section-heading"><h3>{readable(e.action.replaceAll('.',' '))}</h3><time>{manila(e.effective_at)}</time></div>{e.reason&&<p>{e.reason}</p>}<details><summary>Recorded actor and exact versions</summary><p>Account reference {e.actor_id}</p>{e.exact_versions.map(v=><button className="ac-record-reference" key={v.type+v.id} onClick={()=>void inspect(v.type,v.id)}>{readable(v.type)} · {v.id.slice(0,8)}</button>)}</details></div></article>);

@@ -17,10 +17,11 @@ import Outcomes from './Outcomes';
 import Audit from './Audit';
 import Queue from './Queue';
 import Operations from './Operations';
-import {LanguageProvider,LanguageSelector} from './Language';
+import {LanguageProvider,LanguageSelector,useErrorMessage} from './Language';
 export default function Workspace(props:{slug:string;section:string}){return <LanguageProvider><Suspense fallback={<div className="ac-loading" role="status">Opening your workspace…</div>}><WorkspaceBody {...props}/></Suspense></LanguageProvider>;}
 function WorkspaceBody({slug,section}:{slug:string;section:string}){
   const config=workspaces[slug],search=useSearchParams();
+  const explainError=useErrorMessage(config?.role);
   const [actors,setActors]=useState<Actor[]>([]),[disasters,setDisasters]=useState<Ref[]>([]),[barangays,setBarangays]=useState<Ref[]>([]);
   const [actorID,setActorID]=useState(''),[disaster,setDisaster]=useState(''),[error,setError]=useState(''),[loading,setLoading]=useState(true),[mobileMenu,setMobileMenu]=useState(false),[online,setOnline]=useState(true),[retry,setRetry]=useState(0);
   const menuTrigger=useRef<HTMLButtonElement>(null),sidebar=useRef<HTMLElement>(null),wasOpen=useRef(false);
@@ -28,7 +29,7 @@ function WorkspaceBody({slug,section}:{slug:string;section:string}){
   useEffect(()=>{const c=new AbortController();setLoading(true);setError('');setActorID('');Promise.all([request<Actor[]>('/actors/catalogue',null,c.signal),request<Ref[]>('/disasters',null,c.signal),request<Ref[]>('/barangays',null,c.signal)]).then(([a,d,b])=>{
     const eligible=a.filter(v=>v.role===config.role&&v.status==='active');let savedActor='',savedDisaster='';try{savedActor=localStorage.getItem(`ayudachain:${slug}:account`)||'';savedDisaster=localStorage.getItem('ayudachain:disaster')||'';}catch{}
     const candidate=search.get('account')||savedActor;setActors(a);setDisasters(d);setBarangays(b);setActorID(eligible.find(v=>v.id===candidate)?.id||eligible[0]?.id||'');const target=search.get('disaster')||savedDisaster;setDisaster(d.find(v=>v.id===target)?.id||d[0]?.id||'');
-  }).catch(e=>{if(e.name!=='AbortError')setError('We couldn’t load your workspace. Check the connection and try again.');}).finally(()=>{if(!c.signal.aborted)setLoading(false);});return()=>c.abort();},[slug,retry]);
+  }).catch(e=>{if(e.name!=='AbortError')setError(explainError(e));}).finally(()=>{if(!c.signal.aborted)setLoading(false);});return()=>c.abort();},[slug,retry]);
   useEffect(()=>{setMobileMenu(false);},[section]);
   useEffect(()=>{const account=search.get('account'),selected=search.get('disaster');if(account&&actors.some(a=>a.id===account&&a.role===config.role&&a.status==='active'))setActorID(account);if(selected&&disasters.some(d=>d.id===selected))setDisaster(selected);},[search,actors,disasters,config.role]);
   useEffect(()=>{const update=()=>setOnline(navigator.onLine);update();window.addEventListener('online',update);window.addEventListener('offline',update);return()=>{window.removeEventListener('online',update);window.removeEventListener('offline',update);};},[]);

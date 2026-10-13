@@ -1,4 +1,5 @@
 'use client';
+import {useErrorMessage} from './Language';
 import {useEffect,useState} from 'react';
 import Link from 'next/link';
 import {ArrowRight,CalendarDays,MapPin,ShieldCheck,Check,Clock3,FileText} from 'lucide-react';
@@ -15,6 +16,7 @@ type Props={actor:Actor;disaster:string;disasterName:string;barangays:Ref[];href
 const exceptionNames:Record<string,[string,string,string]>={fallback_snapshots:['Unsigned barangay submission','Claims forwarded without a signed barangay batch.','claims'],pending_or_stale_publication:['List needs publication','Review the current amount and list version.','lists'],bulk_or_category_decisions:['Decision needs inspection','Inspect the human decision and supporting responses.','claims'],changed_inputs:['Amount basis changed','Compare the new basis with the preceding version.','lists'],stopped_attempts:['Identity comparison stopped','Inspect the recorded reason and any clearance.','payouts'],assisted_attempts:['Assisted payout','Inspect payer and independent exit-check evidence.','payouts'],stale_authorizations:['Expired authorization','Inspect the expired attempt; no cash is implied.','payouts'],held_entitlements:['Entitlement on hold','Review the recorded hold and its required next action.','lists'],paid_differences:['Paid amount differs from later basis','The original handed-over amount remains fixed.','lists'],grievances:['Private recipient case','Compare the report with handover and outcome evidence.','outcomes'],resident_challenges:['Residents’ list challenge','Inspect the private challenge and DSWD response.','outcomes']};
 
 export default function Dashboard({actor,disaster,disasterName,barangays,href}:Props){
+  const explainError=useErrorMessage(actor.role);
   const [claims,setClaims]=useState<Claim[]>([]),[sessions,setSessions]=useState<Session[]>([]),[households,setHouseholds]=useState<Household[]>([]),[entitlements,setEntitlements]=useState<Entitlement[]>([]),[transactions,setTransactions]=useState<Summary[]>([]),[overview,setOverview]=useState<Overview|null>(null),[counts,setCounts]=useState<{approved:number;recorded_handover:number;remaining:number}|null>(null);
   const [answer,setAnswer]=useState(''),[loading,setLoading]=useState(true),[error,setError]=useState(''),[retry,setRetry]=useState(0);
   useEffect(()=>{const c=new AbortController();setLoading(true);setError('');setAnswer('');const read=<T,>(path:string)=>request<T>(path,actor.id,c.signal);
@@ -25,7 +27,7 @@ export default function Dashboard({actor,disaster,disasterName,barangays,href}:P
     if(actor.role==='beneficiary')jobs.push(read<Entitlement[]>(`/entitlements?disaster_id=${disaster}`).then(setEntitlements));
     if(actor.role==='barangay')jobs.push(read<{approved:number;recorded_handover:number;remaining:number}>(`/barangay/payout-counts?disaster_id=${disaster}`).then(setCounts));
     if(['dswd','auditor'].includes(actor.role))jobs.push(read<Overview>(`/audit/overview?disaster_id=${disaster}`).then(setOverview));
-    Promise.allSettled(jobs).then(results=>{if(c.signal.aborted)return;if(results.some(r=>r.status==='rejected'))setError('Some records could not be loaded. Refresh to see the latest saved information.');setLoading(false);});return()=>c.abort();
+    Promise.allSettled(jobs).then(results=>{if(c.signal.aborted)return;const failed=results.find(r=>r.status==='rejected');if(failed?.status==='rejected')setError(explainError(failed.reason));setLoading(false);});return()=>c.abort();
   },[actor.id,disaster,retry]);
   if(loading)return <div className="ac-loading" role="status"><span className="ac-loading-bar"/>Loading your records…</div>;
   if(error)return <div className="ac-empty"><h1>Records unavailable</h1><p role="alert">{error}</p><button className="primary" onClick={()=>setRetry(v=>v+1)}>Refresh records</button></div>;

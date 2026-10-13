@@ -5,7 +5,7 @@ import {Ack,Actor,Ref,request} from '@/lib/mvp-client';
 import EvidenceUpload from './EvidenceUpload';
 import CsvIntake from './CsvIntake';
 import Guidance from './Guidance';
-import {useLanguage} from './Language';
+import {useLanguage,useErrorMessage} from './Language';
 import {Status,readable} from './UI';
 
 type Household={id:string;display_id:string;revision:number;address:string;zone:string;declared_barangay_id:string;residence_state:string;identity_state?:string;phone?:string|null;beneficiary_actor_id?:string|null;members:{member_id:string;name:string;birth_date:string|null;relationship:string;is_head:boolean}[]};
@@ -13,6 +13,7 @@ type Intake={id:string;disaster_id:string;revision:number;business_status:string
 type Staff={id:string;display_name:string;role:string;status:string;position:string|null;revision:number;approved_by:string|null};
 
 export default function Registry({actor,actors,disaster}:{actor:Actor;actors:Actor[];disaster:string}){
+  const explainError=useErrorMessage(actor.role);
   const record=useSearchParams().get('record'),{t}=useLanguage();
   const [barangays,setBarangays]=useState<Ref[]>([]),[households,setHouseholds]=useState<Household[]>([]),[intakes,setIntakes]=useState<Intake[]>([]),[staff,setStaff]=useState<Staff[]>([]);
   const [error,setError]=useState(''),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[privatePanel,setPrivatePanel]=useState(false);
@@ -29,14 +30,14 @@ export default function Registry({actor,actors,disaster}:{actor:Actor;actors:Act
     setBarangays(b);setHouseholds(scoped);setIntakes(i);setBarangay(v=>v||b[0]?.id||'');
     if(['dswd','auditor'].includes(actor.role))setStaff(await request<Staff[]>('/staff',actor.id,signal));
   }
-  useEffect(()=>{const c=new AbortController();control.current=c;load(c.signal).catch(e=>{if(e.name!=='AbortError')setError(e.message);});return()=>c.abort();},[actor.id,record]);
+  useEffect(()=>{const c=new AbortController();control.current=c;load(c.signal).catch(e=>{if(e.name!=='AbortError')setError(explainError(e));});return()=>c.abort();},[actor.id,record]);
   useEffect(()=>{if(record&&households.some(h=>h.id===record))document.getElementById(`household-${record}`)?.scrollIntoView({block:'center'});},[record,households]);
-  async function save(path:string,body:object,success:string){setBusy(true);setError('');setMessage('');try{await request<Ack>(path,actor.id,control.current?.signal,body,crypto.randomUUID());setMessage(`${t('Saved. Read the updated status and next action below.','Naitala. Basahin sa ibaba ang bagong katayuan at susunod na hakbang.')} ${success}`);await load(control.current?.signal);return true;}catch(e){if(e instanceof Error&&e.name!=='AbortError')setError(`${e.message}. ${t('Refresh the saved records after a connection loss before retrying.','Basahin muna ang naitalang tala matapos mawalan ng koneksiyon bago subukang muli.')}`);return false;}finally{setBusy(false);}}
+  async function save(path:string,body:object,success:string){setBusy(true);setError('');setMessage('');try{await request<Ack>(path,actor.id,control.current?.signal,body,crypto.randomUUID());setMessage(`${t('Saved. Read the updated status and next action below.','Naitala. Basahin sa ibaba ang bagong katayuan at susunod na hakbang.')} ${success}`);await load(control.current?.signal);return true;}catch(e){if(e instanceof Error&&e.name!=='AbortError')setError(explainError(e));return false;}finally{setBusy(false);}}
   async function register(e:FormEvent){e.preventDefault();const members=[{name,birth_date:null,relationship:'head',is_head:true},...others.split('\n').filter(s=>s.trim()).map(line=>{const [n,birth,relationship]=line.split('|');return {name:n.trim(),birth_date:birth?.trim()||null,relationship:relationship?.trim()||'member',is_head:false};})];
     if(await save('/registry',{beneficiary_actor_id:target||null,phone:phone||null,declared_barangay_id:barangay,address,zone,id_type:idType||null,id_number:idNumber||null,head_photo_evidence_id:photo||null,id_evidence_id:idFile||null,members},'Household registered. Self-declared residence does not grant residents-list access.')){setName('');setAddress('');setZone('');setPhone('');setIDType('');setIDNumber('');setPhoto('');setIDFile('');setOthers('');setPrivatePanel(false);}}
   const selectedReview=households.find(h=>h.id===reviewID),operation=intakes.find(i=>i.disaster_id===disaster);
   const chooseBarangay=(label:string)=><select aria-label={label} required value={barangay} onChange={e=>setBarangay(e.target.value)}><option value="">Select barangay</option>{barangays.filter(b=>actor.role!=='barangay'||b.id===actor.barangay_id).map(b=><option value={b.id} key={b.id}>{b.name}</option>)}</select>;
-  return <><div className="mvp-title"><div><h1>Registry and preparation</h1><p>Keep household details accurate and follow the evidence for every change.</p></div><button onClick={()=>load(control.current?.signal).catch(e=>setError(e.message))}>Refresh records</button></div>{error&&<p role="alert" className="mvp-error">{error} {t('Could not confirm this action. Read the current record before retrying.','Hindi kumpirmado ang ginawa. Basahin muna ang kasalukuyang tala bago subukang muli.')}</p>}{message&&<p role="status" className="mvp-success">{message}</p>}
+  return <><div className="mvp-title"><div><h1>Registry and preparation</h1><p>Keep household details accurate and follow the evidence for every change.</p></div><button onClick={()=>load(control.current?.signal).catch(e=>setError(explainError(e)))}>Refresh records</button></div>{error&&<p role="alert" className="mvp-error">{error}</p>}{message&&<p role="status" className="mvp-success">{message}</p>}
   {!readonly&&<Guidance flow="registration"/>}{!readonly&&['beneficiary','barangay','dswd'].includes(actor.role)&&(actor.role!=='beneficiary'||households.length===0)&&<details className="mvp-panel" open={households.length===0}><summary><h2>{actor.role==='beneficiary'?'Register your household':'Assist household registration'}</h2></summary><form className="mvp-form" onSubmit={register}>
     {actor.role!=='beneficiary'&&<label>Claimed beneficiary account (optional for no-account household)<select aria-label="Claimed beneficiary account (optional for no-account household)" value={target} onChange={e=>setTarget(e.target.value)}><option value="">No linked account yet</option>{actors.filter(a=>a.role==='beneficiary').map(a=><option key={a.id} value={a.id}>{a.display_name}</option>)}</select></label>}
     <div className="mvp-grid"><label>Head name<input required value={name} onChange={e=>setName(e.target.value)}/></label><label>Declared barangay{chooseBarangay('Declared barangay')}</label><label>Address<input required value={address} onChange={e=>setAddress(e.target.value)}/></label><label>Zone<input required value={zone} onChange={e=>setZone(e.target.value)}/></label></div>

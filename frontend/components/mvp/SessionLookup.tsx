@@ -1,4 +1,5 @@
 "use client";
+import {useErrorMessage} from './Language';
 import {useEffect,useRef,useState} from 'react';
 import {Actor,request} from '@/lib/mvp-client';
 import {Session} from './Sessions';
@@ -10,6 +11,7 @@ export const transactionReference=(id:string)=>`ayudachain:transaction:${id}`;
 const validReference=/^(?:ayudachain:transaction:)?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function SessionLookup({actor,sessions,onOpen}:{actor:Actor;sessions:Session[];onOpen:(id:string)=>void}){
+  const explainError=useErrorMessage(actor.role);
   const [session,setSession]=useState(''),[reference,setReference]=useState(''),[error,setError]=useState(''),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[scanning,setScanning]=useState(false);
   const video=useRef<HTMLVideoElement|null>(null),stream=useRef<MediaStream|null>(null),timer=useRef<ReturnType<typeof setTimeout>|null>(null),generation=useRef(0),controller=useRef<AbortController|null>(null),last=useRef('');
   const permitted=sessions.filter(s=>['scheduled','open'].includes(s.business_status)&&s.assignments.some(a=>a.actor_id===actor.id));
@@ -25,7 +27,7 @@ export default function SessionLookup({actor,sessions,onOpen}:{actor:Actor;sessi
     if(last.current===`${session}:${canonical}`){setMessage('This reference is already open. Use its current transaction controls; a repeat scan does not authorize payout.');return;}
     controller.current?.abort();const c=new AbortController();controller.current=c;setBusy(true);
     try{const data=await request<{transaction_id:string}>(`/sessions/${session}/lookup`,actor.id,c.signal,{reference:text});if(c.signal.aborted)return;last.current=`${session}:${canonical}`;setMessage('Transaction found. Complete the current identity, amount and recipient authorization checks before handover.');onOpen(data.transaction_id);}
-    catch(e){if(e instanceof Error&&e.name!=='AbortError')setError(e.message==='record_unavailable'?'No permitted transaction was found in this assigned session. Check the reference and selected session.':`${e instanceof Error?e.message:'Lookup unavailable'}. Check your connection and retry; no payout was recorded.`);}
+    catch(e){if(e instanceof Error&&e.name!=='AbortError')setError(explainError(e));}
     finally{if(!c.signal.aborted)setBusy(false);}
   }
   async function start(){

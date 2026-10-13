@@ -1,5 +1,6 @@
 "use client";
 import {createContext,useContext,useEffect,useState,ReactNode} from 'react';
+import {errorMessage} from '@/lib/workflow-errors';
 
 export type Language='en'|'fil';
 const preferenceKey='ayudachain.guidance-language';
@@ -12,6 +13,10 @@ export function LanguageProvider({children}:{children:ReactNode}){
   return <LanguageContext.Provider value={{language,setLanguage:choose,t:(en,fil)=>language==='fil'&&fil?fil:en}}>{children}</LanguageContext.Provider>;
 }
 export const useLanguage=()=>useContext(LanguageContext);
+export function useErrorMessage(role?:string){
+  const {language}=useLanguage();
+  return (error:unknown)=>errorMessage(error,role,language);
+}
 export function LanguageSelector(){
   const {language,setLanguage}=useLanguage();
   return <label lang={language}>Guidance language / Wika ng gabay<select aria-label="Guidance language / Wika ng gabay" value={language} onChange={e=>setLanguage(e.target.value as Language)}><option value="en" lang="en">English</option><option value="fil" lang="fil">Filipino</option></select></label>;

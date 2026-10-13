@@ -1,11 +1,13 @@
 'use client';
+import {useErrorMessage} from './Language';
 import {useEffect,useState} from 'react';
 import Link from 'next/link';
 import {Actor,pesos,request} from '@/lib/mvp-client';
 type Row={barangay_id:string;name:string;[field:string]:string|number};
 export default function Operations({actor,disaster,href}:{actor:Actor;disaster:string;href:(key:string)=>string}){
+  const explainError=useErrorMessage(actor.role);
  const [data,setData]=useState<{rows:Row[];denominators:string}|null>(null),[error,setError]=useState(''),[retry,setRetry]=useState(0);
- useEffect(()=>{const c=new AbortController();setData(null);setError('');request<{rows:Row[];denominators:string}>(`/operations?disaster_id=${disaster}`,actor.id,c.signal).then(setData).catch(e=>{if(!c.signal.aborted)setError(e.message);});return()=>c.abort();},[actor.id,disaster,retry]);
+ useEffect(()=>{const c=new AbortController();setData(null);setError('');request<{rows:Row[];denominators:string}>(`/operations?disaster_id=${disaster}`,actor.id,c.signal).then(setData).catch(e=>{if(!c.signal.aborted)setError(explainError(e));});return()=>c.abort();},[actor.id,disaster,retry]);
  const full=actor.role!=='barangay',columns=full?['claims','awaiting_dswd','approved','awaiting_amount','awaiting_publication','ready_scheduling','assigned','recorded_handover','received_full','received_less','not_received','unconfirmed','waiting_answer']:['approved','recorded_handover','remaining'];
  const labels:Record<string,string>={claims:'Claims',awaiting_dswd:'Awaiting review',approved:'Approvals',awaiting_amount:'Awaiting amounts',awaiting_publication:'Awaiting publication',ready_scheduling:'Ready to schedule',assigned:'Assigned appointments',recorded_handover:'Handovers',received_full:'Received full',received_less:'Received less',not_received:'Not received',unconfirmed:'Unconfirmed',waiting_answer:'Awaiting answer',remaining:'Remaining'};
  const states:Record<string,string>={awaiting_dswd:'awaiting_dswd',awaiting_amount:'awaiting_amount',awaiting_publication:'awaiting_publication',ready_scheduling:'available',assigned:'assigned',recorded_handover:'handed_over',received_full:'received_full',received_less:'received_less',not_received:'not_received',unconfirmed:'unconfirmed',waiting_answer:'waiting_answer'};

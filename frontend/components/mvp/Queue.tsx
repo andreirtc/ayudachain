@@ -1,4 +1,5 @@
 'use client';
+import {useErrorMessage} from './Language';
 import {useEffect,useState} from 'react';
 import {useSearchParams,useRouter} from 'next/navigation';
 import Link from 'next/link';
@@ -7,12 +8,13 @@ import {readable,Status} from './UI';
 type Row={id:string;name:string;reference:string;zone:string;barangay_id:string;state:string;section:string;target:string;amount_centavos?:string|null};
 type Results={rows:Row[];total:number;offset:number;limit:number;kinds:string[];states:string[];scope:string};
 export default function Queue({actor,disaster,barangays,href}:{actor:Actor;disaster:string;barangays:Ref[];href:(key:string)=>string}){
+  const explainError=useErrorMessage(actor.role);
   const search=useSearchParams(),router=useRouter();
   const kind=search.get('kind')||(actor.role==='disbursing'?'transactions':'claims'),state=search.get('state')||'all',place=search.get('place')||'',offset=Number(search.get('page')||0)*25;
   const [query,setQuery]=useState(''),[term,setTerm]=useState(''),[data,setData]=useState<Results|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState(''),[retry,setRetry]=useState(0);
   useEffect(()=>{try{const value=sessionStorage.getItem(`ayudachain:search:${actor.id}:${disaster}:${kind}`)||'';setQuery(value);setTerm(value);}catch{setQuery('');setTerm('');}},[actor.id,disaster,kind]);
   function remember(value:string){try{sessionStorage.setItem(`ayudachain:search:${actor.id}:${disaster}:${kind}`,value);}catch{}setTerm(value);}
-  useEffect(()=>{const c=new AbortController();setLoading(true);setError('');setData(null);request<Results>('/queues/search',actor.id,c.signal,{kind,disaster_id:disaster,query:term,state,barangay_id:place||null,offset,limit:25}).then(setData).catch(e=>{if(!c.signal.aborted)setError(e.message);}).finally(()=>{if(!c.signal.aborted)setLoading(false);});return()=>c.abort();},[actor.id,disaster,kind,state,place,offset,term,retry]);
+  useEffect(()=>{const c=new AbortController();setLoading(true);setError('');setData(null);request<Results>('/queues/search',actor.id,c.signal,{kind,disaster_id:disaster,query:term,state,barangay_id:place||null,offset,limit:25}).then(setData).catch(e=>{if(!c.signal.aborted)setError(explainError(e));}).finally(()=>{if(!c.signal.aborted)setLoading(false);});return()=>c.abort();},[actor.id,disaster,kind,state,place,offset,term,retry]);
   function filter(next:Record<string,string>){const params=new URLSearchParams(search.toString());params.delete('record');for(const [k,v] of Object.entries(next)){if(v)params.set(k,v);else params.delete(k);}if(!('page' in next))params.delete('page');router.push(window.location.pathname+'?'+params);}
   const kinds=data?.kinds||(actor.role==='disbursing'?['transactions']:actor.role==='barangay'?['claims','registry']:actor.role==='beneficiary'?['claims','registry','entitlements','transactions']:['claims','registry','entitlements','transactions','proofs']);
   const record=(row:Row)=>{const url=new URL(href(row.section),window.location.origin);url.searchParams.set('record',row.id);if(kind==='proofs')url.searchParams.set('history','commitment_id');return url.pathname+url.search;};
