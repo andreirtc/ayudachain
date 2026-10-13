@@ -23,7 +23,7 @@ export interface DashboardStats {
   recent_transactions: Array<{
     event_type: string;
     description: string;
-    amount?: number;
+    amount?: number | null;
     tx_hash?: string;
     timestamp: string;
   }>;

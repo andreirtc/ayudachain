@@ -1,0 +1,18 @@
+# Shared Tonal foundation
+
+The supported authenticated application now uses the accepted Tonal / Material 3, Sea and Sun foundation from design-proposal at 4377db1. This is the first implementation slice after [PR #31](https://github.com/andreirtc/ayudachain/pull/31); household guidance, validated lists, arrangements, concerns and audit are subsequent tasks.
+
+## Delivered behavior
+
+- Desktop navigation uses a tonal rail, line icons and a pill current-page indicator. Phones retain a compact, keyboard-operable menu with at most four role-relevant destinations. Authentication and server scopes still decide access; navigation never selects an actor.
+- **Light theme**, **Dark theme** and **Use device theme** work from the shared shell. An explicit preference persists under ayudachain:theme and applies before paint. Device mode follows OS changes. Storage failure still permits an in-page choice; other tabs receive preference changes. This stores no household, credentials or business submissions.
+- Open Sans is served locally for operational interface text and headings. Source Code Pro is served locally for references. Their original SIL OFL licenses are beside the variable font files in frontend/app/fonts. Sources: [Open Sans](https://github.com/google/fonts/tree/main/ofl/opensans), [Source Code Pro](https://github.com/google/fonts/tree/main/ofl/sourcecodepro). The existing public landing retains its layout and historical local fonts.
+- Shared outlined fields, pill actions, borderless rounded tonal panels, status words/glyphs, restrained message rows and visible focus use semantic color roles in frontend/app/tonal.css. Reduced-motion behavior and 44px touch controls remain.
+
+Routes, exact household/receipt queries, sign-in destinations, session clearing, pending/error states, authoritative centavos/budgets, payout retries, protected evidence and v1/v2 receipt protocols are preserved. A discovered overview crash on nonmonetary review/anchor events is fixed: null amounts remain absent rather than becoming zero or an exception. No workflow API, schema, hash or contract change belongs to this presentation task. Illustrated reference records and proof results were not imported.
+
+## Validation and limits
+
+All 98 existing Edge browser cases passed on the initial foundation build. The final build passed all 16 affected checks (Tonal, existing polish and typography) at desktop1440x900 and phone390x844, including both schemes, local fonts, measured token contrast, keyboard/focus, persistent/device/storage-failure themes and real review events without monetary amounts. Earlier new-test locator failures were corrected; the new journey also exposed and fixed the actual null-amount overview crash. Final screenshots of household, receipt, review and overview plus existing payout/CSV/empty/error/offline/retry journeys were inspected and retained under tmp/ayudachain-pr32-validation. Authentication/permission API20, frontend Node14, independent TypeScript, isolated production build and diff checks passed. Ordinary browser fixtures use actual authenticated API journeys with an explicitly unavailable chain, rather than reporting invented confirmation. Live-chain validation is required for subsequent hash/anchor/contract changes.
+
+The original database, frontend3000, chain8545, .next and deployment artifacts remain preserved. Build/QA use .next-handoff-qa and owned synthetic fixtures on8101/3101. The persistent preview stays stopped. Browser viewport emulation does not establish physical-device usability, translation, human comprehension or full accessibility conformance. Existing dependency advisories and embedded build type/lint skips remain; independent TypeScript is required.

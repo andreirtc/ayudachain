@@ -2,7 +2,7 @@
 
 AyudaChain is a fictional disaster-relief prototype. Use invented households and simulated payouts only. A matching blockchain receipt hash establishes integrity of the fields currently hashed; it does not establish cash delivery, government affiliation or the identity of a real recipient.
 
-The accepted next direction is the Tonal design with staff-validated lists and organized payouts; see [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md). Those additions are planned. The instructions below describe the current implemented application.
+The accepted next direction is the Tonal design with staff-validated lists and organized payouts; see [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md). The [shared Tonal foundation](TONAL_FOUNDATION.md) is delivered. The household starting point, validated lists and arrangements are subsequent tasks. The instructions below describe the current implemented application.
 
 ## Sign in and choose a task
 
@@ -14,7 +14,7 @@ The public landing, funding summaries and limited receipt checks do not require 
 - **Beneficiary:** inspect the household linked to the account and its recorded payouts. Other household records are unavailable.
 - **Auditor:** inspect private office records and evidence, with no business mutations.
 
-Navigation offers tasks relevant to the server-authenticated role. The account banner shows identity, **Sign out**, and a next action when it differs from the current task. On phones, **Menu** supports keyboard navigation and Escape. Refresh restores the server session. Expired or revoked sessions require sign-in again when detected by an API response or reload. Sign-in links retain the exact household or receipt you opened. Your new account must still have access; unavailable households/receipts and Barangay payout denial remain explicit. Direct sign-in keeps the role default. Forms and business submissions are discarded when a session ends and are never replayed after sign-in. See [sign-in destinations](AUTH_DESTINATIONS.md). Provisioning and permission details are in [DEMO_SESSIONS.md](DEMO_SESSIONS.md).
+Navigation offers tasks relevant to the server-authenticated role in a tonal desktop rail or compact phone menu. **Light theme**, **Dark theme** and **Use device theme** change the shared operational scheme; an explicit choice is remembered in this browser. Interface and reference fonts are served locally. The account banner shows identity, **Sign out**, and a next action when it differs from the current task. On phones, **Menu** supports keyboard navigation and Escape. Refresh restores the server session. Expired or revoked sessions require sign-in again when detected by an API response or reload. Sign-in links retain the exact household or receipt you opened. Your new account must still have access; unavailable households/receipts and Barangay payout denial remain explicit. Direct sign-in keeps the role default. Forms and business submissions are discarded when a session ends and are never replayed after sign-in. See [sign-in destinations](AUTH_DESTINATIONS.md). Provisioning and permission details are in [DEMO_SESSIONS.md](DEMO_SESSIONS.md).
 
 ## Funding summaries
 

@@ -137,7 +137,7 @@ export default function DashboardPage() {
                   <p className="registry-muted">
                     {formatRecordedDate(event.timestamp)}
                   </p>
-                  {event.amount !== undefined && (
+                  {typeof event.amount === "number" && Number.isFinite(event.amount) && (
                     <p className="font-semibold">{formatPeso(event.amount)}</p>
                   )}
                   <details className="registry-detail">

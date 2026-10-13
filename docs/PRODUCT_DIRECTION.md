@@ -1,6 +1,6 @@
 # Accepted product direction
 
-Accepted by the user on 2026-10-14 after the branch/design comparison and Philippine disaster-assistance discussion. This records the chosen direction and bounded delivery sequence. The redesign, masterlists and scheduling remain planned.
+Accepted by the user on 2026-10-14 after the branch/design comparison and Philippine disaster-assistance discussion. This records the chosen direction and bounded delivery sequence. The [shared Tonal foundation](TONAL_FOUNDATION.md) is implemented. The household starting point, masterlists and scheduling remain subsequent tasks.
 
 ## Product and household journey
 
@@ -43,7 +43,7 @@ Do not lose allocation caps by copying the MVP funding ledger. A different progr
 
 ## Bounded delivery sequence
 
-Follow [STACKED_PRS.md](STACKED_PRS.md): one complete task per successor draft PR, based on the preceding task. This PR records the direction only; the first implementation is the shared Tonal foundation.
+Follow [STACKED_PRS.md](STACKED_PRS.md): one complete task per successor draft PR, based on the preceding task. PR #31 records the direction; [the shared Tonal foundation](TONAL_FOUNDATION.md) is the first completed implementation.
 
 1. **Tonal foundation.** Adapt the authenticated shell, palette/theme, locally served fonts and shared controls. Preserve supported routes, query references, sign-in destinations and actual states. Validate desktop/phone in both schemes, keyboard/focus, theme persistence, font loading and permission regressions.
 2. **Household starting point.** Show own-household status, relevant payout/receipt and one grounded next action. Keep pending, approved, rejected, historical, no-payout and unavailable states distinct. Display scheduling instructions only when actual arrangements exist.
