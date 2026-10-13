@@ -12,7 +12,7 @@ The public landing, funding summaries and limited receipt checks do not require 
 - **Beneficiary:** inspect the household linked to the account and its recorded payouts. Other household records are unavailable.
 - **Auditor:** inspect private office records and evidence, with no business mutations.
 
-Navigation offers tasks relevant to the server-authenticated role. The account banner shows identity, **Sign out**, and a next action when it differs from the current task. On phones, **Menu** supports keyboard navigation and Escape. Refresh restores the server session. Expired or revoked sessions require sign-in again. Provisioning and permission details are in [DEMO_SESSIONS.md](DEMO_SESSIONS.md).
+Navigation offers tasks relevant to the server-authenticated role. The account banner shows identity, **Sign out**, and a next action when it differs from the current task. On phones, **Menu** supports keyboard navigation and Escape. Refresh restores the server session. Expired or revoked sessions require sign-in again when detected by an API response or reload. Sign-in links retain the exact household or receipt you opened. Your new account must still have access; unavailable households/receipts and Barangay payout denial remain explicit. Direct sign-in keeps the role default. Forms and business submissions are discarded when a session ends and are never replayed after sign-in. See [sign-in destinations](AUTH_DESTINATIONS.md). Provisioning and permission details are in [DEMO_SESSIONS.md](DEMO_SESSIONS.md).
 
 ## Funding summaries
 

@@ -52,6 +52,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-AyudaChain-Session"],
 )
 
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -68,6 +69,10 @@ async def no_store(request, call_next):
     response = await call_next(request)
     if request.url.path.startswith(("/api/", "/receipts/")):
         response.headers["Cache-Control"] = "no-store"
+        if not request.url.path.startswith("/api/auth/"):
+            # Public endpoints may succeed after revocation. Tell the client to
+            # discard its previous private context without restricting public reads.
+            response.headers["X-AyudaChain-Session"] = "active" if public_actor(request) else "ended"
     return response
 
 @app.exception_handler(RequestValidationError)

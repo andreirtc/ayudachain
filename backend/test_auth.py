@@ -178,6 +178,21 @@ class TestSessions(unittest.TestCase):
             self.assertTrue(result.json()[key])
             self.assertTrue(all(row["event_type"] in {"FUND_RELEASE", "ALLOCATION"} for row in result.json()[key]))
 
+    def test_public_responses_report_ended_sessions_without_restricting_verification(self):
+        self.login("demo-auditor-01")
+        result = self.client.get("/api/distributions", headers={"Origin": "http://127.0.0.1:3101"})
+        self.assertEqual(result.headers["X-AyudaChain-Session"], "active")
+        self.assertIn("X-AyudaChain-Session", result.headers["access-control-expose-headers"])
+        with SessionLocal() as db:
+            db.query(auth.DemoSession).update({"expires_at": 0})
+            db.commit()
+        self.assertEqual(self.client.get("/api/distributions").status_code, 401)
+        verification = self.client.post("/api/blockchain/verify", json={"distribution_id": "DIST-0001"})
+        self.assertEqual(verification.status_code, 200)
+        self.assertEqual(verification.headers["X-AyudaChain-Session"], "ended")
+        self.assertIsNone(verification.json()["beneficiary_id"])
+        self.assertEqual(self.client.get("/api/public/receipts").status_code, 200)
+
     def test_shared_template_does_not_leak_other_household_to_scoped_accounts(self):
         for identity in ("demo-beneficiary-01", "demo-disbursing-002"):
             self.login(identity)

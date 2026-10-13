@@ -263,7 +263,7 @@ test("barangay registration connects to DSWD decisions, a payout and its exact r
     .getByRole("button", { name: "Reject household", exact: true })
     .click();
   await expect(
-    page.getByRole("dialog").getByText("Rejected", { exact: true }),
+    page.getByRole("dialog").locator(".registry-badge").filter({ hasText: /^Rejected$/ }),
   ).toBeVisible();
   await reason.fill("Additional synthetic evidence establishes eligibility");
   let release!: () => void;
@@ -293,7 +293,7 @@ test("barangay registration connects to DSWD decisions, a payout and its exact r
   await expect(page.getByRole("dialog")).toBeVisible();
   release();
   await expect(
-    page.getByRole("dialog").getByText("Approved", { exact: true }),
+    page.getByRole("dialog").locator(".registry-badge").filter({ hasText: /^Approved$/ }),
   ).toBeVisible();
   expect(requests).toBe(1);
   await page.getByText(/Review history \(/).click();

@@ -11,6 +11,7 @@ import {
   PublicReceiptReference,
 } from "@/lib/api";
 import { receiptVerificationHref } from "@/lib/receiptNavigation";
+import { signInHref } from "@/lib/signInDestination";
 
 export default function ReceiptDetails({
   record,
@@ -53,7 +54,7 @@ export default function ReceiptDetails({
       ) : (
         <p className="registry-muted">
           This public view shows receipt references and hash checks.{" "}
-          <Link href="/sign-in" className="underline text-blue-700">
+          <Link href={signInHref(receiptVerificationHref(record.distribution_id))} className="underline text-blue-700">
             Sign in
           </Link>{" "}
           for the details available to your account.
