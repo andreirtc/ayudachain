@@ -1,107 +1,16 @@
-# AyudaChain — 5-Minute Hackathon Pitch Script 🇵🇭
+# AyudaChain five-minute demo
 
-**Scenario**: Typhoon Salinlahi (Batch RELIEF-2026-001) in the Province of Albay.  
-**Presenter Roles**: Switch between *Public Citizen*, *Barangay Field Worker*, and *COA Auditor*.
+Use invented records, fictional amounts and a local/test chain. Keep the retained database and chain together. Use locally provisioned accounts from [DEMO_SESSIONS.md](DEMO_SESSIONS.md); never show passwords. The household account demo-beneficiary-01 is linked to BEN-0004 in San Isidro.
 
----
+1. **Public overview (30 seconds).** Open /, then Explore demo. Show actual released, allocated and recorded totals. Describe the prototype as a trail for registration, human review, organized collection and receipts. A record does not prove that cash changed hands.
+2. **DSWD list and arrangement (60 seconds).** Sign in as demo-officer-01. Open BEN-0004 in Households, inspect its synthetic record and save a reasoned approval if needed. Open Validated lists, prepare the San Isidro version, inspect included/excluded rows and finalize it. Publish a future collection date, time, site, requirements and staff contact. Finalizing a list and publishing a schedule do not themselves authorize a payout.
+3. **Household instructions (30 seconds).** Sign out, then sign in as demo-beneficiary-01. My household shows the actual collection details without staff reasons. Existing household information does not need to be entered again.
+4. **Payout desk (60 seconds).** Sign out and sign in as demo-disbursing-001. Open the same household on Payouts. Desk checks read approval, linked-duplicate history, fictional grant limits and the remaining allocation from the server. Record the synthetic payout once. The result shows its exact receipt and actual anchor lifecycle. A lost response can be retried with the same details; a second household payout is blocked. If assistance is needed, Record an assisted concern uses the staff account without household credentials.
+5. **Receipt and concern (60 seconds).** Return to demo-beneficiary-01. Open the saved receipt. Run its current check; explain the actual outcome: verified, mismatch, no anchor found or unavailable. If desired, acknowledge receipt using the household account, identifying this as a simulated recipient statement. From My household, report a concern about the recorded amount or instructions. DSWD can reply and record a separate staff-only reason; the household sees the response and retained history.
+6. **Auditor and public check (60 seconds).** Sign in as demo-auditor-01 and open Audit. Inspect actual allocation balances, review flags, concerns, payout/anchor facts and local history. Check receipt opens the exact current contract check. Auditor has no business write authority. Sign out to show that the public receipt check omits private household and concern content.
 
-### [0:00 – 0:45] — The Hook: The Disaster Relief Trust Deficit
-- **Action**: Open Public Transparency Dashboard (`http://localhost:3000`).
-- **Talking Points**:
-  > "Good day, judges. In the Philippines, whenever a Category 5 typhoon strikes, billions of pesos in calamity funds are mobilized. But every single year, the same tragedies happen:
-  > 1. **Ghost Beneficiaries** claiming aid twice in different barangays.
-  > 2. **'Kupit sa Pera'** — where the national government releases ₱5,000 per family, but local officials hand out only ₱2,000 in cash, claiming *'₱2,000 lang ang pondo mula sa taas'*.
-  > 
-  > **AyudaChain** provides a single, tamper-evident digital trail from national DSWD release down to the household receipt—combining AI entity resolution with Polygon blockchain verification."
+If a payout is already recorded, show its existing receipt instead of attempting another payment. Use an eligible registered synthetic household linked to a provisioned household account for a fresh run. Do not reset the original dataset or chain to make a scene repeatable.
 
----
+## Outside this demo
 
-### [0:45 – 1:30] — National Fund Release & 5-Step Transparency Pipeline
-- **Action**: Point to the 5-Step Pipeline and Hero Metrics on the Dashboard.
-- **Talking Points**:
-  > "Here is our active disaster response for **Typhoon Salinlahi** in Albay:
-  > 
-  > 1. DSWD Central released **₱10,000,000**, anchored on-chain at Block #1.
-  > 2. 100% of the funds are transparently allocated to 4 local barangays.
-  > 3. Notice the right-side card: **Blockchain Ledger Status**. It connects directly to our Smart Contract on Polygon, serving as an unalterable Digital Notary Book. Anyone can copy the contract address and verify it on Polygonscan."
-
----
-
-### [1:30 – 2:45] — AI Entity Resolution, LGU CSV Analyzer & Deleting Duplicates
-- **Action**: Navigate to **Beneficiaries** (`/beneficiaries`).
-- **Action**: Click **"Batch CSV AI Analyzer"** and run the **1-Click Test Masterlist**.
-- **Talking Points**:
-  > "Before cash is disbursed, LGUs submit masterlists of evacuees. This is where aid leaks through clerical typos and cross-barangay double-dipping.
-  > 
-  > Watch what happens when we upload an LGU calamity spreadsheet:
-  > 
-  > Our **AI Entity Resolution Engine** automatically catches:
-  > - **Clerical Typos**: *Juan Dela Cruz* vs *Jhon Dela Cruz* (95.0% match).
-  > - **Swapped First/Last Name Fields**: *Maria Santos* vs *Santos Maria* (95.6% match).
-  > - **Cross-Barangay Duplicate Claims**: *Ricardo Reyes* registered in both Brgy 628 and Brgy 630 (92.8% match).
-  > 
-  > *(Close CSV modal and inspect record BEN-0007: Juan D. Cruz)*
-  > 
-  > Notice our ethical AI principle: **AI never denies aid autonomously.** It flags suspicious records for human review.
-  > 
-  > Now watch this: As a Barangay Officer or COA Auditor, I can click **'🗑️ Tanggalin ang Doble (Delete Duplicate)'**. The duplicate is permanently removed, and a `BENEFICIARY_DELETED` audit event is permanently logged."
-
----
-
-### [2:45 – 3:45] — Point-of-Payout: DAFAC QR Scanner & Offline Mode
-- **Action**: Navigate to **Distributions** (`/distributions`).
-- **Action**: Click **"Scan DAFAC QR Code"** and tap **Danilo Soriano (`DFC-2026-0004`)**.
-- **Talking Points**:
-  > "Now, distribution day at the evacuation center.
-  > 
-  > We adopted the official national standard: the **DSWD DAFAC Card** *(Disaster Assistance Family Access Card)*.
-  > 
-  > The field worker clicks **Scan DAFAC QR Code**. When the camera scans Danilo Soriano's card, his profile loads instantly, and the system **auto-locks the grant to exactly ₱5,000.00**, preventing arbitrary local deductions.
-  > 
-  > *(Point to 'Test Offline Mode' pill)*
-  > 
-  > **What if typhoon winds topple cell towers?**
-  > AyudaChain features an **Offline Caching Architecture**. Field tablets store signed vouchers locally in browser memory, and automatically batch-sync cryptographic proofs to Polygon the moment connectivity is restored via Starlink or municipal Wi-Fi.
-  > 
-  > *(Click 'Confirm & Anchor Disbursement')*
-  > 
-  > A 32-byte SHA-256 hash is stamped into the Polygon Smart Contract, and Danilo receives his official verified receipt."
-
----
-
-### [3:45 – 4:40] — Live Fraud Demonstration: Catching "Kupit sa Pera"
-- **Action**: Navigate to **Verify** (`/verify`).
-- **Talking Points**:
-  > "This is our crowning feature: the **Public Blockchain Integrity Checker**.
-  > 
-  > Let's test how AyudaChain catches the two most common corruption schemes in the Philippines:
-  > 
-  > *(Click 'Scenario A: Pocketing Cash')*
-  > 
-  > **Scenario A:** An insider takes ₱3,000 from the cash box and edits the local computer database so Danilo's record says ₱2,000 instead of ₱5,000.
-  > 
-  > Immediately: **RED CORRUPTION ALERT!**
-  > The local database hash no longer matches the immutable on-chain hash created on payout day!
-  > 
-  > *(Click 'Scenario B: Ghost Beneficiary')*
-  > 
-  > **Scenario B:** An insider swaps the evacuee's name to an unauthorized relative.
-  > 
-  > Again: **RED CORRUPTION ALERT!** The cryptographic signature proves tampering.
-  > 
-  > *(Click '✓ Restore Authentic Record')*
-  > 
-  > When restored to the genuine record: **100% CRYPTOGRAPHIC MATCH**."
-
----
-
-### [4:40 – 5:00] — Conclusion: The 4 Pillars of AyudaChain
-- **Action**: Return to the **Public Dashboard** (`/`).
-- **Closing Statement**:
-  > "To summarize AyudaChain's architectural pillars:
-  > 1. **Off-Chain Database:** Protects private family data in compliance with the Data Privacy Act.
-  > 2. **AI Entity Resolution:** Pre-screens typos and double-dippers before cash leaves the table.
-  > 3. **Polygon Smart Contract:** Acts as an unalterable, mathematical witness of every payout.
-  > 4. **Public Citizen Portal:** Empowers 110 million Filipinos to become real-time COA auditors.
-  > 
-  > From national release to household receipt: transparent, tamper-evident, and auditable. Thank you!"
+Camera QR scanning, persistent offline queues, automatic sync, SMS/provider payments, account administration, protected/anchored general audit logs, funding/historical chain recovery, hosting and a guided tamper playground are deferred. Do not present those as working features. Receipt uploads and real identity/document authenticity are not supplied by the sample template. A fresh proof result must come from the configured contract; never label a chain outage as verification.

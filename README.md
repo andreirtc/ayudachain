@@ -18,7 +18,7 @@ Staff register and review households, record payouts and inspect receipt evidenc
 ### 2. Registration and human review
 - Duplicate suggestions support human decisions with a required reason and authenticated DSWD reviewer.
 - Retained duplicate links preserve original IDs, payout records and local review history. Payout checks include linked aliases.
-- CSV analysis reports suggested pairs; validation, preview and explicit import remain pending.
+- CSV validation, preview and explicit pending import connect to the registry and DSWD review.
 
 ### 3. Recording and checking payouts
 - The server enforces exact centavos, active batches, eligibility, remaining allocation budgets, fictional grant limits and durable payout replay.
@@ -28,8 +28,13 @@ Staff register and review households, record payouts and inspect receipt evidenc
 ### 4. Truthful receipt verification
 - An actual configured-contract read yields verified, mismatch, no anchor found or verification unavailable. Failed reads never become verified.
 - The public check omits private household context. Permitted accounts can inspect local context and technical evidence.
-- Hash matching does not prove cash delivery or all identity/document fields. New payouts have [durable anchor recovery](docs/PAYOUT_ANCHORS.md). Funding/historical recovery, immutable versioned receipts and recipient acknowledgement remain pending.
+- Hash matching does not prove cash delivery or all identity/document fields. New payouts have [durable anchor recovery](docs/PAYOUT_ANCHORS.md). New payouts retain immutable v2 receipt snapshots and own-account simulated recipient acknowledgement. Funding/historical recovery remains deferred.
 - The dashboard reports configured network/contract information; its controls do not change the network. See [current user guide](docs/USER_GUIDE.md).
+
+### 5. Organized collection and connected follow-up
+- DSWD finalizes versioned validated lists; scoped staff publish and revise collection arrangements. Households see their actual instructions.
+- The Disbursing desk reads approval, linked payout history and budget checks before recording. Staff-assisted concerns retain the staff actor without household credentials.
+- Households submit and follow up concerns; DSWD replies with separate private reasons. Auditor inspects actual accounting, exceptions and receipt facts in a read-only workspace. See [the supported demo script](docs/demo-script.md).
 
 ---
 

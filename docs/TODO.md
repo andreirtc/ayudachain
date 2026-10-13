@@ -6,7 +6,7 @@ PR workflow: see [STACKED_PRS.md](STACKED_PRS.md). This planning session is the 
 
 Status: unchecked items are planned, not implemented. Work through one numbered item at a time. First establish a runnable baseline; then backend/contracts correctness; then frontend workflow and usability.
 
-Current direction, accepted 2026-10-14: adopt the Tonal / Material 3, Sea and Sun proposal and a shorter household journey built around staff-validated lists and organized payouts, retaining current accounting, authenticated roles and audit/receipt safeguards. See [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md) for the selected design, compatibility rules and bounded implementation sequence. The Tonal foundation, household starting point, versioned validated lists and payout arrangements are delivered; the remaining desk/receipt/concern/audit tasks stay in sequence.
+Current direction, accepted 2026-10-14: adopt the Tonal / Material 3, Sea and Sun proposal and a shorter household journey built around staff-validated lists and organized payouts, retaining current accounting, authenticated roles and audit/receipt safeguards. See [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md) for the selected design, compatibility rules and bounded implementation sequence. The Tonal foundation, household starting point, versioned validated lists, payout arrangements, authoritative payout desk, concerns/assisted intake and staff audit are delivered. Demo feature wiring is complete; visual iteration and non-demo release work remain.
 
 The previous backend feature pass completed CSV preview/import, own-account synthetic recipient acknowledgement and versioned immutable receipt snapshots. See [CSV_ONBOARDING.md](CSV_ONBOARDING.md), [RECIPIENT_ACKNOWLEDGEMENT.md](RECIPIENT_ACKNOWLEDGEMENT.md) and [RECEIPT_SNAPSHOTS.md](RECEIPT_SNAPSHOTS.md). Remaining unchecked features and production policies stay separate bounded tasks in the PR stack.
 
@@ -19,7 +19,7 @@ The previous backend feature pass completed CSV preview/import, own-account synt
 - [x] Add scoped payout arrangements and household instructions from actual dates/sites/requirements. See [PAYOUT_ARRANGEMENTS.md](PAYOUT_ARRANGEMENTS.md).
 - [x] Adapt the focused payout desk with authoritative approval, linked-alias history, budget and arrangement context while preserving accounting/retry safeguards. See [PAYOUT_DESK.md](PAYOUT_DESK.md). Staff-assisted concerns follow in the concern task.
 - [x] Deliver household concerns and staff-assisted intake with retained replies and private staff reasons. See [HOUSEHOLD_CONCERNS.md](HOUSEHOLD_CONCERNS.md).
-- [ ] Deliver the staff audit workspace while retaining simple public verification.
+- [x] Deliver the read-only DSWD/Auditor workspace with actual budgets, exceptions, concerns and distinct recorded/anchor/acknowledgement facts; retain simple current public verification. See [STAFF_AUDIT.md](STAFF_AUDIT.md).
 
 The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were compared with PR #16 on 2026-10-12. See [BLUEPRINT_COMPARISON.md](BLUEPRINT_COMPARISON.md) for selected ideas, contradictions and remaining integration gates. Keep the corrected accounting and historical proofs; evaluate the five-role journeys and durable evidence implementation before rebuilding equivalents. Preserve this stacked workflow rather than restarting from the blueprint's older #14 baseline.
 
