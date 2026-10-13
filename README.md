@@ -38,6 +38,54 @@ Offline handover, real SMS, live National ID integration, general PIN recovery, 
 
 The redesigned MVP uses responsive task queues, household progress, amount-basis explanations, searchable review/proof records and document previews. [Routes](docs/product/sitemap.md), [user flow](docs/product/user-flow.md) and [design system](DESIGN.md) describe the delivered surface. See the redesign section in [validation](docs/implementation/validation.md) for fresh checks and current runtime limitations.
 
+## Design proposal: Tonal (Material 3, Sea and Sun)
+
+This branch applies the visual layer of the approved "Tonal" design to `/mvp`. The full reference design is in [docs/design/tonal-design-reference.html](docs/design/tonal-design-reference.html); open it in a browser. Its palette switcher previews all three palettes, but only **Sea and Sun** is used in the app. [DESIGN.md](DESIGN.md) records what the code implements.
+
+### Implemented
+
+- **Sea and Sun palette:** every `/mvp` colour is a Material 3 role token in `frontend/app/mvp.css`, with no hard-coded hex values in component rules. Both light and dark schemes are included.
+- **Light / Dark / Device theme toggle** (`ThemeToggle.tsx`): in the workspace top bar and the `/mvp` header. The choice is remembered in the browser and applied before first paint.
+- **Kubo Link logo:** `components/mvp/Logo.tsx`, used in the drawer and on the directory page. The favicon is `app/icon.svg`.
+- **Fonts:** Open Sans for the interface and Source Code Pro for references, loaded with `next/font`. The minimum text size is 13px.
+- **Material 3 shapes and states:**
+  - pill buttons with outlined secondary buttons;
+  - outlined text fields;
+  - borderless rounded tonal panels;
+  - a tonal navigation drawer with a pill indicator for the current page;
+  - a primary-container next-step card;
+  - a primary-filled journey stepper.
+- **Status:** shown as a glyph and a coloured word, with no filled boxes or pills. There is a new negative tone (cross) for "Does not match", "Chain unreachable", "Anchor absent", "Evidence unavailable", "Not received" and "Stopped".
+- **Messages:** error, warning and success messages are banner rows with a glyph and a divider, not tinted boxes.
+- **Return to the directory:** the logo and an "All workspaces" link return to `/mvp`. Neither switches role directly; see [sitemap](docs/product/sitemap.md).
+
+### Not yet implemented or missing
+
+| Area | In the reference design | Current app |
+|---|---|---|
+| Phone navigation | Material 3 bottom navigation bar with at most four destinations per role | Hamburger menu opening the full drawer |
+| Desktop navigation | Navigation rail with a floating action button, plus list and detail panes side by side for claims, payouts and integrity | Fixed side drawer; list and detail are separate stacked panels |
+| Decisions | Segmented buttons (Approve / Decline / Refer to barangay; Endorse / Do not endorse; Pass after comparison / Fail and hold/stop) | Existing radio buttons and selects |
+| Confirmation | "Record this decision?" dialog before an irreversible decision or handover | Decisions and handovers save directly (CSV intake keeps its own preview-and-confirm step) |
+| Feedback | Snackbar after saving ("Decision recorded for DFC-…", with View) | Inline saved message |
+| Flags | Material 3 banner at the top of a case: icon, sentence, text-button actions, divider | Flags appear inside the existing panels |
+| Integrity rows | Status rows (glyph, record name, time or action, explanation line) | Existing `IntegrityStatus` layout restyled; same structure as before |
+| Floating action button | Role's main create action (for example, Barangay "Assisted registration") | Not present |
+| Household screens | Phone-first Home, My claim stepper, payout code screen with a large Source Code Pro code and PIN warning banner, private report screen | Existing screens restyled; same layout as before |
+| Disbursing Officer | Tablet layout: photo beside the comparison form, plus a "Handover steps" side panel | Existing stacked form restyled |
+| Auditor | Result filter chips above the integrity table | Existing search and select filters |
+| Empty states | Icon, title and explanation in an outlined card | Existing empty state restyled |
+| Other palettes | Bayanihan Teal and Indigo and Mango | Only Sea and Sun is shipped |
+| Legacy screens | Not covered by the design | Unchanged (Tailwind legacy UI); only the favicon is shared |
+
+### Known validation gaps
+
+- **Typecheck:** passes.
+- **Production build:** not run on this branch.
+- **Browser suite:** 10 of 37 tests fail. I re-ran the three spec files containing them on the unmodified, pre-redesign code: 6 of these failures were reproduced there, and the other 4 were not re-run there because they depend on the journey test passing first. The causes are a duplicate "Register your household" heading match in `journey.spec.ts`, and verification tests that expect a word boundary after "Verified", which `IntegrityStatus` does not render. These need a separate fix.
+
+The prompt for completing the missing parts is in [docs/design/implement-missing-design.md](docs/design/implement-missing-design.md).
+
 ## Five-role usability additions
 
 The workspaces now include scoped search/task queues, frozen duplicate comparisons, English/Filipino step guidance, barangay operations tables, contextual proof checks, staged CSV registration and native QR/manual session lookup. See [delivered behavior and limitations](docs/implementation/bring-forward-usability.md) and [validation](docs/implementation/validation.md). CSV templates cover head-only no-ID declarations; private completion follows normal workflows. Camera scanning requires browser BarcodeDetector support; manual lookup remains available. These are synthetic evaluation workflows with claimed/unverified accounts, not authenticated production privacy.

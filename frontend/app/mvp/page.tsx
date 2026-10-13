@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import {ArrowRight,ShieldCheck,Users,Landmark,HandCoins,ScanLine,House} from 'lucide-react';
 import {workspaces} from '@/components/mvp/workspaces';
+import {LogoMark} from '@/components/mvp/Logo';
+import ThemeToggle from '@/components/mvp/ThemeToggle';
 const icons=[House,Users,Landmark,HandCoins,ScanLine];
 export default function MVP(){
   return <div className="ac-entry">
-    <header className="ac-entry-header"><Link href="/mvp" className="ac-brand"><span className="ac-brand-mark"><ShieldCheck size={23}/></span>AyudaChain</Link><span>Disaster cash assistance</span></header>
+    <header className="ac-entry-header"><Link href="/mvp" className="ac-brand"><span className="ac-brand-mark"><LogoMark size={30}/></span>AyudaChain</Link><span className="ac-entry-tools"><span>Disaster cash assistance</span><ThemeToggle/></span></header>
     <main id="main-content" className="ac-entry-main">
       <div className="ac-entry-intro"><h1>Relief you can follow.</h1><p>From funding to the family. One clear record of every decision, every handover, and what happened next.</p><div className="ac-entry-process" aria-label="Assistance journey">{['Funding','Claim & review','Payout','Private confirmation','Independent audit'].map((step,i)=><span key={step}>{i>0&&<ArrowRight size={14}/>}<b>{step}</b></span>)}</div></div>
       <section className="ac-workspace-directory" aria-labelledby="workspace-heading"><div className="ac-directory-heading"><h2 id="workspace-heading">Your workspace</h2><p>Choose where you work in the assistance journey.</p></div>
