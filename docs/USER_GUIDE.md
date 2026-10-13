@@ -2,6 +2,8 @@
 
 AyudaChain is a fictional disaster-relief prototype. Use invented households and simulated payouts only. A matching blockchain receipt hash establishes integrity of the fields currently hashed; it does not establish cash delivery, government affiliation or the identity of a real recipient.
 
+The accepted next direction is the Tonal design with staff-validated lists and organized payouts; see [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md). Those additions are planned. The instructions below describe the current implemented application.
+
 ## Sign in and choose a task
 
 The public landing, funding summaries and limited receipt checks do not require sign-in. Private records require a provisioned synthetic account at /sign-in. Account credentials come from local provisioning, not a role dropdown. The server enforces each account's role and scope.
