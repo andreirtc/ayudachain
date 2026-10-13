@@ -4,6 +4,10 @@ Rules for any AI agent working in this repository, whoever is driving it. A huma
 
 AyudaChain is a tamper-evident trail for Philippine disaster-relief payouts: private records off-chain, receipt hashes anchored on-chain, public verification. Its whole value is that a "verified" result can be trusted. Treat every change through that lens.
 
+## Screen storytelling plan handoff
+
+At the start of a new agent session on this branch, read [the screen storytelling implementation plan](docs/implementation/2026-10-13-screen-storytelling-plan.md) and briefly link it in your first user-facing response so the maintainer knows to review it. Before changing MVP navigation, dashboards, screen copy or transaction flows, use the plan alongside the current PRD and user flow, and check which phases are already implemented. The plan is proposed work; reading this handoff does not authorize implementation. Follow the user's requested scope and any subsequent explicit implementation authorization.
+
 ## Integrity invariants
 
 These hold in every change. If a task seems to require breaking one, stop and ask the maintainer.
