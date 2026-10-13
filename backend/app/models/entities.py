@@ -247,6 +247,37 @@ class ValidatedList(Base):
     revision_hash = Column(String(64), nullable=False)
 
 
+class PayoutArrangement(Base):
+    __tablename__ = "payout_arrangements"
+    __table_args__ = (UniqueConstraint("created_by", "request_id", name="uq_arrangement_retry"),)
+    arrangement_id = Column(String(64), primary_key=True)
+    list_id = Column(String(64), ForeignKey("validated_lists.list_id"), nullable=False, unique=True)
+    batch_id = Column(String(64), nullable=False, index=True)
+    barangay_id = Column(String(32), nullable=False, index=True)
+    created_by = Column(String(64), nullable=False)
+    created_at = Column(String(40), nullable=False)
+    request_id = Column(String(64), nullable=False)
+
+
+class ArrangementRevision(Base):
+    __tablename__ = "arrangement_revisions"
+    __table_args__ = (UniqueConstraint("arrangement_id", "revision", name="uq_arrangement_revision"), UniqueConstraint("revised_by", "request_id", name="uq_arrangement_revision_retry"))
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    arrangement_id = Column(String(64), ForeignKey("payout_arrangements.arrangement_id"), nullable=False, index=True)
+    revision = Column(Integer, nullable=False)
+    state = Column(String(16), nullable=False)
+    collection_date = Column(String(10), nullable=False)
+    time_window = Column(String(64), nullable=False)
+    site = Column(String(200), nullable=False)
+    requirements_json = Column(Text, nullable=False)
+    responsible_staff = Column(String(128), nullable=False)
+    reason = Column(Text, nullable=False)
+    revised_by = Column(String(64), nullable=False)
+    revised_at = Column(String(40), nullable=False)
+    request_id = Column(String(64), nullable=False)
+    request_fingerprint = Column(String(64), nullable=False)
+
+
 class ListFinalization(Base):
     __tablename__ = "list_finalizations"
     list_id = Column(String(64), ForeignKey("validated_lists.list_id"), primary_key=True)

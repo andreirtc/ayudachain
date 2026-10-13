@@ -47,7 +47,8 @@ for(const state of ["pending","approved","rejected","historical"]) {
     await expect(page.getByRole("heading",{name:{pending:"Awaiting staff review",approved:"Eligibility approved; no payout recorded",rejected:"Review the recorded decision",historical:"Historical household record"}[state],exact:true})).toBeVisible();
     await expect(page.getByRole("region",{name:"Household status"})).toContainText(`Synthetic ${state} home ${info.project.name}`);
     await expect(page.getByText("Juan Dela Cruz",{exact:true})).toHaveCount(0);
-    await expect(page.getByText("No date, collection site or accepted requirements",{exact:false})).toBeVisible();
+    await expect(page.getByText(payout?"A saved receipt is not a new appointment.":"Staff have not published a collection date, site or requirements",{exact:false})).toBeVisible();
+    await expect(page.getByLabel("Collection instructions")).toHaveCount(0);
     if(payout) {
       await expect(page.getByRole("region",{name:"Payout and instructions"})).toContainText("₱100.25");
       await page.getByRole("link",{name:"Open saved receipt",exact:true}).click();
