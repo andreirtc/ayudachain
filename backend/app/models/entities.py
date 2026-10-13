@@ -285,3 +285,37 @@ class ListFinalization(Base):
     finalized_name = Column(String(128), nullable=False)
     finalized_at = Column(String(40), nullable=False)
     reason = Column(Text, nullable=False)
+
+
+class HouseholdConcern(Base):
+    __tablename__ = "household_concerns"
+    __table_args__ = (UniqueConstraint("created_by", "request_id", name="uq_concern_retry"),)
+    concern_id = Column(String(64), primary_key=True)
+    beneficiary_id = Column(String(64), nullable=False, index=True)
+    batch_id = Column(String(64), nullable=False, index=True)
+    barangay_id = Column(String(32), nullable=True, index=True)
+    distribution_id = Column(String(64), nullable=True)
+    category = Column(String(24), nullable=False)
+    message = Column(Text, nullable=False)
+    source = Column(String(24), nullable=False)
+    created_by = Column(String(64), nullable=False)
+    created_name = Column(String(128), nullable=False)
+    created_at = Column(String(40), nullable=False)
+    request_id = Column(String(64), nullable=False)
+    request_fingerprint = Column(String(64), nullable=False)
+
+
+class ConcernRevision(Base):
+    __tablename__ = "concern_revisions"
+    __table_args__ = (UniqueConstraint("concern_id", "revision", name="uq_concern_revision"), UniqueConstraint("revised_by", "request_id", name="uq_concern_revision_retry"))
+    id = Column(Integer, primary_key=True)
+    concern_id = Column(String(64), ForeignKey("household_concerns.concern_id"), nullable=False, index=True)
+    revision = Column(Integer, nullable=False)
+    status = Column(String(24), nullable=False)
+    household_message = Column(Text, nullable=False)
+    staff_reason = Column(Text, nullable=False)
+    revised_by = Column(String(64), nullable=False)
+    revised_name = Column(String(128), nullable=False)
+    revised_at = Column(String(40), nullable=False)
+    request_id = Column(String(64), nullable=False)
+    request_fingerprint = Column(String(64), nullable=False)

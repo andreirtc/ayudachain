@@ -77,6 +77,7 @@ export default function HouseholdPage() {
       </section>
       {household && <details ref={details} className="workflow-panel household-details"><summary>Household details and review history</summary><dl className="receipt-references mt-4"><dt>Household reference</dt><dd>{household.beneficiary_id}</dd><dt>DAFAC reference</dt><dd>{household.dafac_id || "Not recorded"}</dd><dt>Relief batch</dt><dd>{household.batch_id}</dd>{household.canonical_beneficiary_id && <><dt>Retained link</dt><dd>{household.canonical_beneficiary_id}</dd></>}</dl><p className="registry-muted mt-4">Ask staff to review incorrect or missing details using your reference. Assistance does not require sharing credentials.</p><Link href="/beneficiaries" className="registry-button mt-4">Open record and review history</Link></details>}
       {!payoutError && payouts.length > 1 && <details className="workflow-panel"><summary>Other saved receipts ({payouts.length-1})</summary><ul>{payouts.slice(1).map(row=><li key={row.distribution_id} className="workflow-record"><Link href={receiptHref(row.distribution_id)} className="registry-button">Receipt {row.distribution_id}</Link><p>{formatPeso(row.amount)} · {formatRecordedDate(row.distributed_at)}</p></li>)}</ul></details>}
+      <Link href="/concerns" className="registry-button">Report or follow up a concern</Link>
     </>}
   </div>;
 }
