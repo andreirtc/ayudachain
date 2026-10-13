@@ -6,7 +6,19 @@ PR workflow: see [STACKED_PRS.md](STACKED_PRS.md). This planning session is the 
 
 Status: unchecked items are planned, not implemented. Work through one numbered item at a time. First establish a runnable baseline; then backend/contracts correctness; then frontend workflow and usability.
 
-Current direction, 2026-10-13: the authorized backend feature pass completed CSV preview/import, own-account synthetic recipient acknowledgement and versioned immutable receipt snapshots, with connected desktop/phone journeys. See [CSV_ONBOARDING.md](CSV_ONBOARDING.md), [RECIPIENT_ACKNOWLEDGEMENT.md](RECIPIENT_ACKNOWLEDGEMENT.md) and [RECEIPT_SNAPSHOTS.md](RECEIPT_SNAPSHOTS.md). Remaining unchecked features and production policies remain separate bounded tasks in the PR stack.
+Current direction, accepted 2026-10-14: adopt the Tonal / Material 3, Sea and Sun proposal and a shorter household journey built around staff-validated lists and organized payouts, retaining current accounting, authenticated roles and audit/receipt safeguards. See [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md) for the selected design, compatibility rules and bounded implementation sequence. This is an accepted plan, not an implemented redesign or scheduling feature.
+
+The previous backend feature pass completed CSV preview/import, own-account synthetic recipient acknowledgement and versioned immutable receipt snapshots. See [CSV_ONBOARDING.md](CSV_ONBOARDING.md), [RECIPIENT_ACKNOWLEDGEMENT.md](RECIPIENT_ACKNOWLEDGEMENT.md) and [RECEIPT_SNAPSHOTS.md](RECEIPT_SNAPSHOTS.md). Remaining unchecked features and production policies stay separate bounded tasks in the PR stack.
+
+## Accepted direction delivery
+
+- [x] Record the accepted Tonal design and streamlined validated-list/payout direction with preservation and acceptance rules. Documentation only; see [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md).
+- [ ] Apply the shared Tonal foundation to supported authenticated screens, preserving routes, states and permissions.
+- [ ] Give households a grounded status/next-action starting point using actual own-household records.
+- [ ] Add versioned staff-validated list preparation/finalization, retaining individual approvals, flags, exclusions and history.
+- [ ] Add scoped payout arrangements and household instructions from actual dates/sites/requirements.
+- [ ] Adapt the focused payout/assisted desk with justified controls and existing accounting/retry safeguards.
+- [ ] Deliver concerns and staff audit layout as separately bounded connected features; retain simple public verification.
 
 The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were compared with PR #16 on 2026-10-12. See [BLUEPRINT_COMPARISON.md](BLUEPRINT_COMPARISON.md) for selected ideas, contradictions and remaining integration gates. Keep the corrected accounting and historical proofs; evaluate the five-role journeys and durable evidence implementation before rebuilding equivalents. Preserve this stacked workflow rather than restarting from the blueprint's older #14 baseline.
 
