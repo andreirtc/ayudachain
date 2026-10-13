@@ -29,6 +29,7 @@ lerna-debug.log*
 # Next.js Build Outputs
 # ==========================================
 .next/
+.next-handoff-qa/
 out/
 build/
 dist/

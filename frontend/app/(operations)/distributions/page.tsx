@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { formatRecordedDate } from "@/lib/recordedDate";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { RefreshCw } from "lucide-react";
 import {
   fetchDistributions,
@@ -28,7 +29,8 @@ import PayoutAnchorStatus from "@/components/PayoutAnchorStatus";
 import RegistryDialog from "@/components/RegistryDialog";
 import ReceiptDetails from "@/components/ReceiptDetails";
 
-export default function DistributionsPage() {
+function DistributionsContent({ requestedId }: { requestedId: string | null }) {
+  const router = useRouter();
   const chain = useChainStatus();
   const { role, account } = useRole();
   const browserOnline = useBrowserOnline();
@@ -42,7 +44,7 @@ export default function DistributionsPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   // New Distribution Form State
-  const [selectedBenId, setSelectedBenId] = useState("");
+  const [selectedBenId, setSelectedBenId] = useState(requestedId ?? "");
   const [amountStr, setAmountStr] = useState("");
   const numericAmount = parseFloat(amountStr) || 0;
   const selectedReceipt = "sample_relief_receipt.svg";
@@ -100,7 +102,7 @@ export default function DistributionsPage() {
     try {
       const [dList, bList, batchList] = await Promise.all([
         fetchDistributions(),
-        fetchBeneficiaries(),
+        fetchBeneficiaries({ include_historical: true }),
         fetchBatches(),
       ]);
       const details =
@@ -184,6 +186,10 @@ export default function DistributionsPage() {
   const selectedBeneficiaryObj = beneficiaries.find(
     (b) => b.beneficiary_id === selectedBenId,
   );
+  const requestedHousehold = beneficiaries.find(
+    (b) => b.beneficiary_id === requestedId,
+  );
+  const householdUnavailable = requestedId !== null && !requestedHousehold;
   const selectedBatch = batches.find(
     (b) => b.batch_id === selectedBeneficiaryObj?.batch_id,
   );
@@ -224,29 +230,34 @@ export default function DistributionsPage() {
     /^\d+(?:\.\d{1,2})?$/.test(amountStr) && numericAmount > 0;
   const blockedReason = !selectedBeneficiaryObj
     ? "Choose a household to begin."
-    : existingPayout
-      ? "A payout is already recorded for this household in this batch."
-      : !selectedIsApproved
-        ? "This household needs DSWD approval before payout."
-        : !selectedBatch || selectedBatch.status !== "ACTIVE"
-          ? "This household's relief batch is not active."
-          : !allocation
-            ? "No allocation is recorded for this barangay and batch."
-            : !amountValid
-              ? "Enter a positive amount with up to two decimal places."
-              : numericAmount > maxGrant
-                ? "The amount exceeds this batch's maximum grant."
-                : Math.round(numericAmount * 100) > remainingCentavos
-                  ? "The amount exceeds the remaining recorded allocation."
-                  : null;
+    : selectedBeneficiaryObj.record_status !== "ACTIVE"
+      ? "This retained duplicate cannot receive a new payout. Its earlier records remain available."
+      : existingPayout
+        ? "A payout is already recorded for this household in this batch."
+        : !selectedIsApproved
+          ? "This household needs DSWD approval before payout."
+          : !selectedBatch || selectedBatch.status !== "ACTIVE"
+            ? "This household's relief batch is not active."
+            : !allocation
+              ? "No allocation is recorded for this barangay and batch."
+              : !amountValid
+                ? "Enter a positive amount with up to two decimal places."
+                : numericAmount > maxGrant
+                  ? "The amount exceeds this batch's maximum grant."
+                  : Math.round(numericAmount * 100) > remainingCentavos
+                    ? "The amount exceeds the remaining recorded allocation."
+                    : null;
   const query = searchTerm.trim().toLowerCase();
-  const filteredPayouts = distributions.filter((d) =>
-    [
-      d.distribution_id,
-      d.beneficiary_id,
-      beneficiaries.find((b) => b.beneficiary_id === d.beneficiary_id)
-        ?.household_name,
-    ].some((value) => value?.toLowerCase().includes(query)),
+  const filteredPayouts = distributions.filter(
+    (d) =>
+      (requestedId === null ||
+        (!householdUnavailable && d.beneficiary_id === requestedId)) &&
+      [
+        d.distribution_id,
+        d.beneficiary_id,
+        beneficiaries.find((b) => b.beneficiary_id === d.beneficiary_id)
+          ?.household_name,
+      ].some((value) => value?.toLowerCase().includes(query)),
   );
   return (
     <div className="registry workflow space-y-6">
@@ -289,8 +300,30 @@ export default function DistributionsPage() {
           </button>
         </div>
       )}
+      {!loading && !loadError && requestedId !== null && (
+        <section
+          aria-label="Household payout context"
+          className="workflow-context space-y-3"
+        >
+          <h2>
+            {requestedHousehold?.household_name || "Household unavailable"}
+          </h2>
+          <p>
+            {requestedHousehold
+              ? `${requestedHousehold.barangay_name}. Showing only this household's recorded payouts.`
+              : "This household was not found in the records available to your account."}
+          </p>
+          {step !== "SUBMITTING" && (
+            <Link href="/distributions" className="registry-button">
+              {role === "DISBURSING"
+                ? "Choose another household"
+                : "View all permitted payouts"}
+            </Link>
+          )}
+        </section>
+      )}
       <div className={role === "DISBURSING" ? "workflow-columns" : ""}>
-        {role === "DISBURSING" && (
+        {role === "DISBURSING" && !householdUnavailable && (
           <section aria-label="Payout entry" className="workflow-panel">
             {browserOnline === false && (
               <div role="alert" className="registry-notice">
@@ -346,6 +379,10 @@ export default function DistributionsPage() {
                   className="registry-button"
                   disabled={loading || !!loadError || anchorBusy}
                   onClick={() => {
+                    if (requestedId !== null) {
+                      router.replace("/distributions", { scroll: false });
+                      return;
+                    }
                     setConfirmedResult(null);
                     setStep("IDLE");
                     setSelectedBenId("");
@@ -380,14 +417,21 @@ export default function DistributionsPage() {
                   <select
                     id="payout-household"
                     value={selectedBenId}
-                    disabled={step === "SUBMITTING" || loading || !!loadError}
+                    disabled={
+                      requestedId !== null ||
+                      step === "SUBMITTING" ||
+                      loading ||
+                      !!loadError
+                    }
                     onChange={(e) => {
                       setSelectedBenId(e.target.value);
                       setSubmitError(null);
                     }}
                   >
                     <option value="">Choose a household</option>
-                    {beneficiaries.map((b) => (
+                    {beneficiaries.filter(
+                      (b) => b.record_status === "ACTIVE" || b.beneficiary_id === requestedId,
+                    ).map((b) => (
                       <option key={b.beneficiary_id} value={b.beneficiary_id}>
                         {b.household_name} ({b.barangay_name})
                       </option>
@@ -524,7 +568,7 @@ export default function DistributionsPage() {
             )}
           </section>
         )}
-        <section
+        {!householdUnavailable && <section
           aria-label="Recorded payouts"
           className="workflow-panel space-y-4"
         >
@@ -549,7 +593,13 @@ export default function DistributionsPage() {
           />
           {!loading && !loadError && filteredPayouts.length === 0 && (
             <div className="registry-empty">
-              <h3>{query ? "No matching payouts" : "No payouts recorded"}</h3>
+              <h3>
+                {query
+                  ? "No matching payouts"
+                  : requestedId !== null
+                    ? "No payouts recorded for this household"
+                    : "No payouts recorded"}
+              </h3>
               <p>
                 {query
                   ? "Try another household name or receipt reference."
@@ -636,7 +686,7 @@ export default function DistributionsPage() {
               ))}
             </ol>
           )}
-        </section>
+        </section>}
       </div>
       {previewReceipt && (
         <RegistryDialog
@@ -662,5 +712,24 @@ export default function DistributionsPage() {
         </RegistryDialog>
       )}
     </div>
+  );
+}
+
+function HouseholdPayoutPage() {
+  const params = useSearchParams();
+  const requestedId = params.get("beneficiary_id");
+  return (
+    <DistributionsContent
+      key={requestedId === null ? "all" : `household:${requestedId}`}
+      requestedId={requestedId}
+    />
+  );
+}
+
+export default function DistributionsPage() {
+  return (
+    <Suspense fallback={<p role="status">Loading payout records...</p>}>
+      <HouseholdPayoutPage />
+    </Suspense>
   );
 }
