@@ -46,7 +46,7 @@ export default function Navbar() {
   ).map((key) => ({
     Icon: icons[key],
     ...destinations[key],
-    href: key === "signIn" ? signIn : destinations[key].href,
+    href: key === "signIn" ? signIn : key === "households" && account?.role === "BENEFICIARY" ? "/household" : destinations[key].href,
     name:
       account?.role === "BENEFICIARY" && key === "households"
         ? "My household"
@@ -61,6 +61,7 @@ export default function Navbar() {
         href={href}
         aria-current={
           pathname === href.split("?")[0] ||
+          (href === "/household" && pathname === "/beneficiaries") ||
           (href === "/dashboard" && pathname.startsWith("/batch/"))
             ? "page"
             : undefined

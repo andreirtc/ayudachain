@@ -89,6 +89,7 @@ test("barangay registers within its scope without eligibility or evidence contro
 
 test("household scope and logout prevent retained private content", async ({ page }) => {
   await login(page, "demo-beneficiary-01");
+  await page.getByText("Household details and review history", { exact: true }).click();
   await expect(page.getByText("BEN-0004", { exact: true })).toBeVisible();
   await expect(page.getByText("BEN-0001", { exact: true })).toHaveCount(0);
   expect((await page.context().request.get(API + "/api/beneficiaries/BEN-0001")).status()).toBe(404);

@@ -17,7 +17,7 @@ const actions = {
   DSWD: ["Review households", "/beneficiaries"],
   BARANGAY: ["Open barangay households", "/beneficiaries"],
   DISBURSING: ["Record a payout", "/distributions"],
-  BENEFICIARY: ["My household", "/beneficiaries"],
+  BENEFICIARY: ["My household", "/household"],
   AUDITOR: ["Inspect records", "/beneficiaries"],
 };
 export default function RoleIndicatorBanner() {

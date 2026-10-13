@@ -14,7 +14,7 @@ The previous backend feature pass completed CSV preview/import, own-account synt
 
 - [x] Record the accepted Tonal design and streamlined validated-list/payout direction with preservation and acceptance rules. Documentation only; see [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md).
 - [x] Apply the shared Tonal foundation to supported authenticated screens, preserving routes, states and permissions. See [TONAL_FOUNDATION.md](TONAL_FOUNDATION.md).
-- [ ] Give households a grounded status/next-action starting point using actual own-household records.
+- [x] Give households a grounded status/next-action starting point using actual own-household records. See [HOUSEHOLD_START.md](HOUSEHOLD_START.md).
 - [ ] Add versioned staff-validated list preparation/finalization, retaining individual approvals, flags, exclusions and history.
 - [ ] Add scoped payout arrangements and household instructions from actual dates/sites/requirements.
 - [ ] Adapt the focused payout/assisted desk with justified controls and existing accounting/retry safeguards.

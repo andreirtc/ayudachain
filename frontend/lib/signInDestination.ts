@@ -10,7 +10,7 @@ export function safeReturnTo(value: string | null): string | null {
     const path = value.split("?")[0];
     if (url.pathname !== path) return null;
     const queryKey = path === "/distributions" ? "beneficiary_id" : path === "/verify" ? "distribution_id" : null;
-    const supported = ["/beneficiaries", "/distributions", "/verify", "/dashboard"].includes(path)
+    const supported = ["/beneficiaries", "/distributions", "/verify", "/dashboard", "/household"].includes(path)
       || /^\/batch\/[A-Za-z0-9_-]+$/.test(path);
     if (!supported) return null;
     if (url.searchParams.size && (!queryKey || url.searchParams.size !== 1 || !url.searchParams.has(queryKey))) return null;
@@ -26,5 +26,5 @@ export function signInHref(destination: string): string {
 }
 
 export function afterSignIn(returnTo: string | null, role: string): string {
-  return safeReturnTo(returnTo) || (role === "DISBURSING" ? "/distributions" : "/beneficiaries");
+  return safeReturnTo(returnTo) || (role === "DISBURSING" ? "/distributions" : role === "BENEFICIARY" ? "/household" : "/beneficiaries");
 }
