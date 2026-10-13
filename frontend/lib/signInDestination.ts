@@ -13,7 +13,7 @@ export function safeReturnTo(value: string | null): string | null {
     const supported = ["/beneficiaries", "/distributions", "/verify", "/dashboard", "/household", "/lists", "/arrangements", "/concerns", "/audit"].includes(path)
       || /^\/batch\/[A-Za-z0-9_-]+$/.test(path);
     if (!supported) return null;
-    if (url.searchParams.size && (!queryKey || url.searchParams.size !== 1 || !url.searchParams.has(queryKey))) return null;
+    if (url.searchParams.size && (!queryKey || url.searchParams.size !== 1 || !(url.searchParams.has(queryKey)||(path==="/beneficiaries"&&url.searchParams.has("search"))))) return null;
     return value;
   } catch {
     return null;

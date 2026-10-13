@@ -24,8 +24,8 @@ test('demo desk, assisted concern, private reply and read-only audit stay connec
  await signOut(page);await login(page,'demo-disbursing-001');await page.goto('/distributions?beneficiary_id='+id);
  await expect(page.getByLabel('Desk checks')).toContainText('Ready to record this amount.');await page.getByRole('button',{name:'Record demo payout',exact:true}).click();await expect(page.getByRole('heading',{name:'Payout recorded',exact:true})).toBeVisible();
  await page.screenshot({path:info.outputPath('recorded-payout.png'),fullPage:true});
- await signOut(page);await login(page,'demo-auditor-01');await page.goto('/audit');await expect(page.getByRole('region',{name:'Recorded funding'})).toContainText('Typhoon Salinlahi');
- const receipts=page.getByRole('region',{name:'Receipt evidence'});await expect(receipts).toContainText(id);await expect(receipts).toContainText('Current proof: not checked in this view.');
+ await signOut(page);await login(page,'demo-auditor-01');await page.goto('/audit');await expect(page.getByLabel('Relief batch',{exact:true})).toHaveValue('RELIEF-2026-001');await expect(page.getByRole('region',{name:'Recorded funding'})).toContainText('Payouts recorded');
+ const receipts=page.getByRole('region',{name:'Receipt evidence'});await expect(receipts).toContainText(id);await expect(receipts).toContainText('Current proof needs a fresh check');
  await page.getByText('Local audit history',{exact:false}).click();await expect(page.getByRole('main')).toContainText('concern replied');expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:info.outputPath('staff-audit.png'),fullPage:true});
  h=await headers(page);expect((await request.post(API+'/api/concerns',{headers:h,data:{}})).status()).toBe(403);
  await receipts.getByRole('link',{name:'Check receipt',exact:true}).first().click();await expect(page).toHaveURL(/\/verify\?distribution_id=/);await expect(page.getByRole('main')).toContainText('unavailable',{ignoreCase:true});

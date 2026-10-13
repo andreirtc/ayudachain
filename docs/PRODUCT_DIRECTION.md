@@ -1,6 +1,6 @@
 # Accepted product direction
 
-Accepted by the user on 2026-10-14 after the branch/design comparison and Philippine disaster-assistance discussion. This records the chosen direction and bounded delivery sequence. The [shared Tonal foundation](TONAL_FOUNDATION.md) is implemented. The [household starting point](HOUSEHOLD_START.md) is also delivered. [Versioned validated lists](VALIDATED_LISTS.md) and [payout arrangements](PAYOUT_ARRANGEMENTS.md) are delivered. The [focused payout desk](PAYOUT_DESK.md), [household concerns and assisted intake](HOUSEHOLD_CONCERNS.md), and [staff audit workspace](STAFF_AUDIT.md) complete the demo feature wiring. Visual iteration is next; non-demo recovery and release work remain separate.
+Accepted by the user on 2026-10-14 after the branch/design comparison and Philippine disaster-assistance discussion. This records the chosen direction and bounded delivery sequence. The [shared Tonal foundation](TONAL_FOUNDATION.md) is implemented. The [household starting point](HOUSEHOLD_START.md) is also delivered. [Versioned validated lists](VALIDATED_LISTS.md) and [payout arrangements](PAYOUT_ARRANGEMENTS.md) are delivered. The [focused payout desk](PAYOUT_DESK.md), [household concerns and assisted intake](HOUSEHOLD_CONCERNS.md), and [staff audit workspace](STAFF_AUDIT.md) complete the demo feature wiring. The [actual Material frontend layouts](MATERIAL_FRONTEND.md) are now delivered for visual evaluation. Human design acceptance and non-demo recovery/release work remain separate.
 
 ## Product and household journey
 

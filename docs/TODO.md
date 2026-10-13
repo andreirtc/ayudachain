@@ -6,7 +6,7 @@ PR workflow: see [STACKED_PRS.md](STACKED_PRS.md). This planning session is the 
 
 Status: unchecked items are planned, not implemented. Work through one numbered item at a time. First establish a runnable baseline; then backend/contracts correctness; then frontend workflow and usability.
 
-Current direction, accepted 2026-10-14: adopt the Tonal / Material 3, Sea and Sun proposal and a shorter household journey built around staff-validated lists and organized payouts, retaining current accounting, authenticated roles and audit/receipt safeguards. See [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md) for the selected design, compatibility rules and bounded implementation sequence. The Tonal foundation, household starting point, versioned validated lists, payout arrangements, authoritative payout desk, concerns/assisted intake and staff audit are delivered. Demo feature wiring is complete; visual iteration and non-demo release work remain.
+Current direction, accepted 2026-10-14: adopt the Tonal / Material 3, Sea and Sun proposal and a shorter household journey built around staff-validated lists and organized payouts, retaining current accounting, authenticated roles and audit/receipt safeguards. See [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md) for the selected design, compatibility rules and bounded implementation sequence. The Tonal foundation, household starting point, versioned validated lists, payout arrangements, authoritative payout desk, concerns/assisted intake and staff audit are delivered. Demo feature wiring is complete. The actual Material frontend layouts are delivered for visual evaluation; human acceptance and non-demo release work remain. See [MATERIAL_FRONTEND.md](MATERIAL_FRONTEND.md).
 
 The previous backend feature pass completed CSV preview/import, own-account synthetic recipient acknowledgement and versioned immutable receipt snapshots. See [CSV_ONBOARDING.md](CSV_ONBOARDING.md), [RECIPIENT_ACKNOWLEDGEMENT.md](RECIPIENT_ACKNOWLEDGEMENT.md) and [RECEIPT_SNAPSHOTS.md](RECEIPT_SNAPSHOTS.md). Remaining unchecked features and production policies stay separate bounded tasks in the PR stack.
 
@@ -87,6 +87,8 @@ The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were 
 - [ ] Run contract tests, backend tests, frontend typecheck/build, and browser walkthrough after relevant changes; stop ignoring build type failures.
 - [ ] Choose shared demo deployment: frontend can use Vercel; backend requires suitable runtime and persistent SQLite storage or migrated PostgreSQL. Configure HTTPS API URL/CORS and testnet configuration.
 - [ ] Update README/user guide to match implemented behavior; clearly identify synthetic data, simulated payments, and genuinely unfinished features.
+
+The full Material frontend pass now implements the requested shared layout and controls across the actual routes, with versioned browser screenshots and a live isolated preview. See [MATERIAL_FRONTEND.md](MATERIAL_FRONTEND.md). Human comprehension/design approval and deferred capabilities remain open.
 
 ## UI design priorities requested by the user
 

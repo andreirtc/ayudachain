@@ -1,119 +1,30 @@
 "use client";
-
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { FormEvent, useEffect, useState } from "react";
 import { useRole } from "@/lib/roleContext";
 import { AccountRole } from "@/lib/api";
 import { useSignInHref } from "@/lib/useSignInHref";
-import ThemeToggle from "@/components/ThemeToggle";
-import { Home, Users, HandCoins, Receipt, LogIn, MessageSquare, ClipboardList } from "lucide-react";
-
-const icons = { overview: Home, households: Users, payouts: HandCoins, receipts: Receipt, signIn: LogIn, concerns: MessageSquare, audit: ClipboardList };
-
-const destinations = {
-  overview: { name: "Overview", href: "/dashboard" },
-  households: { name: "Households", href: "/beneficiaries" },
-  payouts: { name: "Payouts", href: "/distributions" },
-  receipts: { name: "Check a receipt", href: "/verify" },
-  audit: { name: "Audit", href: "/audit" },
-  concerns: { name: "Concerns", href: "/concerns" },
-  signIn: { name: "Sign in", href: "/sign-in" },
-};
-const roleLinks: Record<AccountRole, (keyof typeof destinations)[]> = {
-  DSWD: ["households", "concerns", "audit", "payouts"],
-  BARANGAY: ["households", "concerns", "overview", "receipts"],
-  DISBURSING: ["payouts", "households", "concerns", "receipts"],
-  BENEFICIARY: ["households", "concerns", "payouts", "receipts"],
-  AUDITOR: ["audit", "households", "payouts", "receipts"],
-};
-
-export default function Navbar() {
-  const pathname = usePathname();
-  const signIn = useSignInHref();
-  const { account } = useRole();
-  const mobile = useRef<HTMLDetailsElement>(null);
-  const focusMain = useRef(false);
-  useEffect(() => {
-    if (mobile.current) mobile.current.open = false;
-    if (focusMain.current) {
-      document.getElementById("main-content")?.focus();
-      focusMain.current = false;
-    }
-  }, [pathname, account?.id]);
-  const links = (
-    account
-      ? roleLinks[account.role]
-      : (["overview", "receipts", "signIn"] as (keyof typeof destinations)[])
-  ).map((key) => ({
-    Icon: icons[key],
-    ...destinations[key],
-    href: key === "signIn" ? signIn : key === "households" && account?.role === "BENEFICIARY" ? "/household" : destinations[key].href,
-    name:
-      account?.role === "BENEFICIARY" && key === "households"
-        ? "My household"
-        : account?.role === "BENEFICIARY" && key === "payouts"
-          ? "My payouts"
-          : destinations[key].name,
-  }));
-  const navigation = (isMobile: boolean) =>
-    links.map(({ name, href, Icon }) => (
-      <Link
-        key={href}
-        href={href}
-        aria-current={
-          pathname === href.split("?")[0] ||
-          (href === "/household" && pathname === "/beneficiaries") ||
-          (href === "/dashboard" && pathname.startsWith("/batch/"))
-            ? "page"
-            : undefined
-        }
-        onClick={() => {
-          if (!isMobile) return;
-          if (mobile.current) mobile.current.open = false;
-          if (pathname === href)
-            document.getElementById("main-content")?.focus();
-          else focusMain.current = true;
-        }}
-      >
-        <Icon size={20} aria-hidden="true" /><span>{name}</span>
-      </Link>
-    ));
-  return (
-    <header className="app-shell">
-      <a href="#main-content" className="app-skip-link">
-        Skip to content
-      </a>
-      <div className="app-shell-row">
-        <Link href="/" className="app-brand">
-          <img src="/logo-emblem.png" alt="" width={36} height={36} />
-          <span className="app-brand-text"><span className="app-wordmark">AyudaChain</span><span className="app-demo-tag">Synthetic demo</span></span>
-        </Link>
-        <nav aria-label="Main navigation" className="app-desktop-nav">
-          {navigation(false)}
-        </nav>
-        <ThemeToggle />
-        <details
-          ref={mobile}
-          className="app-mobile-nav"
-          onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              event.preventDefault();
-              if (mobile.current) mobile.current.open = false;
-              mobile.current?.querySelector("summary")?.focus();
-            }
-          }}
-          onBlur={(event) => {
-            if (
-              !event.currentTarget.contains(event.relatedTarget as Node | null)
-            )
-              event.currentTarget.open = false;
-          }}
-        >
-          <summary>Menu</summary>
-          <nav aria-label="Mobile navigation">{navigation(true)}</nav>
-        </details>
-      </div>
-    </header>
-  );
+import BrandMark from "@/components/BrandMark";
+import RoleIndicatorBanner from "@/components/RoleIndicatorBanner";
+import { Home, Users, HandCoins, Receipt, LogIn, MessageSquare, ClipboardList, Search } from "lucide-react";
+const destinations={overview:{name:'Overview',href:'/dashboard',Icon:Home},households:{name:'Households',href:'/beneficiaries',Icon:Users},payouts:{name:'Payouts',href:'/distributions',Icon:HandCoins},receipts:{name:'Receipts',href:'/verify',Icon:Receipt},concerns:{name:'Concerns',href:'/concerns',Icon:MessageSquare},audit:{name:'Audit',href:'/audit',Icon:ClipboardList},signIn:{name:'Sign in',href:'/sign-in',Icon:LogIn}};
+const roleLinks:Record<AccountRole,(keyof typeof destinations)[]>={DSWD:['households','concerns','audit','payouts'],BARANGAY:['households','concerns','overview','receipts'],DISBURSING:['payouts','households','concerns','receipts'],BENEFICIARY:['households','payouts','concerns','receipts'],AUDITOR:['audit','households','payouts','receipts']};
+export default function Navbar(){
+ const pathname=usePathname(),router=useRouter(),signIn=useSignInHref(),{account}=useRole();const [query,setQuery]=useState('');
+ useEffect(()=>setQuery(''),[account?.id]);
+ const householdSearch=!!account&&account.role!=='BENEFICIARY';
+ function search(e:FormEvent){e.preventDefault();if(!query.trim())return;router.push(householdSearch?'/beneficiaries?'+new URLSearchParams({search:query.trim()}):'/verify?'+new URLSearchParams({distribution_id:query.trim()}));}
+ const links=(account?roleLinks[account.role]:['overview','receipts','signIn'] as (keyof typeof destinations)[]).map(key=>{const item=destinations[key];return {...item,href:key==='signIn'?signIn:key==='households'&&account?.role==='BENEFICIARY'?'/household':item.href,name:key==='households'&&account?.role==='BENEFICIARY'?'Home':item.name};});
+ const nav=(label:string)=><nav aria-label={label}>{links.map(({name,href,Icon})=><Link key={href} href={href} aria-current={pathname===href.split('?')[0]||(href==='/household'&&pathname==='/beneficiaries')||(href==='/dashboard'&&pathname.startsWith('/batch/'))?'page':undefined}><span className="nav-icon"><Icon size={22} aria-hidden="true"/></span><span>{name}</span></Link>)}</nav>;
+ return <header className="app-shell">
+   <a href="#main-content" className="app-skip-link">Skip to content</a>
+   <div className="app-shell-row">
+     <Link href="/" className="app-brand" aria-label="AyudaChain home"><BrandMark/><span className="app-wordmark">AyudaChain</span></Link>
+     <form onSubmit={search} className="app-search" role="search"><Search size={21} aria-hidden="true"/><input aria-label={householdSearch?'Search households and references':'Search receipt reference'} placeholder={householdSearch?'Search households and references':'Search a receipt reference'} value={query} onChange={e=>setQuery(e.target.value)} maxLength={128}/><button type="submit" className="sr-only">Search</button></form>
+     <RoleIndicatorBanner/>
+   </div>
+   <div className="app-desktop-nav">{nav('Main navigation')}</div>
+   <div className="app-bottom-nav">{nav('Mobile navigation')}</div>
+ </header>;
 }

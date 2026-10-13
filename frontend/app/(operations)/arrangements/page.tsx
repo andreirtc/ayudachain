@@ -51,7 +51,7 @@ export default function ArrangementsPage() {
   function revise(event:FormEvent){event.preventDefault();if(!selected)return;void run(()=>reviseArrangement(selected.arrangement_id,{request_id:retry.current!,expected_revision:selected.current.revision,action:cancelling?"CANCEL":"EDIT",reason,details:cancelling||!edit?null:tidy(edit)}),cancelling?"Arrangement cancelled. Households now see the cancellation.":"Updated arrangement saved; earlier revisions stay retained.");}
   if(account?.role==="BENEFICIARY")return <section className="registry space-y-3"><h1>Payout arrangements are a staff task</h1><p>Your collection instructions appear on your household home.</p><Link href="/household" className="registry-button">My household</Link></section>;
   const cancelled=selected?.current.state==="CANCELLED";
-  return <div className="registry workflow space-y-6">
+  return <div className="registry workflow arrangements-page space-y-6">
     <header className="registry-header"><div><h1>Payout arrangements</h1><p className="registry-description">Publish the collection date, site and requirements for a finalized list. Included households see these instructions on their home.</p></div><Link href="/lists" className="registry-button">Validated lists</Link></header>
     {!online&&<p role="alert" className="registry-notice">Offline. These are the last loaded arrangements. Reconnect before publishing or changing; nothing is queued.</p>}
     {loading&&<p role="status">Loading arrangements...</p>}
@@ -65,10 +65,10 @@ export default function ArrangementsPage() {
             <label htmlFor="arrangement-list">Finalized list version</label><select id="arrangement-list" disabled={busy} value={listId} onChange={e=>{setListId(e.target.value);changed();}}>{open.map(l=><option key={l.list_id} value={l.list_id}>{l.snapshot.barangay_name} · version {l.version} · {l.snapshot.rows.filter(r=>r.included).length} included</option>)}</select>
             <DetailsFields value={draft} disabled={busy} onChange={v=>{setDraft(v);changed();}} />
             <button className="registry-button registry-primary" disabled={busy||!online||!listId}>{busy?"Saving...":"Publish arrangement"}</button></>}
-          <p className="registry-muted">An arrangement tells households where and when to collect. It does not approve anyone or authorize a payout; eligibility, budget and once-only checks still apply at the desk. No SMS is sent.</p>
+          <p className="registry-muted">Collection instructions only. The payout desk still checks approval and funding. No SMS is sent.</p>
         </form>}
         <section className="workflow-panel space-y-3" aria-label="Arrangements"><div className="workflow-section-heading"><h2>Published arrangements</h2><button className="registry-button" disabled={busy||loading||!online} onClick={()=>void load()}>Refresh</button></div>
-          {!arrangements.length?<p>No arrangements have been published in your scope.</p>:<ul>{arrangements.map(a=><li className="workflow-record" key={a.arrangement_id}><Link className="registry-button" aria-current={a.arrangement_id===selected?.arrangement_id?"page":undefined} href={"/arrangements?"+new URLSearchParams({list_id:a.list_id})}>{a.barangay_name} · {collectionDay(a.current.collection_date)}</Link><p>{a.current.state==="CANCELLED"?"Cancelled":"Scheduled"} · list version {a.list_version}{a.superseded?" · Superseded by a newer list":""}</p></li>)}</ul>}
+          {!arrangements.length?<p>No arrangements have been published in your scope.</p>:<ul>{arrangements.map(a=><li className="workflow-record" key={a.arrangement_id}><Link className="version-row" aria-current={a.arrangement_id===selected?.arrangement_id?"page":undefined} href={"/arrangements?"+new URLSearchParams({list_id:a.list_id})}>{a.barangay_name} · {collectionDay(a.current.collection_date)}</Link><p>{a.current.state==="CANCELLED"?"Cancelled":"Scheduled"} · list version {a.list_version}{a.superseded?" · Superseded by a newer list":""}</p></li>)}</ul>}
         </section>
       </div>
       <section className="workflow-panel space-y-4" aria-label="Selected arrangement">

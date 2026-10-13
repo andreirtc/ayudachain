@@ -106,6 +106,8 @@ cd frontend
 
 ## Documentation
 
+- [Material frontend and real screenshots](docs/MATERIAL_FRONTEND.md) — The groupmate’s Google-style layouts applied to the actual routes.
+
 - [User Guide & Role Walkthrough](docs/USER_GUIDE.md) — Current authenticated role tasks and public receipt checks.
 - [Technical Architecture Specification](docs/architecture.md) — In-depth hybrid off-chain/on-chain design.
 - [Smart Contract & Blockchain Spec](docs/blockchain-spec.md) — Gas optimization, data structures, and Polygon Amoy deployment.

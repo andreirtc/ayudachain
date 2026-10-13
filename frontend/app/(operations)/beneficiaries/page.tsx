@@ -69,10 +69,11 @@ function Status({ ben }: { ben: Beneficiary }) {
 export default function BeneficiariesPage() {
   const params = useSearchParams();
   const requestedHousehold = params.getAll("beneficiary_id").length > 1 ? "" : params.get("beneficiary_id");
-  return <RegistryBody key={requestedHousehold ?? "direct-registry"} requestedHousehold={requestedHousehold} />;
+  const requestedSearch=params.get("search") || "";
+  return <RegistryBody key={(requestedHousehold ?? "direct-registry")+requestedSearch} requestedHousehold={requestedHousehold} requestedSearch={requestedSearch} />;
 }
 
-function RegistryBody({ requestedHousehold }: { requestedHousehold: string | null }) {
+function RegistryBody({ requestedHousehold,requestedSearch }: { requestedHousehold: string | null;requestedSearch:string }) {
   const { role, account } = useRole();
   const online = useBrowserOnline();
   const [registeredId, setRegisteredId] = useState<string | null>(null);
@@ -86,7 +87,7 @@ function RegistryBody({ requestedHousehold }: { requestedHousehold: string | nul
   const [showHistorical, setShowHistorical] = useState(false);
   const [canonicalId, setCanonicalId] = useState("");
   const [filterFlagged, setFilterFlagged] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(requestedSearch);
   const [selectedBen, setSelectedBen] = useState<Beneficiary | null>(null);
   const [reviewReason, setReviewReason] = useState("");
   const reviewer = account?.id;
@@ -310,8 +311,7 @@ function RegistryBody({ requestedHousehold }: { requestedHousehold: string | nul
   const reviewDisabled = reviewSaving || !online || !reviewReason.trim();
   if (requestedHousehold !== null && !loading && !loadError && !beneficiaries.some(b=>b.beneficiary_id===requestedHousehold)) return <section className="registry space-y-4"><h1>Household unavailable</h1><p>That exact household is missing or outside your scope. No other record was substituted.</p><Link className="registry-button" href="/beneficiaries">Open household registry</Link></section>;
   return (
-    <div className="registry space-y-6">
-      {role !== "BENEFICIARY" && <Link className="registry-button" href="/lists">Validated lists</Link>}
+    <div className="registry registry-page space-y-6">
       <header className="registry-header">
         <div>
           <p className="registry-eyebrow">
@@ -334,6 +334,7 @@ function RegistryBody({ requestedHousehold }: { requestedHousehold: string | nul
                     : "Inspect household decisions and retained evidence."}
           </p>
         </div>
+        <div className="flex flex-wrap gap-2">{role!=="BENEFICIARY"&&<Link className="registry-button" href="/lists">Validated lists</Link>}
         {canRegister && (
           <button
             onClick={() => {
@@ -345,7 +346,7 @@ function RegistryBody({ requestedHousehold }: { requestedHousehold: string | nul
             <UserPlus size={18} aria-hidden="true" />
             Register a household
           </button>
-        )}
+        )}</div>
       </header>
       {!online && (
         <p role="status" className="registry-notice">
@@ -353,7 +354,7 @@ function RegistryBody({ requestedHousehold }: { requestedHousehold: string | nul
           queued.
         </p>
       )}
-      <section aria-label="Household list" className="registry-panel">
+      <div className={"registry-workspace "+(selectedBen?"has-selection":"")}><section aria-label="Household list" className="registry-panel">
         <div className="registry-list-tools">
           <div className="registry-search">
             <label htmlFor="household-search">Search households</label>
@@ -362,7 +363,7 @@ function RegistryBody({ requestedHousehold }: { requestedHousehold: string | nul
               <input
                 id="household-search"
                 type="search"
-                placeholder="Search household name, ID, barangay..."
+                placeholder="Name or reference"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -456,99 +457,14 @@ function RegistryBody({ requestedHousehold }: { requestedHousehold: string | nul
           </div>
         )}
         {!loading && !loadError && filteredList.length > 0 && (
-          <table className="registry-table">
-            <caption className="sr-only">
-              Households available to your account
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">Household</th>
-                <th scope="col">Barangay</th>
-                <th scope="col">Status</th>
-                <th scope="col">
-                  <span className="sr-only">Action</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredList.map((ben) => (
-                <tr key={ben.beneficiary_id}>
-                  <td>
-                    <p className="registry-household-name">
-                      {ben.household_name}
-                    </p>
-                    <p className="registry-record-id">{ben.beneficiary_id}</p>
-                  </td>
-                  <td data-label="Barangay">{ben.barangay_name}</td>
-                  <td data-label="Status">
-                    <Status ben={ben} />
-                    {ben.record_status !== "DUPLICATE" &&
-                      (ben.duplicate_flag || ben.anomaly_flag) && (
-                        <p className="registry-flag">
-                          {ben.duplicate_flag
-                            ? "Possible duplicate"
-                            : "Amount needs review"}
-                        </p>
-                      )}
-                  </td>
-                  <td>
-                    <button
-                      className="registry-button registry-text-button"
-                      aria-label={
-                        (role === "DSWD" ? "Review " : "Inspect ") +
-                        ben.household_name
-                      }
-                      onClick={() => setSelectedBen(ben)}
-                    >
-                      {role === "DSWD" ? "Review" : "Inspect"}
-                      <ArrowRight size={16} aria-hidden="true" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <ul className="registry-household-list" aria-label="Household records" tabIndex={0}>
+            {filteredList.map(ben=><li key={ben.beneficiary_id}><button className="registry-household-row" aria-pressed={selectedBen?.beneficiary_id===ben.beneficiary_id} aria-label={(role==='DSWD'?'Review ':'Inspect ')+ben.household_name} onClick={()=>setSelectedBen(ben)}><span className="household-avatar" aria-hidden="true">{ben.household_name.split(' ').slice(0,2).map(w=>w[0]).join('')}</span><span><span className="registry-household-name">{ben.household_name}</span><span className="registry-row-meta">{ben.barangay_name} · <Status ben={ben}/></span>{ben.record_status!=='DUPLICATE'&&(ben.duplicate_flag||ben.anomaly_flag)&&<span className="registry-flag">{ben.duplicate_flag?'Possible duplicate':'Amount needs review'}</span>}</span></button></li>)}
+          </ul>
         )}
       </section>
-      {role !== "BENEFICIARY" && (
-        <details className="registry-secondary">
-          <summary>More registry options</summary>
-          <div className="registry-secondary-options">
-            <label className="registry-checkbox">
-              <input
-                type="checkbox"
-                checked={showHistorical}
-                onChange={(e) => setShowHistorical(e.target.checked)}
-              />
-              Include historical duplicates
-            </label>
-            {role === "DSWD" && <button className="registry-button" onClick={() => setShowCsvImport(true)}>Import a CSV</button>}
-            {role === "DSWD" && (
-              <button
-                onClick={() => {
-                  setCsvFile(null);
-                  setCsvError(null);
-                  setShowCsvModal(true);
-                }}
-                className="registry-button"
-              >
-                <FileSpreadsheet size={18} aria-hidden="true" />
-                Analyze a CSV
-              </button>
-            )}
-          </div>
-        </details>
-      )}
-      {selectedBen && (
-        <RegistryDialog
-          title={
-            role === "DSWD" && selectedBen.record_status !== "DUPLICATE"
-              ? "Review household"
-              : "Household details"
-          }
-          busy={reviewSaving}
-          onClose={() => setSelectedBen(null)}
-        >
+      {selectedBen ? (
+        <section className="registry-case" aria-label="Selected household">
+          <div className="registry-case-heading"><h2 tabIndex={-1}>{role==='DSWD'&&selectedBen.record_status!=='DUPLICATE'?'Review household':'Household details'}</h2><button className="registry-button registry-text-button" disabled={reviewSaving} onClick={()=>setSelectedBen(null)}>Back to list</button></div>
           <div className="registry-dialog-content">
             {registeredId === selectedBen.beneficiary_id && (
               <p role="status" className="registry-success">
@@ -578,9 +494,7 @@ function RegistryBody({ requestedHousehold }: { requestedHousehold: string | nul
               ) : selectedStatus === "Approved" ? (
                 <>
                   <p>
-                    Eligibility approved. The Disbursing Officer checks the
-                    active batch, funding and prior payouts before recording a
-                    payout.
+                    Eligibility approved. The desk checks funding and earlier payouts.
                   </p>
                 </>
               ) : selectedStatus === "Rejected" ? (
@@ -840,9 +754,10 @@ function RegistryBody({ requestedHousehold }: { requestedHousehold: string | nul
               Back to households
             </button>
           </div>
-        </RegistryDialog>
-      )}
-      {showAddModal && (
+        </section>
+      ) : <section className="registry-case registry-case-empty" aria-label="Household details"><Search size={32} aria-hidden="true"/><h2>Choose a household</h2><p>Open a record to review its details, decisions and next step.</p></section>}
+      </div>
+{showAddModal && (
         <RegistryDialog
           title="Register a household"
           busy={isSubmitting}
