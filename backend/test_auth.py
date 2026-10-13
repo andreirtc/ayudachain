@@ -124,6 +124,7 @@ class TestSessions(unittest.TestCase):
     def test_beneficiary_reads_only_own_household(self):
         from pathlib import Path
         self.login("demo-disbursing-001")
+        Path(config.RECEIPTS_DIR, "own-household.svg").write_text("<svg xmlns='http://www.w3.org/2000/svg'><text>Fictional BEN-0004</text></svg>")
         payout = self.client.post("/api/distributions/confirm", headers={"Idempotency-Key": "own-file-scope"}, json={"beneficiary_id": "BEN-0004", "batch_id": "RELIEF-2026-001", "amount": 5000, "receipt_filename": "own-household.svg", "ocr_raw_text": "Fictional BEN-0004 receipt"})
         self.assertEqual(payout.status_code, 201, payout.text)
         Path(config.RECEIPTS_DIR, "own-household.svg").write_text("<svg xmlns='http://www.w3.org/2000/svg'><text>Fictional BEN-0004</text></svg>")
@@ -136,7 +137,7 @@ class TestSessions(unittest.TestCase):
         self.assertEqual(self.client.get("/api/beneficiaries/BEN-0001").status_code, 404)
         self.assertEqual(self.client.get("/api/beneficiaries/BEN-0001/reviews").status_code, 404)
         self.assertEqual(self.client.get("/receipts/DIST-0001.svg").status_code, 404)
-        self.assertEqual(self.client.get("/receipts/own-household.svg").status_code, 200)
+        self.assertEqual(self.client.get(payout.json()["receipt_file_path"]).status_code, 200)
         self.assertEqual(self.client.get("/receipts/other-household.svg").status_code, 404)
         self.assertTrue(all(row["beneficiary_id"] == "BEN-0004" for row in self.client.get("/api/distributions").json()))
 

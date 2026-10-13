@@ -87,6 +87,8 @@ try {
   const pages = [];
   const labels = { VERIFIED: "Receipt hash verified", MISMATCH: "Receipt hash mismatch", UNANCHORED: "No receipt anchor found", UNAVAILABLE: "Verification unavailable" };
   const observations = [];
+  let v2;
+  const canonical = value => Array.isArray(value) ? value.map(canonical) : value && typeof value === "object" ? Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])])) : value;
   async function observe(page, mode, state, id) {
     const response = await page.context().request.post(api + "/api/blockchain/verify", { headers: { "X-AyudaChain-Client": "web", Origin: "http://127.0.0.1:3102" }, data: { distribution_id: id } });
     assert.equal(response.status(), 200);
@@ -107,6 +109,37 @@ try {
       const url = new URL(route.request().url()); url.hostname = "127.0.0.1"; url.port = "8102";
       return route.continue({ url: url.toString() });
     });
+    await page.goto("http://127.0.0.1:3102/sign-in");
+    await page.getByRole("textbox", { name: "Account", exact: true }).fill("demo-disbursing-001");
+    await page.getByLabel("Password", { exact: true }).fill("synthetic-test-password-only");
+    await page.getByRole("button", { name: "Sign in", exact: true }).click();
+    await expect(page.getByText("Authenticated synthetic account.", { exact: false })).toBeVisible();
+    const session = await (await page.context().request.get(api + "/api/auth/session")).json();
+    if (!v2) {
+      const response = await page.context().request.post(api + "/api/distributions/confirm", { timeout: 120000, headers: { "X-AyudaChain-Client": "web", "X-CSRF-Token": session.csrf_token, Origin: "http://127.0.0.1:3102", "Idempotency-Key": "snapshot-live" }, data: { distribution_id: "DIST-LIVE-SNAPSHOT", beneficiary_id: "BEN-0004", batch_id: "RELIEF-2026-001", amount: "100.25", receipt_filename: "captured-synthetic.svg", ocr_raw_text: "Controlled synthetic receipt evidence" } });
+      assert.equal(response.status(), 201); v2 = await response.json();
+      assert.equal(v2.receipt_version, 2); assert.equal(v2.anchor_job.state, "CONFIRMED");
+      assert.equal(v2.receipt_hash, ethers.sha256(Buffer.from(JSON.stringify(canonical(v2.receipt_snapshot)))));
+      const bytes = await (await page.context().request.get(api + v2.receipt_file_path)).body();
+      assert.equal(ethers.sha256(bytes), v2.receipt_snapshot.receipt.document.sha256);
+      const replay = await page.context().request.post(api + "/api/distributions/confirm", { headers: { "X-AyudaChain-Client": "web", "X-CSRF-Token": session.csrf_token, Origin: "http://127.0.0.1:3102", "Idempotency-Key": "snapshot-live" }, data: { distribution_id: "DIST-LIVE-SNAPSHOT", beneficiary_id: "BEN-0004", batch_id: "RELIEF-2026-001", amount: "100.25", receipt_filename: "captured-synthetic.svg", ocr_raw_text: "Controlled synthetic receipt evidence" } });
+      assert.equal(replay.status(), 200); assert.equal((await replay.json()).receipt_hash, v2.receipt_hash);
+    }
+    await page.goto("http://127.0.0.1:3102/verify?distribution_id=" + v2.distribution_id);
+    await observe(page, mode + "-v2", "VERIFIED", v2.distribution_id);
+    await change("v2-mismatch"); await page.getByRole("button", { name: "Check again", exact: true }).click();
+    await observe(page, mode + "-v2", "MISMATCH", v2.distribution_id);
+    await change("v2-restore"); await page.getByRole("button", { name: "Check again", exact: true }).click();
+    await observe(page, mode + "-v2-restored", "VERIFIED", v2.distribution_id);
+    await change("v2-registry"); await page.reload();
+    await observe(page, mode + "-v2-renamed", "VERIFIED", v2.distribution_id);
+    await page.getByText("Captured receipt snapshot (version 2)", { exact: true }).click();
+    await expect(page.getByRole("definition").filter({ hasText: /^Danilo Soriano$/ })).toBeVisible();
+    const captured = await (await page.context().request.get(api + v2.receipt_file_path)).body();
+    assert.equal(ethers.sha256(captured), v2.receipt_snapshot.receipt.document.sha256);
+    await page.getByText("Captured receipt snapshot (version 2)", { exact: true }).scrollIntoViewIfNeeded();
+    await page.screenshot({ path: path.join(directory, mode + "-v2-captured.png") });
+    await page.getByRole("button", { name: "Sign out", exact: true }).click();
     await page.goto("http://127.0.0.1:3102/verify?distribution_id=DIST-0001");
     await observe(page, mode, "VERIFIED", "DIST-0001");
     await change("mismatch");
@@ -124,7 +157,7 @@ try {
     await observe(page, mode, "UNAVAILABLE", "DIST-UI-UNANCHORED");
   }
   await writeFile(path.join(directory, "observations.json"), JSON.stringify(observations, null, 2));
-  console.log("10 real-chain UI observations passed, including tamper restoration, at both viewport sizes.");
+  console.log("18 real-chain UI observations passed (v1 and v2), including tamper restoration, at both viewport sizes.");
   console.log("Artifacts: " + directory);
 } finally {
   if (browser) await browser.close();

@@ -20,6 +20,8 @@ from auth_support import accounts_fixture
 accounts_fixture(directory)
 from app import config
 config.CORS_ORIGINS = ["http://127.0.0.1:3102"]
+(directory / "receipts").mkdir(exist_ok=True)
+(directory / "receipts" / "captured-synthetic.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="120"><text x="20" y="50">Controlled synthetic receipt evidence</text></svg>')
 from app.main import app
 
 if __name__ == "__main__":

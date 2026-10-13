@@ -23,6 +23,7 @@ def seed_database():
     # Drop and recreate tables for clean reset
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
+    init_db()  # Reinstall additive protections after an explicit isolated reset.
 
     # Save sample receipt SVG asset
     receipts_dir = config.RECEIPTS_DIR

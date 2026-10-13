@@ -26,9 +26,10 @@ test("payout receipt dialog is keyboard accessible and links to its exact record
   page,
 }, info) => {
   await login(page, "demo-disbursing-001");
-  const open = page
-    .getByRole("button", { name: "View receipt", exact: true })
-    .first();
+  const records = await (await page.context().request.get(API + "/api/distributions")).json();
+  const noImage = records.find((row: { receipt_file_path: string | null }) => !row.receipt_file_path);
+  expect(noImage).toBeTruthy();
+  const open = page.getByRole("region", { name: "Recorded payouts", exact: true }).locator("li.workflow-record").filter({ hasText: noImage.distribution_id }).getByRole("button", { name: "View receipt", exact: true });
   await open.click();
   const dialog = page.getByRole("dialog");
   await expect(

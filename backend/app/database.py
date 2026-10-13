@@ -18,6 +18,7 @@ def init_db():
     Base.metadata.create_all(bind=engine)
     _migrate_payout_idempotency()
     _migrate_beneficiary_history()
+    _protect_receipt_snapshots()
 
 def _migrate_payout_idempotency():
     """Add retry metadata to the preceding SQLite schema without deleting payouts."""
@@ -99,3 +100,11 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def _protect_receipt_snapshots():
+    """No ordinary update/delete of captured originals on the supported SQLite DB."""
+    if engine.dialect.name == "sqlite":
+        with engine.begin() as connection:
+            for operation in ("UPDATE", "DELETE"):
+                connection.exec_driver_sql(f"CREATE TRIGGER IF NOT EXISTS receipt_snapshot_no_{operation.lower()} BEFORE {operation} ON receipt_snapshots BEGIN SELECT RAISE(ABORT, 'Receipt snapshots are immutable'); END")
