@@ -132,6 +132,8 @@ def authorize_request(request: Request):
         return
     actor = require_actor(request)
     if method in {"GET", "HEAD"}:
+        if path.startswith("/api/validated-lists") and actor.role == "BENEFICIARY":
+            raise HTTPException(403, "Validated lists are a private staff workflow.")
         if (path.startswith("/api/distributions") or path.startswith("/receipts/")) and actor.role == "BARANGAY":
             raise HTTPException(403, "Named payout records are not part of the barangay workflow.")
         if path.endswith("/reviews") and actor.role in {"BARANGAY", "DISBURSING"}:
@@ -143,6 +145,8 @@ def authorize_request(request: Request):
         return
     allowed = {"DSWD"}
     if path == "/api/beneficiaries":
+        allowed = {"DSWD", "BARANGAY"}
+    elif path == "/api/validated-lists/prepare":
         allowed = {"DSWD", "BARANGAY"}
     elif path == "/api/distributions/confirm" or (path.startswith("/api/distributions/") and path.endswith("/anchor/retry")):
         allowed = {"DISBURSING"}

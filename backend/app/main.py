@@ -68,6 +68,8 @@ from app.services.csv_onboarding import router as csv_router
 app.include_router(csv_router)
 from app.services.recipient_acknowledgement import router as acknowledgement_router
 app.include_router(acknowledgement_router)
+from app.services.validated_lists import router as lists_router
+app.include_router(lists_router)
 
 @app.middleware("http")
 async def no_store(request, call_next):

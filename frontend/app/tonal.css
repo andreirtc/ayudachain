@@ -70,6 +70,8 @@
 .operations .household-next { border-radius:28px; padding:28px; background:var(--md-primary-container); color:var(--md-on-primary-container); }
 .operations .household-next .registry-eyebrow { color:inherit; }
 .operations .household-details { scroll-margin-top:150px; }
+.operations .list-frozen-rows { max-height:620px; overflow:auto; overscroll-behavior:contain; padding-right:8px; }
+.operations .list-frozen-rows:focus-visible { outline:3px solid var(--md-primary); outline-offset:3px; }
 .operations :is(.workflow-context,.registry-history-entry,.registry-csv-pair,.receipt-summary) { background:var(--md-surface-container); border:0; border-radius:16px; }
 .operations :is(input:not([type=checkbox]),select,textarea) { min-height:44px; border:1px solid var(--md-outline); border-radius:4px; background:var(--md-surface-container-lowest); color:var(--md-on-surface); font-size:16px; }
 .operations :is(input,textarea)::placeholder { color:var(--md-on-surface-variant); opacity:1; }
@@ -115,6 +117,8 @@
 .operations .app-mobile-nav summary { border-color:var(--md-outline); border-radius:24px; }
 .operations .app-mobile-nav nav { background:var(--md-surface-container-high); border-color:var(--md-outline-variant); }
 @media(max-width:900px) {
+  .operations .list-workspace { display:flex; flex-direction:column; align-items:stretch; }
+  .operations .list-workspace > section { order:-1; }
   .operations .app-shell { position:sticky; inset:auto; width:100%; }
   .operations .app-shell-row { flex-direction:row; align-items:center; gap:8px; padding:12px 16px; flex-wrap:wrap; }
   .operations .app-brand { margin-right:auto; }

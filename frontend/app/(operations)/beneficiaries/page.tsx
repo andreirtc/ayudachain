@@ -26,6 +26,7 @@ import {
   resolveBeneficiaryDuplicate,
 } from "@/lib/api";
 import { useRole } from "@/lib/roleContext";
+import { useSearchParams } from "next/navigation";
 
 const barangays: Record<string, string> = {
   "BRGY-001": "San Isidro",
@@ -66,6 +67,12 @@ function Status({ ben }: { ben: Beneficiary }) {
 }
 
 export default function BeneficiariesPage() {
+  const params = useSearchParams();
+  const requestedHousehold = params.getAll("beneficiary_id").length > 1 ? "" : params.get("beneficiary_id");
+  return <RegistryBody key={requestedHousehold ?? "direct-registry"} requestedHousehold={requestedHousehold} />;
+}
+
+function RegistryBody({ requestedHousehold }: { requestedHousehold: string | null }) {
   const { role, account } = useRole();
   const online = useBrowserOnline();
   const [registeredId, setRegisteredId] = useState<string | null>(null);
@@ -83,7 +90,7 @@ export default function BeneficiariesPage() {
   const [selectedBen, setSelectedBen] = useState<Beneficiary | null>(null);
   const [reviewReason, setReviewReason] = useState("");
   const reviewer = account?.id;
-  const canRegister = role === "DSWD" || role === "BARANGAY";
+  const canRegister = requestedHousehold === null && (role === "DSWD" || role === "BARANGAY");
   const canInspectHistory =
     role === "DSWD" || role === "AUDITOR" || role === "BENEFICIARY";
   const [reviews, setReviews] = useState<BeneficiaryReview[]>([]);
@@ -113,7 +120,7 @@ export default function BeneficiariesPage() {
     setLoadError(null);
     try {
       const data = await fetchBeneficiaries({
-        include_historical: showHistorical,
+        include_historical: showHistorical || requestedHousehold !== null,
       });
       if (version === loadVersion.current) setBeneficiaries(data);
     } catch (err) {
@@ -132,7 +139,10 @@ export default function BeneficiariesPage() {
     return () => {
       loadVersion.current++;
     };
-  }, [showHistorical, account?.id]);
+  }, [showHistorical, account?.id, requestedHousehold]);
+  useEffect(() => {
+    if (requestedHousehold !== null && !loading && !loadError) setSelectedBen(beneficiaries.find(b=>b.beneficiary_id===requestedHousehold) || null);
+  }, [requestedHousehold, loading, loadError, beneficiaries]);
 
   useEffect(() => {
     setReviewReason("");
@@ -298,8 +308,10 @@ export default function BeneficiariesPage() {
   const selectedStatus = selectedBen ? householdStatus(selectedBen) : "";
   const canInspectEvidence = role === "DSWD" || role === "AUDITOR";
   const reviewDisabled = reviewSaving || !online || !reviewReason.trim();
+  if (requestedHousehold !== null && !loading && !loadError && !beneficiaries.some(b=>b.beneficiary_id===requestedHousehold)) return <section className="registry space-y-4"><h1>Household unavailable</h1><p>That exact household is missing or outside your scope. No other record was substituted.</p><Link className="registry-button" href="/beneficiaries">Open household registry</Link></section>;
   return (
     <div className="registry space-y-6">
+      {role !== "BENEFICIARY" && <Link className="registry-button" href="/lists">Validated lists</Link>}
       <header className="registry-header">
         <div>
           <p className="registry-eyebrow">
