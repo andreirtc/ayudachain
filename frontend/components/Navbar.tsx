@@ -7,22 +7,23 @@ import { useRole } from "@/lib/roleContext";
 import { AccountRole } from "@/lib/api";
 import { useSignInHref } from "@/lib/useSignInHref";
 import ThemeToggle from "@/components/ThemeToggle";
-import { Home, Users, HandCoins, Receipt, LogIn } from "lucide-react";
+import { Home, Users, HandCoins, Receipt, LogIn, MessageSquare } from "lucide-react";
 
-const icons = { overview: Home, households: Users, payouts: HandCoins, receipts: Receipt, signIn: LogIn };
+const icons = { overview: Home, households: Users, payouts: HandCoins, receipts: Receipt, signIn: LogIn, concerns: MessageSquare };
 
 const destinations = {
   overview: { name: "Overview", href: "/dashboard" },
   households: { name: "Households", href: "/beneficiaries" },
   payouts: { name: "Payouts", href: "/distributions" },
   receipts: { name: "Check a receipt", href: "/verify" },
+  concerns: { name: "Concerns", href: "/concerns" },
   signIn: { name: "Sign in", href: "/sign-in" },
 };
 const roleLinks: Record<AccountRole, (keyof typeof destinations)[]> = {
-  DSWD: ["households", "overview", "payouts", "receipts"],
-  BARANGAY: ["households", "overview", "receipts"],
-  DISBURSING: ["payouts", "households", "overview", "receipts"],
-  BENEFICIARY: ["households", "payouts", "receipts"],
+  DSWD: ["households", "concerns", "overview", "payouts"],
+  BARANGAY: ["households", "concerns", "overview", "receipts"],
+  DISBURSING: ["payouts", "households", "concerns", "receipts"],
+  BENEFICIARY: ["households", "concerns", "payouts", "receipts"],
   AUDITOR: ["overview", "households", "payouts", "receipts"],
 };
 

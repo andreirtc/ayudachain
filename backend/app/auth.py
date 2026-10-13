@@ -150,6 +150,8 @@ def authorize_request(request: Request):
         allowed = {"DSWD", "BARANGAY"}
     elif path == "/api/validated-lists/prepare" or path.startswith("/api/arrangements"):
         allowed = {"DSWD", "BARANGAY"}
+    elif path == "/api/concerns":
+        allowed = {"BENEFICIARY", "BARANGAY", "DISBURSING", "DSWD"}
     elif path == "/api/distributions/confirm" or (path.startswith("/api/distributions/") and path.endswith("/anchor/retry")):
         allowed = {"DISBURSING"}
     elif path.startswith("/api/distributions/") and path.endswith("/acknowledgement"):

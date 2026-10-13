@@ -74,6 +74,8 @@ from app.services.payout_arrangements import router as arrangements_router
 app.include_router(arrangements_router)
 from app.services.payout_desk import router as desk_router
 app.include_router(desk_router)
+from app.services.household_concerns import router as concerns_router
+app.include_router(concerns_router)
 
 @app.middleware("http")
 async def no_store(request, call_next):

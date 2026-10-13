@@ -114,6 +114,6 @@ def _protect_receipt_snapshots():
 def _protect_validated_lists():
     if engine.dialect.name == "sqlite":
         with engine.begin() as connection:
-            for table in ("validated_lists", "list_finalizations", "payout_arrangements", "arrangement_revisions"):
+            for table in ("validated_lists", "list_finalizations", "payout_arrangements", "arrangement_revisions", "household_concerns", "concern_revisions"):
                 for operation in ("UPDATE", "DELETE"):
                     connection.exec_driver_sql(f"CREATE TRIGGER IF NOT EXISTS {table}_no_{operation.lower()} BEFORE {operation} ON {table} BEGIN SELECT RAISE(ABORT, 'Validated list history is immutable'); END")

@@ -549,6 +549,7 @@ function DistributionsContent({ requestedId }: { requestedId: string | null }) {
                     <details><summary>Approval and budget checks</summary><ul>{deskCurrent.result.checks.map(c=><li key={c.code}>{c.passed ? '✓' : '!' } {c.message}</li>)}</ul><p className="registry-muted">The API checks again when saving.</p></details>
                   </>}
                 </section>}
+                {selectedBenId && <Link className="registry-button" href={"/concerns?"+new URLSearchParams({beneficiary_id:selectedBenId})}>Record an assisted concern</Link>}
                 {submitError && (
                   <p role="alert" className="registry-error">
                     {submitError} Retry the same details to retrieve an existing
