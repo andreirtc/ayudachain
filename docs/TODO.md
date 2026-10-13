@@ -17,7 +17,7 @@ The previous backend feature pass completed CSV preview/import, own-account synt
 - [x] Give households a grounded status/next-action starting point using actual own-household records. See [HOUSEHOLD_START.md](HOUSEHOLD_START.md).
 - [x] Add versioned staff-validated list preparation/finalization, retaining individual approvals, flags, exclusions and history. See [VALIDATED_LISTS.md](VALIDATED_LISTS.md).
 - [x] Add scoped payout arrangements and household instructions from actual dates/sites/requirements. See [PAYOUT_ARRANGEMENTS.md](PAYOUT_ARRANGEMENTS.md).
-- [ ] Adapt the focused payout/assisted desk with justified controls and existing accounting/retry safeguards.
+- [x] Adapt the focused payout desk with authoritative approval, linked-alias history, budget and arrangement context while preserving accounting/retry safeguards. See [PAYOUT_DESK.md](PAYOUT_DESK.md). Staff-assisted concerns follow in the concern task.
 - [ ] Deliver concerns and staff audit layout as separately bounded connected features; retain simple public verification.
 
 The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were compared with PR #16 on 2026-10-12. See [BLUEPRINT_COMPARISON.md](BLUEPRINT_COMPARISON.md) for selected ideas, contradictions and remaining integration gates. Keep the corrected accounting and historical proofs; evaluate the five-role journeys and durable evidence implementation before rebuilding equivalents. Preserve this stacked workflow rather than restarting from the blueprint's older #14 baseline.

@@ -72,6 +72,8 @@ from app.services.validated_lists import router as lists_router
 app.include_router(lists_router)
 from app.services.payout_arrangements import router as arrangements_router
 app.include_router(arrangements_router)
+from app.services.payout_desk import router as desk_router
+app.include_router(desk_router)
 
 @app.middleware("http")
 async def no_store(request, call_next):

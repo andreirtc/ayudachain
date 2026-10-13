@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { RefreshCw } from "lucide-react";
 import {
   fetchDistributions,
+  fetchPayoutDesk,
+  PayoutDeskCheck,
   fetchBeneficiaries,
   fetchBatches,
   fetchBatchDetail,
@@ -55,6 +57,18 @@ function DistributionsContent({ requestedId }: { requestedId: string | null }) {
     payload: DistributionConfirmPayload;
     serialized: string;
   } | null>(null);
+  const [desk, setDesk] = useState<{ key:string; result:PayoutDeskCheck|null; error:string|null } | null>(null);
+  const deskKey = selectedBenId + ':' + amountStr;
+  const deskCurrent = desk?.key === deskKey ? desk : null;
+  useEffect(() => {
+    let active = true;
+    if (role !== 'DISBURSING' || !selectedBenId || !/^\d+(?:\.\d{1,2})?$/.test(amountStr) || Number(amountStr) <= 0 || loading || loadError || !browserOnline) { setDesk(null); return; }
+    setDesk(null);
+    const timer = setTimeout(() => {
+      fetchPayoutDesk(selectedBenId, amountStr).then(result => { if(active) setDesk({key:deskKey,result,error:null}); }).catch(e => { if(active) setDesk({key:deskKey,result:null,error:e instanceof Error ? e.message : 'Payout checks unavailable.'}); });
+    }, 180);
+    return () => { active = false; clearTimeout(timer); };
+  }, [deskKey, role, account?.id, loading, loadError, browserOnline]);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [confirmedResult, setConfirmedResult] = useState<Distribution | null>(
     null,
@@ -140,7 +154,7 @@ function DistributionsContent({ requestedId }: { requestedId: string | null }) {
   const handleDisburse = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedBenId || submitting.current) return;
-    if (role !== "DISBURSING" || loading || loadError || blockedReason) {
+    if (role !== "DISBURSING" || loading || loadError || blockedReason || !deskCurrent?.result?.can_record) {
       setSubmitError(
         "Sign in as a disbursing officer and refresh the household records before recording a payout.",
       );
@@ -526,6 +540,15 @@ function DistributionsContent({ requestedId }: { requestedId: string | null }) {
                     )}
                   </p>
                 )}
+                {selectedBenId && amountValid && !loading && !loadError && <section aria-label="Desk checks" className="workflow-context space-y-2">
+                  <h3>Desk checks</h3>
+                  {!deskCurrent ? <p role="status">Checking current approval and budget...</p> : deskCurrent.error ? <p role="alert" className="registry-error">{deskCurrent.error} Refresh records to retry.</p> : deskCurrent.result && <>
+                    <p>{deskCurrent.result.can_record ? 'Ready to record this amount.' : deskCurrent.result.checks.find(c=>!c.passed)?.message || 'Recording is outside your role.'}</p>
+                    {deskCurrent.result.existing_distribution_id && <Link className="registry-button" href={receiptVerificationHref(deskCurrent.result.existing_distribution_id)}>Open existing household receipt</Link>}
+                    {deskCurrent.result.arrangement && <details><summary>Collection arrangement</summary><p>{deskCurrent.result.arrangement.state === 'CANCELLED' ? 'Cancelled appointment' : deskCurrent.result.arrangement.collection_date + ' · ' + deskCurrent.result.arrangement.time_window}</p><p>{deskCurrent.result.arrangement.site}</p><ul>{deskCurrent.result.arrangement.requirements.map(r=><li key={r}>{r}</li>)}</ul></details>}
+                    <details><summary>Approval and budget checks</summary><ul>{deskCurrent.result.checks.map(c=><li key={c.code}>{c.passed ? '✓' : '!' } {c.message}</li>)}</ul><p className="registry-muted">The API checks again when saving.</p></details>
+                  </>}
+                </section>}
                 {submitError && (
                   <p role="alert" className="registry-error">
                     {submitError} Retry the same details to retrieve an existing
@@ -540,7 +563,8 @@ function DistributionsContent({ requestedId }: { requestedId: string | null }) {
                     !browserOnline ||
                     loading ||
                     !!loadError ||
-                    !!blockedReason
+                    !!blockedReason ||
+                    !deskCurrent?.result?.can_record
                   }
                   className="registry-button registry-primary w-full"
                 >
@@ -556,8 +580,8 @@ function DistributionsContent({ requestedId }: { requestedId: string | null }) {
                   <summary>Demo evidence and connection</summary>
                   <p>
                     The demo uses a shared receipt template. Household-specific
-                    receipt uploads and recipient acknowledgement are not
-                    available.
+                    receipt uploads are not available. Recipient acknowledgement
+                    is made separately by the household account.
                   </p>
                   <p>
                     {chainLabel(chain)}. Payout recording and blockchain
