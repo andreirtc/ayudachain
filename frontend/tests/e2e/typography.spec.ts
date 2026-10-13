@@ -11,10 +11,12 @@ test("local typography loads without external font services and fits both entry 
       const root = getComputedStyle(document.documentElement);
       const normalize = (value: string) => value.replace(/["']/g, "").trim();
       const body = normalize(getComputedStyle(document.body).fontFamily);
-      const heading = normalize(getComputedStyle(document.querySelector("h1")!).fontFamily);
+      const headingNode = document.querySelector("h1")!;
+      const heading = normalize(getComputedStyle(headingNode).fontFamily);
+      const localHeading = normalize(getComputedStyle(headingNode).getPropertyValue("--font-heading").split(",")[0]);
       return {
         bodyUsesLocal: body.includes(normalize(root.getPropertyValue("--font-body").split(",")[0])),
-        headingUsesLocal: heading.includes(normalize(root.getPropertyValue("--font-heading").split(",")[0])),
+        headingUsesLocal: heading.includes(localHeading),
         loaded: [...document.fonts].filter(font => font.status === "loaded").length,
         fits: document.documentElement.scrollWidth <= innerWidth,
       };

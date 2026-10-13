@@ -6,6 +6,10 @@ import { useEffect, useRef } from "react";
 import { useRole } from "@/lib/roleContext";
 import { AccountRole } from "@/lib/api";
 import { useSignInHref } from "@/lib/useSignInHref";
+import ThemeToggle from "@/components/ThemeToggle";
+import { Home, Users, HandCoins, Receipt, LogIn } from "lucide-react";
+
+const icons = { overview: Home, households: Users, payouts: HandCoins, receipts: Receipt, signIn: LogIn };
 
 const destinations = {
   overview: { name: "Overview", href: "/dashboard" },
@@ -40,6 +44,7 @@ export default function Navbar() {
       ? roleLinks[account.role]
       : (["overview", "receipts", "signIn"] as (keyof typeof destinations)[])
   ).map((key) => ({
+    Icon: icons[key],
     ...destinations[key],
     href: key === "signIn" ? signIn : destinations[key].href,
     name:
@@ -50,7 +55,7 @@ export default function Navbar() {
           : destinations[key].name,
   }));
   const navigation = (isMobile: boolean) =>
-    links.map(({ name, href }) => (
+    links.map(({ name, href, Icon }) => (
       <Link
         key={href}
         href={href}
@@ -68,7 +73,7 @@ export default function Navbar() {
           else focusMain.current = true;
         }}
       >
-        {name}
+        <Icon size={20} aria-hidden="true" /><span>{name}</span>
       </Link>
     ));
   return (
@@ -84,6 +89,7 @@ export default function Navbar() {
         <nav aria-label="Main navigation" className="app-desktop-nav">
           {navigation(false)}
         </nav>
+        <ThemeToggle />
         <details
           ref={mobile}
           className="app-mobile-nav"

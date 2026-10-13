@@ -14,7 +14,7 @@ export default function DemoPitchBar() {
   const pathname = usePathname();
   if (pathname !== "/dashboard") return null;
   return (
-    <details className="bg-white border-b border-slate-200 px-4 py-3">
+    <details className="app-demo-journey bg-white border-b border-slate-200 px-4 py-3">
       <summary className="max-w-7xl mx-auto cursor-pointer text-sm font-semibold text-slate-700">
         Follow an example household
       </summary>

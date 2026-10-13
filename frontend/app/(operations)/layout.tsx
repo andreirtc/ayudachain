@@ -20,7 +20,7 @@ export default function OperationsLayout({
             <SessionGate>{children}</SessionGate>
           </main>
         </RoleProvider></Suspense>
-        <footer className="bg-slate-900 border-t border-slate-800 text-slate-400 py-8 px-4 sm:px-6 lg:px-8 text-xs">
+        <footer className="app-footer py-6 px-4 sm:px-6 lg:px-8 text-xs">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
               <p className="font-bold text-slate-300">AyudaChain · Synthetic relief prototype</p>

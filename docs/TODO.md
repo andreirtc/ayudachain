@@ -6,14 +6,14 @@ PR workflow: see [STACKED_PRS.md](STACKED_PRS.md). This planning session is the 
 
 Status: unchecked items are planned, not implemented. Work through one numbered item at a time. First establish a runnable baseline; then backend/contracts correctness; then frontend workflow and usability.
 
-Current direction, accepted 2026-10-14: adopt the Tonal / Material 3, Sea and Sun proposal and a shorter household journey built around staff-validated lists and organized payouts, retaining current accounting, authenticated roles and audit/receipt safeguards. See [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md) for the selected design, compatibility rules and bounded implementation sequence. This is an accepted plan, not an implemented redesign or scheduling feature.
+Current direction, accepted 2026-10-14: adopt the Tonal / Material 3, Sea and Sun proposal and a shorter household journey built around staff-validated lists and organized payouts, retaining current accounting, authenticated roles and audit/receipt safeguards. See [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md) for the selected design, compatibility rules and bounded implementation sequence. The shared Tonal foundation is delivered; the subsequent household/list/arrangement tasks remain in sequence.
 
 The previous backend feature pass completed CSV preview/import, own-account synthetic recipient acknowledgement and versioned immutable receipt snapshots. See [CSV_ONBOARDING.md](CSV_ONBOARDING.md), [RECIPIENT_ACKNOWLEDGEMENT.md](RECIPIENT_ACKNOWLEDGEMENT.md) and [RECEIPT_SNAPSHOTS.md](RECEIPT_SNAPSHOTS.md). Remaining unchecked features and production policies stay separate bounded tasks in the PR stack.
 
 ## Accepted direction delivery
 
 - [x] Record the accepted Tonal design and streamlined validated-list/payout direction with preservation and acceptance rules. Documentation only; see [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md).
-- [ ] Apply the shared Tonal foundation to supported authenticated screens, preserving routes, states and permissions.
+- [x] Apply the shared Tonal foundation to supported authenticated screens, preserving routes, states and permissions. See [TONAL_FOUNDATION.md](TONAL_FOUNDATION.md).
 - [ ] Give households a grounded status/next-action starting point using actual own-household records.
 - [ ] Add versioned staff-validated list preparation/finalization, retaining individual approvals, flags, exclusions and history.
 - [ ] Add scoped payout arrangements and household instructions from actual dates/sites/requirements.
