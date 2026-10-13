@@ -21,6 +21,16 @@ Failed comparison before assisted PIN setup records only a stopped refusal: no r
 
 Offline handover is unavailable. No general login/PIN recovery is provided. All households must be invented; current actor selection is unverified. See [evaluation](../guides/demo-script.md) and [scope/visibility requirements](prd.md).
 
+## Workflow errors and recovery
+
+**Local implementation; publication pending.** This section describes uncommitted frontend changes in the reviewed working tree. The documentation-only handoff does not make this behavior available in a fresh checkout. See the linked implementation record for scope and recorded checks.
+
+MVP screens translate API rejection codes into plain-language explanations and next actions for the selected role, using the English/Filipino guidance preference. For example, closed or uncovered intake directs a Beneficiary to ask Barangay/DSWD to check the selected disaster and coverage; a DSWD Officer is directed to Households & intake and the documented opening steps if intake has not yet been opened. Messages do not imply that closed intake can be reopened or its saved coverage silently changed.
+
+Existing claims direct users to the current thread. Stale reviews require refresh and review of the current evidence/flags. Missing amounts/publication, staff assignments, identity checks and recipient authorization name the responsible officer and required step. Payers are explicitly told not to hand over cash again after an existing handover or a lost handover response. A connection loss during a write leaves success uncertain: read the saved record before retrying. Read-only searches, previews, lookup and integrity checks do not claim a business action may have been saved.
+
+Unavailable records remain indistinguishable from records outside the selected account's scope. Private lookup does not reveal whether a transaction exists. Unknown API errors and non-JSON gateway replies get safe recovery messages rather than internal codes/traces. API status/code, permissions, once-only handover and fail-closed integrity rules remain authoritative. Cancelled requests remain silent so former-account replies cannot become recovery guidance in the new view. Filipino copy still requires native-speaker review. See [implementation and checks](../implementation/role-error-guidance.md).
+
 ## Workspace presentation
 
 Beneficiaries start with a household timeline, their next action, own entitlement and documented calculation, appointment, receipt and private help. Barangay Officers start with their scoped response queue and aggregate payout counts. DSWD Officers see outstanding human decisions, sessions and separate recipient outcomes; completed claims stay out of the pending queue. Disbursing Officers see assigned sessions and the compare/present/authorize steps. Auditors see linked exception groups and supporting histories, with handovers separated from recipient-confirmed outcomes.

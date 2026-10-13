@@ -1,5 +1,11 @@
 # MVP implementation validation
 
+## Role-specific error guidance — 2026-10-13
+
+**Publication status:** the following results describe the local working-tree implementation. This documentation-only handoff does not include the frontend changes or new regression tests; they remain uncommitted. These are recorded results from that local implementation, not fresh validation of the committed branch.
+
+MVP UI recovery messages now cover the current 175 named backend rejections and CSV/transport failures in English/Filipino, with role-specific next actions. The API error codes/statuses and underlying workflow, permission and integrity rules remain unchanged. The final selected run passed 20 browser/client checks in 1.9 minutes; final TypeScript and an isolated production build passed. The existing 28-page navigation test timed out twice at its global 60-second limit and is explicitly excluded from that passing run. The release-writing browser case and full chain-dependent journeys were not rerun. See [implementation, reproduction and exact checks](role-error-guidance.md).
+
 Execution authorized 2026-10-10; final validation completed 2026-10-11 (Asia/Manila). The approved full local synthetic MVP is complete in `mvp-full`, branch `feat/five-role-mvp` from main `6d92882`. All 14 stages and all 26 acceptance criteria are implemented and mapped below. The original `main-2` checkout and its planning work remain intact. No commits, pushes, public deployments, external services or module deletions. Independent review and fresh final checks are complete; real-household readiness remains Pending.
 
 ## Recorded checks
