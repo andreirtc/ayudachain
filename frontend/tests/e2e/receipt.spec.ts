@@ -51,7 +51,7 @@ test("payout receipt dialog is keyboard accessible and links to its exact record
   const id = new URL(href!, "http://127.0.0.1:3101").searchParams.get(
     "distribution_id",
   )!;
-  await expect(details.getByText(id, { exact: true })).toBeVisible();
+  await expect(details.locator(":scope > dl").getByText(id, { exact: true })).toBeVisible();
   expect(
     await dialog.evaluate(
       (element) => element.scrollWidth <= element.clientWidth,
@@ -79,6 +79,7 @@ test("payout receipt dialog is keyboard accessible and links to its exact record
   await expect(
     page
       .getByRole("region", { name: "Receipt details" })
+      .locator(":scope > dl")
       .getByText(id, { exact: true }),
   ).toBeVisible();
 });

@@ -141,6 +141,7 @@ class Distribution(CentavoAmount, Base):
     batch = relationship("ReliefBatch", back_populates="distributions")
     beneficiary = relationship("Beneficiary", back_populates="distribution")
     anchor_job = relationship("PayoutAnchorJob", uselist=False, lazy="select")
+    recipient_acknowledgement = relationship("RecipientAcknowledgement", uselist=False, lazy="select")
 
 
 class PayoutAnchorJob(Base):
@@ -193,3 +194,16 @@ class AuditEvent(CentavoAmount, Base):
     entity_id = Column(String(64), nullable=True)
     blockchain_tx_hash = Column(String(66), nullable=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
+
+
+class RecipientAcknowledgement(Base):
+    __tablename__ = "recipient_acknowledgements"
+    distribution_id = Column(String(64), ForeignKey("distributions.distribution_id"), primary_key=True)
+    acknowledgement_id = Column(String(64), unique=True, nullable=False)
+    beneficiary_id = Column(String(64), nullable=False)
+    batch_id = Column(String(64), nullable=False)
+    account_id = Column(String(64), nullable=False)
+    account_display_name = Column(String(128), nullable=False)
+    amount_centavos = Column(Integer, nullable=False)
+    receipt_hash = Column(String(66), nullable=False)
+    acknowledged_at = Column(String(40), nullable=False)

@@ -96,6 +96,7 @@ export interface Distribution {
   blockchain_tx_hash?: string;
   distributed_at: string;
   anchor_job?: PayoutAnchor | null;
+  recipient_acknowledgement?: RecipientAcknowledgement | null;
 }
 
 export interface PayoutAnchor {
@@ -414,5 +415,12 @@ export interface PublicReceiptReference { distribution_id: string; batch_id: str
 export async function fetchPublicReceipts(): Promise<PublicReceiptReference[]> {
   const response = await authenticatedFetch(getApiBase() + "/api/public/receipts", { cache: "no-store" });
   if (!response.ok) throw await errorFrom(response, "Failed to load receipt references");
+  return response.json();
+}
+
+export interface RecipientAcknowledgement { distribution_id: string; acknowledgement_id: string; beneficiary_id: string; batch_id: string; account_id: string; account_display_name: string; amount_centavos: number; receipt_hash: string; acknowledged_at: string; }
+export async function acknowledgePayout(id: string): Promise<RecipientAcknowledgement> {
+  const response = await authenticatedFetch(getApiBase() + "/api/distributions/" + encodeURIComponent(id) + "/acknowledgement", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ acknowledge: true }) });
+  if (!response.ok) throw await errorFrom(response, "Acknowledgement could not be saved. Try again.");
   return response.json();
 }

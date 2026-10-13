@@ -65,6 +65,8 @@ save_sample_receipt(RECEIPTS_DIR)
 app.include_router(auth_router)
 from app.services.csv_onboarding import router as csv_router
 app.include_router(csv_router)
+from app.services.recipient_acknowledgement import router as acknowledgement_router
+app.include_router(acknowledgement_router)
 
 @app.middleware("http")
 async def no_store(request, call_next):
