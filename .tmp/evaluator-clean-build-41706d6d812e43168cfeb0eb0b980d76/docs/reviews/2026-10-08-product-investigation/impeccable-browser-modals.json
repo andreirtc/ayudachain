@@ -1,0 +1,16 @@
+[
+  {
+    "surface": "scanner",
+    "dialogCount": 0,
+    "activeElement": "Scan DAFAC QR",
+    "unlabelledVisibleButtons": 1,
+    "escapeDismisses": false
+  },
+  {
+    "surface": "beneficiary inspector",
+    "dialogCount": 0,
+    "activeElement": "Inspect",
+    "unlabelledVisibleButtons": 1,
+    "unlabelledButtonsAfterEscape": 1
+  }
+]

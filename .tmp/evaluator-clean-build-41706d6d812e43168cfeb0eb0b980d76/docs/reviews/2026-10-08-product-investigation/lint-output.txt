@@ -1,0 +1,13 @@
+Command: npm run lint
+CWD: C:/Users/Yushin/AppData/Local/Temp/ayudachain-investigation-ba4heaqr/frontend
+Exit: 1
+Captured from execution output, 2026-10-08:
+
+> ayudachain-frontend@1.0.0 lint
+> next lint
+
+next lint is deprecated and will be removed in Next.js 16.
+How would you like to configure ESLint?
+Strict (recommended) / Base / Cancel
+
+No answer supplied in noninteractive pipes; lint did not complete.

@@ -1,0 +1,17 @@
+﻿exit_code=2
+command=node C:/Users/Yushin/.agents/skills/impeccable/scripts/detect.mjs --json frontend/app frontend/components
+Browser phase completed after isolated service setup; no human-visible overlay is available from headless tooling.
+Browser target=http://127.0.0.1:3000
+Runtime=own Chrome headless browser via node_repl/Playwright; own contexts and fresh tabs
+DOM mutable-injection preflight=passed (title restored, test script removed)
+Helper=Start-Process -WindowStyle Hidden node C:/Users/Yushin/.agents/skills/impeccable/scripts/live-server.mjs
+Helper cwd=C:/Users/Yushin/AppData/Local/Temp/ayudachain-investigation-ba4heaqr
+Helper PID=32428 port=8400
+Helper metadata=isolated snapshot/frontend/.impeccable/live/server.json
+Detector injection=http://localhost:8400/detect.js succeeded
+Routes=/,/beneficiaries,/distributions,/verify desktop; mobile 390x844 beneficiary/distribution/verification
+Retained browser evidence=clean pre-overlay detect(), then scan() rendered ephemeral overlays; initial post-overlay text-occlusion recapture discarded
+No human-visible overlays=headless tools only
+No API data writes performed by Assessment B
+Cleanup=node live-server.mjs stop --keep-inject from snapshot/frontend; reported stopped port 8400
+Own browser closed=true (all contexts/tabs)

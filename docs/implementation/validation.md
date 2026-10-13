@@ -2,7 +2,7 @@
 
 ## Role-specific error guidance — 2026-10-13
 
-**Publication status:** the following results describe the local working-tree implementation. This documentation-only handoff does not include the frontend changes or new regression tests; they remain uncommitted. These are recorded results from that local implementation, not fresh validation of the committed branch.
+**Publication status:** the frontend implementation and regression tests are committed in `1644f5996de6cc7c55f7c1ea2934fc7a661be648`. Fresh publication checks passed all 20 selected browser/client cases in 1.4 minutes, the frontend TypeScript check and an isolated current-source production build generating all nine static pages. Existing configuration skips ESLint. See the implementation record below for the exact commands and remaining exclusions. The following paragraph preserves the original local implementation results.
 
 MVP UI recovery messages now cover the current 175 named backend rejections and CSV/transport failures in English/Filipino, with role-specific next actions. The API error codes/statuses and underlying workflow, permission and integrity rules remain unchanged. The final selected run passed 20 browser/client checks in 1.9 minutes; final TypeScript and an isolated production build passed. The existing 28-page navigation test timed out twice at its global 60-second limit and is explicitly excluded from that passing run. The release-writing browser case and full chain-dependent journeys were not rerun. See [implementation, reproduction and exact checks](role-error-guidance.md).
 

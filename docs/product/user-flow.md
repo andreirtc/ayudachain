@@ -23,7 +23,7 @@ Offline handover is unavailable. No general login/PIN recovery is provided. All 
 
 ## Workflow errors and recovery
 
-**Local implementation; publication pending.** This section describes uncommitted frontend changes in the reviewed working tree. The documentation-only handoff does not make this behavior available in a fresh checkout. See the linked implementation record for scope and recorded checks.
+**Implemented in `1644f59`.** This section describes the committed frontend recovery guidance. See the linked implementation record for scope, fresh publication checks and retained validation limitations.
 
 MVP screens translate API rejection codes into plain-language explanations and next actions for the selected role, using the English/Filipino guidance preference. For example, closed or uncovered intake directs a Beneficiary to ask Barangay/DSWD to check the selected disaster and coverage; a DSWD Officer is directed to Households & intake and the documented opening steps if intake has not yet been opened. Messages do not imply that closed intake can be reopened or its saved coverage silently changed.
 

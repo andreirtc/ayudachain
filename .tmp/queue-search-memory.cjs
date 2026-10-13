@@ -1,0 +1,1 @@
+const fs=require('fs'),p='frontend/components/mvp/Queue.tsx';let s=fs.readFileSync(p,'utf8').replace('setTerm(query);filter','remember(query);filter').replace("setQuery('');setTerm('');filter", "setQuery('');remember('');filter");fs.writeFileSync(p,s);

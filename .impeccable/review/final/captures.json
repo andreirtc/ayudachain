@@ -1,0 +1,77 @@
+{
+  "captures": [
+    {
+      "route": "mvp",
+      "width": 1440,
+      "imageWidth": 1440,
+      "fits": true
+    },
+    {
+      "route": "mvp",
+      "width": 390,
+      "imageWidth": 390,
+      "fits": true
+    },
+    {
+      "route": "mvp-dswd-officer",
+      "width": 1440,
+      "imageWidth": 1440,
+      "fits": true
+    },
+    {
+      "route": "mvp-dswd-officer",
+      "width": 390,
+      "imageWidth": 390,
+      "fits": true
+    },
+    {
+      "route": "mvp-beneficiary",
+      "width": 1440,
+      "imageWidth": 1440,
+      "fits": true
+    },
+    {
+      "route": "mvp-beneficiary",
+      "width": 390,
+      "imageWidth": 390,
+      "fits": true
+    },
+    {
+      "route": "mvp-barangay-officer",
+      "width": 1440,
+      "imageWidth": 1440,
+      "fits": true
+    },
+    {
+      "route": "mvp-barangay-officer",
+      "width": 390,
+      "imageWidth": 390,
+      "fits": true
+    },
+    {
+      "route": "mvp-disbursing-officer",
+      "width": 1440,
+      "imageWidth": 1440,
+      "fits": true
+    },
+    {
+      "route": "mvp-disbursing-officer",
+      "width": 390,
+      "imageWidth": 390,
+      "fits": true
+    },
+    {
+      "route": "mvp-auditor",
+      "width": 1440,
+      "imageWidth": 1440,
+      "fits": true
+    },
+    {
+      "route": "mvp-auditor",
+      "width": 390,
+      "imageWidth": 390,
+      "fits": true
+    }
+  ],
+  "pageErrors": []
+}

@@ -1,0 +1,79 @@
+[
+  {
+    "name": "directory",
+    "path": "/mvp",
+    "viewport": "1600x1000@2x",
+    "heading": "Relief you can follow.",
+    "capturedAt": "2026-10-13T07:27:58.290Z"
+  },
+  {
+    "name": "beneficiary-overview",
+    "path": "/mvp/beneficiary/overview",
+    "viewport": "1600x1000@2x",
+    "heading": "My assistance",
+    "capturedAt": "2026-10-13T07:28:02.502Z"
+  },
+  {
+    "name": "beneficiary-overview-tall",
+    "path": "/mvp/beneficiary/overview",
+    "viewport": "1600x2000@2x",
+    "heading": "My assistance",
+    "capturedAt": "2026-10-13T07:28:06.630Z"
+  },
+  {
+    "name": "barangay-overview",
+    "path": "/mvp/barangay-officer/overview",
+    "viewport": "1600x1000@2x",
+    "heading": "Your barangay, in focus.",
+    "capturedAt": "2026-10-13T07:28:10.187Z"
+  },
+  {
+    "name": "dswd-overview",
+    "path": "/mvp/dswd-officer/overview",
+    "viewport": "1600x1000@2x",
+    "heading": "Keep assistance moving.",
+    "capturedAt": "2026-10-13T07:28:13.998Z"
+  },
+  {
+    "name": "dswd-funds",
+    "path": "/mvp/dswd-officer/funds",
+    "viewport": "1600x1000@2x",
+    "heading": "Disaster funds",
+    "capturedAt": "2026-10-13T07:28:17.794Z"
+  },
+  {
+    "name": "dswd-claims",
+    "path": "/mvp/dswd-officer/claims",
+    "viewport": "1600x1000@2x",
+    "heading": "Claims and review",
+    "capturedAt": "2026-10-13T07:28:21.239Z"
+  },
+  {
+    "name": "disbursing-overview",
+    "path": "/mvp/disbursing-officer/overview",
+    "viewport": "1600x1000@2x",
+    "heading": "Ready for a careful handover.",
+    "capturedAt": "2026-10-13T07:28:24.883Z"
+  },
+  {
+    "name": "auditor-overview",
+    "path": "/mvp/auditor/overview",
+    "viewport": "1600x1000@2x",
+    "heading": "Follow the evidence.",
+    "capturedAt": "2026-10-13T07:28:29.077Z"
+  },
+  {
+    "name": "auditor-overview-tall",
+    "path": "/mvp/auditor/overview",
+    "viewport": "1600x2000@2x",
+    "heading": "Follow the evidence.",
+    "capturedAt": "2026-10-13T07:28:33.516Z"
+  },
+  {
+    "name": "auditor-audit",
+    "path": "/mvp/auditor/audit",
+    "viewport": "1600x1000@2x",
+    "heading": "Evidence and integrity",
+    "capturedAt": "2026-10-13T07:28:37.438Z"
+  }
+]

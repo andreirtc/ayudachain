@@ -32,7 +32,7 @@ Observed friction:
 - Staff dashboards combine immediate tasks with extensive operational summaries. Closed sessions can compete with current work.
 - Generic saved messages and technical history labels require users to interpret what an action achieved.
 
-These are source and interface observations, not findings from a completed usability study. Existing validation results are recorded in [validation](validation.md). The reviewed working tree also contained uncommitted error-guidance changes; those changes are outside this documentation handoff and may not be present in a fresh checkout.
+These are source and interface observations, not findings from a completed usability study. Existing validation results are recorded in [validation](validation.md). At planning time, the reviewed working tree contained uncommitted error-guidance changes. Those changes were subsequently committed in `1644f59`; see [role error guidance](role-error-guidance.md) for their scope and validation. This does not mark any phase of the storytelling redesign as completed.
 
 ## 1. Beneficiary dashboard and navigation
 

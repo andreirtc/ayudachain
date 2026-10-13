@@ -1,6 +1,6 @@
 # Role-specific workflow error guidance
 
-Implemented locally on 2026-10-13 against the MVP baseline `56102c4`. **Publication status: documentation-only handoff; implementation and regression tests remain uncommitted.** A fresh checkout does not include the frontend changes described below. Validation entries are historical results from the local working tree; they were not rerun for this documentation handoff. Runtime logs and temporary build outputs referenced below are local evidence, not published artifacts. When the implementation is committed and pushed, update this status and the corresponding notes in the validation, user-flow and API documents with the implementation commit and actual verification results.
+Implemented locally on 2026-10-13 against the MVP baseline `56102c4`. **Publication status: implementation and regression tests committed in `1644f5996de6cc7c55f7c1ea2934fc7a661be648`.** The original implementation results below are retained separately from the fresh publication checks. Runtime logs and generated build outputs referenced below remain local evidence; the later publication includes source snapshots and review assets, not Git-ignored runtime data.
 
 The claim-submission API correctly refused `intake_closed_or_not_covered`, but the UI displayed that internal code and suggested a refresh instead of explaining the missing human intake step. MVP error presentation now explains the obstacle, the responsible role and the permitted next action. The catalogue covers all 175 literal `DomainError`/`RecordedRefusal` codes currently declared in `backend/app`, additional CSV row diagnostics and safe transport fallbacks.
 
@@ -18,7 +18,15 @@ Recovery does not reopen closed intake, change recorded coverage, approve duplic
 
 Filipino messages follow the existing guidance preference; native-speaker review remains Pending. This is workflow guidance for claimed, unverified actors, not authentication or real-household readiness.
 
-## Validation
+## Publication checks — 2026-10-13
+
+- Supported Node 22.23.3: all 20 selected browser/client tests passed in 1.4 minutes. Command: `.runtime/tools/node-v22.23.3-win-x64/node.exe frontend/node_modules/@playwright/test/cli.js test --config=frontend/playwright.config.ts workflow-errors.spec.ts workspaces.spec.ts --grep-invert 'edited original-backed release|all principal role sections' --output=.runtime/publish-all-browser-checks --reporter=list --workers=1`.
+- Fresh frontend TypeScript check passed with `--noEmit --incremental false`.
+- A fresh production build passed using supported Node 22 in the isolated current-source copy `.runtime/commit-verification-3949f475cfc740f3976f9f1106129d39`, including type validation and generation of all nine static pages. Compilation took 8.4 minutes. Existing configuration skips ESLint; lint is not claimed. The running development server was not stopped or rebuilt.
+- The existing release-writing case, previously timed-out all-sections navigation case and chain-dependent journeys were not rerun. The passing selected run does not supersede those limitations.
+- Showreel publication checks passed: six scripts passed syntax checks; the WAV is readable; sample frames at 12, 44, 53 and 65 seconds rendered with the renderer's payload/digest checks passing. The illustration label was inspected at 53 seconds. A full video encode was not rerun.
+
+## Original implementation validation
 
 - The reported claim flow failed the new regression before implementation: the UI showed the raw code and generic refresh advice. Unknown API detail, lost write and HTML-gateway regressions also failed before the client change; abort preservation already passed.
 - Initial guidance suite: 10 passed in 10.6 seconds. Review added diagnostic-code/status, nondisclosing lookup, read-only POST and recipient ID-upload coverage. The missing-ID regression failed before correcting the message to avoid assigning an officer's comparison duty to a Beneficiary.
@@ -30,4 +38,4 @@ Filipino messages follow the existing guidance preference; native-speaker review
 
 The expanded 19-case run initially passed 18 checks and timed out on the existing 28-page navigation/overflow case. Its unchanged isolated rerun also exhausted the global 60-second budget. The trace reached the final Auditor audit page at approximately 61.6 seconds of trace time; prior page visits consumed the test budget. The separate Auditor failure/retry check passed. The timeout is retained as a failure; its timeout and assertions were not weakened, and the final selected run excludes it explicitly.
 
-The existing release-writing browser case was excluded to preserve the shared live evaluation state. Full chain-backed journeys and matching/absent/mismatched chain checks were not run: the local chain remains unavailable. Controlled error fixtures in the new regressions supply no workflow success or blockchain observations and send no live business command. Other people's local artifacts, including `showreel/`, remain outside this change.
+The existing release-writing browser case was excluded to preserve the shared live evaluation state. Full chain-backed journeys and matching/absent/mismatched chain checks were not run: the local chain was unavailable during the original validation. Controlled error fixtures in the new regressions supply no workflow success or blockchain observations and send no live business command. Other people's local artifacts, including `showreel/`, were outside the original error-guidance implementation; the maintainer subsequently requested their publication in the separate artifact commit.

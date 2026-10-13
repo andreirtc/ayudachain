@@ -1,0 +1,9 @@
+const fs=require('fs');
+function edit(path,fn){const old=fs.readFileSync(path,'utf8'),value=fn(old);if(value===old)throw new Error('No edit: '+path);fs.writeFileSync(path,value);}
+edit('frontend/components/mvp/workspaces.ts',s=>s.replace(/navigation:\[/g,"navigation:[nav('queues','Search & task queues','list'),"));
+edit('frontend/components/mvp/Workspace.tsx',s=>s
+ .replace("const url=new URL(window.location.href);url.searchParams.set('account',nextActor);", "const url=new URL(window.location.href);url.searchParams.delete('record');url.searchParams.delete('history');url.hash='';url.searchParams.set('account',nextActor);")
+ .replace('<div className="ac-contextbar"><div>', '<div className="ac-contextbar"><LanguageSelector/><div>')
+ .replace("section==='overview'?<Dashboard", "section==='queues'?<Queue actor={actor} disaster={disaster} barangays={barangays} href={href}/>:section==='overview'?<><Dashboard")
+ .replace("barangays={barangays} href={href}/>:section==='funds'", "barangays={barangays} href={href}/>{['dswd','auditor','barangay'].includes(actor.role)&&<Operations actor={actor} disaster={disaster} href={href}/>}</>:section==='funds'"));
+edit('frontend/app/mvp.css',s=>s+'\n/* Task queues retain the existing workdesk controls and scroll tables. */\n.ac-queue-controls{display:flex;flex-wrap:wrap;gap:16px;align-items:end}.ac-queue-controls label{flex:1 1 180px}.ac-table caption{text-align:left;padding:12px 0;color:var(--ac-muted)}.ac-table td a{display:inline-flex;align-items:center;min-height:44px;text-underline-offset:3px}.ac-contextbar>label:first-child{max-width:240px}.ac-table-scroll:focus-visible{outline:2px solid var(--ac-accent);outline-offset:3px}\n@media(max-width:760px){.ac-queue-controls{display:grid;grid-template-columns:1fr}.ac-contextbar>label:first-child{max-width:none}}\n');

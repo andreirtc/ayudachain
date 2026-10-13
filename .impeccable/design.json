@@ -1,0 +1,594 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-10T22:16:20Z",
+  "title": "Design System: AyudaChain MVP",
+  "extensions": {
+    "colorMeta": {
+      "ac-accent": {
+        "role": "primary",
+        "displayName": "Service Teal",
+        "tonalRamp": [
+          "oklch(15% 0.0790 183.19)",
+          "oklch(27% 0.0790 183.19)",
+          "oklch(39% 0.0790 183.19)",
+          "oklch(51% 0.0790 183.19)",
+          "oklch(63% 0.0790 183.19)",
+          "oklch(75% 0.0790 183.19)",
+          "oklch(87% 0.0790 183.19)",
+          "oklch(95% 0.0790 183.19)"
+        ]
+      },
+      "action-hover": {
+        "role": "primary",
+        "displayName": "Deep Service Teal",
+        "tonalRamp": [
+          "oklch(15% 0.0692 182.39)",
+          "oklch(27% 0.0692 182.39)",
+          "oklch(39% 0.0692 182.39)",
+          "oklch(51% 0.0692 182.39)",
+          "oklch(63% 0.0692 182.39)",
+          "oklch(75% 0.0692 182.39)",
+          "oklch(87% 0.0692 182.39)",
+          "oklch(95% 0.0692 182.39)"
+        ]
+      },
+      "ac-ink": {
+        "role": "neutral",
+        "displayName": "Record Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0389 232.73)",
+          "oklch(27% 0.0389 232.73)",
+          "oklch(39% 0.0389 232.73)",
+          "oklch(51% 0.0389 232.73)",
+          "oklch(63% 0.0389 232.73)",
+          "oklch(75% 0.0389 232.73)",
+          "oklch(87% 0.0389 232.73)",
+          "oklch(95% 0.0389 232.73)"
+        ]
+      },
+      "ac-muted": {
+        "role": "neutral",
+        "displayName": "Context Slate",
+        "tonalRamp": [
+          "oklch(15% 0.0249 230.96)",
+          "oklch(27% 0.0249 230.96)",
+          "oklch(39% 0.0249 230.96)",
+          "oklch(51% 0.0249 230.96)",
+          "oklch(63% 0.0249 230.96)",
+          "oklch(75% 0.0249 230.96)",
+          "oklch(87% 0.0249 230.96)",
+          "oklch(95% 0.0249 230.96)"
+        ]
+      },
+      "ac-line": {
+        "role": "neutral",
+        "displayName": "Record Line",
+        "tonalRamp": [
+          "oklch(15% 0.0093 232.37)",
+          "oklch(27% 0.0093 232.37)",
+          "oklch(39% 0.0093 232.37)",
+          "oklch(51% 0.0093 232.37)",
+          "oklch(63% 0.0093 232.37)",
+          "oklch(75% 0.0093 232.37)",
+          "oklch(87% 0.0093 232.37)",
+          "oklch(95% 0.0093 232.37)"
+        ]
+      },
+      "ac-ground": {
+        "role": "neutral",
+        "displayName": "Cool Ground",
+        "tonalRamp": [
+          "oklch(15% 0.0035 219.53)",
+          "oklch(27% 0.0035 219.53)",
+          "oklch(39% 0.0035 219.53)",
+          "oklch(51% 0.0035 219.53)",
+          "oklch(63% 0.0035 219.53)",
+          "oklch(75% 0.0035 219.53)",
+          "oklch(87% 0.0035 219.53)",
+          "oklch(95% 0.0035 219.53)"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "White",
+        "tonalRamp": [
+          "oklch(15% 0.0000 89.88)",
+          "oklch(27% 0.0000 89.88)",
+          "oklch(39% 0.0000 89.88)",
+          "oklch(51% 0.0000 89.88)",
+          "oklch(63% 0.0000 89.88)",
+          "oklch(75% 0.0000 89.88)",
+          "oklch(87% 0.0000 89.88)",
+          "oklch(95% 0.0000 89.88)"
+        ]
+      },
+      "rail": {
+        "role": "neutral",
+        "displayName": "Workdesk Navy",
+        "tonalRamp": [
+          "oklch(15% 0.0405 231.06)",
+          "oklch(27% 0.0405 231.06)",
+          "oklch(39% 0.0405 231.06)",
+          "oklch(51% 0.0405 231.06)",
+          "oklch(63% 0.0405 231.06)",
+          "oklch(75% 0.0405 231.06)",
+          "oklch(87% 0.0405 231.06)",
+          "oklch(95% 0.0405 231.06)"
+        ]
+      },
+      "rail-link": {
+        "role": "neutral",
+        "displayName": "Rail Link",
+        "tonalRamp": [
+          "oklch(15% 0.0217 223.03)",
+          "oklch(27% 0.0217 223.03)",
+          "oklch(39% 0.0217 223.03)",
+          "oklch(51% 0.0217 223.03)",
+          "oklch(63% 0.0217 223.03)",
+          "oklch(75% 0.0217 223.03)",
+          "oklch(87% 0.0217 223.03)",
+          "oklch(95% 0.0217 223.03)"
+        ]
+      },
+      "rail-hover": {
+        "role": "neutral",
+        "displayName": "Rail Hover",
+        "tonalRamp": [
+          "oklch(15% 0.0430 224.30)",
+          "oklch(27% 0.0430 224.30)",
+          "oklch(39% 0.0430 224.30)",
+          "oklch(51% 0.0430 224.30)",
+          "oklch(63% 0.0430 224.30)",
+          "oklch(75% 0.0430 224.30)",
+          "oklch(87% 0.0430 224.30)",
+          "oklch(95% 0.0430 224.30)"
+        ]
+      },
+      "rail-active": {
+        "role": "neutral",
+        "displayName": "Rail Active",
+        "tonalRamp": [
+          "oklch(15% 0.0461 219.16)",
+          "oklch(27% 0.0461 219.16)",
+          "oklch(39% 0.0461 219.16)",
+          "oklch(51% 0.0461 219.16)",
+          "oklch(63% 0.0461 219.16)",
+          "oklch(75% 0.0461 219.16)",
+          "oklch(87% 0.0461 219.16)",
+          "oklch(95% 0.0461 219.16)"
+        ]
+      },
+      "surface-subtle": {
+        "role": "neutral",
+        "displayName": "Quiet Surface",
+        "tonalRamp": [
+          "oklch(15% 0.0021 197.12)",
+          "oklch(27% 0.0021 197.12)",
+          "oklch(39% 0.0021 197.12)",
+          "oklch(51% 0.0021 197.12)",
+          "oklch(63% 0.0021 197.12)",
+          "oklch(75% 0.0021 197.12)",
+          "oklch(87% 0.0021 197.12)",
+          "oklch(95% 0.0021 197.12)"
+        ]
+      },
+      "control-border": {
+        "role": "neutral",
+        "displayName": "Control Border",
+        "tonalRamp": [
+          "oklch(15% 0.0220 227.61)",
+          "oklch(27% 0.0220 227.61)",
+          "oklch(39% 0.0220 227.61)",
+          "oklch(51% 0.0220 227.61)",
+          "oklch(63% 0.0220 227.61)",
+          "oklch(75% 0.0220 227.61)",
+          "oklch(87% 0.0220 227.61)",
+          "oklch(95% 0.0220 227.61)"
+        ]
+      },
+      "secondary-ink": {
+        "role": "neutral",
+        "displayName": "Secondary Action Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0494 226.66)",
+          "oklch(27% 0.0494 226.66)",
+          "oklch(39% 0.0494 226.66)",
+          "oklch(51% 0.0494 226.66)",
+          "oklch(63% 0.0494 226.66)",
+          "oklch(75% 0.0494 226.66)",
+          "oklch(87% 0.0494 226.66)",
+          "oklch(95% 0.0494 226.66)"
+        ]
+      },
+      "secondary-border": {
+        "role": "neutral",
+        "displayName": "Secondary Action Border",
+        "tonalRamp": [
+          "oklch(15% 0.0175 225.23)",
+          "oklch(27% 0.0175 225.23)",
+          "oklch(39% 0.0175 225.23)",
+          "oklch(51% 0.0175 225.23)",
+          "oklch(63% 0.0175 225.23)",
+          "oklch(75% 0.0175 225.23)",
+          "oklch(87% 0.0175 225.23)",
+          "oklch(95% 0.0175 225.23)"
+        ]
+      },
+      "secondary-hover": {
+        "role": "neutral",
+        "displayName": "Secondary Action Hover",
+        "tonalRamp": [
+          "oklch(15% 0.0053 197.07)",
+          "oklch(27% 0.0053 197.07)",
+          "oklch(39% 0.0053 197.07)",
+          "oklch(51% 0.0053 197.07)",
+          "oklch(63% 0.0053 197.07)",
+          "oklch(75% 0.0053 197.07)",
+          "oklch(87% 0.0053 197.07)",
+          "oklch(95% 0.0053 197.07)"
+        ]
+      },
+      "focus": {
+        "role": "primary",
+        "displayName": "Keyboard Focus",
+        "tonalRamp": [
+          "oklch(15% 0.0933 182.65)",
+          "oklch(27% 0.0933 182.65)",
+          "oklch(39% 0.0933 182.65)",
+          "oklch(51% 0.0933 182.65)",
+          "oklch(63% 0.0933 182.65)",
+          "oklch(75% 0.0933 182.65)",
+          "oklch(87% 0.0933 182.65)",
+          "oklch(95% 0.0933 182.65)"
+        ]
+      },
+      "positive-ink": {
+        "role": "secondary",
+        "displayName": "Recorded Green Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0758 166.09)",
+          "oklch(27% 0.0758 166.09)",
+          "oklch(39% 0.0758 166.09)",
+          "oklch(51% 0.0758 166.09)",
+          "oklch(63% 0.0758 166.09)",
+          "oklch(75% 0.0758 166.09)",
+          "oklch(87% 0.0758 166.09)",
+          "oklch(95% 0.0758 166.09)"
+        ]
+      },
+      "positive-ground": {
+        "role": "secondary",
+        "displayName": "Recorded Green Ground",
+        "tonalRamp": [
+          "oklch(15% 0.0124 157.00)",
+          "oklch(27% 0.0124 157.00)",
+          "oklch(39% 0.0124 157.00)",
+          "oklch(51% 0.0124 157.00)",
+          "oklch(63% 0.0124 157.00)",
+          "oklch(75% 0.0124 157.00)",
+          "oklch(87% 0.0124 157.00)",
+          "oklch(95% 0.0124 157.00)"
+        ]
+      },
+      "positive-line": {
+        "role": "secondary",
+        "displayName": "Recorded Green Line",
+        "tonalRamp": [
+          "oklch(15% 0.0250 156.70)",
+          "oklch(27% 0.0250 156.70)",
+          "oklch(39% 0.0250 156.70)",
+          "oklch(51% 0.0250 156.70)",
+          "oklch(63% 0.0250 156.70)",
+          "oklch(75% 0.0250 156.70)",
+          "oklch(87% 0.0250 156.70)",
+          "oklch(95% 0.0250 156.70)"
+        ]
+      },
+      "attention-ink": {
+        "role": "secondary",
+        "displayName": "Review Amber Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0975 62.38)",
+          "oklch(27% 0.0975 62.38)",
+          "oklch(39% 0.0975 62.38)",
+          "oklch(51% 0.0975 62.38)",
+          "oklch(63% 0.0975 62.38)",
+          "oklch(75% 0.0975 62.38)",
+          "oklch(87% 0.0975 62.38)",
+          "oklch(95% 0.0975 62.38)"
+        ]
+      },
+      "attention-ground": {
+        "role": "secondary",
+        "displayName": "Review Amber Ground",
+        "tonalRamp": [
+          "oklch(15% 0.0197 77.32)",
+          "oklch(27% 0.0197 77.32)",
+          "oklch(39% 0.0197 77.32)",
+          "oklch(51% 0.0197 77.32)",
+          "oklch(63% 0.0197 77.32)",
+          "oklch(75% 0.0197 77.32)",
+          "oklch(87% 0.0197 77.32)",
+          "oklch(95% 0.0197 77.32)"
+        ]
+      },
+      "attention-line": {
+        "role": "secondary",
+        "displayName": "Review Amber Line",
+        "tonalRamp": [
+          "oklch(15% 0.0450 82.60)",
+          "oklch(27% 0.0450 82.60)",
+          "oklch(39% 0.0450 82.60)",
+          "oklch(51% 0.0450 82.60)",
+          "oklch(63% 0.0450 82.60)",
+          "oklch(75% 0.0450 82.60)",
+          "oklch(87% 0.0450 82.60)",
+          "oklch(95% 0.0450 82.60)"
+        ]
+      },
+      "neutral-ink": {
+        "role": "neutral",
+        "displayName": "Pending Gray Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0261 238.07)",
+          "oklch(27% 0.0261 238.07)",
+          "oklch(39% 0.0261 238.07)",
+          "oklch(51% 0.0261 238.07)",
+          "oklch(63% 0.0261 238.07)",
+          "oklch(75% 0.0261 238.07)",
+          "oklch(87% 0.0261 238.07)",
+          "oklch(95% 0.0261 238.07)"
+        ]
+      },
+      "neutral-ground": {
+        "role": "neutral",
+        "displayName": "Pending Gray Ground",
+        "tonalRamp": [
+          "oklch(15% 0.0042 236.50)",
+          "oklch(27% 0.0042 236.50)",
+          "oklch(39% 0.0042 236.50)",
+          "oklch(51% 0.0042 236.50)",
+          "oklch(63% 0.0042 236.50)",
+          "oklch(75% 0.0042 236.50)",
+          "oklch(87% 0.0042 236.50)",
+          "oklch(95% 0.0042 236.50)"
+        ]
+      },
+      "neutral-line": {
+        "role": "neutral",
+        "displayName": "Pending Gray Line",
+        "tonalRamp": [
+          "oklch(15% 0.0085 236.57)",
+          "oklch(27% 0.0085 236.57)",
+          "oklch(39% 0.0085 236.57)",
+          "oklch(51% 0.0085 236.57)",
+          "oklch(63% 0.0085 236.57)",
+          "oklch(75% 0.0085 236.57)",
+          "oklch(87% 0.0085 236.57)",
+          "oklch(95% 0.0085 236.57)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Page Headline",
+        "purpose": "Operational page titles; compact/mobile page headings use 28px."
+      },
+      "title": {
+        "displayName": "Panel Title",
+        "purpose": "Task panel headings; mobile uses 17px."
+      },
+      "task-title": {
+        "displayName": "Task Title",
+        "purpose": "Queue entries and subsection headings."
+      },
+      "body": {
+        "displayName": "Operational Body",
+        "purpose": "Shared /mvp stack; tabular numerals throughout."
+      },
+      "field": {
+        "displayName": "Field and Panel Copy",
+        "purpose": "Input values and ordinary panel paragraphs."
+      },
+      "label": {
+        "displayName": "Field Label",
+        "purpose": "Visible sentence-case field captions."
+      },
+      "button": {
+        "displayName": "Action Label",
+        "purpose": "Compact semibold controls with direct task verbs."
+      },
+      "briefing": {
+        "displayName": "Operational Total",
+        "purpose": "Four-column briefing strip; 22px compact desktop and 23px mobile."
+      }
+    },
+    "shadows": [
+      {
+        "name": "account-panel",
+        "value": "0 12px 28px #15313e18",
+        "purpose": "Floating synthetic-account disclosure."
+      },
+      {
+        "name": "mobile-drawer",
+        "value": "8px 0 30px #18333f22",
+        "purpose": "Mobile navigation above the work area."
+      },
+      {
+        "name": "skip-link",
+        "value": "0 3px 12px #19323f25",
+        "purpose": "Visible keyboard skip link."
+      }
+    ],
+    "motion": [
+      {
+        "name": "control-color",
+        "value": "background .15s ease-out, border-color .15s ease-out",
+        "purpose": "Button state feedback."
+      },
+      {
+        "name": "directory-hover",
+        "value": "background .16s ease-out",
+        "purpose": "Workspace directory row feedback."
+      },
+      {
+        "name": "rail-feedback",
+        "value": "background .16s, color .16s",
+        "purpose": "Workspace link feedback; default CSS easing."
+      },
+      {
+        "name": "drawer",
+        "value": "transform .18s ease-out",
+        "purpose": "Mobile rail reveal."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "@media (prefers-reduced-motion: reduce) { transition: none !important; animation: none !important; scroll-behavior: auto !important; }",
+        "purpose": "Applied to /mvp descendants."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide-min",
+        "value": "1800px"
+      },
+      {
+        "name": "compact-desktop-max",
+        "value": "1200px"
+      },
+      {
+        "name": "single-main-column-max",
+        "value": "1000px"
+      },
+      {
+        "name": "mobile-max",
+        "value": "760px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The prominent next task, selected from current workflow records.",
+      "html": "<button type=\"button\" class=\"ds-button-primary\">Review claims<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14m-6-6 6 6-6 6\"/></svg></button>",
+      "css": ".ds-button-primary{display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:41px;padding:9px 14px;border:1px solid #bdcbd1;background:#fff;color:#244958;border-radius:5px;font-family:\"Segoe UI\",-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:12px;font-weight:600;line-height:1.5;cursor:pointer;text-decoration:none;transition:background .15s ease-out,border-color .15s ease-out;background:var(--ac-accent,#146b61);border-color:var(--ac-accent,#146b61);color:#fff}.ds-button-primary:hover{background:#0d574e;border-color:#0d574e}.ds-button-primary:focus-visible{outline:3px solid #238b7e;outline-offset:3px}.ds-button-primary:disabled{opacity:.5;cursor:not-allowed}@media(max-width:760px){.ds-button-primary{min-height:44px}}@media(prefers-reduced-motion:reduce){.ds-button-primary{transition:none}}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "An explicit supporting action such as a current chain check.",
+      "html": "<button type=\"button\" class=\"ds-button-secondary\">Check now</button>",
+      "css": ".ds-button-secondary{display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:41px;padding:9px 14px;border:1px solid #bdcbd1;background:#fff;color:#244958;border-radius:5px;font-family:\"Segoe UI\",-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:12px;font-weight:600;line-height:1.5;cursor:pointer;text-decoration:none;transition:background .15s ease-out,border-color .15s ease-out}.ds-button-secondary:hover{background:#f0f5f5;border-color:#8aa7aa}.ds-button-secondary:focus-visible{outline:3px solid #238b7e;outline-offset:3px}.ds-button-secondary:disabled{opacity:.5;cursor:not-allowed}@media(max-width:760px){.ds-button-secondary{min-height:44px}}@media(prefers-reduced-motion:reduce){.ds-button-secondary{transition:none}}"
+    },
+    {
+      "name": "Labelled Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Visible label, neutral control border, themed caret and keyboard focus.",
+      "html": "<label class=\"ds-field\">Search proofs<input type=\"search\" placeholder=\"Record type or reference\"/></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:7px;max-width:300px;color:var(--ac-ink,#19323f);font-family:\"Segoe UI\",-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:12px;font-weight:600;line-height:1.55}.ds-field input{width:100%;padding:10px 12px;min-height:44px;background:#fff;border:1px solid #abbcc4;border-radius:5px;font-family:\"Segoe UI\",-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:13px;font-weight:400;color:var(--ac-ink,#19323f);caret-color:var(--ac-accent,#146b61)}.ds-field input::placeholder{color:#60727c;opacity:1}.ds-field input:focus-visible{outline:3px solid #238b7e;outline-offset:3px}"
+    },
+    {
+      "name": "Workspace Navigation",
+      "kind": "nav",
+      "refersTo": "navigation-active",
+      "description": "Navy rail links with icons, written labels and an explicit active page; workspace links retain requested URL context while the initial catalogue loads.",
+      "html": "<nav class=\"ds-navigation\" aria-label=\"Workspace navigation\"><a href=\"#overview\" aria-current=\"page\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z\"/></svg><span>Operations overview</span></a><a href=\"#claims\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m20 6-11 11-5-5\"/></svg><span>Claim review</span></a></nav>",
+      "css": ".ds-navigation{display:flex;flex-direction:column;gap:5px;width:220px;padding:18px;background:#17323f;font-family:\"Segoe UI\",-apple-system,BlinkMacSystemFont,Arial,sans-serif}.ds-navigation a{display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:44px;border-radius:5px;font-size:13px;color:#c6d8df;text-decoration:none;transition:background .16s,color .16s}.ds-navigation a:hover{background:#254551;color:#fff}.ds-navigation a[aria-current=page]{background:#2b505b;color:#fff;font-weight:600}.ds-navigation a[aria-current=page] svg{color:#b9e7d8}.ds-navigation a:focus-visible{outline:3px solid #238b7e;outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-navigation a{transition:none}}"
+    },
+    {
+      "name": "Positive Status",
+      "kind": "chip",
+      "refersTo": "status-positive",
+      "description": "A named positive business state; this preview does not claim a verification result.",
+      "html": "<span class=\"ds-status-positive\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m20 6-11 11-5-5\"/></svg><span>Handover recorded</span></span>",
+      "css": ".ds-status-positive{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;padding:3px 8px;border:1px solid #d6e8dc;border-radius:4px;background:#edf6f0;color:#23634c;font-family:\"Segoe UI\",-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:10px;font-weight:500;line-height:1.5}"
+    },
+    {
+      "name": "Attention Status",
+      "kind": "chip",
+      "refersTo": "status-attention",
+      "description": "A hold or adverse state that requires inspection without alleging fraud.",
+      "html": "<span class=\"ds-status-attention\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 8v4m0 4h.01\"/></svg><span>Held</span></span>",
+      "css": ".ds-status-attention{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;padding:3px 8px;border:1px solid #efdebf;border-radius:4px;background:#fff6e9;color:#8b5620;font-family:\"Segoe UI\",-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:10px;font-weight:500;line-height:1.5}"
+    },
+    {
+      "name": "Pending Status",
+      "kind": "chip",
+      "refersTo": "status-neutral",
+      "description": "Pending workflow or unchecked evidence, always written explicitly.",
+      "html": "<span class=\"ds-status-neutral\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 6v6l4 2\"/></svg><span>Awaiting DSWD review</span></span>",
+      "css": ".ds-status-neutral{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;padding:3px 8px;border:1px solid #e0e6ea;border-radius:4px;background:#f0f3f5;color:#5a6a75;font-family:\"Segoe UI\",-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:10px;font-weight:500;line-height:1.5}"
+    },
+    {
+      "name": "Work Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Flat record grouping with a fine border, concise heading and supporting prose.",
+      "html": "<section class=\"ds-panel\"><h2>Claim response queue</h2><p>Attest residence and affectedness. DSWD makes the final decision.</p></section>",
+      "css": ".ds-panel{background:#fff;border:1px solid var(--ac-line,#dce3e7);border-radius:7px;padding:24px;color:var(--ac-ink,#19323f);font-family:\"Segoe UI\",-apple-system,BlinkMacSystemFont,Arial,sans-serif}.ds-panel h2{font-size:18px;line-height:1.35;font-weight:650;letter-spacing:-.25px;margin:0 0 12px}.ds-panel p{font-size:13px;line-height:1.55;color:var(--ac-muted,#5c6d76);margin:0}@media(max-width:1200px){.ds-panel{padding:21px}}@media(max-width:760px){.ds-panel{padding:20px 17px}.ds-panel h2{font-size:17px}}"
+    },
+    {
+      "name": "Staff Work Table",
+      "kind": "custom",
+      "description": "Compact record rows and explicit actions; sample content is invented.",
+      "html": "<div class=\"ds-table-scroll\"><table class=\"ds-table\"><thead><tr><th scope=\"col\">Household</th><th scope=\"col\">Claim status</th><th scope=\"col\">Action</th></tr></thead><tbody><tr><td><strong>Invented household</strong><small>DFC-2026-0001 · Synthetic preview</small></td><td>Awaiting DSWD review</td><td><a href=\"#review\">Review<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14m-6-6 6 6-6 6\"/></svg></a></td></tr></tbody></table></div>",
+      "css": ".ds-table-scroll{overflow:auto;max-width:100%;scrollbar-color:#a9c0c4 #f3f6f7;scrollbar-width:thin}.ds-table{width:100%;border-collapse:collapse;text-align:left;color:var(--ac-ink,#19323f);font-family:\"Segoe UI\",-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:12px;line-height:1.55;font-variant-numeric:tabular-nums}.ds-table th{background:#f7f9fa;color:#637680;font-size:10px;font-weight:600;padding:11px 13px;border-bottom:1px solid var(--ac-line,#dce3e7);white-space:nowrap}.ds-table td{padding:15px 13px;border-bottom:1px solid #e9eef0;vertical-align:middle}.ds-table td strong{display:block;font-weight:600;font-size:12px;min-width:120px;max-width:260px;overflow-wrap:anywhere}.ds-table td small{display:block;font-size:10px;color:var(--ac-muted,#5c6d76);margin-top:3px}.ds-table tbody tr:hover{background:#fafcfc}.ds-table a{display:inline-flex;align-items:center;gap:7px;color:var(--ac-accent,#146b61);font-weight:600;text-decoration:none;min-height:36px;white-space:nowrap}.ds-table a:hover{text-decoration:underline;text-underline-offset:4px}.ds-table a:focus-visible{outline:3px solid #238b7e;outline-offset:3px}@media(max-width:760px){.ds-table{min-width:470px}.ds-table th,.ds-table td{padding:12px 10px}.ds-table a{min-height:44px}}"
+    },
+    {
+      "name": "Household Journey",
+      "kind": "custom",
+      "description": "Sequential household guidance with written complete, current and future steps.",
+      "html": "<ol class=\"ds-journey\"><li class=\"ds-complete\"><span class=\"ds-step-symbol\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m20 6-11 11-5-5\"/></svg></span><div><h3>Household &amp; claim</h3><p>Your claim has been submitted.</p></div></li><li class=\"ds-current\"><span class=\"ds-step-symbol\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 6v6l4 2\"/></svg></span><div><h3>Barangay response</h3><p>Your barangay confirms residence and affectedness.</p></div></li><li><span class=\"ds-step-symbol\"><span></span></span><div><h3>DSWD decision &amp; amount</h3><p>DSWD reviews the evidence and decides your claim.</p></div></li></ol>",
+      "css": ".ds-journey{list-style:none;margin:24px 0 18px;padding:0;color:var(--ac-ink,#19323f);font-family:\"Segoe UI\",-apple-system,BlinkMacSystemFont,Arial,sans-serif}.ds-journey li{position:relative;display:flex;gap:15px;padding-bottom:26px}.ds-journey li:not(:last-child)::before{content:\"\";position:absolute;left:12px;top:28px;width:1px;height:calc(100% - 28px);background:#d5e1df}.ds-journey li:last-child{padding-bottom:0}.ds-step-symbol{display:grid;place-items:center;border:1px solid #cbd8dc;border-radius:50%;width:26px;height:26px;min-width:26px;background:#fff;color:#7b8b95}.ds-step-symbol>span{width:5px;height:5px;border-radius:50%;background:#a1b0b9}.ds-complete .ds-step-symbol{background:#e2f0e8;border-color:#c2decf;color:#276b50}.ds-current .ds-step-symbol{background:#fff5e5;border-color:#e5cfaa;color:#966723}.ds-journey h3{font-size:13px;font-weight:600;line-height:1.5;margin:0}.ds-journey p{font-size:12px;margin:5px 0 0;line-height:1.65;color:var(--ac-muted,#5c6d76)}@media(max-width:760px){.ds-journey li{padding-bottom:28px}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Public-Service Workdesk",
+    "overview": "AyudaChain uses a calm, practical interface for following disaster cash assistance. A stable navy rail frames white work surfaces; restrained teal identifies actions. The visual hierarchy gives the current task, its supporting record and its permitted next step priority over decoration.\n\nThis document records the implementation of `/mvp` and its five role workspaces as of 11 October 2026. Its sources are `frontend/app/mvp.css`, the directory route, `frontend/components/mvp/`, and the 1440px/390px confirmation captures in `.impeccable/review/final/`. It does not define the retained legacy screens. `PRODUCT.md` supplies the durable commitments to truthful evidence, understandable states and household guidance; surface composition remains in `.impeccable/surface-briefs/mvp.md`.",
+    "keyCharacteristics": [
+      "Stable navigation and persistent account/disaster context.",
+      "Dense staff queues and a shorter, sequential household journey.",
+      "White surfaces, fine dividers and restrained teal actions.",
+      "Written states with consistent line icons.",
+      "Evidence first, with explicit unavailable and not-checked states."
+    ],
+    "rules": [
+      {
+        "name": "The Written State Rule",
+        "body": "Color always accompanies a state name and, for status chips, a check, clock or alert icon. A green business status is not a claim that chain integrity or physical receipt has been proved.",
+        "section": "colors"
+      },
+      {
+        "name": "The Plain Task Rule",
+        "body": "Preserve clear size and weight steps, sentence case and direct labels. Do not add decorative eyebrows or a separate typographic voice above task headings.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Work Surface Rule",
+        "body": "Keep record panels and queue rows flat. Use elevation only for controls that float above the work area.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** use the existing operational palette, flat panels and visible control borders.",
+      "**Do** pair each status color with explicit words and an appropriate line icon.",
+      "**Do** select the next action from current API records and preserve account/disaster context in task links, including during initial catalogue loading.",
+      "**Do** keep beneficiary instructions short and sequential, with the amount basis and appointment evidence close by.",
+      "**Do** use Philippine peso formatting and Asia/Manila dates with tabular numerals.",
+      "**Do** label simulated ID/SMS paths and the selected, unverified synthetic account.",
+      "**Do** preserve keyboard focus, retry states, reduced motion and mobile 44px action targets."
+    ],
+    "donts": [
+      "**Don't** show \"Verified\" from a saved submission state or an earlier successful check.",
+      "**Don't** describe a review flag as fraud, or a recorded handover as proof of recipient-confirmed receipt.",
+      "**Don't** invent records, transaction hashes or empty-state success evidence.",
+      "**Don't** claim sign-in, authenticated identity, operational privacy or offline payout.",
+      "**Don't** turn this scoped system into a redesign rule for retained legacy routes.",
+      "**Don't** introduce generic role tabs, decorative metric cards or an additional icon vocabulary into these workspaces."
+    ]
+  }
+}

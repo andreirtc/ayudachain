@@ -1,0 +1,62 @@
+[
+  {
+    "role": "beneficiary",
+    "http": 200,
+    "headings": [
+      "My assistance",
+      "Your receipt answer is on record",
+      "Your claim journey",
+      "Your entitlement",
+      "Payout appointment"
+    ],
+    "text": "My assistance\n\nInvented Browser Own 1791665184253 · DFC-2026-33757601\n\nView private report\nYour receipt answer is on record\n\nYou can view your answer or add a private report. Earlier answers stay in your history.\n\nView private report\nYour claim journey\nHousehold & claim\n\nYour claim has been submitted.\n\nBarangay response\n\nThe barangay responses are recorded.\n\nDSWD decision & amount\n\nYour entitlement and amount basis are recorded.\n\nPayout appointment\n\nOct 11, 2026 · Invented browser hall Invented Browser Own 1791665184253\n\nReceipt confirmation\n\nYour private receipt answer is on record.\n\nApproved\nYour entitlement\n₱4,950.00\nHandover recorded\nHow your amount was worked out\n₱330.00 per day\n× 15 documented days\n75% of ₱435.00 daily wage, rounded up to the next ₱10.\nView amount and history\nPayout appointment\nOct 11, 2026\n\nInvented browser hall Invented Browser Own 1791665184253\n\nClosed\nView appointment\nNeed to report a concern?\nSend a private report to DSWD."
+  },
+  {
+    "role": "barangay-officer",
+    "http": 200,
+    "headings": [
+      "Your barangay, in focus.",
+      "Claim response queue",
+      "Formal batch submission",
+      "Residents’ approved list",
+      "Barangay operations"
+    ],
+    "text": "Your barangay, in focus.\n\nInvented Sapa · Synthetic Flood Talim\n\nRespond to claims\n1\nAwaiting barangay response\n0\nWith DSWD for review\n2\nApproved households\n2\nRecorded handovers\nClaim response queue\n\nAttest residence and affectedness. DSWD makes the final decision.\n\nAll claims\nHousehold\tClaim status\tResponse deadline\t\nAction\n\n\nInvented Browser Head 1791665293248\nZone 9\n\t\nAwaiting barangay response\n\tOct 17, 2026, 3:10 PM\tOpen\nFormal batch submission\n\nThe Punong Barangay submits responded claims with the council resolution. Each submission keeps its original responses and evidence.\n\nOpen responses and batch submission\nResidents’ approved list\n\nView household names, zones and damage categories in the published list.\n\nPayout progress is shown as aggregate counts only.\n\nOpen residents’ list\nBarangay operations\n\nCurrent claims and non-cancelled entitlements, one per household/disaster. Handover amounts are locked; answers use latest revision only. Awaiting response is separate from recorded unconfirmed outcomes.\n\nSelected disaster · Own barangay aggregate counts\nBarangay\tApprovals\tHandovers\tRemaining\nInvented Sapa\t2\t2\t0"
+  },
+  {
+    "role": "dswd-officer",
+    "http": 200,
+    "headings": [
+      "Keep assistance moving.",
+      "Next decisions",
+      "Claim review queue",
+      "Payout sessions",
+      "Handover is one part of the story.",
+      "Document the funding.",
+      "Barangay operations"
+    ],
+    "text": "Keep assistance moving.\n\nSynthetic Flood Talim · Funding, decisions and payout operations in one place.\n\nResolve private cases\n₱1,270,952.75\nRecorded funding authority\n0\nClaims awaiting review\n2\nApproved entitlements\n0\nActive payout sessions\nNext decisions\nReview household claims\n\nRead endorsements, flags and evidence before deciding.\n\n0\nResolve private cases\n\nRecord a human response to recipient concerns.\n\n1\nPublish current approved lists\n\nCheck amount inputs and confirm the list’s chain record.\n\n0\nClaim review queue\nOpen review\nNo claims awaiting review\n\nAll current claims have a recorded decision. New claims will appear here when they reach DSWD.\n\nView recorded decisions\nPayout sessions\nManage sessions\nOct\n11\nInvented browser hall Invented Browser Own 1791665184253\n\nInvented Sapa · 1 households\n\nClosed\nOct\n13\nInvented browser hall Invented Browser Assisted 1791665231129\n\nInvented Sapa · 1 households\n\nClosed\nHandover is one part of the story.\n\nRecipient answers are separate evidence.\n\n2\nrecorded handovers\nReceived in full\n1\nAdverse answer\n1\nAwaiting answer\n0\nUnconfirmed after 72 hours\n0\nInspect recipient outcomes\nDocument the funding.\n\nRelease orders establish recorded funding authority. Payout handovers and physical cash arrangements remain separate.\n\nOpen funding ledger\nBarangay operations\n\nCurrent claims and non-cancelled entitlements, one per household/disaster. Handover amounts are locked; answers use latest revision only. Awaiting response is separate from recorded unconfirmed outcomes.\n\nSelected disaster · Office-wide records\nBarangay\tClaims\tAwaiting review\tApprovals\tAwaiting amounts\tAwaiting publication\tReady to schedule\tAssigned appointments\tHandovers\tReceived full\tReceived less\tNot received\tUnconfirmed\tAwaiting answer\tKnown approved subtotal\tRecorded handover subtotal\nInvented Sapa\t3\t0\t2\t0\t0\t0\t0\t2\t1\t1\t0\t0\t0\t₱12,550.00\n0 awaiting amount\n\t₱12,550.00\nInvented Silong\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t₱0.00\n0 awaiting amount\n\t₱0.00\nInvented Staffless\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t₱0.00\n0 awaiting amount\n\t₱0.00\n\nFunding authority, approved entitlements, recorded cash an"
+  },
+  {
+    "role": "disbursing-officer",
+    "http": 200,
+    "headings": [
+      "Ready for a careful handover.",
+      "Your assigned sessions",
+      "Households in your scope"
+    ],
+    "text": "Ready for a careful handover.\n\nWork only on your assigned households. Compare identity, present the computed cash, then record authorization.\n\nView handover records\n1\nCompare identity\n\nMatch the person to the accepted photo ID.\n\n2\nPresent the amount\n\nLet the recipient count the computed cash.\n\n3\nRecord authorization\n\nUse the recipient’s code once at handover.\n\nYour assigned sessions\nOct\n11\nInvented browser hall Invented Browser Own 1791665184253\n\nInvented Sapa · 1 households\n\nClosed\nOct\n13\nInvented browser hall Invented Browser Assisted 1791665231129\n\nInvented Sapa · 1 households\n\nClosed\nHouseholds in your scope\nIndependent exit checks\nHousehold\tComputed amount\tHandover\t\nAction\n\n\nInvented Browser Own 1791665184253\n\t₱4,950.00\t\nHandover recorded\n\tOpen\n\n\nInvented Browser Assisted 1791665231129\n\t₱7,600.00\t\nHandover recorded\n\tOpen\n\nAn assisted payout needs a different eligible officer for the exit check. A recorded handover cannot be repeated."
+  },
+  {
+    "role": "auditor",
+    "http": 200,
+    "headings": [
+      "Follow the evidence.",
+      "Exception register",
+      "Handover is one part of the story.",
+      "Trust the current check.",
+      "Barangay operations"
+    ],
+    "text": "Follow the evidence.\n\nIndependent review of funding, decisions and payout outcomes. A flag is a reason to inspect, never a finding of fraud.\n\nCheck record integrity\n5\nWorkflow flags to inspect\n3\nRecorded claims\n2\nRecorded handovers\n1\nRecipient-confirmed in full\nException register\n5 flags\nUnsigned barangay submission\n\nClaims forwarded without a signed barangay batch.\n\nRecord 6df1617d · Recorded flag\nAmount basis changed\n\nCompare the new basis with the preceding version.\n\nRecord d5897c09 · Recorded flag\nAssisted payout\n\nInspect payer and independent exit-check evidence.\n\nRecord 404dbf5b · Handover recorded\nPaid amount differs from later basis\n\nThe original handed-over amount remains fixed.\n\nRecord 744e5974 · Recorded flag\nPrivate recipient case\n\nCompare the report with handover and outcome evidence.\n\nRecord de27d60d · Open\nHandover is one part of the story.\n\nRecipient answers are separate evidence.\n\n2\nrecorded handovers\nReceived in full\n1\nAdverse answer\n1\nAwaiting answer\n0\nUnconfirmed after 72 hours\n0\nInspect recipient outcomes\nTrust the current check.\n\nA matching hash proves committed content is unchanged. It does not prove the original document was genuine or that physical cash reached a household.\n\nOpen originals and chain checks\nBarangay operations\n\nCurrent claims and non-cancelled entitlements, one per household/disaster. Handover amounts are locked; answers use latest revision only. Awaiting response is separate from recorded unconfirmed outcomes.\n\nSelected disaster · Office-wide records\nBarangay\tClaims\tAwaiting review\tApprovals\tAwaiting amounts\tAwaiting publication\tReady to schedule\tAssigned appointments\tHandovers\tReceived full\tReceived less\tNot received\tUnconfirmed\tAwaiting answer\tKnown approved subtotal\tRecorded handover subtotal\nInvented Sapa\t3\t0\t2\t0\t0\t0\t0\t2\t1\t1\t0\t0\t0\t₱12,550.00\n0 awaiting amount\n\t₱12,550.00\nInvented Silong\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t₱0.00\n0 awaiting amount\n\t₱0.00\nInvented Staffless\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t0\t₱0.00\n0 awaiting amount\n\t₱0.00\n\nFunding authority, approved entitlements, recorded cash and recipient answers are separate. These subt"
+  }
+]

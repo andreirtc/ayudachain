@@ -1,0 +1,2 @@
+const slugs:Record<string,string>={beneficiary:'beneficiary',barangay:'barangay-officer',dswd:'dswd-officer',disbursing:'disbursing-officer',auditor:'auditor'};
+export function workspacePath(role:string,account:string,section='overview',disaster?:string){const query=new URLSearchParams({account,...(disaster?{disaster}:{})});return '/mvp/'+slugs[role]+(section==='overview'?'':'/'+section)+'?'+query.toString();}

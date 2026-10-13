@@ -1,0 +1,12 @@
+Source: captured tool output reading the disposable backend log before backend restart (2026-10-08 Asia/Manila).
+The first backend log was overwritten by the investigation harness's restart, so this is a transcribed excerpt, not the original complete log. Harness now appends on restart.
+
+Forced API reverse scenario:
+backend/server.py, line 701, in do_POST
+sqlite3.IntegrityError: UNIQUE constraint failed: distributions.distribution_id
+
+Subsequent browser payout attempt:
+backend/server.py, line 701, in do_POST
+sqlite3.OperationalError: database is locked
+
+Browser harness route.fetch reported socket hang up, with POST /api/distributions/confirm, and reset its kernel due uncaught rejection. The planned lost-response test was not completed by this failed attempt. Earlier evidence had been persisted. Backend restarted using recorded owned PID to release the leaked connection; no original database was touched.
