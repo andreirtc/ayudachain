@@ -1,9 +1,10 @@
-import { test, expect, Page } from "@playwright/test";
-const API = "http://127.0.0.1:8101";
-const client = { "X-AyudaChain-Client": "web", Origin: "http://127.0.0.1:3101" };
+import { API, BASE_URL } from "./support";
+import { test, expect, Page } from "./support";
+
+const client = { "X-AyudaChain-Client": "web", Origin: BASE_URL };
 test.beforeEach(async ({ page }) => {
   await page.route(/http:\/\/(?:127\.0\.0\.1|localhost):8000\//, r => {
-    const url = new URL(r.request().url()); url.hostname = "127.0.0.1"; url.port = "8101";
+    const url = new URL(r.request().url()); url.hostname = "127.0.0.1"; url.port = new URL(API).port;
     return r.continue({url:url.toString()});
   });
 });
@@ -45,7 +46,8 @@ for(const state of ["pending","approved","rejected","historical"]) {
     await page.emulateMedia({colorScheme:state==="rejected"||state==="historical"?"dark":"light"});
     await home(page,state,info.project.name);
     await expect(page.getByRole("heading",{name:{pending:"Awaiting staff review",approved:"Eligibility approved; no payout recorded",rejected:"Review the recorded decision",historical:"Historical household record"}[state],exact:true})).toBeVisible();
-    await expect(page.getByRole("region",{name:"Household status"})).toContainText(`Synthetic ${state} home ${info.project.name}`);
+    await expect(page.getByRole("main").getByText(`Synthetic ${state} home ${info.project.name}`,{exact:true})).toBeVisible();
+    await expect(page.getByRole("region",{name:"Household status"})).toContainText({pending:"Pending review",approved:"Approved",rejected:"Rejected",historical:"Retained duplicate"}[state]!);
     await expect(page.getByText("Juan Dela Cruz",{exact:true})).toHaveCount(0);
     await expect(page.getByText(payout?"A saved receipt is not a new appointment.":"Staff have not published a collection date, site or requirements",{exact:false})).toBeVisible();
     await expect(page.getByLabel("Collection instructions")).toHaveCount(0);

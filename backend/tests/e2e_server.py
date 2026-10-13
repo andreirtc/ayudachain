@@ -4,6 +4,7 @@ import json
 import sys
 import tempfile
 from pathlib import Path
+from urllib.parse import urlsplit
 
 BACKEND = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND))
@@ -11,7 +12,11 @@ directory = Path(tempfile.mkdtemp(prefix="ayudachain-auth-e2e-"))
 os.environ["DATABASE_URL"] = "sqlite:///" + (directory / "records.db").as_posix()
 os.environ["RECEIPTS_DIR"] = str(directory / "receipts")
 os.environ["DEMO_ACCOUNTS_FILE"] = str(directory / "accounts.json")
-os.environ["CORS_ORIGINS"] = "http://127.0.0.1:3101"
+frontend_origin = os.environ.get("AYUDACHAIN_TEST_BASE_URL", "http://127.0.0.1:3101")
+api_url = urlsplit(os.environ.get("AYUDACHAIN_TEST_API_URL", "http://127.0.0.1:8101"))
+if api_url.scheme != "http" or api_url.hostname not in {"127.0.0.1", "localhost"}:
+    raise RuntimeError("Browser test API must use loopback HTTP")
+os.environ["CORS_ORIGINS"] = frontend_origin
 sys.path.insert(0, str(BACKEND / "tests"))
 from auth_support import accounts_fixture
 accounts_path = accounts_fixture(directory)
@@ -23,7 +28,7 @@ for viewport in ("desktop", "phone"):
         accounts["accounts"].append({**recipient, "id": f"synthetic-home-{state}-{viewport}", "display_name": f"Synthetic home {state}", "beneficiary_id": f"BEN-HOME-{state}-{viewport}"})
 accounts_path.write_text(json.dumps(accounts))
 from app import config
-config.CORS_ORIGINS = ["http://127.0.0.1:3101"]
+config.CORS_ORIGINS = [frontend_origin]
 from app.services.blockchain import blockchain_service
 
 
@@ -38,6 +43,24 @@ for name in ("get_status", "release_fund", "allocate_fund", "confirm_distributio
 (directory / "receipts" / "captured-synthetic.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="120"><text x="20" y="50">Controlled synthetic receipt evidence</text></svg>')
 from app.main import app
 
+# Registered only by this disposable test launcher, never by the production API.
+# Every browser case starts with fresh records rather than inheriting prior payouts.
+if os.environ.get("AYUDACHAIN_E2E_RESET_ENABLED") == "1":
+    from fastapi import Header, HTTPException
+    from app.database import engine, Base, init_db
+    from app.seed_demo import seed_if_empty
+
+    @app.post("/__test__/reset", include_in_schema=False)
+    def reset_fixture(x_ayudachain_test_reset: str | None = Header(default=None)):
+        if x_ayudachain_test_reset != "synthetic-e2e-reset-only":
+            raise HTTPException(403, "Browser fixture reset only")
+        if Path(engine.url.database).resolve() != (directory / "records.db").resolve():
+            raise RuntimeError("Refusing reset outside the owned temporary database")
+        Base.metadata.drop_all(bind=engine)
+        init_db()
+        seed_if_empty()
+        return {"reset": True, "synthetic": True}
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8101, log_level="warning")
+    uvicorn.run(app, host="127.0.0.1", port=api_url.port or 8101, log_level="warning")

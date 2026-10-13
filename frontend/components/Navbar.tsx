@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRole } from "@/lib/roleContext";
 import { AccountRole } from "@/lib/api";
 import { useSignInHref } from "@/lib/useSignInHref";
+import { workspaceHome } from "@/lib/workspaceHome";
 import BrandMark from "@/components/BrandMark";
 import RoleIndicatorBanner from "@/components/RoleIndicatorBanner";
 import { Home, Users, HandCoins, Receipt, LogIn, MessageSquare, ClipboardList, Search } from "lucide-react";
@@ -20,7 +21,7 @@ export default function Navbar(){
  return <header className="app-shell">
    <a href="#main-content" className="app-skip-link">Skip to content</a>
    <div className="app-shell-row">
-     <Link href="/" className="app-brand" aria-label="AyudaChain home"><BrandMark/><span className="app-wordmark">AyudaChain</span></Link>
+     <Link href={workspaceHome(account?.role)} className="app-brand" aria-label="AyudaChain home"><BrandMark/><span className="app-wordmark">AyudaChain</span></Link>
      <form onSubmit={search} className="app-search" role="search"><Search size={21} aria-hidden="true"/><input aria-label={householdSearch?'Search households and references':'Search receipt reference'} placeholder={householdSearch?'Search households and references':'Search a receipt reference'} value={query} onChange={e=>setQuery(e.target.value)} maxLength={128}/><button type="submit" className="sr-only">Search</button></form>
      <RoleIndicatorBanner/>
    </div>

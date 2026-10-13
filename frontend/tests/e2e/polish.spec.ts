@@ -1,10 +1,11 @@
-import { test, expect, Page } from "@playwright/test";
-const API = "http://127.0.0.1:8101";
+import { API, BASE_URL } from "./support";
+import { test, expect, Page } from "./support";
+
 test.beforeEach(async ({ page }) => {
   await page.route(/http:\/\/(?:127\.0\.0\.1|localhost):8000\//, (route) => {
     const url = new URL(route.request().url());
     url.hostname = "127.0.0.1";
-    url.port = "8101";
+    url.port = new URL(API).port;
     return route.continue({ url: url.toString() });
   });
 });
@@ -22,7 +23,6 @@ async function login(page: Page, account: string) {
   ).toBeVisible();
 }
 async function nav(page: Page, phone: boolean) {
-  if (phone) await page.locator(".app-mobile-nav summary").click();
   return page.getByRole("navigation", {
     name: phone ? "Mobile navigation" : "Main navigation",
     exact: true,
@@ -36,7 +36,7 @@ test("public entry has clear copy, keyboard navigation and reduced motion", asyn
   await page.goto("/");
   await expect(
     page.getByRole("heading", {
-      name: "Follow relief from funds to receipts.",
+      name: "Relief, with a clear record.",
       exact: true,
     }),
   ).toBeVisible();
@@ -44,7 +44,7 @@ test("public entry has clear copy, keyboard navigation and reduced motion", asyn
   await expect(
     page.getByRole("heading", { name: "Relief overview", exact: true }),
   ).toBeVisible();
-  await expect(page.getByText("Synthetic demo", { exact: true })).toBeVisible();
+  await expect(page.getByText("AyudaChain · Synthetic demo", { exact: true })).toBeVisible();
   const phone = info.project.name === "phone";
   const navigation = await nav(page, phone);
   await expect(
@@ -53,23 +53,14 @@ test("public entry has clear copy, keyboard navigation and reduced motion", asyn
   await expect(
     navigation.getByRole("link", { name: "Payouts", exact: true }),
   ).toHaveCount(0);
-  if (phone) {
-    await navigation
-      .getByRole("link", { name: "Check a receipt", exact: true })
-      .focus();
-    await page.keyboard.press("Escape");
-    await expect(page.locator(".app-mobile-nav summary")).toBeFocused();
-    await expect(page.locator(".app-mobile-nav")).not.toHaveAttribute("open");
-    await page.locator(".app-mobile-nav summary").click();
-  }
-  await navigation
-    .getByRole("link", { name: "Check a receipt", exact: true })
-    .click();
+  const receiptLink = navigation.getByRole("link", { name: "Receipts", exact: true });
+  await receiptLink.focus();
+  await expect(receiptLink).toBeFocused();
+  await page.keyboard.press("Enter");
   await expect(
     page.getByRole("heading", { name: "Check a receipt", exact: true }),
   ).toBeVisible();
-  if (phone)
-    await expect(page.locator(".app-mobile-nav")).not.toHaveAttribute("open");
+  await expect(receiptLink).toHaveAttribute("aria-current", "page");
   await page
     .getByRole("link", { name: "Skip to content", exact: true })
     .focus();
@@ -110,7 +101,7 @@ test("all five authenticated roles get relevant navigation and Barangay remains 
     const navigation = await nav(page, info.project.name === "phone");
     await expect(
       navigation.getByRole("link", {
-        name: ownHousehold ? "My household" : "Households",
+        name: ownHousehold ? "Home" : "Households",
         exact: true,
       }),
     ).toBeVisible();
@@ -121,7 +112,7 @@ test("all five authenticated roles get relevant navigation and Barangay remains 
     else
       await expect(
         navigation.getByRole("link", {
-          name: ownHousehold ? "My payouts" : "Payouts",
+          name: "Payouts",
           exact: true,
         }),
       ).toBeVisible();
@@ -152,11 +143,7 @@ test("overview uses API totals with truthful payout labels and retained refresh 
   await expect(
     page.getByRole("region", { name: "Recorded funding" }),
   ).toContainText("Recorded payouts");
-  await expect(
-    page.getByText(snapshot.confirmed_distributions + " recorded payouts.", {
-      exact: false,
-    }),
-  ).toBeVisible();
+  await expect(page.getByRole("region", { name: "Household and payout counts" }).getByText(String(snapshot.confirmed_distributions), { exact: true })).toBeVisible();
   await expect(page.getByText("100% assigned", { exact: false })).toHaveCount(
     0,
   );
@@ -219,7 +206,7 @@ test("batch allocations fit phones and loading errors offer retry without anchor
   ).toHaveCount(0);
   await page.getByText("Batch details and references", { exact: true }).click();
   await expect(
-    page.getByText("This page does not verify the funding transaction.", {
+    page.getByText("Stored transaction references do not establish current blockchain evidence.", {
       exact: false,
     }),
   ).toBeVisible();

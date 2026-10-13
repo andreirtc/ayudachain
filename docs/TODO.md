@@ -4,11 +4,11 @@ All beneficiary records, receipts, balances, and payouts must remain synthetic. 
 
 PR workflow: see [STACKED_PRS.md](STACKED_PRS.md). This planning session is the first PR; each follow-up task gets its own branch and PR based on the previous branch.
 
-Status: unchecked items are planned, not implemented. Work through one numbered item at a time. First establish a runnable baseline; then backend/contracts correctness; then frontend workflow and usability.
+Status: unchecked items include planned capabilities and incomplete acceptance/release work. Historical validation counts below describe their original passes; current coverage and interface gaps are recorded in [FULL_REGRESSION_VALIDATION.md](FULL_REGRESSION_VALIDATION.md). Work through one bounded item at a time.
 
 Current direction, accepted 2026-10-14: adopt the Tonal / Material 3, Sea and Sun proposal and a shorter household journey built around staff-validated lists and organized payouts, retaining current accounting, authenticated roles and audit/receipt safeguards. See [PRODUCT_DIRECTION.md](PRODUCT_DIRECTION.md) for the selected design, compatibility rules and bounded implementation sequence. The Tonal foundation, household starting point, versioned validated lists, payout arrangements, authoritative payout desk, concerns/assisted intake and staff audit are delivered. Demo feature wiring is complete. The actual Material frontend layouts are delivered for visual evaluation; human acceptance and non-demo release work remain. See [MATERIAL_FRONTEND.md](MATERIAL_FRONTEND.md).
 
-The previous backend feature pass completed CSV preview/import, own-account synthetic recipient acknowledgement and versioned immutable receipt snapshots. See [CSV_ONBOARDING.md](CSV_ONBOARDING.md), [RECIPIENT_ACKNOWLEDGEMENT.md](RECIPIENT_ACKNOWLEDGEMENT.md) and [RECEIPT_SNAPSHOTS.md](RECEIPT_SNAPSHOTS.md). Remaining unchecked features and production policies stay separate bounded tasks in the PR stack.
+The previous backend feature pass completed CSV preview/import, own-account synthetic recipient acknowledgement and versioned immutable receipt snapshots. See [CSV_ONBOARDING.md](CSV_ONBOARDING.md), [RECIPIENT_ACKNOWLEDGEMENT.md](RECIPIENT_ACKNOWLEDGEMENT.md) and [RECEIPT_SNAPSHOTS.md](RECEIPT_SNAPSHOTS.md). Remaining unchecked features and production policies stay separate bounded tasks in the PR stack. "Demo feature wiring" refers to the selected staff-validated-list workflow; claims, calculated entitlements, assigned payout sessions, public account sign-up and funding authoring screens are not delivered in this frontend. See [FULL_REGRESSION_VALIDATION.md](FULL_REGRESSION_VALIDATION.md) for the current scope and MVP differences.
 
 ## Accepted direction delivery
 
@@ -47,7 +47,7 @@ The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were 
 
 ## 4. Truthful blockchain anchoring and verification
 - [x] Remove fabricated transaction hashes and successful verification fallbacks; distinguish unavailable, unanchored, mismatch, and verified outcomes. Done 2026-10-12: service/seeder/UI no longer invent evidence; strict contract reads return four explicit states; chain/contract checks and mined transaction receipts are required. Verified all states against an isolated local chain. See [TRUTHFUL_VERIFICATION.md](TRUTHFUL_VERIFICATION.md).
-- [ ] Separate payout recorded state from anchor pending/submitted/confirmed/failed; record receipt confirmation and support safe retry/reconciliation.
+- [x] Separate new payout recorded state from anchor pending/submitted/confirmed/failed; record receipt confirmation and support safe retry/reconciliation. Funding/allocation and historical recovery remain separate.
   - [x] New payout jobs commit with the business record, persist the signed envelope before broadcast, and reconcile the same transaction with scoped recovery controls. Pin chain/code/block identity, retain observations, refuse conflicts and preserve legacy proofs. See [PAYOUT_ANCHORS.md](PAYOUT_ANCHORS.md). Funding/allocation and historical recovery remain separate.
 - [ ] Recover consistently when database writes or blockchain operations fail; handle restarted local chains and synchronized demo reset without contradictory records.
 - [x] Use an immutable versioned receipt snapshot for new payouts covering captured registry identifiers/labels, batch/allocation, exact amount, OCR and available receipt bytes, with deterministic hashing and retained legacy verification. Real identity/document intake and authenticity remain separate. See [RECEIPT_SNAPSHOTS.md](RECEIPT_SNAPSHOTS.md).
@@ -83,8 +83,8 @@ The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were 
 
 ## 7. Verification and deployment
 - [ ] Review dependency audit findings and upgrade vulnerable dependencies, including the installed Next.js version, before shared deployment.
-- [ ] Add meaningful API/integration tests for over-allocation, exhausted funds, ineligible beneficiaries, cross-batch requests, retries/concurrency, chain outages, missing anchors, receipt tampering, CSV import, permissions, and retained history.
-- [ ] Run contract tests, backend tests, frontend typecheck/build, and browser walkthrough after relevant changes; stop ignoring build type failures.
+- [x] Add meaningful API/integration tests for over-allocation, exhausted funds, ineligible beneficiaries, cross-batch requests, retries/concurrency, chain outages, missing anchors, receipt tampering, CSV import, permissions, and retained history. All 184 backend tests plus five actual-chain recovery scenarios pass; see [FULL_REGRESSION_VALIDATION.md](FULL_REGRESSION_VALIDATION.md).
+- [x] Run contract tests, backend tests, frontend unit/typecheck/build, and full desktop/phone browser coverage after relevant changes; stop ignoring build type failures. Repeatable commands and stacked-PR CI are configured; remote CI execution and release validation remain open.
 - [ ] Choose shared demo deployment: frontend can use Vercel; backend requires suitable runtime and persistent SQLite storage or migrated PostgreSQL. Configure HTTPS API URL/CORS and testnet configuration.
 - [ ] Update README/user guide to match implemented behavior; clearly identify synthetic data, simulated payments, and genuinely unfinished features.
 

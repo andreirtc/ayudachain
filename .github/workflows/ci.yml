@@ -4,7 +4,6 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -25,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: 'npm'
           cache-dependency-path: contracts/package-lock.json
 
@@ -38,8 +37,21 @@ jobs:
       - name: Run Hardhat test suite
         run: npx hardhat test
 
+      - name: Setup Python for isolated chain recovery
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install backend for isolated chain recovery
+        run: |
+          python -m venv ../backend/.venv
+          ../backend/.venv/bin/python -m pip install -r ../backend/requirements.txt
+
+      - name: Run actual isolated chain recovery scenarios
+        run: node scripts/test_payout_anchor_live.js
+
   backend:
-    name: Backend Unit & AI Tests (Python)
+    name: Backend Unit, API, Auth & Business Regressions
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -52,14 +64,22 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.13'
 
-      - name: Run Backend Unit & AI Entity Resolution Tests
-        run: python3 test_backend.py
+      - name: Install backend dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Run every isolated backend suite
+        run: python scripts/run_tests.py
 
   frontend:
-    name: Frontend Typecheck & Build (Next.js)
+    name: Frontend Unit, Typecheck, Build & Browser Regressions
     runs-on: ubuntu-latest
+    env:
+      AYUDACHAIN_BUILD_DIR: .next-ci
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:8000
+      AYUDACHAIN_TEST_BASE_URL: http://127.0.0.1:3301
+      AYUDACHAIN_TEST_API_URL: http://127.0.0.1:8301
     defaults:
       run:
         working-directory: frontend
@@ -71,15 +91,49 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
+      - name: Run frontend unit tests
+        run: npm run test:unit
+
       - name: Typecheck TypeScript code
         run: ./node_modules/.bin/tsc --noEmit
 
       - name: Build Next.js application
         run: npm run build
+
+      - name: Setup Python for browser fixture
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install disposable browser API
+        run: |
+          python -m venv ../backend/.venv
+          ../backend/.venv/bin/python -m pip install -r ../backend/requirements.txt
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run all desktop and phone browser cases
+        run: npm run test:e2e
+
+      - name: Install contract tools for live UI verification
+        run: |
+          npm --prefix ../contracts ci
+          npm --prefix ../contracts run compile
+
+      - name: Verify actual chain outcomes and captured receipts in the browser
+        run: node tests/live-verification.mjs
+
+      - name: Retain browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-failure-evidence
+          path: frontend/test-results/

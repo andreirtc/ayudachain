@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 :root {
+  --font-body: var(--font-open-sans);
+  --font-heading: var(--font-open-sans);
   --primary: var(--md-on-surface);
   --accent: var(--md-primary);
   --emerald: #059669;

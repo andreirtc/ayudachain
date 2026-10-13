@@ -14,6 +14,18 @@ The frontend now follows the groupmate's [Tonal Sea and Sun reference](https://g
 
 The public landing illustration is explicitly labelled as an illustration. All operational content comes from the API. No API, database, receipt protocol, contract or anchor worker change is part of this frontend task.
 
+## Appearance and interaction fixes
+
+The shared appearance menu now uses three labeled choices: Light, Dark and Device default, with the current choice marked. This removes the unused space that looked like a fourth choice. Outside pointer presses, moving keyboard focus outside, Escape, choosing a theme and changing page/account dismiss the menu; Escape and selection return focus to its trigger. The public landing uses the same menu, including on phones. Theme controls enable after their saved preference initializes.
+
+Menus fit the viewport down to 320px, with scrolling available on short screens. The compact header hides its decorative avatar on the smallest phones. DSWD CSV import and analysis entry points, accidentally omitted during the registry redesign, are restored beside the list filters; other roles do not receive those tools.
+
+![Appearance menu on desktop](screenshots/material-frontend/appearance-desktop.png)
+
+![Appearance menu on a phone](screenshots/material-frontend/appearance-phone.png)
+
+Six focused browser cases pass on desktop and phone: labeled choices/dismissal, keyboard/device themes with unavailable storage, and restored DSWD CSV/registration dialogs with focus return and Barangay visibility restrictions. Main routes and all five roles were inspected in both themes at 320, 390, 1024 and 1440 pixels without document overflow. Initial public-menu diagnostics ran before native details contents finished becoming visible; those 16 views were rechecked with visible-content and actual-theme assertions. The original diagnostics and confirmed results are retained under `tmp/ayudachain-ux-polish`. This is a visual/interaction check, not a full accessibility audit or usability study.
+
 ## Screenshots from the working preview
 
 These are actual browser captures at desktop1440x1000 and phone390x844. They use owned synthetic records and real authenticated APIs, not the reference's invented proof outcomes.
@@ -30,7 +42,11 @@ These are actual browser captures at desktop1440x1000 and phone390x844. They use
 
 ![Public landing](screenshots/material-frontend/landing-desktop.png)
 
-## Focused validation
+## Full regression follow-up
+
+The later [full regression pass](FULL_REGRESSION_VALIDATION.md) restores the checks deferred below. It also fixes logo navigation and signed-in landing headers, phone account announcements, inline registry focus/history controls, payout record navigation/search and the receipt dialog's verification link. All 140 distinct desktop/phone cases are covered, along with every backend/unit/contract suite and actual chain-browser checks. The earlier focused results below remain the historical record of the initial layout pass.
+
+## Initial focused validation
 
 Independent TypeScript and the isolated production build pass. Six existing navigation/offline-payout Node tests pass. A single full workflow passes at desktop and phone sizes: real registration, inline approval, guarded repeat click, server persistence followed by an intentionally lost response and safe replay, exact receipt navigation, audit search/filter, household concern redaction, collection focus and keyboard theme controls.
 

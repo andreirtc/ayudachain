@@ -1,12 +1,13 @@
-import { test, expect, Page } from "@playwright/test";
+import { API, BASE_URL } from "./support";
+import { test, expect, Page } from "./support";
 
-const API = "http://127.0.0.1:8101";
+
 const PASSWORD = "synthetic-test-password-only";
 
 test.beforeEach(async ({ page }) => {
   // Route the actual browser's API traffic to the isolated API, without fabricating responses.
   await page.route(/http:\/\/(?:127\.0\.0\.1|localhost):8000\//, route => {
-    const url = new URL(route.request().url()); url.hostname = "127.0.0.1"; url.port = "8101";
+    const url = new URL(route.request().url()); url.hostname = "127.0.0.1"; url.port = new URL(API).port;
     return route.continue({ url: url.toString() });
   });
 });
@@ -22,7 +23,7 @@ async function login(page: Page, account: string) {
 async function mutationHeaders(page: Page) {
   const response = await page.context().request.get(API + "/api/auth/session");
   const session = await response.json();
-  return { "X-CSRF-Token": session.csrf_token, "X-AyudaChain-Client": "web", Origin: "http://127.0.0.1:3101" };
+  return { "X-CSRF-Token": session.csrf_token, "X-AyudaChain-Client": "web", Origin: BASE_URL };
 }
 
 test("public receipt checks and private sign-in gate do not reveal households", async ({ page }) => {
@@ -39,7 +40,7 @@ test("public receipt checks and private sign-in gate do not reveal households", 
 
 test("DSWD signs in, records its own review identity and stays signed in after refresh", async ({ page }, info) => {
   await login(page, "demo-officer-01");
-  await page.getByPlaceholder("Search household name, ID, barangay...").fill("BEN-0007");
+  await page.getByLabel("Search households", { exact: true }).fill("BEN-0007");
   await page.getByRole("button", { name: /Review|Inspect/ }).first().click();
   await page.getByLabel("Reason for decision").fill("Distinct synthetic household for session testing");
   await page.getByRole("button", { name: "Approve household", exact: true }).click();
@@ -56,7 +57,7 @@ test("DSWD signs in, records its own review identity and stays signed in after r
 test("auditor is read-only in the UI and direct API", async ({ page }) => {
   await login(page, "demo-auditor-01");
   await expect(page.getByRole("button", { name: "Register a household", exact: true })).toHaveCount(0);
-  await page.getByPlaceholder("Search household name, ID, barangay...").fill("BEN-0007");
+  await page.getByLabel("Search households", { exact: true }).fill("BEN-0007");
   await page.getByRole("button", { name: /Review|Inspect/ }).first().click();
   await expect(page.getByRole("button", { name: "Approve household", exact: true })).toHaveCount(0);
   const result = await page.context().request.post(API + "/api/beneficiaries/BEN-0007/verify", { headers: await mutationHeaders(page), data: { status: "VERIFIED", review_notes: "Unauthorized synthetic request", reviewed_by: "demo-officer-01" } });
@@ -112,7 +113,7 @@ test("disbursing records a payout, keeps the exact receipt link and cannot queue
   await page.getByLabel("Household", { exact: true }).selectOption(id);
   await expect(page.getByLabel("Fictional amount (PHP)")).toHaveValue("5000");
   await page.context().setOffline(true);
-  await expect(page.getByText("Browser is offline", { exact: true })).toBeVisible();
+  await expect(page.getByText("Browser is offline.", { exact: false })).toBeVisible();
   await expect(page.getByRole("button", { name: "Reconnect to record a payout" })).toBeDisabled();
   await page.context().setOffline(false);
   await expect(page.getByRole("button", { name: "Record demo payout", exact: true })).toBeEnabled();
@@ -120,7 +121,7 @@ test("disbursing records a payout, keeps the exact receipt link and cannot queue
   const link = page.getByRole("link", { name: "Check this receipt", exact: true });
   await expect(link).toBeVisible();
   const href = await link.getAttribute("href");
-  const payoutId = new URL(href!, "http://127.0.0.1:3101").searchParams.get("distribution_id")!;
+  const payoutId = new URL(href!, BASE_URL).searchParams.get("distribution_id")!;
   const card = page.getByRole("status").filter({ has: link });
   await expect(card.getByText("Anchoring needs attention", { exact: true })).toBeVisible();
   const recover = card.getByRole("button", { name: "Recover anchor", exact: true });
@@ -136,7 +137,7 @@ test("disbursing records a payout, keeps the exact receipt link and cannot queue
   await page.screenshot({ path: info.outputPath("payout.png"), fullPage: true });
   expect(href).toMatch(/^\/verify\?distribution_id=DIST-/);
   await page.reload();
-  await page.getByText("Anchor status and recovery", { exact: true }).first().click();
+  await page.locator("summary").filter({ hasText: /^Anchor status$/ }).first().click();
   await expect(page.getByRole("button", { name: "Recover anchor", exact: true })).toBeVisible();
   const persisted = await page.context().request.get(API + "/api/distributions");
   expect((await persisted.json()).filter((row: { beneficiary_id: string }) => row.beneficiary_id === id)).toHaveLength(1);
@@ -164,6 +165,6 @@ test("stored browser roles cannot bypass sign-in or server permissions", async (
   await page.addInitScript(() => localStorage.setItem("ayudachain_role", "Barangay Officer"));
   await page.goto("/distributions");
   await expect(page.getByRole("heading", { name: "Sign in to continue" })).toBeVisible();
-  const result = await page.context().request.post(API + "/api/distributions/confirm", { headers: { "X-Demo-Actor-ID": "demo-disbursing-001", "X-AyudaChain-Client": "web", Origin: "http://127.0.0.1:3101" }, data: { beneficiary_id: "BEN-0004", batch_id: "RELIEF-2026-001", amount: 5000 } });
+  const result = await page.context().request.post(API + "/api/distributions/confirm", { headers: { "X-Demo-Actor-ID": "demo-disbursing-001", "X-AyudaChain-Client": "web", Origin: BASE_URL }, data: { beneficiary_id: "BEN-0004", batch_id: "RELIEF-2026-001", amount: 5000 } });
   expect(result.status()).toBe(401);
 });

@@ -116,3 +116,4 @@ frontend/playwright-report/
 # Owned local visual evaluation build
 frontend/.next-visual-preview/
 frontend/.next-material-qa/
+frontend/.next-ci/

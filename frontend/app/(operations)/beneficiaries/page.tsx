@@ -89,6 +89,18 @@ function RegistryBody({ requestedHousehold,requestedSearch }: { requestedHouseho
   const [filterFlagged, setFilterFlagged] = useState(false);
   const [searchTerm, setSearchTerm] = useState(requestedSearch);
   const [selectedBen, setSelectedBen] = useState<Beneficiary | null>(null);
+  const caseHeading = useRef<HTMLHeadingElement>(null);
+  const lastSelected = useRef<string | null>(null);
+  useEffect(() => {
+    if (selectedBen) {
+      lastSelected.current = selectedBen.beneficiary_id;
+      caseHeading.current?.focus();
+    } else if (lastSelected.current) {
+      const row = document.querySelector<HTMLElement>(`[data-household-id="${CSS.escape(lastSelected.current)}"]`);
+      (row || document.getElementById("household-search"))?.focus();
+      lastSelected.current = null;
+    }
+  }, [selectedBen?.beneficiary_id]);
   const [reviewReason, setReviewReason] = useState("");
   const reviewer = account?.id;
   const canRegister = requestedHousehold === null && (role === "DSWD" || role === "BARANGAY");
@@ -394,6 +406,18 @@ function RegistryBody({ requestedHousehold,requestedSearch }: { requestedHouseho
               </button>
             </div>
           )}
+          {role !== "BENEFICIARY" && <label className="registry-checkbox">
+            <input type="checkbox" checked={showHistorical} onChange={event => setShowHistorical(event.target.checked)} />
+            Include historical duplicates
+          </label>}
+          {role === "DSWD" && <div role="group" className="registry-import-tools" aria-label="Household CSV tools">
+            <button className="registry-button registry-text-button" onClick={() => setShowCsvImport(true)}>
+              <FileSpreadsheet size={16} aria-hidden="true" />Import a CSV
+            </button>
+            <button className="registry-button registry-text-button" onClick={() => { setCsvFile(null); setCsvError(null); setShowCsvModal(true); }}>
+              Analyze a CSV
+            </button>
+          </div>}
         </div>
         <div className="registry-list-caption">
           <p role="status">
@@ -458,13 +482,13 @@ function RegistryBody({ requestedHousehold,requestedSearch }: { requestedHouseho
         )}
         {!loading && !loadError && filteredList.length > 0 && (
           <ul className="registry-household-list" aria-label="Household records" tabIndex={0}>
-            {filteredList.map(ben=><li key={ben.beneficiary_id}><button className="registry-household-row" aria-pressed={selectedBen?.beneficiary_id===ben.beneficiary_id} aria-label={(role==='DSWD'?'Review ':'Inspect ')+ben.household_name} onClick={()=>setSelectedBen(ben)}><span className="household-avatar" aria-hidden="true">{ben.household_name.split(' ').slice(0,2).map(w=>w[0]).join('')}</span><span><span className="registry-household-name">{ben.household_name}</span><span className="registry-row-meta">{ben.barangay_name} · <Status ben={ben}/></span>{ben.record_status!=='DUPLICATE'&&(ben.duplicate_flag||ben.anomaly_flag)&&<span className="registry-flag">{ben.duplicate_flag?'Possible duplicate':'Amount needs review'}</span>}</span></button></li>)}
+            {filteredList.map(ben=><li key={ben.beneficiary_id}><button data-household-id={ben.beneficiary_id} className="registry-household-row" aria-pressed={selectedBen?.beneficiary_id===ben.beneficiary_id} aria-label={(role==='DSWD'?'Review ':'Inspect ')+ben.household_name} onClick={()=>setSelectedBen(ben)}><span className="household-avatar" aria-hidden="true">{ben.household_name.split(' ').slice(0,2).map(w=>w[0]).join('')}</span><span><span className="registry-household-name">{ben.household_name}</span><span className="registry-row-meta">{ben.barangay_name} · <Status ben={ben}/></span>{ben.record_status!=='DUPLICATE'&&(ben.duplicate_flag||ben.anomaly_flag)&&<span className="registry-flag">{ben.duplicate_flag?'Possible duplicate':'Amount needs review'}</span>}</span></button></li>)}
           </ul>
         )}
       </section>
       {selectedBen ? (
         <section className="registry-case" aria-label="Selected household">
-          <div className="registry-case-heading"><h2 tabIndex={-1}>{role==='DSWD'&&selectedBen.record_status!=='DUPLICATE'?'Review household':'Household details'}</h2><button className="registry-button registry-text-button" disabled={reviewSaving} onClick={()=>setSelectedBen(null)}>Back to list</button></div>
+          <div className="registry-case-heading"><h2 ref={caseHeading} tabIndex={-1}>{role==='DSWD'&&selectedBen.record_status!=='DUPLICATE'?'Review household':'Household details'}</h2><button className="registry-button registry-text-button" disabled={reviewSaving} onClick={()=>setSelectedBen(null)}>Back to list</button></div>
           <div className="registry-dialog-content">
             {registeredId === selectedBen.beneficiary_id && (
               <p role="status" className="registry-success">

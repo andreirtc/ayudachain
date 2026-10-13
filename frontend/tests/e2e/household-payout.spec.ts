@@ -1,11 +1,12 @@
-import { test, expect, Page } from "@playwright/test";
+import { API, BASE_URL } from "./support";
+import { test, expect, Page } from "./support";
 
-const API = "http://127.0.0.1:8101";
+
 test.beforeEach(async ({ page }) => {
   await page.route(/http:\/\/(?:127\.0\.0\.1|localhost):8000\//, (route) => {
     const url = new URL(route.request().url());
     url.hostname = "127.0.0.1";
-    url.port = "8101";
+    url.port = new URL(API).port;
     return route.continue({ url: url.toString() });
   });
 });
@@ -20,7 +21,7 @@ async function login(page: Page, account: string) {
 
 async function mutationHeaders(page: Page) {
   const session = await (await page.context().request.get(API + "/api/auth/session")).json();
-  return { "X-AyudaChain-Client": "web", "X-CSRF-Token": session.csrf_token, Origin: "http://127.0.0.1:3101" };
+  return { "X-AyudaChain-Client": "web", "X-CSRF-Token": session.csrf_token, Origin: BASE_URL };
 }
 
 async function fixture(page: Page, id: string, name: string, approved: boolean, area = "BRGY-001") {
@@ -58,19 +59,19 @@ test("household links filter exact IDs, survive refresh, and open only that rece
   expect(new URL((await link.getAttribute("href"))!, page.url()).searchParams.get("beneficiary_id")).toBe(target.beneficiary_id);
   await link.click();
   const list = page.getByRole("region", { name: "Recorded payouts" });
-  await expect(list.locator("li.workflow-record")).toHaveCount(expected.length);
+  await expect(list.locator("tbody tr")).toHaveCount(expected.length);
   for (const row of expected) await expect(list.getByText(row.distribution_id, { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Refresh", exact: true }).click();
-  await expect(list.locator("li.workflow-record")).toHaveCount(expected.length);
+  await page.getByRole("button", { name: "Refresh records", exact: true }).click();
+  await expect(list.locator("tbody tr")).toHaveCount(expected.length);
   await page.reload();
-  await expect(list.locator("li.workflow-record")).toHaveCount(expected.length);
+  await expect(list.locator("tbody tr")).toHaveCount(expected.length);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: info.outputPath("household-payout-records.png"), fullPage: true });
   await list.getByRole("link", { name: "Check receipt", exact: true }).first().click();
   await expect(page.getByLabel("Receipt", { exact: true })).toHaveValue(expected[0].distribution_id);
   await page.goto(href(target.beneficiary_id));
   await page.getByRole("link", { name: "View all permitted payouts", exact: true }).click();
-  await expect(list.locator("li.workflow-record")).toHaveCount(records.length);
+  await expect(list.locator("tbody tr")).toHaveCount(records.length);
 });
 
 test("unknown, empty and out-of-scope references never select or reveal another household", async ({ page }, info) => {
@@ -95,7 +96,8 @@ test("unknown, empty and out-of-scope references never select or reveal another 
   await page.goto(href(outside));
   await expect(page.getByRole("heading", { name: "Household unavailable", exact: true })).toBeVisible();
   await page.goto(href("BEN-0004"));
-  await expect(page.getByRole("region", { name: "Household payout context" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Recorded payouts" }).getByRole("heading", { name: "Danilo Soriano", exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Payout entry" })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Household unavailable", exact: true })).toHaveCount(0);
 });
 
@@ -116,7 +118,7 @@ test("linked household entry preserves API eligibility, exact amount and one pay
   await expect(page.getByLabel("Household", { exact: true })).toBeDisabled();
   await page.getByLabel("Fictional amount (PHP)").fill("100.25");
   await page.route(/8000\/api\/beneficiaries\?/, (route) => route.abort(), { times: 1 });
-  await page.getByRole("button", { name: "Refresh", exact: true }).click();
+  await page.getByRole("button", { name: "Refresh records", exact: true }).click();
   await expect(page.getByRole("main").getByRole("alert")).toContainText("Previously loaded records are hidden");
   await expect(page.getByRole("button", { name: "Record demo payout", exact: true })).toBeDisabled();
   await page.getByRole("button", { name: "Refresh records", exact: true }).click();
@@ -133,7 +135,7 @@ test("linked household entry preserves API eligibility, exact amount and one pay
   await page.reload();
   await expect(page.getByText("A payout is already recorded for this household in this batch.", { exact: false })).toBeVisible();
   await expect(page.getByRole("button", { name: "Record demo payout", exact: true })).toBeDisabled();
-  await page.getByRole("link", { name: "Open recorded receipt", exact: true }).click();
+  await page.getByRole("link", { name: "Open existing household receipt", exact: true }).click();
   await expect(page.getByLabel("Receipt", { exact: true })).toHaveValue(saved[0].distribution_id);
 });
 
@@ -161,7 +163,7 @@ test("retained duplicate handoff keeps its original receipts and blocks new payo
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await login(page, "demo-disbursing-001");
   await page.goto("/beneficiaries");
-  await page.getByText("More registry options", { exact: true }).click();
+
   await page.getByLabel("Include historical duplicates").check();
   await page.getByLabel("Search households", { exact: true }).fill(id);
   await page.getByRole("button", { name: "Inspect Synthetic retained handoff " + info.project.name, exact: true }).click();
@@ -169,6 +171,6 @@ test("retained duplicate handoff keeps its original receipts and blocks new payo
   await expect(page.getByText("This retained duplicate cannot receive a new payout.", { exact: false })).toBeVisible();
   await expect(page.getByRole("button", { name: "Record demo payout", exact: true })).toBeDisabled();
   const list = page.getByRole("region", { name: "Recorded payouts" });
-  await expect(list.locator("li.workflow-record")).toHaveCount(1);
+  await expect(list.locator("tbody tr")).toHaveCount(1);
   await expect(list.getByRole("link", { name: "Check receipt", exact: true })).toHaveAttribute("href", receiptHref!);
 });

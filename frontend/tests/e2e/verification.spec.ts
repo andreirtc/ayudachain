@@ -1,10 +1,11 @@
-import { test, expect } from "@playwright/test";
-const API = "http://127.0.0.1:8101";
+import { API, BASE_URL } from "./support";
+import { test, expect } from "./support";
+
 test.beforeEach(async ({ page }) => {
   await page.route(/http:\/\/(?:127\.0\.0\.1|localhost):8000\//, (route) => {
     const url = new URL(route.request().url());
     url.hostname = "127.0.0.1";
-    url.port = "8101";
+    url.port = new URL(API).port;
     return route.continue({ url: url.toString() });
   });
 });

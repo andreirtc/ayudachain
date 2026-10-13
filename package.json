@@ -5,9 +5,11 @@
   "private": true,
   "scripts": {
     "start": "bash start_ayudachain.sh",
-    "test": "npm run test:contracts && npm run test:backend",
+    "test": "npm run test:contracts && npm run test:backend && npm run test:frontend",
     "test:contracts": "npm --prefix contracts test",
-    "test:backend": "cd backend && python3 test_backend.py && python3 test_api.py",
+    "test:backend": "python backend/scripts/run_tests.py",
+    "test:frontend": "npm --prefix frontend run test:unit && npm --prefix frontend run typecheck",
+    "test:e2e": "npm --prefix frontend run test:e2e",
     "compile:contracts": "npm --prefix contracts run compile",
     "dev:contracts": "npm --prefix contracts run node",
     "dev:frontend": "npm --prefix frontend run dev",

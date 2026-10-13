@@ -1,9 +1,10 @@
-import {test,expect,Page} from "@playwright/test";
-const API="http://127.0.0.1:8101";
-test.beforeEach(async({page})=>{await page.route(/http:\/\/(?:127\.0\.0\.1|localhost):8000\//,r=>{const u=new URL(r.request().url());u.hostname="127.0.0.1";u.port="8101";return r.continue({url:u.toString()});});});
+import { API, BASE_URL } from "./support";
+import {test,expect,Page} from "./support";
+
+test.beforeEach(async({page})=>{await page.route(/http:\/\/(?:127\.0\.0\.1|localhost):8000\//,r=>{const u=new URL(r.request().url());u.hostname="127.0.0.1";u.port=new URL(API).port;return r.continue({url:u.toString()});});});
 async function login(page:Page,id="demo-officer-01"){await page.goto("/sign-in");await page.getByRole("textbox",{name:"Account",exact:true}).fill(id);await page.getByLabel("Password",{exact:true}).fill("synthetic-test-password-only");await page.getByRole("button",{name:"Sign in",exact:true}).click();await expect(page.getByText("Authenticated synthetic account.",{exact:false})).toBeVisible();}
 async function signOut(page:Page){await page.getByRole("button",{name:"Sign out",exact:true}).click();}
-async function headers(page:Page){const s=await(await page.context().request.get(API+"/api/auth/session")).json();return {"X-AyudaChain-Client":"web","X-CSRF-Token":s.csrf_token,Origin:"http://127.0.0.1:3101"};}
+async function headers(page:Page){const s=await(await page.context().request.get(API+"/api/auth/session")).json();return {"X-AyudaChain-Client":"web","X-CSRF-Token":s.csrf_token,Origin:BASE_URL};}
 const soon=new Date(Date.now()+7*864e5).toISOString().slice(0,10);
 
 test("staff publish, edit and cancel instructions that the included household reads without staff notes",async({page},info)=>{

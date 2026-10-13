@@ -1,8 +1,9 @@
-import {test,expect,Page} from "@playwright/test";
-const API="http://127.0.0.1:8101";
-test.beforeEach(async({page})=>{await page.route(/http:\/\/(?:127\.0\.0\.1|localhost):8000\//,r=>{const u=new URL(r.request().url());u.hostname="127.0.0.1";u.port="8101";return r.continue({url:u.toString()});});});
+import { API, BASE_URL } from "./support";
+import {test,expect,Page} from "./support";
+
+test.beforeEach(async({page})=>{await page.route(/http:\/\/(?:127\.0\.0\.1|localhost):8000\//,r=>{const u=new URL(r.request().url());u.hostname="127.0.0.1";u.port=new URL(API).port;return r.continue({url:u.toString()});});});
 async function login(page:Page,account:string){await page.goto("/sign-in");await page.getByRole("textbox",{name:"Account",exact:true}).fill(account);await page.getByLabel("Password",{exact:true}).fill("synthetic-test-password-only");await page.getByRole("button",{name:"Sign in",exact:true}).click();await expect(page.getByText("Authenticated synthetic account.",{exact:false})).toBeVisible();}
-async function headers(page:Page){const session=await(await page.context().request.get(API+"/api/auth/session")).json();return {"X-AyudaChain-Client":"web","X-CSRF-Token":session.csrf_token,Origin:"http://127.0.0.1:3101"};}
+async function headers(page:Page){const session=await(await page.context().request.get(API+"/api/auth/session")).json();return {"X-AyudaChain-Client":"web","X-CSRF-Token":session.csrf_token,Origin:BASE_URL};}
 
 test("new receipts show captured v2 metadata and protected actual bytes",async({page},info)=>{
  await login(page,"demo-officer-01");const id="BEN-SNAPSHOT-UI-"+info.project.name;const auth=await headers(page);expect((await page.context().request.post(API+"/api/beneficiaries",{headers:auth,data:{beneficiary_id:id,household_name:"Synthetic captured household "+info.project.name,barangay_id:"BRGY-001",barangay_name:"San Isidro",batch_id:"RELIEF-2026-001"}})).status()).toBe(201);expect((await page.context().request.post(API+"/api/beneficiaries/"+id+"/verify",{headers:auth,data:{status:"VERIFIED",review_notes:"Controlled snapshot fixture approved"}})).status()).toBe(200);await page.getByRole("button",{name:"Sign out",exact:true}).click();

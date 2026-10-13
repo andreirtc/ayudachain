@@ -1,8 +1,9 @@
-import { test, expect } from "@playwright/test";
+import { API, BASE_URL } from "./support";
+import { test, expect } from "./support";
 
 test.beforeEach(async ({ page }) => {
   await page.route(/http:\/\/(?:127\.0\.0\.1|localhost):8000\//, route => {
-    const url = new URL(route.request().url()); url.hostname = "127.0.0.1"; url.port = "8101";
+    const url = new URL(route.request().url()); url.hostname = "127.0.0.1"; url.port = new URL(API).port;
     return route.continue({ url: url.toString() });
   });
 });
@@ -14,19 +15,20 @@ for (const scheme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme: scheme, reducedMotion: "reduce" });
     // Provision a real own-household payout in the disposable API if this spec runs alone.
     const api = page.context().request;
-    const clientHeaders = { "X-AyudaChain-Client": "web", Origin: "http://127.0.0.1:3101" };
-    const login = await api.post("http://127.0.0.1:8101/api/auth/login", { headers: clientHeaders, data: { username: "demo-disbursing-001", password: "synthetic-test-password-only" } });
+    const clientHeaders = { "X-AyudaChain-Client": "web", Origin: BASE_URL };
+    const login = await api.post(API + "/api/auth/login", { headers: clientHeaders, data: { username: "demo-disbursing-001", password: "synthetic-test-password-only" } });
     expect(login.ok()).toBe(true);
-    const rows = await (await api.get("http://127.0.0.1:8101/api/distributions")).json();
+    const rows = await (await api.get(API + "/api/distributions")).json();
     let receipt = rows.find((row: { beneficiary_id: string }) => row.beneficiary_id === "BEN-0004");
-    const session = await (await api.get("http://127.0.0.1:8101/api/auth/session")).json();
+    const session = await (await api.get(API + "/api/auth/session")).json();
     const headers = { ...clientHeaders, "X-CSRF-Token": session.csrf_token };
     if (!receipt) {
-      const saved = await api.post("http://127.0.0.1:8101/api/distributions/confirm", { headers: { ...headers, "Idempotency-Key": "tonal-own-household" }, data: { beneficiary_id: "BEN-0004", batch_id: "RELIEF-2026-001", amount: "100.25" } });
+      const saved = await api.post(API + "/api/distributions/confirm", { headers: { ...headers, "Idempotency-Key": "tonal-own-household" }, data: { beneficiary_id: "BEN-0004", batch_id: "RELIEF-2026-001", amount: "100.25" } });
       expect(saved.status()).toBe(201); receipt = await saved.json();
     }
-    expect((await api.post("http://127.0.0.1:8101/api/auth/logout", { headers })).ok()).toBe(true);
+    expect((await api.post(API + "/api/auth/logout", { headers })).ok()).toBe(true);
     await page.goto("/sign-in?returnTo=%2Fdistributions%3Fbeneficiary_id%3DBEN-0004");
+    await page.getByLabel("Display preferences", { exact: true }).click();
     await page.getByRole("button", { name: scheme === "dark" ? "Dark theme" : "Light theme", exact: true }).click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", scheme);
     await page.getByRole("textbox", { name: "Account", exact: true }).fill("demo-beneficiary-01");
@@ -36,7 +38,9 @@ for (const scheme of ["light", "dark"] as const) {
     await expect(page.getByText("Authenticated synthetic account.", { exact: false })).toBeVisible();
     await expect(page.getByRole("button", { name: "Record demo payout", exact: true })).toHaveCount(0);
     await page.reload();
+    await page.getByLabel("Display preferences", { exact: true }).click();
     await expect(page.getByRole("button", { name: scheme === "dark" ? "Dark theme" : "Light theme", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await page.keyboard.press("Escape");
     await page.goto("/verify?distribution_id=" + encodeURIComponent(receipt.distribution_id));
     await expect(page.getByRole("heading", { name: "Verification unavailable", exact: true })).toBeVisible();
     await page.evaluate(() => document.fonts.ready);
@@ -64,7 +68,7 @@ for (const scheme of ["light", "dark"] as const) {
     expect(visual.textContrast).toBeGreaterThanOrEqual(4.5); expect(visual.mutedContrast).toBeGreaterThanOrEqual(4.5);
     expect(visual.buttonContrast).toBeGreaterThanOrEqual(4.5); expect(visual.outlineContrast).toBeGreaterThanOrEqual(3);
     visual.statusContrast.forEach(value => expect(value).toBeGreaterThanOrEqual(4.5));
-    expect(fontUrls.length).toBeGreaterThan(0); expect(fontUrls.every(url=>new URL(url).origin === "http://127.0.0.1:3101")).toBe(true);
+    expect(fontUrls.length).toBeGreaterThan(0); expect(fontUrls.every(url=>new URL(url).origin === BASE_URL)).toBe(true);
     await page.getByRole("link", { name: "Skip to content", exact: true }).focus(); await page.keyboard.press("Enter");
     await expect(page.getByRole("main")).toBeFocused();
     await page.screenshot({ path: info.outputPath(`tonal-${scheme}-receipt.png`), fullPage: true });
@@ -76,7 +80,7 @@ for (const scheme of ["light", "dark"] as const) {
     await page.getByRole("textbox", { name: "Account", exact: true }).fill("demo-officer-01");
     await page.getByLabel("Password", { exact: true }).fill("synthetic-test-password-only");
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
-    await page.getByPlaceholder("Search household name, ID, barangay...").fill("BEN-0002");
+    await page.getByLabel("Search households", { exact: true }).fill("BEN-0002");
     await page.getByRole("button", { name: /Review|Inspect/ }).first().click();
     await expect(page.getByLabel("Reason for decision")).toBeVisible();
     await page.screenshot({ path: info.outputPath(`tonal-${scheme}-review.png`), fullPage: false });
@@ -94,12 +98,15 @@ test("device theme follows the OS and the control works without persistent stora
   await page.addInitScript(() => { Storage.prototype.setItem = () => { throw new Error("Storage unavailable"); }; });
   await page.emulateMedia({ colorScheme: "light" });
   await page.goto("/sign-in");
+  await page.getByLabel("Display preferences", { exact: true }).click();
   await page.getByRole("button", { name: "Dark theme", exact: true }).focus(); await page.keyboard.press("Enter");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.getByLabel("Display preferences", { exact: true }).click();
   await page.getByRole("button", { name: "Use device theme", exact: true }).click();
   await expect(page.locator("html")).not.toHaveAttribute("data-theme");
   await page.emulateMedia({ colorScheme: "dark" });
   expect(await page.locator(".operations").evaluate(node => getComputedStyle(node).backgroundColor)).toBe("rgb(17, 19, 24)");
+  await page.getByLabel("Display preferences", { exact: true }).click();
   await page.getByRole("button", { name: "Light theme", exact: true }).click();
   expect(await page.locator(".operations").evaluate(node => getComputedStyle(node).backgroundColor)).toBe("rgb(249, 249, 255)");
 });
