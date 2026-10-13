@@ -10,7 +10,7 @@ if directory.parent != Path(tempfile.gettempdir()).resolve() or not directory.na
 os.environ["DATABASE_URL"] = "sqlite:///" + (directory / "records.db").as_posix()
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app.database import SessionLocal
-from app.models.entities import Distribution, Allocation
+from app.models.entities import Distribution, Allocation, Beneficiary
 from app.services.hasher import compute_receipt_hash
 
 action = sys.argv[2]
@@ -20,6 +20,13 @@ with SessionLocal() as db:
         if record.amount_centavos not in {500000, 500001}:
             raise SystemExit("Unexpected fixture amount; refusing to rewrite it")
         record.amount_centavos = 500001 if action == "mismatch" else 500000
+    elif action in {"v2-mismatch", "v2-restore"}:
+        record = db.query(Distribution).filter_by(distribution_id="DIST-LIVE-SNAPSHOT").one()
+        if record.amount_centavos not in {10025, 10026}: raise SystemExit("Unexpected owned v2 fixture amount")
+        record.amount_centavos = 10026 if action == "v2-mismatch" else 10025
+    elif action == "v2-registry":
+        db.query(Beneficiary).filter_by(beneficiary_id="BEN-0004").update({"household_name": "Current renamed synthetic household"})
+        (directory / "receipts" / "captured-synthetic.svg").write_text("Changed original source file")
     elif action == "unanchored":
         if not db.query(Distribution).filter_by(distribution_id="DIST-UI-UNANCHORED").first():
             allocation = db.query(Allocation).filter_by(batch_id="RELIEF-2026-001", barangay_id="BRGY-001").one()

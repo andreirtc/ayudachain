@@ -21,6 +21,7 @@ from app.auth import router as auth_router, authorize_request, require_actor, op
 from app.database import init_db, get_db
 from app.models.entities import ReliefBatch, Allocation, Beneficiary, BeneficiaryReview, Distribution, AuditEvent, PayoutAnchorJob
 from app.services.payout_anchors import new_job, process_job
+from app.services.receipt_snapshots import capture_document, capture, current_receipt_hash
 from app.schemas.schemas import (
     DashboardStats, ReliefBatchCreate, ReliefBatchResponse,
     AllocationCreate, AllocationResponse,
@@ -102,7 +103,12 @@ def distribution_projection(dist, actor):
     result = DistributionResponse.model_validate(dist).model_dump()
     # Older fixtures reuse a template containing a different household's details.
     # Preserve stored evidence/hashes, but do not disclose that template to scoped accounts.
+    shared_snapshot = bool(dist.receipt_snapshot and dist.receipt_snapshot.get("receipt", {}).get("document", {}).get("kind") == "SHARED_TEMPLATE")
     if actor.role in {"DISBURSING", "BENEFICIARY"}:
+        if shared_snapshot:
+            result["receipt_file_path"] = None
+            result["ocr_text"] = None
+            result["receipt_snapshot"]["receipt"]["ocr_text"] = None
         if dist.receipt_file_path == "/receipts/sample_relief_receipt.svg":
             result["receipt_file_path"] = None
         if dist.ocr_text == DEMO_OCR_TEXT:
@@ -126,6 +132,10 @@ def receipt_file(filename: str, request: Request, db: Session = Depends(get_db))
             assert_household_scope(actor, ben)
         except HTTPException:
             continue
+        if dist.receipt_file_path == "/receipts/" + filename and dist.snapshot_record and dist.snapshot_record.document_bytes is not None:
+            if actor.role not in {"DSWD", "AUDITOR"} and dist.receipt_snapshot["receipt"]["document"]["kind"] == "SHARED_TEMPLATE":
+                continue
+            return Response(content=dist.snapshot_record.document_bytes, media_type=dist.snapshot_record.document_media_type, headers={"X-Content-Type-Options": "nosniff", "Content-Security-Policy": "default-src 'none'; sandbox"})
         full_path = os.path.join(RECEIPTS_DIR, filename)
         if os.path.isfile(full_path):
             return FileResponse(full_path)
@@ -661,10 +671,10 @@ def confirm_distribution(
     with _funds_lock:
         actor = require_actor(request)
         assert_household_scope(actor, db.query(Beneficiary).filter_by(beneficiary_id=payload.beneficiary_id).first())
-        return distribution_projection(_confirm_distribution(payload, db, idempotency_key, response), actor)
+        return distribution_projection(_confirm_distribution(payload, db, idempotency_key, response, actor), actor)
 
 
-def _confirm_distribution(payload: DistributionConfirmRequest, db: Session, idempotency_key: Optional[str], response: Response):
+def _confirm_distribution(payload: DistributionConfirmRequest, db: Session, idempotency_key: Optional[str], response: Response, actor):
     _registry_write_lock(db)
     fingerprint = _payout_fingerprint(payload)
     existing = _replayed_payout(payload, db, idempotency_key, fingerprint)
@@ -734,18 +744,8 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session, idem
     # Generate or normalize OCR text
     ocr_content = payload.ocr_raw_text or DEMO_OCR_TEXT
 
-    # Compute Canonical SHA-256 Hash
-    receipt_hash = compute_receipt_hash(
-        distribution_id=distribution_id,
-        beneficiary_id=payload.beneficiary_id,
-        batch_id=payload.batch_id,
-        amount_centavos=amount_c,
-        ocr_text=ocr_content,
-        verification_method=payload.verification_method
-    )
+    document = capture_document(payload.receipt_filename, db, actor)
 
-    # Reserve the payout and its retry identity before any blockchain side effect.
-    receipt_filename = payload.receipt_filename or "sample_relief_receipt.svg"
     dist = Distribution(
         distribution_id=distribution_id,
         idempotency_key=idempotency_key,
@@ -755,11 +755,16 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session, idem
         allocation_id=allocation.allocation_id,
         amount_centavos=amount_c,
         verification_method=payload.verification_method,
-        receipt_hash=receipt_hash,
-        receipt_file_path=f"/receipts/{receipt_filename}",
+        receipt_hash="",
+        receipt_file_path=None,
         ocr_text=ocr_content,
-        status="CONFIRMED"
+        status="CONFIRMED",
+        distributed_at=datetime.utcnow(),
     )
+    if document[1] is not None:
+        dist.receipt_file_path = f"/receipts/snapshot-{distribution_id}"
+    snapshot, dist.receipt_hash = capture(dist, ben, batch, allocation, actor, document)
+    dist.snapshot_record = snapshot
     db.add(dist)
     db.add(new_job(dist))
     audit = AuditEvent(
@@ -828,14 +833,7 @@ def verify_blockchain_record(payload: BlockchainVerifyRequest, request: Request,
         raise HTTPException(status_code=404, detail="Distribution record not found in off-chain database.")
 
     # 1. Recalculate local hash from off-chain stored document/metadata
-    local_recalculated_hash = compute_receipt_hash(
-        distribution_id=dist.distribution_id,
-        beneficiary_id=dist.beneficiary_id,
-        batch_id=dist.batch_id,
-        amount_centavos=dist.amount_centavos,
-        ocr_text=dist.ocr_text,
-        verification_method=dist.verification_method
-    )
+    local_recalculated_hash = current_receipt_hash(dist)
 
     # A successful contract read is required; local hashes alone prove no anchor.
     try:
@@ -877,6 +875,7 @@ def verify_blockchain_record(payload: BlockchainVerifyRequest, request: Request,
     return BlockchainVerifyResponse(
         record_id=dist.distribution_id,
         beneficiary_id=dist.beneficiary_id if viewer and viewer.role in {"DSWD", "AUDITOR"} else None,
+        receipt_version=dist.receipt_version,
         receipt_hash_local=local_recalculated_hash,
         receipt_hash_onchain=onchain_hash,
         verification_status=outcome,

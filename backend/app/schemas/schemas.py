@@ -198,6 +198,8 @@ class DistributionResponse(BaseModel):
     distributed_at: datetime
     anchor_job: Optional[PayoutAnchorResponse] = None
     recipient_acknowledgement: Optional[AcknowledgementResponse] = None
+    receipt_version: int = 1
+    receipt_snapshot: Optional[dict] = None
 
     class Config:
         from_attributes = True
@@ -208,6 +210,7 @@ class BlockchainVerifyRequest(BaseModel):
     receipt_hash: Optional[str] = None
 
 class BlockchainVerifyResponse(BaseModel):
+    receipt_version: int = 1
     record_id: str
     beneficiary_id: Optional[str] = None
     receipt_hash_local: str

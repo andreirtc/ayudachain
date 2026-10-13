@@ -11,7 +11,7 @@ from app import config
 from app.database import SessionLocal
 from app.models.entities import Distribution, PayoutAnchorJob, AnchorSignerLease, AnchorObservation, AuditEvent
 from app.services.blockchain import blockchain_service, is_hex_hash
-from app.services.hasher import compute_receipt_hash
+from app.services.receipt_snapshots import current_receipt_hash
 
 ERRORS = {"RPC_UNAVAILABLE", "CHAIN_CHANGED", "DEPLOYMENT_CHANGED", "ANCHOR_CONFLICT", "ENVELOPE_CHANGED",
           "RECORD_CHANGED", "TRANSACTION_REVERTED", "NONCE_CONFLICT", "BROADCAST_UNCERTAIN", "SIGNER_BUSY"}
@@ -88,8 +88,7 @@ def observation(db, job):
 
 
 def record_matches(dist, payload):
-    recalculated = compute_receipt_hash(distribution_id=dist.distribution_id, beneficiary_id=dist.beneficiary_id,
-        batch_id=dist.batch_id, amount_centavos=dist.amount_centavos, ocr_text=dist.ocr_text, verification_method=dist.verification_method)
+    recalculated = current_receipt_hash(dist)
     return payload_for(dist) == {key: payload.get(key) for key in payload_for(dist)} and recalculated.lower() == dist.receipt_hash.lower()
 
 

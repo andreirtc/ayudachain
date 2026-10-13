@@ -97,6 +97,8 @@ export interface Distribution {
   distributed_at: string;
   anchor_job?: PayoutAnchor | null;
   recipient_acknowledgement?: RecipientAcknowledgement | null;
+  receipt_version?: number;
+  receipt_snapshot?: ReceiptSnapshot | null;
 }
 
 export interface PayoutAnchor {
@@ -424,3 +426,5 @@ export async function acknowledgePayout(id: string): Promise<RecipientAcknowledg
   if (!response.ok) throw await errorFrom(response, "Acknowledgement could not be saved. Try again.");
   return response.json();
 }
+
+export interface ReceiptSnapshot { version: number; payout: { recorded_at: string; amount_centavos: number; allocation_id: string; distribution_id: string }; household: { household_name: string; dafac_id: string | null; beneficiary_id: string; barangay_name: string }; batch: { calamity_name: string; batch_id: string }; allocation: { amount_centavos: number; allocation_id: string }; recorded_by: { account_id: string; display_name: string }; receipt: { ocr_text: string | null; document: { kind: "CAPTURED" | "SHARED_TEMPLATE" | "MISSING"; sha256: string | null; byte_count: number } }; }

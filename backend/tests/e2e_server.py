@@ -31,6 +31,8 @@ def unavailable(*args, **kwargs):
 for name in ("get_status", "release_fund", "allocate_fund", "confirm_distribution", "verify_receipt", "payout_anchor"):
     setattr(blockchain_service, name, unavailable)
 
+(directory / "receipts").mkdir(exist_ok=True)
+(directory / "receipts" / "captured-synthetic.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg" width="400" height="120"><text x="20" y="50">Controlled synthetic receipt evidence</text></svg>')
 from app.main import app
 
 if __name__ == "__main__":

@@ -31,7 +31,7 @@ export default function ReceiptDetails({
     setImageStatus("LOADING");
     setImageVersion(0);
   }, [record.distribution_id, record.receipt_file_path]);
-  const sharedTemplate = record.receipt_file_path?.endsWith(
+  const sharedTemplate = record.receipt_snapshot?.receipt.document.kind === "SHARED_TEMPLATE" || record.receipt_file_path?.endsWith(
     "/sample_relief_receipt.svg",
   );
 
@@ -79,6 +79,8 @@ export default function ReceiptDetails({
           does not verify identity or prove cash delivery.
         </p>
       )}
+      {record.receipt_version === 2 && <details className="registry-detail"><summary>Captured receipt snapshot (version 2)</summary>{record.receipt_snapshot ? <div className="space-y-3 mt-3"><p>These values were captured when the payout was recorded. They are separate from the current registry labels above and do not prove real identity or cash delivery.</p><dl className="receipt-references"><dt>Captured household</dt><dd>{record.receipt_snapshot.household.household_name}</dd><dt>Captured DAFAC reference</dt><dd>{record.receipt_snapshot.household.dafac_id || "Not supplied"}</dd><dt>Captured batch</dt><dd>{record.receipt_snapshot.batch.calamity_name}</dd><dt>Allocation</dt><dd>{record.receipt_snapshot.allocation.allocation_id}</dd><dt>Recorded by</dt><dd>{record.receipt_snapshot.recorded_by.display_name} ({record.receipt_snapshot.recorded_by.account_id})</dd><dt>Receipt bytes</dt><dd>{record.receipt_snapshot.receipt.document.kind === "CAPTURED" ? "Captured " + record.receipt_snapshot.receipt.document.byte_count + " bytes" : record.receipt_snapshot.receipt.document.kind === "SHARED_TEMPLATE" ? "Captured shared template; not household-specific evidence" : "No receipt file was available at recording"}</dd>{record.receipt_snapshot.receipt.document.sha256 && <><dt>Captured document SHA-256</dt><dd className="font-mono break-all">{record.receipt_snapshot.receipt.document.sha256}</dd></>}</dl></div> : <p role="alert">The captured snapshot is unavailable. A successful proof check is still required; no identity or document coverage is assumed.</p>}</details>}
+      {record.receipt_version === 1 && <p className="registry-muted">Legacy receipt format. No version 2 snapshot was created or backfilled.</p>}
       {record.beneficiary_id && record.status && record.amount !== undefined && <RecipientAcknowledgement key={record.distribution_id} record={{ distribution_id: record.distribution_id, beneficiary_id: record.beneficiary_id, status: record.status, recipient_acknowledgement: record.recipient_acknowledgement }} />}
       {record.receipt_file_path ? (
         <details className="registry-detail">

@@ -6,7 +6,7 @@ PR workflow: see [STACKED_PRS.md](STACKED_PRS.md). This planning session is the 
 
 Status: unchecked items are planned, not implemented. Work through one numbered item at a time. First establish a runnable baseline; then backend/contracts correctness; then frontend workflow and usability.
 
-Current direction, 2026-10-13: the synthetic backend supports the core demo. Prioritize bounded frontend journeys now; remaining backend features are not prerequisites for UI work. Follow-up tasks still use the PR stack.
+Current direction, 2026-10-13: the authorized backend feature pass completed CSV preview/import, own-account synthetic recipient acknowledgement and versioned immutable receipt snapshots, with connected desktop/phone journeys. See [CSV_ONBOARDING.md](CSV_ONBOARDING.md), [RECIPIENT_ACKNOWLEDGEMENT.md](RECIPIENT_ACKNOWLEDGEMENT.md) and [RECEIPT_SNAPSHOTS.md](RECEIPT_SNAPSHOTS.md). Remaining unchecked features and production policies remain separate bounded tasks in the PR stack.
 
 The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were compared with PR #16 on 2026-10-12. See [BLUEPRINT_COMPARISON.md](BLUEPRINT_COMPARISON.md) for selected ideas, contradictions and remaining integration gates. Keep the corrected accounting and historical proofs; evaluate the five-role journeys and durable evidence implementation before rebuilding equivalents. Preserve this stacked workflow rather than restarting from the blueprint's older #14 baseline.
 
@@ -37,7 +37,7 @@ The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were 
 - [ ] Separate payout recorded state from anchor pending/submitted/confirmed/failed; record receipt confirmation and support safe retry/reconciliation.
   - [x] New payout jobs commit with the business record, persist the signed envelope before broadcast, and reconcile the same transaction with scoped recovery controls. Pin chain/code/block identity, retain observations, refuse conflicts and preserve legacy proofs. See [PAYOUT_ANCHORS.md](PAYOUT_ANCHORS.md). Funding/allocation and historical recovery remain separate.
 - [ ] Recover consistently when database writes or blockchain operations fail; handle restarted local chains and synchronized demo reset without contradictory records.
-- [ ] Use an immutable versioned receipt snapshot covering intended household identity, batch, amount, allocation, and receipt contents; retain deterministic hashing.
+- [x] Use an immutable versioned receipt snapshot for new payouts covering captured registry identifiers/labels, batch/allocation, exact amount, OCR and available receipt bytes, with deterministic hashing and retained legacy verification. Real identity/document intake and authenticity remain separate. See [RECEIPT_SNAPSHOTS.md](RECEIPT_SNAPSHOTS.md).
 - [ ] Replace hardcoded fraud UI outcomes with actual synthetic record tampering and backend/contract verification; test restoration. Old hardcoded scenario controls were removed on 2026-10-12; an interactive tampering/restoration workflow is still pending.
 - [ ] Protect and anchor relevant audit history; accurately describe which logs are local versus blockchain-protected.
 

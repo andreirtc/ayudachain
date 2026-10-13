@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Text, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, Text, ForeignKey, UniqueConstraint, LargeBinary
 from sqlalchemy.orm import declarative_base, relationship
 
 from app.money import centavos_to_pesos
@@ -141,6 +141,20 @@ class Distribution(CentavoAmount, Base):
     batch = relationship("ReliefBatch", back_populates="distributions")
     beneficiary = relationship("Beneficiary", back_populates="distribution")
     anchor_job = relationship("PayoutAnchorJob", uselist=False, lazy="select")
+    snapshot_record = relationship("ReceiptSnapshot", uselist=False, lazy="select")
+
+    @property
+    def receipt_version(self):
+        return self.snapshot_record.version if self.snapshot_record else 1
+
+    @property
+    def receipt_snapshot(self):
+        import json
+        try:
+            return json.loads(self.snapshot_record.snapshot_json) if self.snapshot_record else None
+        except (ValueError, TypeError):
+            return None
+
     recipient_acknowledgement = relationship("RecipientAcknowledgement", uselist=False, lazy="select")
 
 
@@ -207,3 +221,12 @@ class RecipientAcknowledgement(Base):
     amount_centavos = Column(Integer, nullable=False)
     receipt_hash = Column(String(66), nullable=False)
     acknowledged_at = Column(String(40), nullable=False)
+
+
+class ReceiptSnapshot(Base):
+    __tablename__ = "receipt_snapshots"
+    distribution_id = Column(String(64), ForeignKey("distributions.distribution_id"), primary_key=True)
+    version = Column(Integer, nullable=False)
+    snapshot_json = Column(Text, nullable=False)
+    document_bytes = Column(LargeBinary, nullable=True)
+    document_media_type = Column(String(64), nullable=True)
