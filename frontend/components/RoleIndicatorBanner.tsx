@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useRole } from "@/lib/roleContext";
+import { useSignInHref } from "@/lib/useSignInHref";
 
 const labels = {
   DSWD: "DSWD Officer",
@@ -21,6 +22,7 @@ const actions = {
 };
 export default function RoleIndicatorBanner() {
   const pathname = usePathname();
+  const signIn = useSignInHref();
   const { account, loading, logout } = useRole();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -79,7 +81,7 @@ export default function RoleIndicatorBanner() {
         ) : (
           pathname !== "/sign-in" && (
             <Link
-              href="/sign-in"
+              href={signIn}
               className="min-h-11 inline-flex items-center text-blue-800 underline font-semibold"
             >
               Sign in

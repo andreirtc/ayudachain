@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { useRole } from "@/lib/roleContext";
 import { AccountRole } from "@/lib/api";
+import { useSignInHref } from "@/lib/useSignInHref";
 
 const destinations = {
   overview: { name: "Overview", href: "/dashboard" },
@@ -23,6 +24,7 @@ const roleLinks: Record<AccountRole, (keyof typeof destinations)[]> = {
 
 export default function Navbar() {
   const pathname = usePathname();
+  const signIn = useSignInHref();
   const { account } = useRole();
   const mobile = useRef<HTMLDetailsElement>(null);
   const focusMain = useRef(false);
@@ -39,6 +41,7 @@ export default function Navbar() {
       : (["overview", "receipts", "signIn"] as (keyof typeof destinations)[])
   ).map((key) => ({
     ...destinations[key],
+    href: key === "signIn" ? signIn : destinations[key].href,
     name:
       account?.role === "BENEFICIARY" && key === "households"
         ? "My household"
@@ -52,7 +55,7 @@ export default function Navbar() {
         key={href}
         href={href}
         aria-current={
-          pathname === href ||
+          pathname === href.split("?")[0] ||
           (href === "/dashboard" && pathname.startsWith("/batch/"))
             ? "page"
             : undefined

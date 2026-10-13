@@ -371,14 +371,17 @@ export type AccountRole = "DSWD" | "BARANGAY" | "DISBURSING" | "BENEFICIARY" | "
 export interface DemoAccount { id: string; role: AccountRole; display_name: string; barangay_id: string | null; beneficiary_id: string | null; }
 interface SessionResult { account: DemoAccount; csrf_token: string; synthetic: boolean; }
 let csrfToken = "";
-export function clearSession(): void { csrfToken = ""; }
+let sessionGeneration = 0;
+export function clearSession(): void { csrfToken = ""; sessionGeneration++; }
 
 export async function authenticatedFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  const generation = sessionGeneration;
   const headers = new Headers(options.headers);
   headers.set("X-AyudaChain-Client", "web");
   if (csrfToken) headers.set("X-CSRF-Token", csrfToken);
   const result = await fetch(url, { ...options, headers, credentials: "include" });
-  if (result.status === 401 && !url.endsWith("/api/auth/login") && typeof window !== "undefined") {
+  const ended = result.status === 401 || (!!csrfToken && result.headers.get("X-AyudaChain-Session") === "ended");
+  if (ended && generation === sessionGeneration && !url.endsWith("/api/auth/login") && typeof window !== "undefined") {
     clearSession();
     window.dispatchEvent(new Event("ayudachain-session-expired"));
   }
@@ -386,16 +389,19 @@ export async function authenticatedFetch(url: string, options: RequestInit = {})
 }
 
 export async function fetchSession(): Promise<DemoAccount | null> {
+  const generation = sessionGeneration;
   const response = await authenticatedFetch(getApiBase() + "/api/auth/session", { cache: "no-store" });
   if (response.status === 401) return null;
   if (!response.ok) throw await errorFrom(response, "Sign-in service unavailable");
-  const session: SessionResult = await response.json(); csrfToken = session.csrf_token; return session.account;
+  const session: SessionResult = await response.json();
+  if (generation !== sessionGeneration) return null;
+  csrfToken = session.csrf_token; sessionGeneration++; return session.account;
 }
 
 export async function signIn(username: string, password: string): Promise<DemoAccount> {
   const response = await authenticatedFetch(getApiBase() + "/api/auth/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ username, password }) });
   if (!response.ok) throw await errorFrom(response, "Sign-in failed");
-  const session: SessionResult = await response.json(); csrfToken = session.csrf_token; return session.account;
+  const session: SessionResult = await response.json(); csrfToken = session.csrf_token; sessionGeneration++; return session.account;
 }
 
 export async function signOut(): Promise<void> {
