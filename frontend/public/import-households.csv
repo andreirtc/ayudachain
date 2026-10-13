@@ -1,0 +1,3 @@
+beneficiary_id,household_name,barangay_id,barangay_name,dafac_id
+BEN-CSV-SAMPLE-01,Synthetic Liora Mercado,BRGY-001,San Isidro,DFC-CSV-SAMPLE-01
+BEN-CSV-SAMPLE-02,Synthetic Neri Bautista,BRGY-002,Santa Elena,DFC-CSV-SAMPLE-02

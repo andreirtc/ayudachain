@@ -42,7 +42,7 @@ The shared hackathon blueprint and confirmed workmate `feat/five-role-mvp` were 
 - [ ] Protect and anchor relevant audit history; accurately describe which logs are local versus blockchain-protected.
 
 ## 5. Connected data and permissions
-- [ ] Connect CSV validation -> preview -> duplicate review -> explicit import -> beneficiary registry; detect matches against existing records and provide row errors.
+- [x] Connect CSV validation -> preview -> explicit pending import -> beneficiary registry and DSWD review; detect matches against current/retained records and within the file, provide row errors and durable repeated-submit protection. See [CSV_ONBOARDING.md](CSV_ONBOARDING.md).
 - [x] Enforce permissions on backend endpoints using synthetic demo accounts; prevent browser role selection alone authorizing privileged writes. Password-authenticated sessions, five server roles, scoped records, DSWD review attribution and read-only Auditor implemented. See [DEMO_SESSIONS.md](DEMO_SESSIONS.md). Staff assignment, recusal, account administration and production identity remain follow-ups.
 - [x] Make public responses appropriately limited; keep detailed household/contact records in permitted private views even with synthetic fixtures. Public funding activity omits household narratives; receipt references/hash verification omit household context. Scoped accounts cannot access the shared historical sample template. Existing hashes/IDs remain compatible; this is not a privacy-preserving commitment protocol.
 - [ ] Add explicit simulated recipient acknowledgement and payout lifecycle; communicate that receipt integrity cannot prove physical cash delivery.

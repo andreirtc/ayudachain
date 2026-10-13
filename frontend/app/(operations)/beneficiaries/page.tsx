@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { formatRecordedDate } from "@/lib/recordedDate";
 import Link from "next/link";
 import RegistryDialog from "@/components/RegistryDialog";
+import CsvOnboarding from "@/components/CsvOnboarding";
 import { useBrowserOnline } from "@/lib/useBrowserOnline";
 import {
   Search,
@@ -101,6 +102,7 @@ export default function BeneficiariesPage() {
   const registerSubmitting = useRef(false);
   const [registerError, setRegisterError] = useState<string | null>(null);
 
+  const [showCsvImport, setShowCsvImport] = useState(false);
   const [showCsvModal, setShowCsvModal] = useState(false);
   const [csvResult, setCsvResult] = useState<CsvBatchResult | null>(null);
   const [isAnalyzingCsv, setIsAnalyzingCsv] = useState(false);
@@ -508,6 +510,7 @@ export default function BeneficiariesPage() {
               />
               Include historical duplicates
             </label>
+            {role === "DSWD" && <button className="registry-button" onClick={() => setShowCsvImport(true)}>Import a CSV</button>}
             {role === "DSWD" && (
               <button
                 onClick={() => {
@@ -900,6 +903,7 @@ export default function BeneficiariesPage() {
           </form>
         </RegistryDialog>
       )}
+      {showCsvImport && <CsvOnboarding onClose={() => { setShowCsvImport(false); void loadBeneficiaries(); }} onReview={id => { setShowCsvImport(false); setSearchTerm(id); setFilterFlagged(true); void loadBeneficiaries(); }} />}
       {showCsvModal && (
         <RegistryDialog
           title="Analyze a CSV"
