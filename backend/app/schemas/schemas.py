@@ -179,6 +179,8 @@ class PayoutAnchorResponse(BaseModel):
         from_attributes = True
 
 
+from app.services.recipient_acknowledgement import AcknowledgementResponse
+
 class DistributionResponse(BaseModel):
     id: int
     distribution_id: str
@@ -195,6 +197,7 @@ class DistributionResponse(BaseModel):
     blockchain_tx_hash: Optional[str]
     distributed_at: datetime
     anchor_job: Optional[PayoutAnchorResponse] = None
+    recipient_acknowledgement: Optional[AcknowledgementResponse] = None
 
     class Config:
         from_attributes = True

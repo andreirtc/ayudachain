@@ -100,8 +100,14 @@ test("household scope and logout prevent retained private content", async ({ pag
 });
 
 test("disbursing records a payout, keeps the exact receipt link and cannot queue offline", async ({ page }, info) => {
+  await login(page, "demo-officer-01");
+  const id = "BEN-SESSION-PAYOUT-" + info.project.name;
+  const headers = await mutationHeaders(page);
+  const created = await page.context().request.post(API + "/api/beneficiaries", { headers, data: { beneficiary_id: id, household_name: "Synthetic session payout " + info.project.name, barangay_id: "BRGY-001", barangay_name: "San Isidro", batch_id: "RELIEF-2026-001" } });
+  expect(created.status()).toBe(201);
+  expect((await page.context().request.post(API + "/api/beneficiaries/" + id + "/verify", { headers, data: { status: "VERIFIED", review_notes: "Independent synthetic session payout fixture" } })).status()).toBe(200);
+  await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await login(page, "demo-disbursing-001");
-  const id = info.project.name === "desktop" ? "BEN-0004" : "BEN-0006";
   await page.getByLabel("Household", { exact: true }).selectOption(id);
   await expect(page.getByLabel("Fictional amount (PHP)")).toHaveValue("5000");
   await page.context().setOffline(true);

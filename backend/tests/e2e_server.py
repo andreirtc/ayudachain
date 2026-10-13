@@ -1,5 +1,6 @@
 """Isolated browser-test API. No original database or local chain is used."""
 import os
+import json
 import sys
 import tempfile
 from pathlib import Path
@@ -13,7 +14,11 @@ os.environ["DEMO_ACCOUNTS_FILE"] = str(directory / "accounts.json")
 os.environ["CORS_ORIGINS"] = "http://127.0.0.1:3101"
 sys.path.insert(0, str(BACKEND / "tests"))
 from auth_support import accounts_fixture
-accounts_fixture(directory)
+accounts_path = accounts_fixture(directory)
+accounts = json.loads(accounts_path.read_text())
+recipient = next(row for row in accounts["accounts"] if row["role"] == "BENEFICIARY")
+accounts["accounts"].append({**recipient, "id": "synthetic-beneficiary-phone", "display_name": "Synthetic phone recipient", "beneficiary_id": "BEN-0006"})
+accounts_path.write_text(json.dumps(accounts))
 from app import config
 config.CORS_ORIGINS = ["http://127.0.0.1:3101"]
 from app.services.blockchain import blockchain_service

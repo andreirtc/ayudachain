@@ -146,6 +146,8 @@ def authorize_request(request: Request):
         allowed = {"DSWD", "BARANGAY"}
     elif path == "/api/distributions/confirm" or (path.startswith("/api/distributions/") and path.endswith("/anchor/retry")):
         allowed = {"DISBURSING"}
+    elif path.startswith("/api/distributions/") and path.endswith("/acknowledgement"):
+        allowed = {"BENEFICIARY"}
     if actor.role not in allowed:
         raise HTTPException(403, "This account cannot perform that action.")
     validate_csrf(request)

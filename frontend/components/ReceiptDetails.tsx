@@ -12,6 +12,7 @@ import {
 } from "@/lib/api";
 import { receiptVerificationHref } from "@/lib/receiptNavigation";
 import { signInHref } from "@/lib/signInDestination";
+import RecipientAcknowledgement from "./RecipientAcknowledgement";
 
 export default function ReceiptDetails({
   record,
@@ -78,6 +79,7 @@ export default function ReceiptDetails({
           does not verify identity or prove cash delivery.
         </p>
       )}
+      {record.beneficiary_id && record.status && record.amount !== undefined && <RecipientAcknowledgement key={record.distribution_id} record={{ distribution_id: record.distribution_id, beneficiary_id: record.beneficiary_id, status: record.status, recipient_acknowledgement: record.recipient_acknowledgement }} />}
       {record.receipt_file_path ? (
         <details className="registry-detail">
           <summary>Saved receipt image</summary>
