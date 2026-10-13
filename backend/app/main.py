@@ -63,6 +63,8 @@ RECEIPTS_DIR = config.RECEIPTS_DIR
 os.makedirs(RECEIPTS_DIR, exist_ok=True)
 save_sample_receipt(RECEIPTS_DIR)
 app.include_router(auth_router)
+from app.services.csv_onboarding import router as csv_router
+app.include_router(csv_router)
 
 @app.middleware("http")
 async def no_store(request, call_next):
