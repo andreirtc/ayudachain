@@ -159,7 +159,7 @@ test("hostile or ambiguous return targets cannot redirect outside supported rout
 });
 
 test("direct sign-in preserves all role defaults and navigation preserves receipt links", async ({ page }, info) => {
-  for (const [account, destination] of [["demo-officer-01", "beneficiaries"], ["demo-barangay-01", "beneficiaries"], ["demo-disbursing-001", "distributions"], ["demo-beneficiary-01", "beneficiaries"], ["demo-auditor-01", "beneficiaries"]]) {
+  for (const [account, destination] of [["demo-officer-01", "beneficiaries"], ["demo-barangay-01", "beneficiaries"], ["demo-disbursing-001", "distributions"], ["demo-beneficiary-01", "household"], ["demo-auditor-01", "beneficiaries"]]) {
     await page.goto("/sign-in"); await submit(page, account);
     await expect(page).toHaveURL("http://127.0.0.1:3101/" + destination);
     await page.getByRole("button", { name: "Sign out", exact: true }).click();

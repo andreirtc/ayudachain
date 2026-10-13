@@ -66,6 +66,10 @@
 .operations :is(.registry-dialog,.registry-dialog-heading) { background:var(--md-surface-container-high); color:var(--md-on-surface); }
 .operations .registry-dialog { border:0; border-radius:24px; }
 .operations .registry-next-step { border:0; border-radius:28px; background:var(--md-primary-container); color:var(--md-on-primary-container); }
+.operations .household-home { max-width:820px; margin-inline:auto; }
+.operations .household-next { border-radius:28px; padding:28px; background:var(--md-primary-container); color:var(--md-on-primary-container); }
+.operations .household-next .registry-eyebrow { color:inherit; }
+.operations .household-details { scroll-margin-top:150px; }
 .operations :is(.workflow-context,.registry-history-entry,.registry-csv-pair,.receipt-summary) { background:var(--md-surface-container); border:0; border-radius:16px; }
 .operations :is(input:not([type=checkbox]),select,textarea) { min-height:44px; border:1px solid var(--md-outline); border-radius:4px; background:var(--md-surface-container-lowest); color:var(--md-on-surface); font-size:16px; }
 .operations :is(input,textarea)::placeholder { color:var(--md-on-surface-variant); opacity:1; }

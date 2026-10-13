@@ -1,0 +1,15 @@
+# Own-household starting point
+
+Beneficiary accounts now open /household after direct sign-in or from **My household**. Exact household/receipt return destinations continue to take precedence. /beneficiaries remains available for the linked record's existing private details and review history. Staff receive an explicit role message at household home and use their own registry workspace.
+
+The page loads existing scoped registry records, including retained duplicates, and scoped payout records independently. It matches the account's exact household ID; another household is never selected as a fallback. It offers one primary next step: open an existing receipt, review household details, or retry a failed/missing read. Registered or imported households do not reapply here.
+
+Pending review, approved eligibility without a recorded payout, rejection and retained historical records are distinct. Review flags stay visible without calling them fraud. An existing payout displays its recorded amount/time/status and exact receipt. Earlier receipts remain accessible for historical records; recipient acknowledgement and current proof remain separate. Amounts, dates, sites and accepted requirements are never invented. Arrangements will be connected by the subsequent scoped-arrangement task.
+
+Failed household reads hide prior household context. Failed payout reads say unavailable, never no payout or ready for collection. Successful refresh replaces the snapshot. Request generations and the existing keyed session gate prevent old account responses restoring private content. Offline controls do not submit or queue anything. Existing protected APIs remain authoritative; there is no new schema, payout authorization, chain evidence or registration/concern mutation.
+
+## Validation
+
+All 48 affected existing Edge authentication/session/handoff/polish cases passed at desktop1440x900 and phone390x844. All 12 new own-home cases passed in the final run, including retained-receipt navigation, missing records, partial read errors/retry, keyboard focus, no substitution and actual API revocation. Initial fixture expectations were corrected to the existing registration HTTP201 response. Local font/theme screenshots in both schemes were inspected and retained under tmp/ayudachain-pr33-validation. Frontend Node14, independent TypeScript, isolated production build and diff checks passed. New cases use synthetic provisioned linked accounts for pending, approved, rejected, historical and missing records at both viewports. Historical receipts use an actual recorded payout followed by a retained duplicate decision through authenticated APIs. No response invents eligibility, payout success or chain confirmation.
+
+Physical-device usability, translation/comprehension and a complete accessibility audit remain unclaimed. Existing dependency advisories and embedded build type/lint skips remain. Original data/services/builds/artifacts and provider pane stay preserved; temporary test services stop and the persistent preview stays stopped.

@@ -18,6 +18,9 @@ accounts_path = accounts_fixture(directory)
 accounts = json.loads(accounts_path.read_text())
 recipient = next(row for row in accounts["accounts"] if row["role"] == "BENEFICIARY")
 accounts["accounts"].append({**recipient, "id": "synthetic-beneficiary-phone", "display_name": "Synthetic phone recipient", "beneficiary_id": "BEN-0006"})
+for viewport in ("desktop", "phone"):
+    for state in ("pending", "approved", "rejected", "historical", "missing"):
+        accounts["accounts"].append({**recipient, "id": f"synthetic-home-{state}-{viewport}", "display_name": f"Synthetic home {state}", "beneficiary_id": f"BEN-HOME-{state}-{viewport}"})
 accounts_path.write_text(json.dumps(accounts))
 from app import config
 config.CORS_ORIGINS = ["http://127.0.0.1:3101"]

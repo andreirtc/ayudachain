@@ -1,6 +1,6 @@
 # Accepted product direction
 
-Accepted by the user on 2026-10-14 after the branch/design comparison and Philippine disaster-assistance discussion. This records the chosen direction and bounded delivery sequence. The [shared Tonal foundation](TONAL_FOUNDATION.md) is implemented. The household starting point, masterlists and scheduling remain subsequent tasks.
+Accepted by the user on 2026-10-14 after the branch/design comparison and Philippine disaster-assistance discussion. This records the chosen direction and bounded delivery sequence. The [shared Tonal foundation](TONAL_FOUNDATION.md) is implemented. The [household starting point](HOUSEHOLD_START.md) is also delivered. Masterlists and scheduling remain subsequent tasks.
 
 ## Product and household journey
 

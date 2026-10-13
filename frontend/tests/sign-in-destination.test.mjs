@@ -19,7 +19,9 @@ test("external, malformed, unsupported and looping destinations fall back safely
 });
 
 test("supported local pages preserve role defaults and never decide permission", () => {
-  for (const path of ["/verify", "/beneficiaries", "/dashboard", "/batch/RELIEF-2026-001", "/distributions?beneficiary_id="]) assert.equal(safeReturnTo(path), path);
+  for (const path of ["/verify", "/beneficiaries", "/household", "/dashboard", "/batch/RELIEF-2026-001", "/distributions?beneficiary_id="]) assert.equal(safeReturnTo(path), path);
+  assert.equal(afterSignIn(null, "BENEFICIARY"), "/household");
+  assert.equal(safeReturnTo("/household?beneficiary_id=OTHER"), null);
   assert.equal(afterSignIn("/distributions?beneficiary_id=BEN-OUTSIDE", "BARANGAY"), "/distributions?beneficiary_id=BEN-OUTSIDE");
   assert.equal(signInHref("/sign-in"), "/sign-in");
 });
