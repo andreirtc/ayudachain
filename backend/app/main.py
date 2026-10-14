@@ -78,6 +78,13 @@ from app.services.household_concerns import router as concerns_router
 app.include_router(concerns_router)
 from app.services.staff_audit import router as audit_router
 app.include_router(audit_router)
+from app.services.damage_claims import router as claims_router
+app.include_router(claims_router)
+from app.services.amount_rules import router as amount_rules_router
+app.include_router(amount_rules_router)
+from app.services.payout_sessions import router as sessions_router, session_gate
+app.include_router(sessions_router)
+from app.services.entitlements import entitlement
 
 @app.middleware("http")
 async def no_store(request, call_next):
@@ -745,11 +752,20 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session, idem
             detail=f"Payout of {format_peso(amount_c)} exceeds the {format_peso(remaining_c)} left in {ben.barangay_name}'s allocation {allocation.allocation_id}."
         )
 
-    # Flag amounts that differ from this batch's standard grant
-    is_anomalous_amount = amount_c != batch.standard_grant_centavos
+    expected = entitlement(db, ben, batch)
+    if expected["blocked"]:
+        raise HTTPException(status_code=409, detail=f"{ben.household_name} cannot be paid yet: {expected['blocked'].lower()}.")
+    gate = session_gate(db, ben, actor)
+    if gate and not gate["passed"]:
+        raise HTTPException(status_code=409, detail=gate["message"])
+
+    # Flag amounts that differ from this household's calculated amount
+    expected_c = expected["amount_centavos"]
+    basis = "calculated claim amount" if expected["basis"] == "CLAIM" else "batch standard"
+    is_anomalous_amount = amount_c != expected_c
     if is_anomalous_amount:
         ben.anomaly_flag = True
-        ben.review_notes = f"AI Anomaly: Non-standard grant amount {format_peso(amount_c)} (batch standard {format_peso(batch.standard_grant_centavos)}). Flagged for auditor review."
+        ben.review_notes = f"AI Anomaly: Non-standard grant amount {format_peso(amount_c)} ({basis} {format_peso(expected_c)}). Flagged for auditor review."
 
     # Generate or normalize OCR text
     ocr_content = payload.ocr_raw_text or DEMO_OCR_TEXT
@@ -790,7 +806,7 @@ def _confirm_distribution(payload: DistributionConfirmRequest, db: Session, idem
         db.add(AuditEvent(
             batch_id=payload.batch_id,
             event_type="AI_ANOMALY_FLAG",
-            description=f"AI Anomaly Engine: Non-standard disbursement of {format_peso(amount_c)} to {payload.beneficiary_id} flagged for auditor review (batch standard {format_peso(batch.standard_grant_centavos)})",
+            description=f"AI Anomaly Engine: Non-standard disbursement of {format_peso(amount_c)} to {payload.beneficiary_id} flagged for auditor review ({basis} {format_peso(expected_c)})",
             amount_centavos=amount_c,
             entity_id=payload.beneficiary_id
         ))

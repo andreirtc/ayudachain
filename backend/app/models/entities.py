@@ -305,6 +305,88 @@ class HouseholdConcern(Base):
     request_fingerprint = Column(String(64), nullable=False)
 
 
+class DamageClaim(Base):
+    __tablename__ = "damage_claims"
+    __table_args__ = (UniqueConstraint("beneficiary_id", "batch_id", name="uq_claim_household_batch"), UniqueConstraint("created_by", "request_id", name="uq_claim_retry"))
+    claim_id = Column(String(64), primary_key=True)
+    beneficiary_id = Column(String(64), nullable=False, index=True)
+    batch_id = Column(String(64), nullable=False, index=True)
+    barangay_id = Column(String(32), nullable=False, index=True)
+    source = Column(String(24), nullable=False)
+    created_by = Column(String(64), nullable=False)
+    created_name = Column(String(128), nullable=False)
+    created_at = Column(String(40), nullable=False)
+    request_id = Column(String(64), nullable=False)
+    request_fingerprint = Column(String(64), nullable=False)
+
+
+class ClaimRevision(Base):
+    __tablename__ = "claim_revisions"
+    __table_args__ = (UniqueConstraint("claim_id", "revision", name="uq_claim_revision"), UniqueConstraint("revised_by", "request_id", name="uq_claim_revision_retry"))
+    id = Column(Integer, primary_key=True)
+    claim_id = Column(String(64), ForeignKey("damage_claims.claim_id"), nullable=False, index=True)
+    revision = Column(Integer, nullable=False)
+    action = Column(String(24), nullable=False)
+    status = Column(String(24), nullable=False)
+    category = Column(String(32), nullable=False)
+    description = Column(Text, nullable=False)
+    household_message = Column(Text, nullable=False)
+    staff_reason = Column(Text, nullable=False)
+    revised_by = Column(String(64), nullable=False)
+    revised_name = Column(String(128), nullable=False)
+    revised_at = Column(String(40), nullable=False)
+    request_id = Column(String(64), nullable=False)
+    request_fingerprint = Column(String(64), nullable=False)
+
+
+class AmountRuleVersion(Base):
+    __tablename__ = "amount_rule_versions"
+    __table_args__ = (UniqueConstraint("batch_id", "version", name="uq_amount_rule_version"), UniqueConstraint("created_by", "request_id", name="uq_amount_rule_retry"))
+    id = Column(Integer, primary_key=True)
+    batch_id = Column(String(64), nullable=False, index=True)
+    version = Column(Integer, nullable=False)
+    mode = Column(String(16), nullable=False)
+    daily_wage_centavos = Column(Integer, nullable=True)
+    rules_json = Column(Text, nullable=False)
+    reason = Column(Text, nullable=False)
+    created_by = Column(String(64), nullable=False)
+    created_name = Column(String(128), nullable=False)
+    created_at = Column(String(40), nullable=False)
+    request_id = Column(String(64), nullable=False)
+    request_fingerprint = Column(String(64), nullable=False)
+
+
+class PayoutSession(Base):
+    __tablename__ = "payout_sessions"
+    __table_args__ = (UniqueConstraint("created_by", "request_id", name="uq_session_retry"),)
+    session_id = Column(String(64), primary_key=True)
+    list_id = Column(String(64), ForeignKey("validated_lists.list_id"), nullable=False, index=True)
+    batch_id = Column(String(64), nullable=False, index=True)
+    barangay_id = Column(String(32), nullable=False, index=True)
+    created_by = Column(String(64), nullable=False)
+    created_at = Column(String(40), nullable=False)
+    request_id = Column(String(64), nullable=False)
+
+
+class SessionRevision(Base):
+    __tablename__ = "session_revisions"
+    __table_args__ = (UniqueConstraint("session_id", "revision", name="uq_session_revision"), UniqueConstraint("revised_by", "request_id", name="uq_session_revision_retry"))
+    id = Column(Integer, primary_key=True)
+    session_id = Column(String(64), ForeignKey("payout_sessions.session_id"), nullable=False, index=True)
+    revision = Column(Integer, nullable=False)
+    action = Column(String(16), nullable=False)
+    state = Column(String(16), nullable=False)
+    session_date = Column(String(10), nullable=False)
+    site = Column(String(200), nullable=False)
+    assigned_json = Column(Text, nullable=False)
+    reason = Column(Text, nullable=False)
+    revised_by = Column(String(64), nullable=False)
+    revised_name = Column(String(128), nullable=False)
+    revised_at = Column(String(40), nullable=False)
+    request_id = Column(String(64), nullable=False)
+    request_fingerprint = Column(String(64), nullable=False)
+
+
 class ConcernRevision(Base):
     __tablename__ = "concern_revisions"
     __table_args__ = (UniqueConstraint("concern_id", "revision", name="uq_concern_revision"), UniqueConstraint("revised_by", "request_id", name="uq_concern_revision_retry"))

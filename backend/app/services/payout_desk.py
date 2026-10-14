@@ -8,6 +8,8 @@ from app.auth import require_actor, assert_household_scope
 from app.database import get_db
 from app.models.entities import Beneficiary, Distribution, ReliefBatch, Allocation, ValidatedList, ListFinalization, PayoutArrangement, ArrangementRevision
 from app.money import to_centavos
+from app.services.entitlements import entitlement
+from app.services.payout_sessions import session_gate
 
 router = APIRouter(prefix="/api/payout-desk")
 
@@ -25,10 +27,17 @@ def inspect_payout(beneficiary_id: str, request: Request, amount: Decimal | None
     prior = db.query(Distribution).filter(Distribution.batch_id == ben.batch_id, Distribution.beneficiary_id.in_(aliases)).order_by(Distribution.id).first()
     spent = db.query(func.coalesce(func.sum(Distribution.amount_centavos), 0)).filter(Distribution.allocation_id == allocation.allocation_id).scalar() if allocation else 0
     remaining = allocation.amount_centavos - spent if allocation else 0
-    requested = to_centavos(amount) if amount is not None else (batch.standard_grant_centavos if batch else 0)
+    expected = entitlement(db, ben, batch) if batch else None
+    expected_c = expected["amount_centavos"] if expected else None
+    requested = to_centavos(amount) if amount is not None else (expected_c or (batch.standard_grant_centavos if batch else 0))
     checks = []
     def check(code, passed, message):
         checks.append({"code": code, "passed": bool(passed), "message": message})
+    if expected and expected["blocked"]:
+        check("ENTITLEMENT", False, expected["blocked"] + ". No amount can be paid yet.")
+    gate = session_gate(db, ben, actor) if actor.role == "DISBURSING" else None
+    if gate:
+        check("SESSION", gate["passed"], gate["message"])
     check("ACTIVE_HOUSEHOLD", ben.record_status == "ACTIVE", "Household is active." if ben.record_status == "ACTIVE" else "Retained duplicates cannot receive another payout.")
     approved = ben.verification_status == "VERIFIED" and ben.review_status == "APPROVED"
     check("APPROVAL", approved, "DSWD approval recorded." if approved else "DSWD approval is required.")
@@ -47,4 +56,4 @@ def inspect_payout(beneficiary_id: str, request: Request, amount: Decimal | None
         if plan and membership["included"]:
             rev = db.query(ArrangementRevision).filter_by(arrangement_id=plan.arrangement_id).order_by(ArrangementRevision.revision.desc()).first()
             arrangement = {"state": rev.state, "collection_date": rev.collection_date, "time_window": rev.time_window, "site": rev.site, "requirements": json.loads(rev.requirements_json), "responsible_staff": rev.responsible_staff}
-    return {"beneficiary_id": ben.beneficiary_id, "household_name": ben.household_name, "barangay_name": ben.barangay_name, "batch_id": ben.batch_id, "amount_centavos": requested, "remaining_centavos": remaining, "standard_grant_centavos": batch.standard_grant_centavos if batch else None, "max_grant_centavos": batch.max_grant_centavos if batch else None, "can_record": actor.role == "DISBURSING" and all(c["passed"] for c in checks), "checks": checks, "existing_distribution_id": prior.distribution_id if prior else None, "list_membership": membership, "arrangement": arrangement, "nonstandard_amount": bool(batch and requested != batch.standard_grant_centavos), "evidence_scope": "Current recorded checks only. Saving rechecks eligibility and budget. Assistance does not authorize payment."}
+    return {"beneficiary_id": ben.beneficiary_id, "household_name": ben.household_name, "barangay_name": ben.barangay_name, "batch_id": ben.batch_id, "amount_centavos": requested, "remaining_centavos": remaining, "standard_grant_centavos": batch.standard_grant_centavos if batch else None, "max_grant_centavos": batch.max_grant_centavos if batch else None, "can_record": actor.role == "DISBURSING" and all(c["passed"] for c in checks), "checks": checks, "existing_distribution_id": prior.distribution_id if prior else None, "list_membership": membership, "arrangement": arrangement, "nonstandard_amount": bool(expected_c and requested != expected_c), "entitlement": None if not expected else {"basis": expected["basis"], "category": expected["category"], "amount_centavos": expected_c, "rule_version": expected["rule_version"]}, "session": gate, "evidence_scope": "Current recorded checks only. Saving rechecks eligibility and budget. Assistance does not authorize payment."}

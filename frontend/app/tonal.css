@@ -73,7 +73,7 @@
 .operations .list-frozen-rows { max-height:620px; overflow:auto; overscroll-behavior:contain; padding-right:8px; }
 .operations .list-frozen-rows:focus-visible { outline:3px solid var(--md-primary); outline-offset:3px; }
 .operations :is(.workflow-context,.registry-history-entry,.registry-csv-pair,.receipt-summary) { background:var(--md-surface-container); border:0; border-radius:16px; }
-.operations :is(input:not([type=checkbox]),select,textarea) { min-height:44px; border:1px solid var(--md-outline); border-radius:4px; background:var(--md-surface-container-lowest); color:var(--md-on-surface); font-size:16px; }
+.operations :is(input:not([type=checkbox],[type=radio]),select,textarea) { min-height:44px; border:1px solid var(--md-outline); border-radius:4px; background:var(--md-surface-container-lowest); color:var(--md-on-surface); font-size:16px; }
 .operations :is(input,textarea)::placeholder { color:var(--md-on-surface-variant); opacity:1; }
 .operations input[type=file]::file-selector-button { padding:8px 14px; border:0; border-radius:20px; background:var(--md-secondary-container); color:var(--md-on-secondary-container); }
 .operations .registry-filter-selected { background:var(--md-secondary-container); color:var(--md-on-secondary-container); border-color:var(--md-outline); }
@@ -111,7 +111,7 @@
 .operations .workflow-facts { grid-template-columns:minmax(140px,1fr) minmax(0,1fr); gap:10px 20px; }
 .operations .workflow-facts dd { font-weight:600; }
 .operations .receipt-references dd { font-family:inherit; }
-.operations :is(input:not([type=checkbox]),select,textarea) { background:transparent; border-radius:4px; min-height:52px; padding:13px 14px; font-size:15px; }
+.operations :is(input:not([type=checkbox],[type=radio]),select,textarea) { background:transparent; border-radius:4px; min-height:52px; padding:13px 14px; font-size:15px; }
 .operations :is(input,select,textarea):focus { border-color:var(--md-primary); }
 .operations :is(input,select,textarea):disabled { opacity:.7; }
 .operations .registry label { font-size:13px; font-weight:600; color:var(--md-on-surface-variant); margin-bottom:6px; }
@@ -439,3 +439,9 @@
 .material-landing .app-account .registry-button { min-height:44px; padding:10px 16px; border-radius:24px; font-size:13px; color:var(--md-primary); background:transparent; }
 .material-landing .account-role { max-width:92px; font-size:12px; }
 @media(max-width:640px){.material-landing .landing-header nav { display:none; }.material-landing .app-account { gap:4px; }.material-landing .account-avatar { width:32px; height:32px; font-size:12px; }.material-landing .app-preferences-panel { top:84px; }}
+
+.session-progress { height: 8px; border-radius: 999px; background: var(--md-surface-container-highest); overflow: hidden; }
+.session-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--md-primary); transition: width .2s ease; }
+.household-claim fieldset { border: 0; padding: 0; margin: 0; }
+.household-claim legend, .amounts-page legend, .sessions-page legend { font-weight: 600; margin-bottom: .25rem; }
+.amounts-page fieldset, .sessions-page fieldset { border: 0; padding: 0; margin: 0; }

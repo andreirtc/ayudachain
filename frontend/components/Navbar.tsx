@@ -8,9 +8,9 @@ import { useSignInHref } from "@/lib/useSignInHref";
 import { workspaceHome } from "@/lib/workspaceHome";
 import BrandMark from "@/components/BrandMark";
 import RoleIndicatorBanner from "@/components/RoleIndicatorBanner";
-import { Home, Users, HandCoins, Receipt, LogIn, MessageSquare, ClipboardList, Search } from "lucide-react";
-const destinations={overview:{name:'Overview',href:'/dashboard',Icon:Home},households:{name:'Households',href:'/beneficiaries',Icon:Users},payouts:{name:'Payouts',href:'/distributions',Icon:HandCoins},receipts:{name:'Receipts',href:'/verify',Icon:Receipt},concerns:{name:'Concerns',href:'/concerns',Icon:MessageSquare},audit:{name:'Audit',href:'/audit',Icon:ClipboardList},signIn:{name:'Sign in',href:'/sign-in',Icon:LogIn}};
-const roleLinks:Record<AccountRole,(keyof typeof destinations)[]>={DSWD:['households','concerns','audit','payouts'],BARANGAY:['households','concerns','overview','receipts'],DISBURSING:['payouts','households','concerns','receipts'],BENEFICIARY:['households','payouts','concerns','receipts'],AUDITOR:['audit','households','payouts','receipts']};
+import { Home, Users, HandCoins, Receipt, LogIn, MessageSquare, ClipboardList, Search, FileText, CalendarCheck } from "lucide-react";
+const destinations={overview:{name:'Overview',href:'/dashboard',Icon:Home},households:{name:'Households',href:'/beneficiaries',Icon:Users},payouts:{name:'Payouts',href:'/distributions',Icon:HandCoins},receipts:{name:'Receipts',href:'/verify',Icon:Receipt},concerns:{name:'Concerns',href:'/concerns',Icon:MessageSquare},audit:{name:'Audit',href:'/audit',Icon:ClipboardList},claims:{name:'Claims',href:'/claims',Icon:FileText},sessions:{name:'Sessions',href:'/sessions',Icon:CalendarCheck},signIn:{name:'Sign in',href:'/sign-in',Icon:LogIn}};
+const roleLinks:Record<AccountRole,(keyof typeof destinations)[]>={DSWD:['households','claims','sessions','payouts','concerns','audit'],BARANGAY:['households','claims','concerns','overview','receipts'],DISBURSING:['sessions','payouts','households','concerns','receipts'],BENEFICIARY:['households','payouts','concerns','receipts'],AUDITOR:['audit','claims','households','payouts','receipts']};
 export default function Navbar(){
  const pathname=usePathname(),router=useRouter(),signIn=useSignInHref(),{account}=useRole();const [query,setQuery]=useState('');
  useEffect(()=>setQuery(''),[account?.id]);

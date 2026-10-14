@@ -8,6 +8,7 @@ import { RefreshCw } from "lucide-react";
 import {
   fetchDistributions,
   fetchPayoutDesk,
+  DAMAGE_CATEGORIES,
   PayoutDeskCheck,
   fetchBeneficiaries,
   fetchBatches,
@@ -213,10 +214,20 @@ function DistributionsContent({ requestedId }: { requestedId: string | null }) {
   const standardGrant = selectedBatch?.standard_grant ?? 0;
   const maxGrant = selectedBatch?.max_grant ?? 0;
 
-  // Start each household at its batch's standard grant
+  // Start at the standard grant, then switch to the calculated amount unless already edited
   useEffect(() => {
-    if (selectedBatch) setAmountStr(String(selectedBatch.standard_grant));
+    if (!selectedBatch) return;
+    const standard = String(selectedBatch.standard_grant);
+    setAmountStr(standard);
+    if (role !== "DISBURSING" || !selectedBenId) return;
+    let live = true;
+    fetchPayoutDesk(selectedBenId, "").then(result => {
+      const calculated = result.entitlement?.amount_centavos;
+      if (live && calculated) setAmountStr(current => current === standard ? String(calculated / 100) : current);
+    }).catch(() => {});
+    return () => { live = false; };
   }, [selectedBenId, selectedBatch?.batch_id]);
+  const calculated = deskCurrent?.result?.entitlement;
 
   const existingPayout = distributions.find(
     (d) =>
@@ -289,7 +300,7 @@ function DistributionsContent({ requestedId }: { requestedId: string | null }) {
         </div>:<form onSubmit={handleDisburse} aria-busy={step==='SUBMITTING'} className="space-y-5">
           <div><label htmlFor="payout-household">Household</label><select id="payout-household" value={selectedBenId} disabled={requestedId!==null||step==='SUBMITTING'||loading||!!loadError} onChange={e=>{setSelectedBenId(e.target.value);setSubmitError(null);}}><option value="">Choose a household</option>{beneficiaries.filter(b=>b.record_status==='ACTIVE'||b.beneficiary_id===requestedId).map(b=><option key={b.beneficiary_id} value={b.beneficiary_id}>{b.household_name} ({b.barangay_name})</option>)}</select></div>
           {selectedBeneficiaryObj&&!loading&&!loadError&&<div className="desk-person"><span className="household-avatar" aria-hidden="true">{selectedBeneficiaryObj.household_name.split(' ').slice(0,2).map(n=>n[0]).join('')}</span><div><p className="registry-record-id">{selectedBeneficiaryObj.dafac_id||selectedBeneficiaryObj.beneficiary_id}</p><h2>{selectedBeneficiaryObj.household_name}</h2><p className="registry-muted">{selectedBeneficiaryObj.barangay_name} · {selectedBatch?.calamity_name}</p><span className={'registry-badge '+(selectedIsApproved?'registry-approved':'registry-pending')}>{selectedIsApproved?'Approved':'Needs DSWD review'}</span></div></div>}
-          <div className="payout-amount-field"><div><label htmlFor="payout-amount">Fictional amount (PHP)</label><input id="payout-amount" type="text" inputMode="decimal" value={amountStr} disabled={!selectedBenId||step==='SUBMITTING'||loading||!!loadError} onChange={e=>setAmountStr(e.target.value)} aria-describedby="payout-amount-help"/><p id="payout-amount-help" className="registry-muted mt-2">{selectedBatch&&amountValid&&numericAmount!==standardGrant?'This differs from the standard grant. Check before saving.':'Use up to two decimal places.'}</p></div>{selectedBatch&&<div className="payout-standard"><span>Standard grant</span><strong>{formatPeso(standardGrant)}</strong></div>}</div>
+          <div className="payout-amount-field"><div><label htmlFor="payout-amount">Fictional amount (PHP)</label><input id="payout-amount" type="text" inputMode="decimal" value={amountStr} disabled={!selectedBenId||step==='SUBMITTING'||loading||!!loadError} onChange={e=>setAmountStr(e.target.value)} aria-describedby="payout-amount-help"/><p id="payout-amount-help" className="registry-muted mt-2">{selectedBatch&&amountValid&&(calculated?deskCurrent?.result?.nonstandard_amount:numericAmount!==standardGrant)?'This differs from the household\'s calculated amount. Check before saving.':'Use up to two decimal places.'}</p></div>{selectedBatch&&<div className="payout-standard"><span>{calculated?.basis==='CLAIM'?'Calculated amount':'Standard grant'}</span><strong>{calculated?.amount_centavos?formatPeso(calculated.amount_centavos/100):formatPeso(standardGrant)}</strong>{calculated?.basis==='CLAIM'&&calculated.category&&<small>{DAMAGE_CATEGORIES[calculated.category]}</small>}</div>}</div>
           {selectedBenId&&amountValid&&!loading&&!loadError&&<section aria-label="Desk checks" className="space-y-3"><h3>Desk checks</h3>{!deskCurrent?<p role="status" className="registry-muted">Checking current approval and budget...</p>:deskCurrent.error?<p role="alert" className="registry-error">{deskCurrent.error} Refresh records to retry.</p>:deskCurrent.result&&<><p className={deskCurrent.result.can_record?'registry-approved':'registry-pending'}>{deskCurrent.result.can_record?'Ready to record this amount.':deskCurrent.result.checks.find(c=>!c.passed)?.message||'Recording is outside your role.'}</p>{deskCurrent.result.existing_distribution_id&&<Link className="registry-button" href={receiptVerificationHref(deskCurrent.result.existing_distribution_id)}>Open existing household receipt</Link>}<details><summary>Approval and budget checks</summary><ul className="desk-check-list">{deskCurrent.result.checks.map(c=><li key={c.code}><span className="desk-check-icon" style={{color:c.passed?'var(--st-ok)':'var(--st-warn)'}}>{c.passed?'✓':'!'}</span>{c.message}</li>)}</ul></details></>}</section>}
           {deskBlock&&!loading&&!loadError&&(!deskCurrent?.result||!selectedBenId||!amountValid)&&<p className="registry-notice">{deskBlock}</p>}
           {submitError&&<p role="alert" className="registry-error">{submitError} Retry the same details to retrieve a payout if the response was lost.</p>}

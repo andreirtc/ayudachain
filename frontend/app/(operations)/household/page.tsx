@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Check, Clock, ArrowRight, UserRound, MessageSquare } from "lucide-react";
 import { useRole } from "@/lib/roleContext";
 import { useBrowserOnline } from "@/lib/useBrowserOnline";
-import { Beneficiary, Distribution, HouseholdArrangement, fetchBeneficiaries, fetchDistributions, fetchMyArrangements, formatPeso } from "@/lib/api";
+import { Beneficiary, DamageClaim, Distribution, Entitlement, HouseholdArrangement, fetchBeneficiaries, fetchClaims, fetchDistributions, fetchMyArrangements, fetchMyEntitlement, formatPeso } from "@/lib/api";
+import HouseholdClaim, { amountLine } from "@/components/HouseholdClaim";
 import { formatRecordedDate } from "@/lib/recordedDate";
 import { receiptVerificationHref as receiptHref } from "@/lib/receiptNavigation";
 
@@ -22,15 +23,21 @@ export default function HouseholdPage() {
   const [payoutError, setPayoutError] = useState(false);
   const [arrangements, setArrangements] = useState<HouseholdArrangement[]>([]);
   const [arrangementError, setArrangementError] = useState(false);
+  const [claim, setClaim] = useState<DamageClaim | null>(null);
+  const [entitlement, setEntitlement] = useState<Entitlement | null>(null);
+  const [claimError, setClaimError] = useState(false);
   const ownId = account?.beneficiary_id;
 
   async function load() {
     const current = ++generation.current;
-    setLoading(true); setHousehold(null); setPayouts([]); setHouseholdError(false); setPayoutError(false); setArrangements([]); setArrangementError(false);
-    const [registry, records, instructions] = await Promise.allSettled([
-      fetchBeneficiaries({ include_historical: true }), fetchDistributions(), fetchMyArrangements(),
+    setLoading(true); setHousehold(null); setPayouts([]); setHouseholdError(false); setPayoutError(false); setArrangements([]); setArrangementError(false); setClaim(null); setEntitlement(null); setClaimError(false);
+    const [registry, records, instructions, claims, amount] = await Promise.allSettled([
+      fetchBeneficiaries({ include_historical: true }), fetchDistributions(), fetchMyArrangements(), fetchClaims(), fetchMyEntitlement(),
     ]);
     if (current !== generation.current) return;
+    if (claims.status === "fulfilled") setClaim(claims.value[0] || null);
+    else setClaimError(true);
+    if (amount.status === "fulfilled") setEntitlement(amount.value);
     if (instructions.status === "fulfilled") setArrangements(instructions.value);
     else setArrangementError(true);
     if (registry.status === "fulfilled") setHousehold(registry.value.find(row => row.beneficiary_id === ownId) || null);
@@ -83,9 +90,12 @@ export default function HouseholdPage() {
           : arrangementError ? <><p role="alert" className="registry-error">Collection instructions unavailable. This does not mean no schedule exists.</p><button className="registry-button" disabled={!online} onClick={()=>void load()}>Retry instructions</button></>
           : !plan ? <p className="registry-muted">Staff have not published a collection date, site or requirements for your household yet.</p>
           : plan.state === "CANCELLED" ? <p role="alert" className="registry-notice">The collection on {collectionDay(plan.collection_date)} at {plan.site} was cancelled by staff. Wait for new instructions; do not go to the site.</p>
-          : <div className="workflow-context space-y-2" aria-label="Collection instructions"><h3>Collection instructions{arrangements[0].updated ? " (updated)" : ""}</h3><dl className="receipt-references"><dt>Date</dt><dd>{collectionDay(plan.collection_date)}</dd><dt>Time</dt><dd>{plan.time_window}</dd><dt>Site</dt><dd>{plan.site}</dd><dt>Bring</dt><dd><ul>{plan.requirements.map(r=><li key={r}>{r}</li>)}</ul></dd><dt>Ask for</dt><dd>{plan.responsible_staff}</dd></dl><p className="registry-muted">{approved ? "These instructions do not guarantee a payout; staff still check eligibility and funding." : "Your household is listed, but staff must confirm eligibility before any payout."}</p></div>}
+          : <div className="workflow-context space-y-2" aria-label="Collection instructions"><h3>Collection instructions{arrangements[0].updated ? " (updated)" : ""}</h3><dl className="receipt-references"><dt>Date</dt><dd>{collectionDay(plan.collection_date)}</dd><dt>Time</dt><dd>{plan.time_window}</dd><dt>Site</dt><dd>{plan.site}</dd><dt>Bring</dt><dd><ul>{plan.requirements.map(r=><li key={r}>{r}</li>)}</ul></dd><dt>Ask for</dt><dd>{plan.responsible_staff}</dd>{entitlement && <><dt>Amount</dt><dd>{amountLine(entitlement)}</dd></>}</dl><p className="registry-muted">{approved ? "These instructions do not guarantee a payout; staff still check eligibility and funding." : "Your household is listed, but staff must confirm eligibility before any payout."}</p></div>}
       </section>
       </div>
+      {household && !historical && (claim || !receipt) && (claimError
+        ? <section className="workflow-panel space-y-3" aria-label="Damage claim"><h2>Damage claim</h2><p role="alert" className="registry-error">Your damage claim could not be loaded. This does not mean no claim exists.</p><button className="registry-button" disabled={!online} onClick={()=>void load()}>Retry claim</button></section>
+        : <HouseholdClaim claim={claim} entitlement={entitlement} online={online !== false} onChanged={next=>{setClaim(next);fetchMyEntitlement().then(setEntitlement).catch(()=>setEntitlement(null));}} />)}
       {household && <details ref={details} className="workflow-panel household-details"><summary>Household details and review history</summary><dl className="receipt-references mt-4"><dt>Household reference</dt><dd>{household.beneficiary_id}</dd><dt>DAFAC reference</dt><dd>{household.dafac_id || "Not recorded"}</dd><dt>Relief batch</dt><dd>{household.batch_id}</dd>{household.canonical_beneficiary_id && <><dt>Retained link</dt><dd>{household.canonical_beneficiary_id}</dd></>}</dl><p className="registry-muted mt-4">Ask staff to review incorrect or missing details using your reference. Assistance does not require sharing credentials.</p><Link href="/beneficiaries" className="registry-button mt-4">Open record and review history</Link></details>}
       {!payoutError && payouts.length > 1 && <details className="workflow-panel"><summary>Other saved receipts ({payouts.length-1})</summary><ul>{payouts.slice(1).map(row=><li key={row.distribution_id} className="workflow-record"><Link href={receiptHref(row.distribution_id)} className="registry-button">Receipt {row.distribution_id}</Link><p>{formatPeso(row.amount)} · {formatRecordedDate(row.distributed_at)}</p></li>)}</ul></details>}
       <section className="household-support"><div><MessageSquare size={22} aria-hidden="true"/><div><h2>Something needs reviewing?</h2><p className="registry-muted">Ask staff about your details, collection or payout.</p></div></div><Link href="/concerns" className="registry-button">Report or follow up a concern <ArrowRight size={16}/></Link></section>
