@@ -30,7 +30,7 @@ if __name__=='__main__':
     import sys
     result=reset(persist_configuration=True)
     if '--with-sample-households' in sys.argv:
-        # Opt-in fictional residents; the default stays reference-only because browser journeys register their own households.
+        # Opt-in fictional residents, approvals, intake and claim responses; the default stays reference-only because browser journeys register their own households.
         from backend.scripts.seed_households import seed_households
-        result['sample_households']=len(seed_households()[0])
+        result['sample_data']=seed_households(with_claims=True)
     print(json.dumps(result))

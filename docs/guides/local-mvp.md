@@ -97,15 +97,15 @@ Retired actors cannot run ordinary commands. Read old history separately using a
 
 Original export requires a new path; inspection is privately logged. Old matched reads remain historical if the pinned chain is unavailable. Frozen legacy SQLite import is explicit and read-only: `python -m backend.scripts.import_legacy --actor DSWD_UUID --source PATH_TO_SYNTHETIC_SQLITE [--manifest ORIGINAL_LEGACY_MANIFEST]`. Import does not create MVP eligibility or re-anchor legacy data. Without original evidence/deployment, verification is explicitly unavailable.
 
-## Optional sample households
+## Optional sample residents, approvals and claim responses
 
-The reference seed creates beneficiary accounts but no households, so barangay Households and claim tables start empty. To fill them with fictional households, run against the active evaluation run. It registers one household for each of the six beneficiaries (three in Silong, three in Sapa) plus seven assisted-registration households per barangay for residents without accounts, registered by that barangay's Punong Barangay and so flagged as assisted:
+The reference seed creates beneficiary accounts but no households, so barangay Households and Claim responses start empty. To fill them with fictional residents, run against the active evaluation run. It registers 10 households per barangay (the six reference beneficiaries, ten more sample resident accounts it creates, and two assisted registrations per barangay made by the Punong Barangay), has an independent officer approve residence for all but four of them, and leaves those four for you to approve in the Households tab. With `--with-claims` it also has DSWD open intake if needed, files claims for the account holders, records sample endorsements and a not-endorse, and has each Punong Barangay send the fully endorsed claims to DSWD:
 
 ```powershell
 .venv/Scripts/python -m backend.scripts.seed_households --with-claims
 ```
 
-Each household is registered through the real registry command as its own beneficiary account; it is unconfirmed and not an aid application. `--with-claims` also files a claim, but only for barangays covered by an open DSWD intake, and the claim then waits for barangay responses. Nothing is endorsed, approved, published or anchored. The script skips households that already exist, so it is safe to repeat. A published approved list still needs the real DSWD approval, amount and chain publication steps. A reset retires the run and its households, and the browser journey spec resets the run, so rerun the script afterwards, or reset with `.venv/Scripts/python -m backend.scripts.reset_mvp --with-sample-households`.
+Everything goes through the real commands as the acting account, so each step is audited. The sample approvals, endorsements and intake are synthetic stand-ins for human decisions. Nothing is approved by DSWD, published or anchored. The script skips households that already exist, so it is safe to repeat. A published approved list still needs the real DSWD approval, amount and chain publication steps. A reset retires the run and its households, and the browser journey spec resets the run, so rerun the script afterwards, or reset with `.venv/Scripts/python -m backend.scripts.reset_mvp --with-sample-households`, which seeds everything above including claims. Restart the API after a reset or backend change so it uses the new deployment and code.
 
 ## Tests and independently recomputed proof
 
