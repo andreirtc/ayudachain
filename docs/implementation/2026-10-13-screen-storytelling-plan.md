@@ -182,6 +182,8 @@ On tablets, place the accepted-ID photo beside the comparison form and a handove
 
 ### Auditor
 
+Update 2026-10-14: the maintainer approved reducing the Auditor to three destinations (Inspect, Records, Verify) with record pages reachable through Records and exceptions; see the [Auditor simplification design](../superpowers/specs/2026-10-14-auditor-simplification-design.md). This replaces the four Auditor destinations recorded in the sitemap.
+
 Lead with **“Records needing inspection.”** Open each exception directly to its explanation, original evidence, relevant changes and current integrity result. Preserve filters when returning to the list.
 
 Keep the workflow read-only. A flag is a reason to inspect, not a fraud finding. Show current proof results separately from submission history and earlier successful checks. Preserve logged access for sensitive evidence.

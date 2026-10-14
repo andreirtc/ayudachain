@@ -193,3 +193,12 @@ At the maintainer's request: a single disaster with two staffed barangays, more 
 - **Rendered-text scan:** 76 pages (all five roles, every section, English and Filipino, every expandable section opened, plus alt text, aria labels, titles and the document title) contain none of "invented", "static", "demo", "demonstration", "synthetic" or "kathang-isip".
 - **Not rerun:** the chain-backed journey, funding and verification suites were not rerun after these changes; the journey's selectors for the renamed clock and photo labels were updated but are unproven until it runs.
 
+
+## Auditor simplification - 2026-10-14
+
+Auditor navigation reduced to Inspect, Records and Verify; see the [design](../superpowers/specs/2026-10-14-auditor-simplification-design.md). Frontend only. The DSWD evidence page keeps its combined layout.
+
+- Frontend typecheck (`tsc --noEmit`): passed.
+- Mocked browser suites (`auditor-simplified`, `storytelling-integrity`, `storytelling-matrix`, `storytelling-staff-shell`, `usability-duplicate`, `tonal-design`, `workflow-errors`): 118 passed in the broad run. The one failure was the workflow-error test still targeting the exceptions read on Verify; it was moved to Inspect, with a Verify case added for `/audit/proofs`, and re-run: 21 passed (`workflow-errors` and `auditor-simplified`).
+- Live-backend suites (`workspaces`, `funds`, `storytelling-staff-shell`, `notes`): 10 passed, 1 failed. `notes.spec.ts` failed its precondition `transactions.length > 0`: the local database had no payout transaction. It never reached an Auditor screen. Not rerun after seeding.
+- Not run: production build, `journey.spec.ts` and `verification.spec.ts` (full local chain journey). Their Auditor heading assertions were updated to "Verify".

@@ -1,6 +1,6 @@
 # Auditor workspace simplification — design
 
-Date: 2026-10-14. Status: **Proposed — awaiting maintainer review.** Nothing here is implemented yet.
+Date: 2026-10-14. Status: **Implemented 2026-10-14** (frontend only). Validation results are in `docs/implementation/validation.md`.
 
 ## Intent
 
@@ -60,7 +60,8 @@ Keep:
 Change:
 
 - **Add funding exceptions to the register.** The Auditor dashboard also reads `/funds?disaster_id=…`. Each entry with a non-empty `exceptions` array becomes a register row. Its title is the release reference, its explanation lists the exception names in readable form, and it links to Verify with `record=<fund id>&history=fund_entry_id`. If the funds read fails, the dashboard shows the existing unavailable state. It never shows an empty "no exceptions" result based on a failed read.
-- **Fallback link for a flag with no history slot.** Today such a flag links to the `#exceptions-<kind>` anchor on Audit, which this design removes. It now opens the record page named in `exceptionNames[kind][2]`, with `record=<row id>` when an id exists.
+- **Fallback link for a flag with no history slot.** Today such a flag links to the `#exceptions-<kind>` anchor on Audit, which this design removes. It now opens the record page named in `exceptionNames[kind][2]`, without a `record` parameter, because the flag's row id (for example a payout attempt) is not that page's record id.
+- **Unsupported history slots fixed.** Grievance and challenge flags previously linked to `grievance_id`/`challenge_id` histories, which the timeline endpoint rejects. They now use the row's `transaction_id` or `handover_id`, or fall back to their record page.
 - **Remove** the four-number briefing strip. The register count and outcome summary already carry those numbers.
 - **Remove** the "Supporting operations and totals" block for the Auditor; it moves to Records. DSWD and Barangay keep it on their overview.
 
@@ -68,7 +69,7 @@ Change:
 
 - The title is "Records" with the description "Find any record and open its evidence." The other roles keep "Search and task queues".
 - The existing queue search, filters, paging and scope text are unchanged.
-- An **Other records** row of links appears beneath the search: Funding ledger, Payout sessions, Recipient outcomes, Amount and list history. These cover records the queue search API does not serve.
+- An **Other records** row of links appears above the search: Funding ledger, Payout sessions, Recipient outcomes, Amount and list history. These cover records the queue search API does not serve.
 - Below the search, a collapsed `<details>` labelled "Office totals by barangay" renders the existing `Operations` component. Its count links already open filtered searches.
 
 ### 4. Verify (`Audit.tsx`)
@@ -81,7 +82,8 @@ Change:
   - *Event history*: the existing append-only timeline, latest 20 first, with a "show all" control.
 - The view switcher is a labelled group of links or buttons using `aria-current`/`aria-pressed`. Changing view pushes a history entry and keeps `record`, `history`, `proof_filter` and `proof_query`, so browser Back restores the earlier view without issuing a chain check.
 - **Remove** the "Exceptions and supporting records" section. Exceptions live on Inspect.
-- The data loads stay as they are. Funds are no longer needed on this page, so the `/funds` read moves to the dashboard.
+- For the Auditor, Verify no longer reads `/audit/overview` or `/funds`; both exception sources are read on Inspect.
+- **DSWD is unaffected.** The DSWD Officer's Evidence & history page uses the same component and keeps its combined layout, exceptions section and reads. The view switcher applies to the Auditor only.
 
 ### Error and empty states
 

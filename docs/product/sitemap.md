@@ -8,7 +8,7 @@
 | /mvp/barangay-officer | Own-barangay response queue, endorsements and batches, assisted registration, a read-only household census, the restricted approved list and aggregate payout counts |
 | /mvp/dswd-officer | Funding, intake, registry/staff, claim review, amount inputs/lists, session assignments, payout records, private cases and evidence |
 | /mvp/disbursing-officer | Assigned sessions, identity comparison and cash handover, independent assisted exit checks and operational notes |
-| /mvp/auditor | Read-only exception register, funding and payout records, originals, histories and current integrity checks |
+| /mvp/auditor | Read-only. Inspect (exception register, including funding exceptions), Records (server search plus links to funding, sessions, outcomes and list history) and Verify (chain checks, originals, event history) |
 | /verify | Read-only frozen legacy verification with original coverage and actual pinned chain state |
 | /legacy-home | Preserved old dashboard component |
 | Other legacy routes | Preserved three-role screens requiring the independent standard-library backend; not MVP entry points |
@@ -37,7 +37,7 @@ Below 760px every workspace shows a labelled bottom bar with at most four destin
 | Barangay Officer | Barangay overview; Claim responses; Households; Approved list |
 | DSWD Officer | Operations overview; Claim review; Payout sessions; Private cases (funding, intake, amounts/lists, payout records, evidence and queues stay in the drawer/rail) |
 | Disbursing Officer | My work today; Cash handover; Assigned sessions; Exit checks & notes |
-| Auditor | Exceptions overview; Integrity & histories; Funding evidence; Search & task queues (all other record pages stay in the drawer/rail) |
+| Auditor | Inspect; Records; Verify. The same three appear in the drawer/rail. Record pages (funding, claims, households, amounts and lists, sessions, handovers, outcomes) keep their URLs; they open from Records or an exception, highlight Records, and show Back to Records. |
 
 Each role’s overview leads with one task: Barangay “Claims needing your response”, DSWD “Work needing your decision”, Disbursing “Find recipient”, Auditor “Records needing inspection”. The Barangay Assisted registration action opens the existing registry flow as a secondary link; the Auditor has no create action. Barangay Claim responses is a table of the barangay’s own claims (open claims, then history); selecting a row opens that claim’s review and Endorse / Not endorse form below it, and the Punong Barangay ticks rows to send. Barangay Households is a read-only census table of every household registered in the barangay, whether or not it has claimed; it confirms nothing. Barangay Approved list shows DSWD-published entries (name, zone, category) and a count, never amounts. Claims, payout records and integrity use a list beside a detail pane from 1024px and stack below it; Auditor proof selection keeps `record`, `history`, `material` and `proof_filter` in the URL so browser Back restores the earlier selection without issuing a chain check or business command.
 
