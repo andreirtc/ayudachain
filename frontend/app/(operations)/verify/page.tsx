@@ -209,7 +209,7 @@ function VerifyContent() {
       <header>
         <h1>Check a receipt</h1>
         <p className="registry-description">
-          Check whether covered payout fields match their blockchain proof.
+          Compare a saved receipt with its current proof.
         </p>
       </header>
       {online === false && (
@@ -220,7 +220,7 @@ function VerifyContent() {
             : ""}
         </p>
       )}
-      <section
+      <div className="verification-layout"><section
         aria-label="Choose a receipt"
         className="workflow-panel space-y-4"
       >
@@ -321,7 +321,7 @@ function VerifyContent() {
             </button>
           </form>
         </details>
-      </section>
+      </section><div className="workflow-panel space-y-5">
       {activeDist && (
         <section aria-label="Verification result" className="space-y-4">
           {checking && <p role="status">Reading the blockchain receipt...</p>}
@@ -398,7 +398,7 @@ function VerifyContent() {
         </section>
       )}
       {activeDist && (
-        <div className="workflow-panel">
+        <div>
           <ReceiptDetails
             key={activeDist.distribution_id}
             record={activeDist}
@@ -406,6 +406,8 @@ function VerifyContent() {
           />
         </div>
       )}
+      {!activeDist && !loadingRecords && <div className="registry-case-empty"><h2>Choose a receipt to check</h2><p>Select a saved record or enter its exact reference.</p></div>}
+      </div></div>
     </div>
   );
 }

@@ -5,11 +5,12 @@ Typhoon Salinlahi — Calamity Relief Batch 2026-001
 Includes intentional duplicates and anomalies for pitch demonstration.
 """
 
+import json
 import os
 from app import config
 from datetime import datetime, timedelta
 from app.database import SessionLocal, init_db, engine
-from app.models.entities import Base, ReliefBatch, Allocation, Beneficiary, Distribution, AuditEvent
+from app.models.entities import Base, ReliefBatch, Allocation, Beneficiary, Distribution, AuditEvent, AmountRuleVersion
 from app.services.hasher import compute_receipt_hash
 from app.services.receipt_generator import save_sample_receipt, DEMO_OCR_TEXT
 from app.services.blockchain import blockchain_service, confirmed_transaction_hash
@@ -63,6 +64,14 @@ def seed_database():
         created_at=now - timedelta(hours=3)
     )
     db.add(batch)
+
+    # Fictional wage-formula amount rules: daily wage x days per damage category
+    db.add(AmountRuleVersion(
+        batch_id=batch_id, version=1, mode="WAGE_FORMULA", daily_wage_centavos=50_000,
+        rules_json=json.dumps({"PARTIALLY_DAMAGED": {"days": 12, "amount_centavos": 600_000}, "TOTALLY_DAMAGED": {"days": 20, "amount_centavos": 1_000_000}}, sort_keys=True),
+        reason="Initial fictional demo rules", created_by="system-seed", created_name="Demo seed",
+        created_at=(now - timedelta(hours=3)).isoformat() + "+00:00", request_id="seed-amount-rules-v1", request_fingerprint="seed",
+    ))
 
     # 2. Barangay Allocations
     barangays = [(b_id, b_name, 250_000_000, 500) for b_id, b_name in DEMO_BARANGAYS.items()]

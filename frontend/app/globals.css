@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 :root {
+  --font-body: var(--font-open-sans);
+  --font-heading: var(--font-open-sans);
   --primary: var(--md-on-surface);
   --accent: var(--md-primary);
   --emerald: #059669;
@@ -48,7 +50,7 @@ h1, h2, h3 { font-weight: 700; }
 .registry-panel { background: var(--md-surface-container-lowest); border: 1px solid var(--md-outline-variant); border-radius: 12px; overflow: hidden; }
 .registry-list-tools { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; padding: 20px 24px; }
 .registry label { display: block; font-weight: 600; margin-bottom: 7px; }
-.registry :is(input:not([type=checkbox]), select, textarea) { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--md-outline); border-radius: 7px; background: var(--md-surface-container-lowest); color: var(--md-on-surface); font-size: 16px; }
+.registry :is(input:not([type=checkbox],[type=radio]), select, textarea) { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--md-outline); border-radius: 7px; background: var(--md-surface-container-lowest); color: var(--md-on-surface); font-size: 16px; }
 .registry :is(input, select, textarea):disabled { background: var(--md-surface-container); color: var(--md-on-surface-variant); }
 .registry-search { width: min(100%, 400px); }
 .registry-search svg { position: absolute; left: 12px; top: 14px; color: var(--md-on-surface-variant); }

@@ -144,6 +144,12 @@ def authorize_request(request: Request):
             raise HTTPException(403, "This account cannot inspect the office audit trail.")
         if path == "/api/beneficiaries/sample-csv" and actor.role != "DSWD":
             raise HTTPException(403, "This account cannot analyze office CSV data.")
+        if path.startswith("/api/claims") and actor.role == "DISBURSING":
+            raise HTTPException(403, "Damage claims are not part of the payout desk workflow.")
+        if path.startswith("/api/payout-sessions") and actor.role == "BENEFICIARY":
+            raise HTTPException(403, "Payout sessions are a staff workflow; open your household home.")
+        if path.startswith("/api/amount-rules") and actor.role not in {"DSWD", "AUDITOR"}:
+            raise HTTPException(403, "Amount rules are a DSWD and Auditor workflow.")
         return
     allowed = {"DSWD"}
     if path == "/api/beneficiaries":
@@ -152,6 +158,12 @@ def authorize_request(request: Request):
         allowed = {"DSWD", "BARANGAY"}
     elif path == "/api/concerns":
         allowed = {"BENEFICIARY", "BARANGAY", "DISBURSING", "DSWD"}
+    elif path == "/api/claims":
+        allowed = {"BENEFICIARY", "BARANGAY"}
+    elif path.startswith("/api/claims/") and path.endswith("/revisions"):
+        allowed = {"BENEFICIARY", "BARANGAY", "DSWD"}
+    elif path.startswith("/api/payout-sessions/") and path.endswith("/revisions"):
+        allowed = {"DSWD", "DISBURSING"}
     elif path == "/api/distributions/confirm" or (path.startswith("/api/distributions/") and path.endswith("/anchor/retry")):
         allowed = {"DISBURSING"}
     elif path.startswith("/api/distributions/") and path.endswith("/acknowledgement"):

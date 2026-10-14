@@ -11,6 +11,7 @@ from app.auth import require_actor
 from app.database import get_db
 from app.models.entities import ValidatedList, ListFinalization, ReliefBatch, Beneficiary, BeneficiaryReview, Distribution, AuditEvent
 from app.barangays import DEMO_BARANGAYS as BARANGAYS
+from app.services.entitlements import current_rules, entitlement
 
 router = APIRouter(prefix="/api/validated-lists")
 
@@ -47,7 +48,9 @@ def snapshot(db, batch_id, area, exclusions):
     registry = db.query(Beneficiary).filter_by(batch_id=batch_id).all()
     roots = {b.beneficiary_id:b.canonical_beneficiary_id or b.beneficiary_id for b in registry}
     paid = db.query(Distribution).filter_by(batch_id=batch_id).all()
+    rules = current_rules(db, batch_id)
     for ben in records:
+        amount = entitlement(db, ben, batch, rules)
         review = db.query(BeneficiaryReview).filter_by(beneficiary_id=ben.beneficiary_id).order_by(BeneficiaryReview.id.desc()).first()
         reasons = []
         if ben.record_status != "ACTIVE": reasons.append("Historical record; retain earlier evidence")
@@ -57,9 +60,11 @@ def snapshot(db, batch_id, area, exclusions):
         if not ben.household_name.strip() or ben.barangay_name != BARANGAYS[area]: reasons.append("Incomplete or inconsistent locality")
         prior_payouts = sorted(d.distribution_id for d in paid if roots.get(d.beneficiary_id,d.beneficiary_id)==roots[ben.beneficiary_id])
         if prior_payouts: reasons.append("Payout already recorded for linked household; this is not ineligibility")
+        if amount["blocked"]: reasons.append(amount["blocked"])
         if ben.beneficiary_id in exclusions: reasons.append("Staff exclusion: " + exclusions[ben.beneficiary_id])
         rows.append({"beneficiary_id":ben.beneficiary_id,"household_name":ben.household_name,"dafac_id":ben.dafac_id,"record_status":ben.record_status,"canonical_beneficiary_id":ben.canonical_beneficiary_id,"verification_status":ben.verification_status,"review_status":ben.review_status,"duplicate_flag":bool(ben.duplicate_flag),"anomaly_flag":bool(ben.anomaly_flag),"included":not reasons,"exclusion_reasons":reasons,"decision":None if not review else {"review_id":review.review_id,"decision":review.decision,"actor":review.reviewed_by,"at":review.reviewed_at,"reason":review.reason}})
         rows[-1]["recorded_payout_references"] = prior_payouts
+        rows[-1]["entitlement"] = {key: amount[key] for key in ("basis", "category", "amount_centavos", "rule_version")}
         if review:
             rows[-1]["decision"]["evidence"] = {key:getattr(review,key) for key in ("previous_verification_status","previous_review_status","previous_review_notes","duplicate_flag_before","anomaly_flag_before","duplicate_flag_after","anomaly_flag_after","linked_beneficiary_id","matched_beneficiary_id","duplicate_confidence")}
     return {"format":"ayudachain.validated-list","version":1,"batch_id":batch_id,"batch_name":batch.calamity_name,"batch_status":batch.status,"barangay_id":area,"barangay_name":BARANGAYS[area],"standard_grant_centavos":batch.standard_grant_centavos,"max_grant_centavos":batch.max_grant_centavos,"exclusions":exclusions,"rows":rows}

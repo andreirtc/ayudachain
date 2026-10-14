@@ -1,11 +1,13 @@
-import { test, expect, Page } from "@playwright/test";
+import path from "node:path";
+import { API, BASE_URL } from "./support";
+import { test, expect, Page } from "./support";
 
-const API = "http://127.0.0.1:8101";
+
 test.beforeEach(async ({ page }) => {
   await page.route(/http:\/\/(?:127\.0\.0\.1|localhost):8000\//, (route) => {
     const url = new URL(route.request().url());
     url.hostname = "127.0.0.1";
-    url.port = "8101";
+    url.port = new URL(API).port;
     return route.continue({ url: url.toString() });
   });
 });
@@ -183,28 +185,16 @@ test("registration retains input, blocks offline and repeated submits, and manag
     page.getByText("Household registered.", { exact: true }),
   ).toBeVisible();
   expect(requests).toBe(1);
-  await expect(
-    page.getByRole("dialog").getByText("Pending review", { exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Approve household" }),
-  ).toHaveCount(0);
+  const selected = page.getByRole("region", { name: "Selected household", exact: true });
+  await expect(selected.getByText("Pending review", { exact: true })).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(selected.getByRole("heading", { name: "Household details", exact: true })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Approve household" })).toHaveCount(0);
   await fits(page);
-  await page.screenshot({
-    path: info.outputPath("registration.png"),
-    fullPage: true,
-  });
-  await page
-    .getByRole("button", { name: "Back to households", exact: true })
-    .focus();
-  await page.keyboard.press("Tab");
-  await expect(
-    page.getByRole("button", { name: "Close household details" }),
-  ).toBeFocused();
-  await page.keyboard.press("Shift+Tab");
-  await expect(
-    page.getByRole("button", { name: "Back to households", exact: true }),
-  ).toBeFocused();
+  await page.screenshot({ path: info.outputPath("registration.png"), fullPage: true });
+  await selected.getByRole("button", { name: "Back to list", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Household list", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Inspect " + name, exact: true })).toBeFocused();
 });
 
 test("barangay registration connects to DSWD decisions, a payout and its exact receipt", async ({
@@ -235,7 +225,7 @@ test("barangay registration connects to DSWD decisions, a payout and its exact r
   await page
     .getByRole("button", { name: "Approve household", exact: true })
     .click();
-  await expect(page.getByRole("dialog").getByRole("alert")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Selected household", exact: true }).getByRole("alert")).toBeVisible();
   await expect(reason).toHaveValue(
     "Distinct synthetic household, evidence checked",
   );
@@ -263,7 +253,7 @@ test("barangay registration connects to DSWD decisions, a payout and its exact r
     .getByRole("button", { name: "Reject household", exact: true })
     .click();
   await expect(
-    page.getByRole("dialog").locator(".registry-badge").filter({ hasText: /^Rejected$/ }),
+    page.getByRole("region", { name: "Selected household", exact: true }).locator(".registry-badge").filter({ hasText: /^Rejected$/ }),
   ).toBeVisible();
   await reason.fill("Additional synthetic evidence establishes eligibility");
   let release!: () => void;
@@ -290,15 +280,15 @@ test("barangay registration connects to DSWD decisions, a payout and its exact r
     page.getByText("Saving review...", { exact: true }),
   ).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(page.getByRole("region", { name: "Selected household", exact: true })).toBeVisible();
   release();
   await expect(
-    page.getByRole("dialog").locator(".registry-badge").filter({ hasText: /^Approved$/ }),
+    page.getByRole("region", { name: "Selected household", exact: true }).locator(".registry-badge").filter({ hasText: /^Approved$/ }),
   ).toBeVisible();
   expect(requests).toBe(1);
   await page.getByText(/Review history \(/).click();
   await expect(
-    page
+    page.getByRole("region", { name: "Selected household", exact: true })
       .getByRole("list")
       .getByText("Additional synthetic evidence establishes eligibility", {
         exact: true,
@@ -319,7 +309,7 @@ test("barangay registration connects to DSWD decisions, a payout and its exact r
   await page
     .getByRole("link", { name: "View payout records", exact: true })
     .click();
-  await expect(page.getByText("Your signed-in role can inspect these records.", { exact: false })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Payout records", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Record demo payout", exact: true })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "No payouts recorded for this household", exact: true })).toBeVisible();
   await switchAccount(page, "demo-disbursing-001");
@@ -358,7 +348,7 @@ test("duplicate decision retains history and original payouts behind historical 
   ).json();
   const created = await register(page, "Juan Dela Cruz");
   await expect(
-    page.getByRole("dialog").getByText("Possible duplicate", { exact: true }),
+    page.getByRole("region", { name: "Selected household", exact: true }).getByText("Possible duplicate", { exact: true }),
   ).toBeVisible();
   await page.getByText("Review evidence", { exact: true }).click();
   await expect(page.getByText(/Similarity: 100%/)).toBeVisible();
@@ -374,7 +364,7 @@ test("duplicate decision retains history and original payouts behind historical 
     })
     .click();
   await expect(
-    page.getByRole("dialog").getByText("Retained duplicate", { exact: true }),
+    page.getByRole("region", { name: "Selected household", exact: true }).getByText("Retained duplicate", { exact: true }),
   ).toBeVisible();
   await expect(page.getByText("Review saved.", { exact: true })).toBeVisible();
   await expect(
@@ -389,7 +379,7 @@ test("duplicate decision retains history and original payouts behind historical 
   await expect(
     page.getByRole("heading", { name: "No matching households" }),
   ).toBeVisible();
-  await page.getByText("More registry options", { exact: true }).click();
+
   await page.getByLabel("Include historical duplicates").check();
   await expect(
     page.getByRole("button", { name: "Review Juan Dela Cruz", exact: true }),
@@ -399,7 +389,7 @@ test("duplicate decision retains history and original payouts behind historical 
     .click();
   await page.getByText(/Review history \(/).click();
   await expect(
-    page
+    page.getByRole("region", { name: "Selected household", exact: true })
       .getByRole("list")
       .getByText(
         "Same fictional household, retain the original record and evidence",
@@ -422,8 +412,8 @@ test("CSV is secondary, keyboard accessible and analysis does not import househo
   ).json();
   await expect(
     page.getByRole("button", { name: "Analyze a CSV", exact: true }),
-  ).toBeHidden();
-  await page.getByText("More registry options", { exact: true }).click();
+  ).toBeVisible();
+
   await page
     .getByRole("button", { name: "Analyze a CSV", exact: true })
     .click();
@@ -441,7 +431,7 @@ test("CSV is secondary, keyboard accessible and analysis does not import househo
   await expect(page.getByRole("dialog").getByRole("alert")).toBeVisible();
   await page
     .getByLabel("Fictional CSV file")
-    .setInputFiles("../backend/app/data/seed_beneficiaries.csv");
+    .setInputFiles(path.resolve(path.dirname(info.file), "../../../backend/app/data/seed_beneficiaries.csv"));
   await page
     .getByRole("button", { name: "Analyze selected CSV", exact: true })
     .click();

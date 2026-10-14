@@ -1,10 +1,11 @@
-import { test, expect, Page } from "@playwright/test";
-const API = "http://127.0.0.1:8101";
+import { API, BASE_URL } from "./support";
+import { test, expect, Page } from "./support";
+
 test.beforeEach(async ({ page }) => {
   await page.route(/http:\/\/(?:127\.0\.0\.1|localhost):8000\//, (route) => {
     const url = new URL(route.request().url());
     url.hostname = "127.0.0.1";
-    url.port = "8101";
+    url.port = new URL(API).port;
     return route.continue({ url: url.toString() });
   });
 });
@@ -29,11 +30,11 @@ test("payout receipt dialog is keyboard accessible and links to its exact record
   const records = await (await page.context().request.get(API + "/api/distributions")).json();
   const noImage = records.find((row: { receipt_file_path: string | null }) => !row.receipt_file_path);
   expect(noImage).toBeTruthy();
-  const open = page.getByRole("region", { name: "Recorded payouts", exact: true }).locator("li.workflow-record").filter({ hasText: noImage.distribution_id }).getByRole("button", { name: "View receipt", exact: true });
+  const open = page.getByRole("region", { name: "Recorded payouts", exact: true }).locator("tbody tr").filter({ hasText: noImage.distribution_id }).getByRole("button", { name: "Receipt details", exact: true });
   await open.click();
   const dialog = page.getByRole("dialog");
   await expect(
-    dialog.getByRole("heading", { name: "Payout receipt", exact: true }),
+    dialog.getByRole("heading", { name: "Recorded receipt", exact: true }),
   ).toBeFocused();
   const details = dialog.getByRole("region", { name: "Receipt details" });
   await expect(
@@ -49,7 +50,7 @@ test("payout receipt dialog is keyboard accessible and links to its exact record
   const href = await dialog
     .getByRole("link", { name: "Check this receipt", exact: true })
     .getAttribute("href");
-  const id = new URL(href!, "http://127.0.0.1:3101").searchParams.get(
+  const id = new URL(href!, BASE_URL).searchParams.get(
     "distribution_id",
   )!;
   await expect(details.locator(":scope > dl").getByText(id, { exact: true })).toBeVisible();
@@ -67,7 +68,7 @@ test("payout receipt dialog is keyboard accessible and links to its exact record
     .focus();
   await page.keyboard.press("Tab");
   await expect(
-    dialog.getByRole("button", { name: "Close payout receipt", exact: true }),
+    dialog.getByRole("button", { name: "Close recorded receipt", exact: true }),
   ).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);

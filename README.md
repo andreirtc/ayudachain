@@ -93,7 +93,7 @@ python3 test_backend.py
 python3 test_api.py
 python3 test_auth.py
 ```
-Current validation counts and isolated browser-test setup are recorded in [DEMO_SESSIONS.md](docs/DEMO_SESSIONS.md).
+Run every backend suite with `python scripts/run_tests.py` from `backend`. Current results, frontend unit/type/build commands, full desktop/phone browser setup and real-chain helpers are recorded in [FULL_REGRESSION_VALIDATION.md](docs/FULL_REGRESSION_VALIDATION.md). The earlier account setup remains in [DEMO_SESSIONS.md](docs/DEMO_SESSIONS.md).
 
 ### 3. TypeScript Compilation Audit
 ```bash
@@ -105,6 +105,8 @@ cd frontend
 ---
 
 ## Documentation
+
+- [Material frontend and real screenshots](docs/MATERIAL_FRONTEND.md) — The groupmate’s Google-style layouts applied to the actual routes.
 
 - [User Guide & Role Walkthrough](docs/USER_GUIDE.md) — Current authenticated role tasks and public receipt checks.
 - [Technical Architecture Specification](docs/architecture.md) — In-depth hybrid off-chain/on-chain design.

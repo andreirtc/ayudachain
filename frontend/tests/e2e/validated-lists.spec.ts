@@ -1,8 +1,9 @@
-import {test,expect,Page} from "@playwright/test";
-const API="http://127.0.0.1:8101";
-test.beforeEach(async({page})=>{await page.route(/http:\/\/(?:127\.0\.0\.1|localhost):8000\//,r=>{const u=new URL(r.request().url());u.hostname="127.0.0.1";u.port="8101";return r.continue({url:u.toString()});});});
+import { API, BASE_URL } from "./support";
+import {test,expect,Page} from "./support";
+
+test.beforeEach(async({page})=>{await page.route(/http:\/\/(?:127\.0\.0\.1|localhost):8000\//,r=>{const u=new URL(r.request().url());u.hostname="127.0.0.1";u.port=new URL(API).port;return r.continue({url:u.toString()});});});
 async function login(page:Page,id="demo-officer-01"){await page.goto("/sign-in");await page.getByRole("textbox",{name:"Account",exact:true}).fill(id);await page.getByLabel("Password",{exact:true}).fill("synthetic-test-password-only");await page.getByRole("button",{name:"Sign in",exact:true}).click();await expect(page.getByText("Authenticated synthetic account.",{exact:false})).toBeVisible();}
-async function headers(page:Page){const s=await(await page.context().request.get(API+"/api/auth/session")).json();return {"X-AyudaChain-Client":"web","X-CSRF-Token":s.csrf_token,Origin:"http://127.0.0.1:3101"};}
+async function headers(page:Page){const s=await(await page.context().request.get(API+"/api/auth/session")).json();return {"X-AyudaChain-Client":"web","X-CSRF-Token":s.csrf_token,Origin:BASE_URL};}
 async function prepare(page:Page){await page.getByRole("button",{name:"Prepare list version",exact:true}).click();await expect(page.getByText("Preparation saved. Inspect the frozen version.",{exact:true})).toBeVisible();await expect(page).toHaveURL(/list_id=LIST-/);return new URL(page.url()).searchParams.get("list_id")!;}
 test("CSV pending rows connect to exact review and frozen list with once-only lost-response retries",async({page},info)=>{
  await login(page);const id="BEN-LIST-UI-"+info.project.name,h=await headers(page);
@@ -11,15 +12,15 @@ test("CSV pending rows connect to exact review and frozen list with once-only lo
  expect((await page.context().request.post(API+"/api/beneficiaries/csv/"+plan.import_id+"/import",{headers:h})).status()).toBe(201);
  await page.goto("/lists");let listId=await prepare(page);
  await page.getByLabel("Find a listed household").fill(id);const row=page.getByRole("list",{name:"Frozen household rows"}).locator("li");await expect(row).toContainText("Eligibility not approved");
- await row.getByRole("link",{name:"Inspect current household",exact:true}).click();await expect(page.getByRole("dialog")).toBeVisible();await expect(page.getByRole("dialog")).toContainText(id);
+ await row.getByRole("link",{name:"Inspect current household",exact:true}).click();await expect(page.getByRole("region",{name:"Selected household",exact:true})).toBeVisible();await expect(page.getByRole("region",{name:"Selected household",exact:true})).toContainText(id);
  await page.getByLabel("Reason for decision").fill("Inspected synthetic CSV household for the prepared list");await page.getByRole("button",{name:"Approve household",exact:true}).click();await expect(page.getByText("Review saved.",{exact:true})).toBeVisible();
  await page.goto("/lists?list_id="+listId);await expect(page.getByRole("region",{name:"Selected list"})).toContainText("Current records changed after preparation");
- await page.route(/8000\/api\/validated-lists\/prepare$/,async r=>{const response=await r.fetch({url:r.request().url().replace(":8000",":8101")});expect(response.status()).toBe(201);await r.abort();},{times:1});
+ await page.route(/8000\/api\/validated-lists\/prepare$/,async r=>{const response=await r.fetch({url:r.request().url().replace(":8000",":" + new URL(API).port)});expect(response.status()).toBe(201);await r.abort();},{times:1});
  await page.getByRole("button",{name:"Prepare list version",exact:true}).click();await expect(page.getByRole("main").getByRole("alert").last()).toBeVisible();
  const button=page.getByRole("button",{name:"Prepare list version",exact:true});await button.evaluate((b:HTMLButtonElement)=>{b.click();b.click();});await expect(page.getByText("Preparation saved. Inspect the frozen version.",{exact:true})).toBeVisible();await expect.poll(()=>new URL(page.url()).searchParams.get("list_id")).not.toBe(listId);listId=new URL(page.url()).searchParams.get("list_id")!;
  await page.getByLabel("List result",{exact:true}).selectOption("included");await page.getByLabel("Find a listed household").fill(id);await expect(row).toContainText("✓ Included");await row.getByText("Frozen decision reference",{exact:true}).click();await expect(row).toContainText("demo-officer-01");
  const action=page.getByRole("button",{name:"Finalize list version",exact:true});await expect(action).toBeDisabled();await page.getByLabel("Finalization reason").fill("Inspected this synthetic prepared version and its exclusions");await page.getByRole("checkbox",{name:/I inspected the included records/}).check();
- await page.route(/8000\/api\/validated-lists\/[^/]+\/finalize$/,async r=>{const response=await r.fetch({url:r.request().url().replace(":8000",":8101")});expect(response.status()).toBe(201);await r.abort();},{times:1});await action.click();await expect(page.getByRole("main").getByRole("alert")).toBeVisible();await expect(page.getByLabel("Finalization reason")).toHaveValue("Inspected this synthetic prepared version and its exclusions");await action.evaluate((b:HTMLButtonElement)=>{b.click();b.click();});await expect(page.getByRole("heading",{name:"Finalization retained",exact:true})).toBeVisible();
+ await page.route(/8000\/api\/validated-lists\/[^/]+\/finalize$/,async r=>{const response=await r.fetch({url:r.request().url().replace(":8000",":" + new URL(API).port)});expect(response.status()).toBe(201);await r.abort();},{times:1});await action.click();await expect(page.getByRole("main").getByRole("alert")).toBeVisible();await expect(page.getByLabel("Finalization reason")).toHaveValue("Inspected this synthetic prepared version and its exclusions");await action.evaluate((b:HTMLButtonElement)=>{b.click();b.click();});await expect(page.getByRole("heading",{name:"Finalization retained",exact:true})).toBeVisible();
  const saved=await(await page.context().request.get(API+"/api/validated-lists/"+listId)).json();expect(saved.state).toBe("FINALIZED");expect(saved.finalization.actor).toBe("demo-officer-01");
  await page.emulateMedia({colorScheme:info.project.name==="phone"?"dark":"light"});await page.evaluate(()=>window.scrollTo(0,0));expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:info.outputPath("finalized-list.png"),fullPage:false});await page.getByRole("heading",{name:"Finalization retained",exact:true}).scrollIntoViewIfNeeded();await page.screenshot({path:info.outputPath("retained-finalization.png"),fullPage:false});
 });
@@ -49,8 +50,9 @@ test("Auditor stays read-only and household accounts cannot inspect full lists",
 test("empty scope, loading, failed reads, offline controls and keyboard filters stay explicit",async({page})=>{
  await login(page,"demo-disbursing-004");await page.goto("/lists");await expect(page.getByText("No list versions have been prepared in your scope.",{exact:true})).toBeVisible();await expect(page.getByRole("heading",{name:"No list version available",exact:true})).toBeVisible();
  await page.getByRole("button",{name:"Sign out",exact:true}).click();await login(page);
+ expect((await page.context().request.post(API+"/api/validated-lists/prepare",{headers:await headers(page),data:{batch_id:"RELIEF-2026-001",barangay_id:"BRGY-001",request_id:crypto.randomUUID(),exclusions:{}}})).status()).toBe(201);
  let release!:()=>void;const held=new Promise<void>(resolve=>{release=resolve;});
- await page.route(/8000\/api\/validated-lists$/,async r=>{await held;const u=r.request().url().replace(":8000",":8101");await r.continue({url:u});},{times:1});
+ await page.route(/8000\/api\/validated-lists$/,async r=>{await held;const u=r.request().url().replace(":8000",":" + new URL(API).port);await r.continue({url:u});},{times:1});
  await page.goto("/lists");await expect(page.getByText("Loading list versions...",{exact:true})).toBeVisible();release();await expect(page.getByRole("region",{name:"Selected list"})).toBeVisible();
  await page.getByLabel("Find a listed household").fill("NO-SUCH-SYNTHETIC-LIST-ROW");await expect(page.getByText("No records match these filters.",{exact:true})).toBeVisible();await page.getByLabel("Find a listed household").fill("");
  await page.getByLabel("List result",{exact:true}).focus();await page.keyboard.press("ArrowDown");await page.keyboard.press("Enter");await expect(page.getByLabel("List result",{exact:true})).toBeFocused();

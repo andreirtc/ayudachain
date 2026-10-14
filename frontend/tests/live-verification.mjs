@@ -19,7 +19,9 @@ const run = promisify(execFile);
 const directory = await mkdtemp(path.join(tmpdir(), "ayudachain-verification-ui-"));
 const python = path.join(root, "backend/.venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python");
 const rpc = "http://127.0.0.1:8547";
-const api = "http://127.0.0.1:8102";
+const api = process.env.AYUDACHAIN_LIVE_API_URL || "http://127.0.0.1:8312";
+const baseURL = process.env.AYUDACHAIN_LIVE_BASE_URL || "http://127.0.0.1:3312";
+for (const value of [api, baseURL]) { const u = new URL(value); if (u.protocol !== "http:" || !["127.0.0.1", "localhost"].includes(u.hostname)) throw Error("Live verification uses loopback servers only"); }
 const key = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // public local test key
 const children = [];
 const logs = [];
@@ -61,7 +63,7 @@ async function change(action) {
 }
 
 try {
-  await Promise.all([8547, 8102, 3102].map(free));
+  await Promise.all([8547, Number(new URL(api).port), Number(new URL(baseURL).port)].map(free));
   chain = await start("chain", process.execPath, ["node_modules/hardhat/internal/cli/cli.js", "node", "--hostname", "127.0.0.1", "--port", "8547"], contracts);
   let connected = false;
   for (let attempt = 0; attempt < 300; attempt++) {
@@ -78,10 +80,10 @@ try {
   const artifact = JSON.parse(await readFile(path.join(contracts, "artifacts/contracts/AyudaChainRegistry.sol/AyudaChainRegistry.json"), "utf8"));
   const contract = await new ethers.ContractFactory(artifact.abi, artifact.bytecode, new ethers.Wallet(key, provider)).deploy();
   await contract.waitForDeployment();
-  const backend = await start("api", python, [path.join(root, "backend/tests/live_ui_server.py"), directory], root, { POLYGON_RPC_URL: rpc, POLYGON_PRIVATE_KEY: key, CHAIN_ID: "31337", CONTRACT_ADDRESS: await contract.getAddress() });
+  const backend = await start("api", python, [path.join(root, "backend/tests/live_ui_server.py"), directory], root, { POLYGON_RPC_URL: rpc, POLYGON_PRIVATE_KEY: key, CHAIN_ID: "31337", CONTRACT_ADDRESS: await contract.getAddress(), AYUDACHAIN_LIVE_API_URL: api, AYUDACHAIN_LIVE_BASE_URL: baseURL });
   await ready(backend, api + "/api/public/receipts");
-  const frontend = await start("frontend", process.execPath, ["node_modules/next/dist/bin/next", "start", "--hostname", "127.0.0.1", "--port", "3102"], path.join(root, "frontend"));
-  await ready(frontend, "http://127.0.0.1:3102");
+  const frontend = await start("frontend", process.execPath, ["node_modules/next/dist/bin/next", "start", "--hostname", "127.0.0.1", "--port", new URL(baseURL).port], path.join(root, "frontend"));
+  await ready(frontend, baseURL);
   await change("unanchored");
   browser = await chromium.launch({ headless: true, channel: process.platform === "win32" ? "msedge" : undefined });
   const pages = [];
@@ -90,7 +92,7 @@ try {
   let v2;
   const canonical = value => Array.isArray(value) ? value.map(canonical) : value && typeof value === "object" ? Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])])) : value;
   async function observe(page, mode, state, id) {
-    const response = await page.context().request.post(api + "/api/blockchain/verify", { headers: { "X-AyudaChain-Client": "web", Origin: "http://127.0.0.1:3102" }, data: { distribution_id: id } });
+    const response = await page.context().request.post(api + "/api/blockchain/verify", { headers: { "X-AyudaChain-Client": "web", Origin: baseURL }, data: { distribution_id: id } });
     assert.equal(response.status(), 200);
     const evidence = await response.json();
     assert.equal(evidence.verification_status, state);
@@ -106,26 +108,26 @@ try {
     const context = await browser.newContext({ viewport, isMobile: mode === "phone", hasTouch: mode === "phone" });
     const page = await context.newPage(); pages.push([mode, page]);
     await page.route(/http:\/\/(?:127\.0\.0\.1|localhost):8000\//, route => {
-      const url = new URL(route.request().url()); url.hostname = "127.0.0.1"; url.port = "8102";
+      const url = new URL(route.request().url()); url.hostname = "127.0.0.1"; url.port = new URL(api).port;
       return route.continue({ url: url.toString() });
     });
-    await page.goto("http://127.0.0.1:3102/sign-in");
+    await page.goto(baseURL + "/sign-in");
     await page.getByRole("textbox", { name: "Account", exact: true }).fill("demo-disbursing-001");
     await page.getByLabel("Password", { exact: true }).fill("synthetic-test-password-only");
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
     await expect(page.getByText("Authenticated synthetic account.", { exact: false })).toBeVisible();
     const session = await (await page.context().request.get(api + "/api/auth/session")).json();
     if (!v2) {
-      const response = await page.context().request.post(api + "/api/distributions/confirm", { timeout: 120000, headers: { "X-AyudaChain-Client": "web", "X-CSRF-Token": session.csrf_token, Origin: "http://127.0.0.1:3102", "Idempotency-Key": "snapshot-live" }, data: { distribution_id: "DIST-LIVE-SNAPSHOT", beneficiary_id: "BEN-0004", batch_id: "RELIEF-2026-001", amount: "100.25", receipt_filename: "captured-synthetic.svg", ocr_raw_text: "Controlled synthetic receipt evidence" } });
+      const response = await page.context().request.post(api + "/api/distributions/confirm", { timeout: 120000, headers: { "X-AyudaChain-Client": "web", "X-CSRF-Token": session.csrf_token, Origin: baseURL, "Idempotency-Key": "snapshot-live" }, data: { distribution_id: "DIST-LIVE-SNAPSHOT", beneficiary_id: "BEN-0004", batch_id: "RELIEF-2026-001", amount: "100.25", receipt_filename: "captured-synthetic.svg", ocr_raw_text: "Controlled synthetic receipt evidence" } });
       assert.equal(response.status(), 201); v2 = await response.json();
       assert.equal(v2.receipt_version, 2); assert.equal(v2.anchor_job.state, "CONFIRMED");
       assert.equal(v2.receipt_hash, ethers.sha256(Buffer.from(JSON.stringify(canonical(v2.receipt_snapshot)))));
       const bytes = await (await page.context().request.get(api + v2.receipt_file_path)).body();
       assert.equal(ethers.sha256(bytes), v2.receipt_snapshot.receipt.document.sha256);
-      const replay = await page.context().request.post(api + "/api/distributions/confirm", { headers: { "X-AyudaChain-Client": "web", "X-CSRF-Token": session.csrf_token, Origin: "http://127.0.0.1:3102", "Idempotency-Key": "snapshot-live" }, data: { distribution_id: "DIST-LIVE-SNAPSHOT", beneficiary_id: "BEN-0004", batch_id: "RELIEF-2026-001", amount: "100.25", receipt_filename: "captured-synthetic.svg", ocr_raw_text: "Controlled synthetic receipt evidence" } });
+      const replay = await page.context().request.post(api + "/api/distributions/confirm", { headers: { "X-AyudaChain-Client": "web", "X-CSRF-Token": session.csrf_token, Origin: baseURL, "Idempotency-Key": "snapshot-live" }, data: { distribution_id: "DIST-LIVE-SNAPSHOT", beneficiary_id: "BEN-0004", batch_id: "RELIEF-2026-001", amount: "100.25", receipt_filename: "captured-synthetic.svg", ocr_raw_text: "Controlled synthetic receipt evidence" } });
       assert.equal(replay.status(), 200); assert.equal((await replay.json()).receipt_hash, v2.receipt_hash);
     }
-    await page.goto("http://127.0.0.1:3102/verify?distribution_id=" + v2.distribution_id);
+    await page.goto(baseURL + "/verify?distribution_id=" + v2.distribution_id);
     await observe(page, mode + "-v2", "VERIFIED", v2.distribution_id);
     await change("v2-mismatch"); await page.getByRole("button", { name: "Check again", exact: true }).click();
     await observe(page, mode + "-v2", "MISMATCH", v2.distribution_id);
@@ -140,7 +142,7 @@ try {
     await page.getByText("Captured receipt snapshot (version 2)", { exact: true }).scrollIntoViewIfNeeded();
     await page.screenshot({ path: path.join(directory, mode + "-v2-captured.png") });
     await page.getByRole("button", { name: "Sign out", exact: true }).click();
-    await page.goto("http://127.0.0.1:3102/verify?distribution_id=DIST-0001");
+    await page.goto(baseURL + "/verify?distribution_id=DIST-0001");
     await observe(page, mode, "VERIFIED", "DIST-0001");
     await change("mismatch");
     await page.getByRole("button", { name: "Check again", exact: true }).click();
@@ -148,7 +150,7 @@ try {
     await change("restore");
     await page.getByRole("button", { name: "Check again", exact: true }).click();
     await observe(page, mode + "-restored", "VERIFIED", "DIST-0001");
-    await page.goto("http://127.0.0.1:3102/verify?distribution_id=DIST-UI-UNANCHORED");
+    await page.goto(baseURL + "/verify?distribution_id=DIST-UI-UNANCHORED");
     await observe(page, mode, "UNANCHORED", "DIST-UI-UNANCHORED");
   }
   await stop(chain);

@@ -1,4 +1,5 @@
-import { test, expect } from "@playwright/test";
+import { API, BASE_URL } from "./support";
+import { test, expect } from "./support";
 
 test("local typography loads without external font services and fits both entry screens", async ({ page }, info) => {
   const fonts: string[] = [];
@@ -22,9 +23,9 @@ test("local typography loads without external font services and fits both entry 
       };
     });
     expect(type).toMatchObject({ bodyUsesLocal: true, headingUsesLocal: true, fits: true });
-    expect(type.loaded).toBeGreaterThanOrEqual(2);
+    expect(type.loaded).toBeGreaterThanOrEqual(1);
     await page.screenshot({ path: info.outputPath(name + ".png"), fullPage: false });
   }
   expect(fonts.length).toBeGreaterThanOrEqual(2);
-  expect(fonts.every(url => new URL(url).origin === "http://127.0.0.1:3101")).toBe(true);
+  expect(fonts.every(url => new URL(url).origin === BASE_URL)).toBe(true);
 });

@@ -1,10 +1,11 @@
-import { test, expect, Page } from "@playwright/test";
-const API = "http://127.0.0.1:8101";
+import { API, BASE_URL } from "./support";
+import { test, expect, Page } from "./support";
+
 test.beforeEach(async ({ page }) => {
   await page.route(/http:\/\/(?:127\.0\.0\.1|localhost):8000\//, (route) => {
     const url = new URL(route.request().url());
     url.hostname = "127.0.0.1";
-    url.port = "8101";
+    url.port = new URL(API).port;
     return route.continue({ url: url.toString() });
   });
 });
@@ -28,7 +29,7 @@ async function headers(page: Page) {
   return {
     "X-AyudaChain-Client": "web",
     "X-CSRF-Token": session.csrf_token,
-    Origin: "http://127.0.0.1:3101",
+    Origin: BASE_URL,
   };
 }
 
@@ -44,7 +45,7 @@ test("readers see payout records without an entry form and get search/refresh fe
   await expect(
     page.getByRole("button", { name: "Record demo payout", exact: true }),
   ).toHaveCount(0);
-  await page.getByLabel("Search payout records").fill("no-such-receipt");
+  await page.getByLabel("Find a recorded payout").fill("no-such-receipt");
   await expect(
     page.getByRole("heading", { name: "No matching payouts" }),
   ).toBeVisible();
@@ -52,15 +53,15 @@ test("readers see payout records without an entry form and get search/refresh fe
   await page.route(/8000\/api\/distributions$/, (route) => route.abort(), {
     times: 1,
   });
-  await page.getByRole("button", { name: "Refresh", exact: true }).click();
+  await page.getByRole("button", { name: "Refresh records", exact: true }).click();
   await expect(page.getByRole("main").getByRole("alert")).toContainText(
     "Previously loaded records are hidden",
   );
   await page
-    .getByRole("button", { name: "Refresh records", exact: true })
+    .getByRole("button", { name: "Retry loading payouts", exact: true })
     .click();
   await expect(
-    page.getByRole("button", { name: "View receipt", exact: true }).first(),
+    page.getByRole("button", { name: "Receipt details", exact: true }).first(),
   ).toBeVisible();
   expect(
     await page.evaluate(
