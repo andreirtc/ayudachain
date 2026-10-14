@@ -1,6 +1,6 @@
 # AyudaChain local synthetic MVP
 
-Finals preparation (14 October 2026): see [current readiness and evidence](docs/finals/FINALIST_READINESS.md), [safe demo runbook](docs/finals/DEMO_RUNBOOK.md), [plain-English explanation](docs/finals/PROJECT_EXPLAINED.md) and [judges’ defense masterbook](docs/finals/JUDGES_QA.md). These fresh results are distinct from historical validation.
+Finals preparation (14 October 2026): start with [natural Taglish guides](docs/finals/taglish/START_HERE.md), [SDG alignment](docs/finals/SDG_ALIGNMENT.md) and [teammate reference](docs/finals/REFERENCE_BRANCH.md); see [current readiness and evidence](docs/finals/FINALIST_READINESS.md), [safe demo runbook](docs/finals/DEMO_RUNBOOK.md), [plain-English explanation](docs/finals/PROJECT_EXPLAINED.md) and [judges’ defense masterbook](docs/finals/JUDGES_QA.md). These fresh results are distinct from historical validation.
 
 The implemented five-role workflow runs at **/mvp** with FastAPI, PostgreSQL and an actual local EVM registry. The root page redirects there. Open a dedicated role workspace from the entry page: /mvp/beneficiary, /mvp/barangay-officer, /mvp/dswd-officer, /mvp/disbursing-officer or /mvp/auditor. Each has its own overview, nested navigation and a same-role synthetic Account panel. URLs organize the interface; there is no sign-in gate. Authentication, secure authorization, operational privacy and authenticated accountability remain **Pending**. Use invented households only.
 
@@ -40,7 +40,7 @@ Offline handover, real SMS, live National ID integration, general PIN recovery, 
 
 The redesigned MVP uses responsive task queues, household progress, amount-basis explanations, searchable review/proof records and document previews. [Routes](docs/product/sitemap.md), [user flow](docs/product/user-flow.md) and [design system](DESIGN.md) describe the delivered surface. See the redesign section in [validation](docs/implementation/validation.md) for fresh checks and current runtime limitations.
 
-## Design proposal: Tonal (Material 3, Sea and Sun)
+## Finals reference interface (Material 3, Sea and Sun)
 
 This branch applies the visual layer of the approved "Tonal" design to `/mvp`. The full reference design is in [docs/design/tonal-design-reference.html](docs/design/tonal-design-reference.html); open it in a browser. Its palette switcher previews all three palettes, but only **Sea and Sun** is used in the app. [DESIGN.md](DESIGN.md) records what the code implements.
 
@@ -89,3 +89,5 @@ The prompt for completing the missing parts is in [docs/design/implement-missing
 ## Five-role usability additions
 
 The workspaces now include scoped search/task queues, frozen duplicate comparisons, English/Filipino step guidance, barangay operations tables, contextual proof checks, staged CSV registration and native QR/manual session lookup. See [delivered behavior and limitations](docs/implementation/bring-forward-usability.md) and [validation](docs/implementation/validation.md). CSV templates cover head-only no-ID declarations; private completion follows normal workflows. Camera scanning requires browser BarcodeDetector support; manual lookup remains available. These are synthetic evaluation workflows with claimed/unverified accounts, not authenticated production privacy.
+
+The current finalist layer recreates the supplied shield/link logo as SVG, introduces the product before all five role choices, uses full desktop task labels referenced from five-role-mvp and four phone shortcuts/full menu, and supports remembered English/Taglish. Private records remain off-chain; authentication remains absent. Native workflow artwork is illustrative, not transaction evidence. No financial/schema/hash/contract change.

@@ -1,6 +1,6 @@
 # Teammate reference branch
 
-Requested by the maintainer after the natural Taglish work. **Branch:feat/finals-reference**. It is a separate main-based reference snapshot; design-proposal's original worktree stays uncommitted and intact. Main and other branches/PRs are unchanged. This is a draft reference for review, not an instruction to merge wholesale or a production release.
+Requested by the maintainer after the natural Taglish work. **[Draft PR40](https://github.com/andreirtc/ayudachain/pull/40) · Branch:feat/finals-reference**. It is a separate main-based reference snapshot; design-proposal's original worktree stays uncommitted and intact. Main and other branches/PRs are unchanged. This is a draft reference for review, not an instruction to merge wholesale or a production release.
 
 First commit captures the existing approved design-proposal baseline4377db1. The next layer adds finals UI/demo fixes, recreated logo, English/Taglish interface, docs and selected synthetic evidence. The broad PR against main includes the pre-existing MVP; it is not all newly authored finalist work. To inspect only finals differences, compare4377db1 directly with this branch.
 

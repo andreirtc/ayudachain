@@ -1,5 +1,8 @@
 # AyudaChain: departure handoff
 
+**Open the prepared demo:** [Current five-role links, with Maria selected](LIVE_DEMO_LINKS.md).
+
+
 The local synthetic demo is ready for your rehearsal. All seven requested materials are complete. Changes are uncommitted in `design-proposal`; no push, merge, database reset or public deployment occurred.
 
 **New to the project? Start with [Understand AyudaChain from zero](TEAM_CRASH_COURSE.md).** It explains one household story, each role, the demo and 20 short spoken answers.

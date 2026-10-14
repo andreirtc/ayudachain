@@ -1,3 +1,5 @@
+> Historical pause checkpoint, superseded by the resumed candidate and [Draft PR40](https://github.com/andreirtc/ayudachain/pull/40). For current status read [FINALIST_READINESS](FINALIST_READINESS.md). Do not use the old lab/port instructions below.
+
 # Resume checkpoint — 14 October 2026, 10:11 Asia/Manila
 
 Paused at the maintainer's request to join the team. Work is NOT fully complete. Preserve current uncommitted design-proposal work; no commit/push/merge/public deployment was authorized or performed. Do not reset labs or nodes.

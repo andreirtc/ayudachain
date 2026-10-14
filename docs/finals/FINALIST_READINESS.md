@@ -1,6 +1,6 @@
 # Finalist readiness — current review candidate
 
-Updated14October2026 after the resumed UI/language pass. **Ready for team review and local synthetic rehearsal; not production/real-household ready.** Current source is in design-proposal with uncommitted changes preserved. A separate main-based reference branch is prepared under feat/finals-reference for the teammate; see REFERENCE_BRANCH.md. No main modification, merge, existing PR closure, database reset or public deployment occurred. Reference publication is explicitly authorized by the latest user instruction.
+Updated14October2026 after the resumed UI/language pass. **Ready for team review and local synthetic rehearsal; not production/real-household ready.** Current source is in design-proposal with uncommitted changes preserved. A separate main-based reference branch is published under feat/finals-reference for the teammate; see REFERENCE_BRANCH.md. No main modification, merge, existing PR closure, database reset or public deployment occurred. Reference publication is explicitly authorized by the latest user instruction.
 
 ## Read these first
 
@@ -51,3 +51,8 @@ Team must review actual placement/copy, rehearse11–12minute script/three-minut
 Before real citizens: authenticated principals/sessions/recovery; private storage/transport hardening; institutional procedure/current-rule/FACED/signature/privacy mapping; real notices/ID integrations; funding/cash arrangements; retained chain/key governance; support and recovery targets. Offline payout, full liquidation/advances/returns, representative/multi-tranche/in-kind flows remain unavailable/deferred.
 
 Do not claim government endorsement, public Polygon deployment, learned Random Forest/Isolation Forest fraud models, Supabase Auth, certified cash balance, measured SDG impact, verified signatures, guaranteed ROI or production scale. [SDG alignment](SDG_ALIGNMENT.md) and [deployment plan](PITCH_SLIDE_CORRECTIONS.md) separate proposed contribution/infrastructure from implemented behavior.
+
+
+## Published teammate reference
+
+[Draft PR40](https://github.com/andreirtc/ayudachain/pull/40), branch feat/finals-reference. Two separate baseline/finalist commits preserve main and the original dirty design-proposal worktree. Reference only; no merge/deploy. Offline reader verified220question headings,390/1440no overflow/page errors, video1280×720/31.583s/readyState4. ZIP integrity/secret-directory exclusion passed. [Direct stage links](LIVE_DEMO_LINKS.md) select the populated Maria account; unused Ana remains available for fresh-registration demonstration.

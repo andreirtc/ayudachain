@@ -1,5 +1,8 @@
 # AyudaChain — ito muna ang basahin
 
+**Open the prepared demo:** [Current five-role links, with Maria selected](../LIVE_DEMO_LINKS.md).
+
+
 Ito ang natural Taglish reading pack para sa team. Familiar English terms ang gamit natin kapag mas malinaw: request, review, payout, records, database at blockchain. Hindi ito bagong product specification. Pareho ang facts at limitations sa detailed English guides.
 
 **Need SDGs for slides?** Read [SDG alignment and spoken answers](SDG_ALIGNMENT.md). Main:SDG16; supporting:SDG1/10.
