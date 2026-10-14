@@ -1,5 +1,6 @@
 import {workspacePath} from './workspace-navigation';
 import {test,expect} from '@playwright/test';
+test.beforeEach(async({page})=>{await page.addInitScript(()=>{if(!localStorage.getItem('ayudachain.guidance-language'))localStorage.setItem('ayudachain.guidance-language','en');});});
 
 test('self registry persists absence and scoped staff view omits private contact',async({page,request})=>{
   const actors=(await (await request.get('http://127.0.0.1:8000/api/v1/actors/catalogue')).json()).data as {id:string;role:string;display_name:string}[];
@@ -16,9 +17,9 @@ test('self registry persists absence and scoped staff view omits private contact
   await page.getByRole('combobox',{name:'Declared barangay',exact:true}).selectOption(barangays[0].id);
   await page.getByLabel('Head name',{exact:true}).fill(head);await page.getByLabel('Address',{exact:true}).fill('Invented Lane 27');await page.getByLabel('Zone',{exact:true}).fill('9');
   await page.getByRole('button',{name:'Open recipient panel for private details'}).click();await page.getByLabel('Contact phone (optional)',{exact:true}).fill('09990000009');
-  await page.getByRole('button',{name:'Register household',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'Household registered'})).toBeVisible();
+  await page.getByRole('button',{name:'Review household registration',exact:true}).click();await page.getByRole('dialog',{name:'Review household registration',exact:true}).getByRole('button',{name:'Register household',exact:true}).click();await expect(page.locator('.ac-saved-result')).toContainText('Household registered');
   }
-  await expect(page.getByText('Identity evidence: pending_field_check')).toBeVisible();
+  await expect(page.getByText('Identity evidence: Pending field check')).toBeVisible();
   await page.reload();await expect(page.getByRole('heading',{name:new RegExp(head)})).toBeVisible();
   await page.goto(workspacePath(officer.role,officer.id,'registry'));await expect(page.locator('body')).not.toContainText('09990000009');
 });

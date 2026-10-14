@@ -38,6 +38,58 @@ Offline handover, real SMS, live National ID integration, general PIN recovery, 
 
 The redesigned MVP uses responsive task queues, household progress, amount-basis explanations, searchable review/proof records and document previews. [Routes](docs/product/sitemap.md), [user flow](docs/product/user-flow.md) and [design system](DESIGN.md) describe the delivered surface. See the redesign section in [validation](docs/implementation/validation.md) for fresh checks and current runtime limitations.
 
+## Design proposal: Tonal (Material 3, Sea and Sun)
+
+The visual layer of the "Tonal" design was brought forward from `design-proposal` to `/mvp`, preserving this branch's role-specific workflow error recovery, and the [screen storytelling plan](docs/implementation/2026-10-13-screen-storytelling-plan.md) was then implemented on top of it. The full reference design is in [docs/design/tonal-design-reference.html](docs/design/tonal-design-reference.html); open it in a browser. Its palette switcher previews all three palettes, but only **Sea and Sun** is used in the app. [DESIGN.md](DESIGN.md) records what the code implements. The reference's additional layouts and interactions are implemented as described under screen storytelling below, except where the plan chose different Filipino-first labels.
+
+### Implemented
+
+- **Sea and Sun palette:** every `/mvp` colour is a Material 3 role token in `frontend/app/mvp.css`, with no hard-coded hex values in component rules. Both light and dark schemes are included.
+- **Light / Dark / Device theme toggle** (`ThemeToggle.tsx`): in the workspace top bar and the `/mvp` header. The choice is remembered in the browser and applied before first paint.
+- **Logo:** `public/logo.svg`, rendered by `components/mvp/Logo.tsx` in the drawer and on the directory page. The favicon is `app/icon.svg`, a copy of the same file. The retained legacy screens keep their original PNG logos.
+- **Fonts:** Open Sans for the interface and Source Code Pro for references, loaded with `next/font`. The minimum text size is 13px.
+- **Material 3 shapes and states:**
+  - pill buttons with outlined secondary buttons;
+  - outlined text fields;
+  - borderless rounded tonal panels;
+  - a tonal navigation drawer with a pill indicator for the current page;
+  - a primary-container next-step card;
+  - a primary-filled journey stepper.
+- **Status:** shown as a glyph and a coloured word, with no filled boxes or pills. There is a new negative tone (cross) for "Does not match", "Chain unreachable", "Anchor absent", "Evidence unavailable", "Not received" and "Stopped".
+- **Messages:** error, warning and success messages are banner rows with a glyph and a divider, not tinted boxes.
+- **Return to the directory:** the logo and an "All workspaces" link return to `/mvp`. Neither switches role directly; see [sitemap](docs/product/sitemap.md).
+
+### Screen storytelling: implemented and still pending
+
+The [screen storytelling plan](docs/implementation/2026-10-13-screen-storytelling-plan.md) is implemented in software across all five phases and checked by automated tests; the [execution checklist](docs/implementation/screen-storytelling-progress.md) links the evidence. The plan's four beneficiary destinations and Filipino-first copy take precedence over the reference's sample labels.
+
+| Area | Status |
+|---|---|
+| Safe status and next-action mapping (`Storytelling.ts`) | Implemented; 26 pure regression cases |
+| Phone bottom navigation (at most four destinations per role), drawer at 760-1023px, labelled rail from 1024px | Implemented for the Beneficiary and all four staff roles |
+| Filipino-first Beneficiary experience with saved English option | Implemented; **translations are drafts pending native-speaker review** |
+| Review dialogs, specific saved results and snackbar | Implemented for registration, applications, decisions, responses, ID comparison, handover, publication and case actions |
+| Segmented choices (recipient path, decisions, endorsement, identity result) | Implemented as native radio groups |
+| Case flag banners | Implemented; they prompt inspection and never declare fraud |
+| Integrity rows and Auditor result chips | Implemented; chips filter only records loaded and checked in the view |
+| Disbursing tablet layout | Implemented; independent exit checks remain a separate task |
+| List and detail panes (claims, payout records, integrity) | Implemented from 1024px |
+| Barangay Assisted registration action | Implemented as a secondary link to the existing flow; the Auditor has no create action |
+| Other palettes (Bayanihan Teal, Indigo and Mango) | Out of scope; only Sea and Sun is shipped |
+| Legacy screens | Unchanged; out of scope |
+| **Native Filipino review, five-participant comprehension test, physical phone/tablet/camera checks** | **Pending; they need humans and devices** ([checklist](docs/implementation/storytelling-human-validation.md)) |
+| Colour-contrast measurement | Pending; not measured |
+
+### Validation
+
+- **Typecheck:** passed (`tsc --noEmit`, exit 0) on supported Node 22.
+- **Production build:** passed in an isolated source copy using the installed locked dependencies, with the running development app untouched. The existing build configuration skips ESLint.
+- **Browser checks:** the real form-driven journey passed (own-device and no-phone assisted payouts, actual chain-backed publication and handover, actual current integrity match). The automated suites passed with two exceptions that were fixed and rerun: three older tests and one more asserted raw API codes that the committed error-recovery work replaced with plain-language guidance, so their assertions were updated, and a re-selected payout transaction lost its detail, which is fixed with a regression test. A saved English choice also caused a hydration mismatch, fixed with a regression test. See [validation](docs/implementation/validation.md) for counts and for the one run that was interrupted.
+- **Layout matrix:** 42 automated cases passed (five roles at 390px and 1440px in light and dark and in English and Filipino, plus the 759/760/1023/1024px shell transitions): no horizontal overflow, page errors, text under 13px or touch targets under 44px.
+- **Limits:** no single uninterrupted run covers every test; a local runtime interruption left one anchor job awaiting reconciliation, so the chain-backed runtime has to be recovered before another chain-backed run (see validation). Authentication and real-household readiness remain Pending.
+
+The earlier proposed completion prompt is kept in [docs/design/implement-missing-design.md](docs/design/implement-missing-design.md) as a historical supporting checklist.
+
 ## Five-role usability additions
 
-The workspaces now include scoped search/task queues, frozen duplicate comparisons, English/Filipino step guidance, barangay operations tables, contextual proof checks, staged CSV registration and native QR/manual session lookup. See [delivered behavior and limitations](docs/implementation/bring-forward-usability.md) and [validation](docs/implementation/validation.md). CSV templates cover head-only no-ID declarations; private completion follows normal workflows. Camera scanning requires browser BarcodeDetector support; manual lookup remains available. These are synthetic evaluation workflows with claimed/unverified accounts, not authenticated production privacy.
+The workspaces now include scoped search/task queues, frozen duplicate comparisons, English/Filipino step guidance, barangay operations tables, contextual proof checks, staged CSV registration for Barangay and DSWD staff (Beneficiaries use the household form) and native QR/manual session lookup. See [delivered behavior and limitations](docs/implementation/bring-forward-usability.md) and [validation](docs/implementation/validation.md). CSV templates cover head-only no-ID declarations; private completion follows normal workflows. Camera scanning requires browser BarcodeDetector support; manual lookup remains available. These are synthetic evaluation workflows with claimed/unverified accounts, not authenticated production privacy.

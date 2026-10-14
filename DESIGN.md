@@ -1,320 +1,254 @@
 ---
 name: AyudaChain MVP
-description: A clear operational record of disaster cash assistance in one DSWD Field Office.
+description: A clear operational record of disaster cash assistance in one DSWD Field Office, set in Material 3 with the Sea and Sun palette.
 colors:
-  ac-accent: "#146b61"
-  action-hover: "#0d574e"
-  ac-ink: "#19323f"
-  ac-muted: "#5c6d76"
-  ac-line: "#dce3e7"
-  ac-ground: "#f4f7f8"
-  white: "#ffffff"
-  rail: "#17323f"
-  rail-link: "#c6d8df"
-  rail-hover: "#254551"
-  rail-active: "#2b505b"
-  surface-subtle: "#fafcfc"
-  control-border: "#abbcc4"
-  secondary-ink: "#244958"
-  secondary-border: "#bdcbd1"
-  secondary-hover: "#f0f5f5"
-  focus: "#238b7e"
-  positive-ink: "#23634c"
-  positive-ground: "#edf6f0"
-  positive-line: "#d6e8dc"
-  attention-ink: "#8b5620"
-  attention-ground: "#fff6e9"
-  attention-line: "#efdebf"
-  neutral-ink: "#5a6a75"
-  neutral-ground: "#f0f3f5"
-  neutral-line: "#e0e6ea"
+  md-primary: "#2b5ea7"
+  md-on-primary: "#ffffff"
+  md-primary-container: "#d7e2ff"
+  md-on-primary-container: "#001a41"
+  md-secondary: "#565e71"
+  md-secondary-container: "#dae2f9"
+  md-on-secondary-container: "#131c2b"
+  md-tertiary: "#7a5900"
+  md-tertiary-container: "#ffdf9e"
+  md-on-tertiary-container: "#261a00"
+  md-surface: "#f9f9ff"
+  md-surface-container-lowest: "#ffffff"
+  md-surface-container-low: "#f3f3fa"
+  md-surface-container: "#ededf4"
+  md-surface-container-high: "#e7e8ee"
+  md-surface-container-highest: "#e2e2e9"
+  md-on-surface: "#191c20"
+  md-on-surface-variant: "#44474f"
+  md-outline: "#74777f"
+  md-outline-variant: "#c4c6d0"
+  md-error: "#ba1a1a"
+  md-on-error: "#ffffff"
+  md-error-container: "#ffdad6"
+  md-on-error-container: "#410002"
+  st-ok: "#1b6b3a"
+  st-ok-container: "#c8ecd2"
+  st-warn: "#7a4f00"
+  st-warn-container: "#ffddb0"
+  st-sim: "#6750a4"
 typography:
   headline:
-    fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif'
+    fontFamily: '"Open Sans", Roboto, Arial, sans-serif'
     fontSize: "31px"
-    fontWeight: 650
-    lineHeight: 1.2
-    letterSpacing: "-0.8px"
-  title:
-    fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif'
-    fontSize: "18px"
-    fontWeight: 650
-    lineHeight: 1.35
-    letterSpacing: "-0.25px"
-  task-title:
-    fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif'
-    fontSize: "14px"
     fontWeight: 600
-    lineHeight: 1.5
+    lineHeight: 1.2
+  title:
+    fontFamily: '"Open Sans", Roboto, Arial, sans-serif'
+    fontSize: "18px"
+    fontWeight: 600
+    lineHeight: 1.35
   body:
-    fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif'
+    fontFamily: '"Open Sans", Roboto, Arial, sans-serif'
     fontSize: "14px"
     fontWeight: 400
     lineHeight: 1.55
   field:
-    fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif'
-    fontSize: "13px"
+    fontFamily: '"Open Sans", Roboto, Arial, sans-serif'
+    fontSize: "15px"
     fontWeight: 400
     lineHeight: 1.55
   label:
-    fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif'
-    fontSize: "12px"
-    fontWeight: 600
-    lineHeight: 1.55
-  button:
-    fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif'
-    fontSize: "12px"
+    fontFamily: '"Open Sans", Roboto, Arial, sans-serif'
+    fontSize: "13px"
     fontWeight: 600
     lineHeight: 1.5
-  briefing:
-    fontFamily: '"Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif'
-    fontSize: "25px"
-    fontWeight: 620
-    lineHeight: 1.3
-    letterSpacing: "-0.5px"
+  button:
+    fontFamily: '"Open Sans", Roboto, Arial, sans-serif'
+    fontSize: "14px"
+    fontWeight: 600
+    lineHeight: 1.5
+  reference:
+    fontFamily: '"Source Code Pro", ui-monospace, monospace'
+    fontWeight: 500
 rounded:
-  tag: "4px"
-  control: "5px"
-  panel: "7px"
-  popover: "8px"
-  circle: "50%"
-spacing:
-  compact: "8px"
-  control-gap: "12px"
-  inline: "16px"
-  form-gap: "17px"
-  compact-panel: "20px"
-  section-gap: "23px"
+  field: "4px"
+  chip: "8px"
+  tonal-block: "12px"
+  fieldset: "16px"
+  button: "20px"
   panel: "24px"
-  roomy: "28px"
-  page-gutter: "36px"
+  next-step: "28px"
+  nav-indicator: "28px"
+  circle: "50%"
 components:
   button-primary:
-    backgroundColor: "{colors.ac-accent}"
-    textColor: "{colors.white}"
+    backgroundColor: "{colors.md-primary}"
+    textColor: "{colors.md-on-primary}"
     typography: "{typography.button}"
-    rounded: "{rounded.control}"
-    padding: "9px 14px"
-  button-primary-hover:
-    backgroundColor: "{colors.action-hover}"
-    textColor: "{colors.white}"
+    rounded: "{rounded.button}"
+    padding: "8px 20px"
   button-secondary:
-    backgroundColor: "{colors.white}"
-    textColor: "{colors.secondary-ink}"
+    backgroundColor: "transparent"
+    borderColor: "{colors.md-outline}"
+    textColor: "{colors.md-primary}"
     typography: "{typography.button}"
-    rounded: "{rounded.control}"
-    padding: "9px 14px"
-  button-secondary-hover:
-    backgroundColor: "{colors.secondary-hover}"
-    textColor: "{colors.secondary-ink}"
+    rounded: "{rounded.button}"
+    padding: "8px 20px"
   input:
-    backgroundColor: "{colors.white}"
-    textColor: "{colors.ac-ink}"
+    backgroundColor: "{colors.md-surface-container-lowest}"
+    borderColor: "{colors.md-outline}"
+    focusBorderColor: "{colors.md-primary}"
+    textColor: "{colors.md-on-surface}"
     typography: "{typography.field}"
-    rounded: "{rounded.control}"
-    padding: "10px 12px"
+    rounded: "{rounded.field}"
   panel:
-    backgroundColor: "{colors.white}"
-    textColor: "{colors.ac-ink}"
+    backgroundColor: "{colors.md-surface-container-low}"
+    textColor: "{colors.md-on-surface}"
     rounded: "{rounded.panel}"
     padding: "24px"
-  navigation-link:
-    backgroundColor: "{colors.rail}"
-    textColor: "{colors.rail-link}"
-    rounded: "{rounded.control}"
-    padding: "12px 14px"
+  navigation-drawer:
+    backgroundColor: "{colors.md-surface-container-low}"
+    textColor: "{colors.md-on-surface-variant}"
   navigation-active:
-    backgroundColor: "{colors.rail-active}"
-    textColor: "{colors.white}"
-    rounded: "{rounded.control}"
-    padding: "12px 14px"
+    backgroundColor: "{colors.md-secondary-container}"
+    textColor: "{colors.md-on-secondary-container}"
+    rounded: "{rounded.nav-indicator}"
+  next-step:
+    backgroundColor: "{colors.md-primary-container}"
+    textColor: "{colors.md-on-primary-container}"
+    rounded: "{rounded.next-step}"
   status-positive:
-    backgroundColor: "{colors.positive-ground}"
-    textColor: "{colors.positive-ink}"
-    rounded: "{rounded.tag}"
-    padding: "3px 8px"
+    textColor: "{colors.st-ok}"
+  status-negative:
+    textColor: "{colors.md-error}"
   status-attention:
-    backgroundColor: "{colors.attention-ground}"
-    textColor: "{colors.attention-ink}"
-    rounded: "{rounded.tag}"
-    padding: "3px 8px"
+    textColor: "{colors.st-warn}"
   status-neutral:
-    backgroundColor: "{colors.neutral-ground}"
-    textColor: "{colors.neutral-ink}"
-    rounded: "{rounded.tag}"
-    padding: "3px 8px"
+    textColor: "{colors.md-on-surface-variant}"
 ---
 
 # Design System: AyudaChain MVP
 
 ## Overview
 
-**Creative North Star: "The Public-Service Workdesk"**
+**Creative North Star: "Tonal public service"**
 
-AyudaChain uses a calm, practical interface for following disaster cash assistance. A stable navy rail frames white work surfaces; restrained teal identifies actions. The visual hierarchy gives the current task, its supporting record and its permitted next step priority over decoration.
+AyudaChain follows Material 3, the design language most Android phones in the Philippines already use, so households and field staff meet familiar controls. The Sea and Sun palette pairs a deep sea blue with a sun-gold tertiary colour. Surfaces are tonal rather than bordered or shadowed. The current task, its record and its permitted next step take priority over decoration.
 
-This document records the implementation of `/mvp` and its five role workspaces as of 11 October 2026. Its sources are `frontend/app/mvp.css`, the directory route, `frontend/components/mvp/`, and the 1440px/390px confirmation captures in `.impeccable/review/final/`. It does not define the retained legacy screens. `PRODUCT.md` supplies the durable commitments to truthful evidence, understandable states and household guidance; surface composition remains in `.impeccable/surface-briefs/mvp.md`.
+This document records the implementation of `/mvp` and its five role workspaces as of 13 October 2026. Its sources are `frontend/app/mvp.css`, `frontend/app/layout.tsx`, `frontend/app/icon.svg`, `frontend/components/mvp/Logo.tsx` and `frontend/components/mvp/UI.tsx`. It does not define the retained legacy screens, apart from the shared favicon. `PRODUCT.md` supplies the durable commitments to truthful evidence, understandable states and household guidance.
 
-**Key Characteristics:**
+**Key characteristics:**
 
-- Stable navigation and persistent account/disaster context.
-- Dense staff queues and a shorter, sequential household journey.
-- White surfaces, fine dividers and restrained teal actions.
-- Written states with consistent line icons.
+- A tonal navigation drawer with a pill-shaped active indicator, and persistent account and disaster context.
+- Pill-shaped buttons, Material 3 outlined fields and rounded tonal panels.
+- Status shown as a glyph and a coloured word, never as a filled box or highlighted pill.
 - Evidence first, with explicit unavailable and not-checked states.
 
-## Colors
+## Logo
 
-The palette combines deep blue-green navigation with cool neutral surfaces. Semantic green, amber and gray communicate recorded states without becoming competing page accents. The frontmatter is the normative color reference.
+The mark is a blue shield and check (verified) around a green house inside a chain ring (the household held by the anchored record), with a second link beneath it. The master file is `frontend/public/logo.svg`, a fixed blue and green gradient on a transparent background that does not follow the theme colours. `LogoMark` in `frontend/components/mvp/Logo.tsx` renders that file beside the Open Sans Bold wordmark in the drawer and on the directory page. `frontend/app/icon.svg` is the favicon: a copy of the same file. It replaces the earlier Kubo Link mark (a bahay kubo roof over two rings). The logo is a concept that has not been registered. It uses no government seal, flag or agency mark.
 
-### Primary
+## Colours
 
-- **Service Teal** (`ac-accent`) marks primary buttons, text actions, selected form accents and key amounts. **Deep Service Teal** (`action-hover`) is the primary hover state.
-- **Workdesk Navy** (`rail`) anchors the navigation. **Rail Hover** and **Rail Active** provide distinct tonal feedback; active links also use stronger text and `aria-current="page"`.
+All colours are Material 3 role tokens declared on `.ac-entry,.ac-app` in `mvp.css`. Component rules refer to roles, not hex values. The legacy aliases `--ac-ink`, `--ac-muted`, `--ac-line`, `--ac-accent` and `--ac-ground` point to on-surface, on-surface-variant, outline-variant, primary and surface. Light and dark schemes are implemented. The dark scheme uses the Sea and Sun dark roles (primary `#acc7ff`, surface `#111318`, on-surface `#e2e2e9`, outline `#8e9099`) and dark status colours (success `#8cd8a1`, warning `#f2bc6a`, error `#ffb4ab`). A Light, Dark and System toggle (`ThemeToggle.tsx`) sits in the workspace top bar and the directory header. System follows `prefers-color-scheme`. An explicit choice sets `data-theme` on `<html>` and is remembered in the browser under `ayudachain:theme`. An inline script in `layout.tsx` applies it before first paint.
 
-### Secondary
+- **Primary** (sea blue) is used for filled buttons, links, text buttons, focus rings, the logo and completed journey steps. **Primary container** carries the household next-step card.
+- **Secondary container** is the active navigation indicator, count chips, date blocks and directory icons.
+- **Tertiary container** (sun gold) is used for avatars.
+- **Surfaces** step from surface (page) through surface-container-low (drawer, panels) to surface-container-high (account panel).
+- **Status colours** are shared and independent of the palette: success green, warning amber, error red and simulated violet. They are used only as text and glyph colour.
 
-- **Recorded Green** (`positive-*`) accompanies explicit positive business states or a current matching integrity result.
-- **Review Amber** (`attention-*`) marks holds, stops, adverse answers, mismatch and chain unavailability. It calls for attention; it does not allege fraud.
-- **Pending Gray** (`neutral-*`) holds other states, including an unchecked integrity result.
+Contrast was checked with the WCAG formula. On-primary on primary is 6.4:1. On-surface-variant on surface is 8.9:1. Success, warning and error text on surface-container-low are each at least 5.8:1. The outline is 4.3:1 on surface, which meets the 3:1 requirement for component borders.
 
-### Neutral
-
-- **Record Ink** (`ac-ink`) is the principal text color; **Context Slate** (`ac-muted`) carries supporting prose.
-- **Cool Ground** (`ac-ground`) separates the work area from **White** panels and topbar.
-- **Quiet Surface** (`surface-subtle`) provides a small tonal step for the context bar and hover rows.
-- **Record Line** (`ac-line`) divides panels, queues and histories. Controls use the stronger `control-border`; secondary actions use their own ink and border tokens.
-
-**The Written State Rule.** Color always accompanies a state name and, for status chips, a check, clock or alert icon. A green business status is not a claim that chain integrity or physical receipt has been proved.
+**The written state rule.** A state is always a glyph plus its name. A green business status is not a claim that chain integrity or physical receipt has been proved.
 
 ## Typography
 
-The shipped operational stack starts with Segoe UI, followed by platform and Arial fallbacks. Body text, fields and labels share that stack. No font asset is generated or loaded for `/mvp`.
+Open Sans (400, 500, 600, 700) is the interface face. Source Code Pro (500, 600) is used for code, references and the payout code box. Both load through `next/font/google` in `frontend/app/layout.tsx`, exposed as `--font-open-sans` and `--font-source-code-pro`. Headings use weight 600 and sentence case. All numerals use tabular figures.
 
-The hierarchy favors sentence case and compact task reading. All numerals use tabular figures. Headings balance text; reference strings and supporting data wrap instead of widening the page.
-
-### Hierarchy
-
-- **Headline**: page titles use the frontmatter headline role; compact/mobile page headings reduce to 28px.
-- **Title**: panel headings use the title role; mobile panels reduce to 17px.
-- **Task title**: queue entries and subsection headings use the task-title role.
-- **Body**: the base is the body role. Most panel paragraphs and input values use the 13px field size; table content is 12px.
-- **Label**: field captions and button text are compact, semibold and sentence case.
-- **Briefing**: the four-column operational strip uses the briefing role; it reduces to 22px below 1200px and is 23px in the mobile two-column strip.
-- **Financial emphasis**: entitlement amounts and outcome totals use 36px; payout amounts use 32px. These are record values with their basis or unit adjacent, rather than a general display style.
-
-The directory currently uses a larger system-font headline (64px desktop, 53px below 1000px, 46px mobile). This is an observed entry-page treatment, not a reusable display identity. The shipped 10–11px badge, table-header and metadata text is recorded as compact secondary detail, not a minimum size for future essential instructions.
-
-**The Plain Task Rule.** Preserve clear size and weight steps, sentence case and direct labels. Do not add decorative eyebrows or a separate typographic voice above task headings.
+The minimum text size is 13px. Every 10px, 11px and 12px rule in `mvp.css` was raised to 13px. Form fields use 15px and buttons 14px.
 
 ## Layout
 
-Desktop workspaces use a fixed left rail (238px), a 73px topbar, a separate disaster context bar and a flexible main frame. Main content is centered within a maximum 1560px frame with 36px horizontal gutters. Staff overview grids give the main queue more space than its supporting column; forms stop at 900px. The beneficiary overview stops at 1030px and uses a main journey beside entitlement and appointment evidence. The beneficiary next-action paragraph stops at 58ch.
+The shell has a left navigation area, a topbar, a disaster context bar and a flexible main frame. From 1024px the navigation is a labelled sidebar, 280px wide (296px from 1280px, 312px from 1800px), with the icon beside a single-line label so every role's destinations and the All workspaces link fit without wrapping in English and Filipino. From 760px to 1023px it is an off-canvas drawer opened from a labelled menu button, with Escape returning focus to the trigger. Below 760px the same destinations also appear in a fixed bottom bar of at most four labelled destinations (44px minimum touch height), and the main frame reserves space so the bar never covers the final action. Claim and payout records use a list beside a detail pane from 1024px and stack below it. The Auditor's chain integrity list uses the full container width as table-like rows until a proof is selected; a selection then places the list beside its detail from 1024px. Tables keep their own horizontal scroll. The directory remains a two-column page with a ruled list of the five workspaces.
 
-The directory has a maximum 1200px frame, two unequal columns and a ruled list of five workspaces. These are links to dedicated URLs: `/mvp/beneficiary`, `/mvp/barangay-officer`, `/mvp/dswd-officer`, `/mvp/disbursing-officer` and `/mvp/auditor`. Account selection remains inside the chosen role. Workspace navigation links preserve the selected `account` and `disaster` query context. While the initial catalogue is loading, links retain the requested values from the current URL until the loaded records resolve the eligible account and disaster.
+## Shapes and depth
 
-Spacing is measured for work rather than forced onto one mathematical scale. The recurring form gap is 17px, section/grid separation is commonly 23–24px, and normal panel padding is 24px. Below 1200px, page gutters become 25px and panel padding 21px. Reuse these existing roles rather than smoothing away the observed rhythm.
+- **Fields** use 4px corners, following Material 3 outlined text fields.
+- **Count chips** use 8px corners. **Date blocks and icon tiles** use 12px.
+- **Fieldsets** use 16px corners. **Panels** use 24px. **The next-step card** uses 28px.
+- **Buttons** are 40px tall with 20px pill corners. The navigation indicator is a full pill.
 
-Responsive behavior follows the shipped media queries:
-
-- At 1800px and above, the rail widens to 260px.
-- At 1200px and below, the rail narrows to 214px and staff grids tighten.
-- At 1000px and below, the main operational/audit grids and beneficiary main grid become one column; supporting panels can still form a two-column row.
-- At 760px and below, the rail becomes a 254px off-canvas menu. The main frame fills the viewport, the topbar is 61px, content gutters are 20px, context selection wraps, page actions stack, forms and supporting panels become one column, and briefing totals become two columns.
-- Mobile panels use 20px vertical and 17px horizontal padding. Tables retain a 470px minimum width inside their own horizontal scroll region; the page itself must fit the viewport.
-- At the mobile breakpoint, buttons and text actions have a minimum 44px height. Input controls already have a 44px minimum height; the compact desktop disaster selector uses 36px.
-
-## Elevation & Depth
-
-Work surfaces are flat: white fill and one-pixel borders establish separation. There are no resting panel shadows. Soft shadows are reserved for a floating account panel, the mobile navigation drawer and the keyboard skip link.
-
-### Shadow Vocabulary
-
-- **Account panel**: `0 12px 28px #15313e18`.
-- **Mobile drawer**: `8px 0 30px #18333f22`.
-- **Skip link**: `0 3px 12px #19323f25`.
-
-**The Flat Work Surface Rule.** Keep record panels and queue rows flat. Use elevation only for controls that float above the work area.
-
-## Shapes
-
-Controls and rail links have modest control corners; panels use slightly softer panel corners. Compact state chips use tag corners. Account panels use popover corners. Circular avatars, journey markers and numbered handover steps express people or sequence rather than turning every control into a pill.
-
-Fine borders and horizontal rules carry most grouping. The AyudaChain shield mark has its existing rounded-bottom silhouette; ordinary panels do not inherit that brand shape.
+Panels have no border and no shadow; tone separates them from the page. Shadows are reserved for the account panel and the mobile drawer.
 
 ## Components
 
-### Buttons and links
+### Buttons
 
-Primary actions use service teal and white text; secondary buttons use white, a visible border and secondary ink. Both use 9px vertical and 14px horizontal padding, a 41px minimum desktop height, compact semibold text and an 8px icon gap. Hover changes color without lifting or scaling the control. Disabled buttons use 0.5 opacity and a not-allowed cursor.
+The filled primary button has on-primary text and darkens 10% on hover. The default button is outlined, with primary text and a transparent fill. Hover and press use 8% and 12% primary state layers. Disabled buttons use 0.45 opacity.
 
-Text actions use teal, a small arrow where helpful and an underline on hover with a 4px offset. Their minimum desktop height is 36px; mobile actions follow the 44px rule. The prominent page action is selected from the actual task state.
+### Fields
 
-### Inputs and fields
+Fields are outlined with a 1px outline. On focus, the outline thickens to 2px in primary. Labels use on-surface-variant. The file selector button is a secondary-container pill.
 
-Fields have white fill, a visible control border and 10px by 12px padding. Captions sit above them with a 7px gap. Textareas start at 96px and resize vertically. Search fields use a real label; placeholders supplement it. File selectors are subdued buttons inside a light field.
+### Status
 
-All focusable descendants receive a visible 3px teal outline with a 3px offset. The caret and native checked-control accent use service teal. Error, warning and saved-result messages use distinct tinted, bordered regions and explicit text; actions never rely on a tint alone.
+`Status` in `UI.tsx` has four tones, each with its own glyph:
 
-### Status chips
+- **Positive** uses a check: approved, published, active, received in full, open, verified, handover recorded, confirmed.
+- **Negative** uses a cross: stopped, does not match, not received, chain unreachable, anchor absent, evidence unavailable.
+- **Attention** uses an alert circle: held, declined, reversed, received less, stale.
+- **Neutral** uses a clock: every other state.
 
-The shared status component combines a named state, icon and lightly bordered semantic fill. Positive examples include "Approved" and "Handover recorded"; attention examples include "Held" and "Does not match"; pending examples include "Awaiting DSWD review". Chips use compact padding and tag corners. They are record labels, not interactive filters.
+The status has no fill, border or padding.
 
-Integrity starts as "Not checked". "Check now" requests the current result; matching content is labelled "Verified" only after that request returns a match. Unreachable chain, missing anchor, unavailable evidence and failed refresh stay explicit. A previous match is accompanied by a warning that it does not establish the current result. Saved submission status is labelled as historical evidence.
+Integrity starts as "Not checked". "Verified" appears only after a current check returns a match.
 
-### Panels, queues and tables
+### Messages
 
-Panels use white fill, a fine border and flat depth. Their headings pair with a small contextual action or count where needed. Queue rows are separated by rules and lead from the work item to its permitted screen or supporting history.
+`mvp-error`, `mvp-warning` and `mvp-success` are banner rows on the page surface. Each has a circled glyph (×, ! or ✓) in the status colour, plain on-surface text and a divider underneath. They have no tinted box or coloured edge.
 
-Tables use sentence-case headers, subtle header fill, compact supporting identifiers and specific row actions. Long names and references wrap within the record cell. Empty queues explain the missing prerequisite or next expected event; failed requests offer retry. Loading text uses `role="status"` and never substitutes invented rows.
+### Navigation
 
-### Navigation and context
+The AyudaChain logo and an "All workspaces" link at the foot of the drawer both go to the `/mvp` directory. Both sit outside the role navigation list, and neither switches role directly.
 
-Rail links use existing Lucide line icons, written labels, hover feedback and an active tonal block. The shared icon helper hides decorative icons from assistive technology. The auditor context includes a written "Read-only" label.
+Drawer links are 14px semibold on-surface-variant text with line icons. Hover uses a state layer. The current page uses the secondary-container pill and `aria-current="page"`. Keyboard handling, focus trapping on mobile, Escape-to-close and the skip link are unchanged.
 
-Mobile navigation has a labelled trigger with `aria-expanded` and `aria-controls`, a labelled close action, initial focus on a navigation link, focus wrapping, Escape-to-close and focus return to the trigger. Closed mobile navigation is hidden from focus. A skip link targets a focusable main region.
+### Household journey
 
-The account disclosure states: "Synthetic accounts have no sign-in. Selected identities are unverified." Role routes and account selection organize workflow; they do not establish authentication or operational access control.
+The next-step card uses primary-container, and its action is a filled pill button. Journey markers are filled primary when complete and primary-container with a primary ring when current.
 
-### Household journey and receipt guidance
+### Screen storytelling components
 
-The beneficiary overview leads with the next available action, followed by five named journey steps. A household that is already registered but has no claim receives "Submit my claim"; its household page hides the registration form. A thin connecting line joins circular complete, current and pending markers. Entitlement evidence shows the amount with its calculation basis; appointment evidence shows the Manila date and site. Private-report guidance stays adjacent to the household workflow.
+Implemented in `Review.tsx`, `Storytelling.ts`, `Dashboard.tsx` and the task screens. They use plain React/CSS on the existing tokens; no dependency was added.
 
-The handover workspace uses three explicit steps: compare identity, present the amount, record authorization. Recipient confirmation remains separate from the recorded handover. The receipt code is a functional value, never decorative typography.
+- **Review dialog:** a native `<dialog>` that restates the selected record, the choice and its effect, and says the saved event stays in history. It traps focus, Escape or Cancel sends no command, and focus returns to the trigger.
+- **Saved result and snackbar:** a persistent inline result with the next step, plus a `role="status"` snackbar that never takes focus, dismisses after five seconds or by hand, and may offer View. No Undo is offered for an append-only event.
+- **Segmented choice:** native radio groups styled as segments, so arrow keys, labels and form values keep working. A failing identity comparison uses an explicit stop/hold label and the error tone.
+- **Case flags:** an icon, a bold sentence, an explanation and permitted text actions above a divider, with no tinted box or coloured edge. They prompt human inspection and never declare fraud.
+- **Integrity rows and chips:** glyph, status word, a separated Checked time and an explanation. Chips for All, Verified, Does not match, Anchor absent, Chain unreachable, Evidence unavailable and Not checked filter only the records loaded and checked in the view.
+- **Payout code:** Source Code Pro at about 34px in groups of three with Hide code. Reveal uses only the code held in the active view; it is never in a URL or browser storage.
+- **Language:** a saved language choice is applied from inside the same Suspense boundary as the content (`SavedLanguage`), after that content has hydrated in the Filipino-first server default, so a saved English choice causes no hydration mismatch.
 
-### Evidence and histories
-
-Integrity records pair exact material/original actions with current checks. Supporting histories use a simple ruled timeline, readable actions, Manila timestamps and expandable actor/version details. Ordinary reading avoids raw JSON; exact verification material is available in an explicit disclosure.
-
-The footer labels synthetic records and the simulated National ID/SMS paths. It also states that chain reads are actual and signatures are not authenticated. Connectivity loss produces a reconnection instruction; there is no offline payout capability.
+Contrast ratios were not measured. The automated matrix checks overflow, theme, shell composition, touch height and 13px text only.
 
 ### Motion and accessibility
 
-Buttons transition colors in 150ms; directory and rail feedback use 160ms; the mobile drawer uses 180ms ease-out. Motion supports state changes and does not animate record evidence. `prefers-reduced-motion: reduce` removes transitions and animation.
-
-Keep native links, buttons, labels, summaries, selects and tables. Status and error text remains readable independently of color. Live integrity feedback uses polite, atomic announcements. Selection, focus, caret and scrollbars follow the palette. The source contains these mechanisms; this document does not claim a complete WCAG conformance audit.
+Existing transitions are kept, and `prefers-reduced-motion` still removes them. The focus ring is 3px primary with a 2px offset. The source contains these mechanisms; this document does not claim a complete WCAG conformance audit.
 
 ## Do's and Don'ts
 
 ### Do:
 
-- **Do** use the existing operational palette, flat panels and visible control borders.
-- **Do** pair each status color with explicit words and an appropriate line icon.
-- **Do** select the next action from current API records and preserve account/disaster context in task links, including during initial catalogue loading.
-- **Do** keep beneficiary instructions short and sequential, with the amount basis and appointment evidence close by.
+- **Do** use role tokens (`--md-*`, `--st-*`) instead of hex values in component rules.
+- **Do** pair each status colour with words and a glyph.
+- **Do** keep one filled button per task area. Use outlined buttons for everything else.
 - **Do** use Philippine peso formatting and Asia/Manila dates with tabular numerals.
-- **Do** label simulated ID/SMS paths and the selected, unverified synthetic account.
-- **Do** preserve keyboard focus, retry states, reduced motion and mobile 44px action targets.
+- **Do** label simulated ID and SMS paths, and the selected, unverified synthetic account.
 
 ### Don't:
 
-- **Don't** show "Verified" from a saved submission state or an earlier successful check.
-- **Don't** describe a review flag as fraud, or a recorded handover as proof of recipient-confirmed receipt.
+- **Don't** put status in tinted boxes, filled pills or coloured left edges.
+- **Don't** show "Verified" from a saved submission state or an earlier check.
+- **Don't** describe a review flag as fraud, or a recorded handover as proof of receipt.
 - **Don't** invent records, transaction hashes or empty-state success evidence.
 - **Don't** claim sign-in, authenticated identity, operational privacy or offline payout.
-- **Don't** turn this scoped system into a redesign rule for retained legacy routes.
-- **Don't** introduce generic role tabs, decorative metric cards or an additional icon vocabulary into these workspaces.
 
 ## Usability extension (12 October 2026)
 
-Search/task queues use labelled wrapping controls and bounded semantic tables in the existing workdesk palette. Barangay operations use aligned rows with scoped drill-down links; aggregate-only cells are plain text. Duplicate review compares two permitted frozen versions alongside acknowledgment/actions. Language selection controls complete step guidance with a retained English fallback. CSV preview and camera/manual lookup remain task panels within Registry and payouts. Raw proof hashes are expandable beneath readable coverage and comparison. Mobile tables scroll within their panel; controls retain visible focus and touch targets.
+Search and task queues use labelled, wrapping controls and bounded semantic tables. Barangay operations use aligned rows with scoped drill-down links, and aggregate-only cells are plain text. Duplicate review compares two permitted frozen versions alongside the acknowledgement and actions. The language selector controls complete step guidance, with an English fallback. CSV preview and camera or manual lookup remain task panels within Registry and payouts. Raw proof hashes expand beneath readable coverage and comparison. Mobile tables scroll within their panel, and controls keep visible focus and touch targets.

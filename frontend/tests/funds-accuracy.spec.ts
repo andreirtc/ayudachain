@@ -2,6 +2,7 @@ import {workspacePath} from './workspace-navigation';
 import {test,expect,Page} from '@playwright/test';
 import {execFileSync} from 'node:child_process';
 import path from 'node:path';
+test.beforeEach(async({page})=>{await page.addInitScript(()=>{if(!localStorage.getItem('ayudachain.guidance-language'))localStorage.setItem('ayudachain.guidance-language','en');});});
 
 const root=path.resolve(__dirname,'../..'),exactAmount='90071992547409.93';
 function original(amount:string,reference:string){

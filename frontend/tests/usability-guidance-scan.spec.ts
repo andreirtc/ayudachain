@@ -1,5 +1,6 @@
 import {test,expect,Page,APIRequestContext} from '@playwright/test';
-import {workspacePath} from './workspace-navigation';
+import {workspacePath,prepareLookupSession} from './workspace-navigation';
+test.beforeEach(async({page})=>{await page.addInitScript(()=>{if(!localStorage.getItem('ayudachain.guidance-language'))localStorage.setItem('ayudachain.guidance-language','en');});});
 
 const capabilityActor={id:'00000000-0000-4000-8000-000000000001',role:'disbursing',display_name:'Invented capability tester',status:'active',position:null,barangay_id:null};
 const capabilityDisaster='00000000-0000-4000-8000-000000000002',capabilityTransaction='00000000-0000-4000-8000-000000000003',capabilitySession='00000000-0000-4000-8000-000000000004';
@@ -69,7 +70,7 @@ test('projection fixture: direct reference outside catalogue loads and failure c
   await page.getByLabel('Accepted photo ID type',{exact:true}).fill('Invented photo ID');
   await page.getByLabel('I compared the person with the accepted photo ID').check();
   await page.evaluate(()=>{const url=new URL(location.href);url.searchParams.set('record','00000000-0000-4000-8000-000000000099');history.pushState(null,'',url);});
-  await expect(page.locator('main .mvp-error[role="alert"]')).toContainText('record_unavailable');
+  await expect(page.locator('main .mvp-error[role="alert"]')).toContainText('This record is unavailable for the selected account');await expect(page.locator('main .mvp-error[role="alert"]')).not.toContainText('record_unavailable');
   await expect(page.getByRole('heading',{name:'Invented Test Household',exact:true})).toHaveCount(0);
   await page.evaluate(id=>{const url=new URL(location.href);url.searchParams.set('record',id);history.pushState(null,'',url);},capabilityTransaction);
   await expect(page.getByLabel('Accepted photo ID type',{exact:true})).toHaveValue('');
@@ -85,7 +86,7 @@ test('projection fixture: a direct record from another disaster cannot display p
   await expect(page.getByRole('button',{name:'Save ID comparison'})).toHaveCount(0);
 });
 
-async function assigned(request:APIRequestContext){
+async function assigned(request:APIRequestContext,prepare=true){
   const api='http://127.0.0.1:8000/api/v1';
   const catalogue=(await(await request.get(`${api}/actors/catalogue`)).json()).data;
   const disasters=(await(await request.get(`${api}/disasters`)).json()).data;
@@ -97,7 +98,8 @@ async function assigned(request:APIRequestContext){
       if(session)return {actor,disaster,session,transaction:session.entries[0].transaction_id};
     }
   }
-  throw new Error('Run the synthetic journey first: these live lookup regressions require an actual published, assigned session.');
+  if(prepare){await prepareLookupSession(request);return assigned(request,false);}
+  throw new Error('Actual published, assigned lookup session preparation did not produce a current session.');
 }
 async function openLookup(page:Page,request:APIRequestContext){
   const data=await assigned(request);
@@ -112,7 +114,7 @@ test('Filipino guidance persists navigation and reload with language metadata',a
   await page.goto(workspacePath('beneficiary',actor.id,'registry'));
   await page.getByLabel('Guidance language / Wika ng gabay').selectOption('fil');
   await expect(page.getByRole('heading',{name:'Irehistro ang inyong sambahayan'})).toBeVisible();
-  await expect(page.locator('aside[lang="fil"]')).toContainText('hindi beripikado');
+  await expect(page.locator('aside[lang="fil"]')).toContainText('Hindi beripikado');
   await page.reload();await expect(page.getByLabel('Guidance language / Wika ng gabay')).toHaveValue('fil');
   await page.goto(workspacePath('beneficiary',actor.id,'payouts'));
   await expect(page.getByRole('heading',{name:'Panatilihing pribado ang code at PIN'})).toBeVisible();
@@ -132,7 +134,7 @@ test('manual lookup rejects malformed and unknown references then opens current 
   await page.getByLabel('Transaction reference',{exact:true}).fill(data.transaction);
   await page.getByRole('button',{name:'Open transaction reference'}).click();
   await expect(page.getByRole('status').filter({hasText:'Transaction found'})).toBeVisible();
-  await expect(page.getByLabel('Transaction',{exact:true})).toHaveValue(data.transaction);
+  await expect(page).toHaveURL(new RegExp('record='+data.transaction));
   await page.getByRole('button',{name:'Open transaction reference'}).click();
   await expect(page.getByRole('status').filter({hasText:'already open'})).toBeVisible();
   const after=(await(await request.get(`http://127.0.0.1:8000/api/v1/transactions/${data.transaction}`,{headers:{'X-Demo-Actor-ID':data.actor.id}})).json()).data;

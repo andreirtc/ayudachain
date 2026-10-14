@@ -211,7 +211,7 @@ export async function resetDemoData(): Promise<{ success: boolean; message: stri
   const res = await fetch(`${getApiBase()}/api/demo/reset`, {
     method: "POST"
   });
-  if (!res.ok) throw new Error("Failed to reset demo data");
+  if (!res.ok) throw new Error("Failed to reset the data");
   return res.json();
 }
 

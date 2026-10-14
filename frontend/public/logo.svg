@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 110" role="img" aria-labelledby="t">
+  <title id="t">AyudaChain</title>
+  <defs>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5aa0ff"/>
+      <stop offset="1" stop-color="#2f6fe0"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2fae6a"/>
+      <stop offset="1" stop-color="#17703f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- shield -->
+  <path d="M60 8 L96 20 V52 C96 74 80 92 60 102 C40 92 24 74 24 52 V20 Z"
+        fill="none" stroke="url(#blue)" stroke-width="7" stroke-linejoin="round"/>
+
+  <!-- checkmark, long arm runs past the shield edge -->
+  <path d="M46 66 L64 85 L106 33"
+        fill="none" stroke="url(#blue)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- chain: lower link and upper ring -->
+  <g fill="none" stroke="url(#green)" stroke-width="6.500">
+    <rect id="lower" x="-21" y="-10.500" width="42" height="21" rx="10.500" transform="translate(48 72) rotate(-45)"/>
+    <circle id="upper" cx="71" cy="47" r="16"/>
+  </g>
+
+  <!-- house inside the ring -->
+  <path d="M65.500 48 L71 42 L76.500 48 V54 H65.500 Z" fill="#17703f"/>
+  <rect x="69.200" y="49.500" width="3.600" height="4.500" fill="#fff"/>
+</svg>

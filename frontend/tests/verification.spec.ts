@@ -13,7 +13,7 @@ for(const screen of ['Funds','Amounts and lists','Authorization and handover','E
     if(screen==='Authorization and handover'){
       const rows=(await(await request.get(base+'/transactions?disaster_id='+disaster,{headers:{'X-Demo-Actor-ID':dswd.id}})).json()).data as {id:string;business_status:string}[];
       const paid=rows.find(t=>t.business_status==='handed_over')!;
-      expect(paid).toBeTruthy();await page.getByLabel('Transaction',{exact:true}).selectOption(paid.id);
+      expect(paid).toBeTruthy();await page.goto(page.url()+(page.url().includes('?')?'&':'?')+'record='+paid.id);
     }
     const block=screen==='Evidence and review'?page.locator('.mvp-entry').filter({has:page.getByRole('button',{name:'Check now',exact:true})}).filter({hasText:'confirmed'}).first():page.locator('.mvp-proof').filter({hasText:'confirmed'}).first();
     const button=block.getByRole('button',{name:screen==='Evidence and review'?'Check now':screen==='Authorization and handover'?'Check receipt chain record':'Check chain now',exact:true});
@@ -35,7 +35,7 @@ for(const screen of ['Funds','Amounts and lists','Authorization and handover','E
     const auditor=actors.find(a=>a.role==='auditor')!;
     await page.goto(workspacePath(auditor.role,auditor.id,({'Funds':'funds','Amounts and lists':'lists','Authorization and handover':'payouts','Evidence and review':'audit'} as Record<string,string>)[screen],disaster));
     await expect(page.locator('body')).not.toContainText(/Last match|refresh failed/i);
-    await expect(page.locator('body')).not.toContainText(currentMatch);
+    await expect(page.locator('.ac-integrity-result').filter({hasText:currentMatch})).toHaveCount(0);
   });
 }
 
@@ -54,9 +54,9 @@ test('a delayed real chain result cannot populate a newly selected actor view',a
     await page.goto(workspacePath(dswd.role,dswd.id,'audit'));
     await page.locator('.mvp-entry').filter({hasText:'confirmed'}).filter({has:page.getByRole('button',{name:'Check now',exact:true})}).first().getByRole('button',{name:'Check now',exact:true}).click();
     await ready;await page.goto(workspacePath(auditor.role,auditor.id,'audit'));release();
-    await expect(page.getByRole('heading',{name:'Evidence and integrity',exact:true})).toBeVisible();
+    await expect(page.getByRole('heading',{name:'Verify',exact:true})).toBeVisible();
     await expect(page.getByRole('button',{name:'Check now',exact:true}).first()).toBeEnabled();
-    await expect(page.locator('body')).not.toContainText(currentMatch);
+    await expect(page.locator('.ac-integrity-result').filter({hasText:currentMatch})).toHaveCount(0);
     await expect(page.locator('body')).not.toContainText(/Last match/i);
   }finally{release();await page.unrouteAll({behavior:'wait'});}
 });

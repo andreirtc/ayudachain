@@ -1,5 +1,6 @@
 import {workspacePath} from './workspace-navigation';
 import {test,expect} from '@playwright/test';
+test.beforeEach(async({page})=>{await page.addInitScript(()=>{if(!localStorage.getItem('ayudachain.guidance-language'))localStorage.setItem('ayudachain.guidance-language','en');});});
 
 test('amount inputs cannot submit the initial revision while saved input history is loading',async({page,request})=>{
   const base='http://127.0.0.1:8000/api/v1';

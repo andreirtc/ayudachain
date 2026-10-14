@@ -1,13 +1,14 @@
 import {test,expect} from '@playwright/test';
 import {execFileSync} from 'node:child_process';
 import path from 'node:path';
+test.beforeEach(async({page})=>{await page.addInitScript(()=>{if(!localStorage.getItem('ayudachain.guidance-language'))localStorage.setItem('ayudachain.guidance-language','en');});});
 
 const spaces=['beneficiary','barangay-officer','dswd-officer','disbursing-officer','auditor'];
 test('dedicated workspaces survive refresh, preserve role and fit both viewports',async({page})=>{
   for(const space of spaces){
     await page.goto(`/mvp/${space}`);
     await expect(page.getByRole('navigation',{name:'Workspace navigation'})).toBeVisible();
-    await expect(page.getByLabel('Disaster',{exact:true})).toBeVisible();
+    await expect(page.getByLabel('Disaster',{exact:true}).or(page.locator('.ac-context-disaster')).first()).toBeVisible();
     await expect(page.getByLabel('Acting as',{exact:true})).toHaveCount(0);
     await page.reload();
     await expect(page.getByRole('navigation',{name:'Workspace navigation'})).toBeVisible();
@@ -32,7 +33,7 @@ test('read-only auditor and restricted barangay keep private actions out',async(
   await expect(page.getByRole('heading',{name:'Disaster funds',exact:true})).toBeVisible();
   await expect(page.getByRole('button',{name:'Record a release'})).toHaveCount(0);
   await page.goto('/mvp/barangay-officer/registry');
-  await expect(page.getByRole('heading',{name:'Registry and preparation',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Households',exact:true})).toBeVisible();
   await expect(page.locator('body')).not.toContainText('Contact:');
   await expect(page.getByRole('button',{name:'Review registry or linkage'})).toHaveCount(0);
 });
@@ -93,9 +94,20 @@ test('edited original-backed release survives refresh and cannot be changed by a
   await expect(entry).toContainText('₱12,350.50');
   await expect(entry.getByRole('button',{name:'Append correction'})).toHaveCount(0);
   await entry.getByText('Evidence, amount review and chain proofs',{exact:true}).click();
-  await entry.getByRole('button',{name:'Check chain now'}).first().click();
-  await expect(entry.getByText('Chain could not be read; not verified.').first()).toBeVisible({timeout:25000});
-  await expect(entry.locator('.ac-integrity-result').first()).not.toContainText('Verified');
+  // Confirm the actual new release has anchored before asking for a current read.
+  await expect.poll(async()=>{
+    const r=await request.get(`http://127.0.0.1:8000/api/v1/funds?disaster_id=${disaster}`,{headers:{'X-Demo-Actor-ID':auditor.id}});
+    expect(r.ok()).toBeTruthy();const saved=(await r.json()).data.entries.find((e:{reference_number:string})=>e.reference_number===reference);
+    return !!saved&&saved.proofs.length>0&&saved.proofs.every((p:{state:string})=>p.state==='confirmed');
+  },{timeout:40000}).toBeTruthy();
+  const proof=entry.locator('.mvp-proof').first(),currentRead=page.waitForResponse(r=>r.url().endsWith('/integrity/check')&&r.request().method()==='POST');
+  await proof.getByRole('button',{name:'Check chain now'}).click();expect((await(await currentRead).json()).data.result).toBe('match');
+  await expect(proof.locator('.ac-integrity-result')).toContainText(/\bVerified\b/);
+  // A failed subsequent request clears current verification while retaining a labelled earlier match.
+  await page.route('**/api/v1/integrity/check',route=>route.abort('connectionfailed'));
+  await proof.getByRole('button',{name:'Check chain now'}).click();
+  await expect(proof.locator('.ac-integrity-result')).not.toContainText(/\bVerified\b/);
+  await expect(proof).toContainText(/Last match/i);await expect(proof).toContainText(/refresh failed/i);
 });
 
 test('all principal role sections render without horizontal overflow',async({page})=>{
@@ -116,10 +128,17 @@ test('failed dashboard and audit reads stay unavailable until a successful retry
   await page.goto('/mvp/dswd-officer');
   await expect(page.getByRole('heading',{name:'Records unavailable',exact:true})).toBeVisible();
   await expect(page.getByText('Your response queue is clear')).toHaveCount(0);
-  await page.goto('/mvp/auditor/audit');
+  await page.goto('/mvp/dswd-officer/audit');
   await expect(page.getByRole('heading',{name:'Evidence unavailable',exact:true})).toBeVisible();
   await expect(page.getByText('No exceptions recorded. Current chain checks are available below.')).toHaveCount(0);
   await page.unroute('**/api/v1/audit/overview?*');
   await page.getByRole('button',{name:'Try again',exact:true}).click();
   await expect(page.getByRole('heading',{name:'Exceptions and supporting records',exact:true})).toBeVisible();
+  // The Auditor's Verify page no longer reads exceptions; its proof read fails closed instead.
+  await page.route('**/api/v1/audit/proofs',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({detail:'Synthetic connection failure'})}));
+  await page.goto('/mvp/auditor/audit');
+  await expect(page.getByRole('heading',{name:'Evidence unavailable',exact:true})).toBeVisible();
+  await page.unroute('**/api/v1/audit/proofs');
+  await page.getByRole('button',{name:'Try again',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Verify',exact:true})).toBeVisible();
 });

@@ -1,5 +1,6 @@
 import {test,expect,Page} from '@playwright/test';
 import {workspacePath} from './workspace-navigation';
+test.beforeEach(async({page})=>{await page.addInitScript(()=>{if(!localStorage.getItem('ayudachain.guidance-language'))localStorage.setItem('ayudachain.guidance-language','en');});});
 
 // UI-only API fixtures. No chain result is generated and no live data is reset.
 const actor='00000000-0000-4000-8000-000000000001',barangay='00000000-0000-4000-8000-000000000002',household='00000000-0000-4000-8000-000000000003',disaster='00000000-0000-4000-8000-000000000004';
@@ -45,9 +46,9 @@ async function upload(page:Page,text=content){await page.getByLabel('Completed U
 test('CSV preview rejects private headers, cancels without writes and confirms only selected valid rows',async({page})=>{
   const state=await fixture(page);
   await upload(page,content.replace('name,','phone,'));
-  await expect(page.getByRole('alert').filter({hasText:'csv_headers_require'})).toBeVisible();
+  await expect(page.getByRole('alert').filter({hasText:'Use the template’s five headers exactly once'})).toBeVisible();await expect(page.getByRole('alert').filter({hasText:'csv_headers_require'})).toHaveCount(0);
   await upload(page);await expect(page.getByRole('heading',{name:'Row 1: Invented <b>Tala</b> · Valid'})).toBeVisible();
-  await expect(page.getByText('Birth date requires past YYYY MM DD')).toBeVisible();
+  await expect(page.getByText('Enter the birth date as YYYY-MM-DD, no later than today, or leave it blank if unknown.')).toBeVisible();await expect(page.getByText('birth_date_requires_past_YYYY_MM_DD')).toHaveCount(0);
   expect(await page.locator('article b').count()).toBe(0);
   for(const viewport of [{width:1280,height:900,name:'desktop'},{width:390,height:844,name:'mobile'}]){
     await page.setViewportSize(viewport);

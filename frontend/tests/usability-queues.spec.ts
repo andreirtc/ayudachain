@@ -1,4 +1,5 @@
 import {test,expect,Page} from '@playwright/test';
+test.beforeEach(async({page})=>{await page.addInitScript(()=>{if(!localStorage.getItem('ayudachain.guidance-language'))localStorage.setItem('ayudachain.guidance-language','en');});});
 const office={id:'00000000-0000-4000-8000-000000000001',role:'dswd',display_name:'Invented Queue Officer',status:'active',barangay_id:null,position:null};
 const disaster='00000000-0000-4000-8000-000000000002',place='00000000-0000-4000-8000-000000000003';
 async function fixture(page:Page){
@@ -25,6 +26,6 @@ test('queue filters navigate without putting household search text in URLs',asyn
 });
 test('queue errors are recoverable and do not show previous counts',async({page})=>{
  await fixture(page);let fail=true;await page.route('**/api/v1/queues/search',async route=>{if(fail)await route.fulfill({status:503,json:{error:'database_unavailable'}});else await route.fulfill({json:{data:{rows:[],total:0,offset:0,limit:25,kinds:['claims'],states:[],scope:'permitted'}}});});
- await page.goto(`/mvp/dswd-officer/queues?account=${office.id}&disaster=${disaster}`);await expect(page.getByRole('alert').filter({hasText:'database_unavailable'})).toContainText('database_unavailable');
+ await page.goto(`/mvp/dswd-officer/queues?account=${office.id}&disaster=${disaster}`);const queueAlert=page.getByRole('alert').filter({hasText:'The database service is unavailable'});await expect(queueAlert).toBeVisible();await expect(queueAlert).not.toContainText('database_unavailable');
  fail=false;await page.getByRole('button',{name:'Retry search'}).click();await expect(page.getByText('0 results',{exact:false})).toBeVisible();
 });

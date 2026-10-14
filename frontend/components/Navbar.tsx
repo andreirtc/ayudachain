@@ -14,17 +14,17 @@ export default function Navbar() {
   const [resetMessage, setResetMessage] = useState<string | null>(null);
 
   const handleReset = async () => {
-    if (!confirm("Reset demo data to initial state (Typhoon Salinlahi Batch 2026-001)?")) return;
+    if (!confirm("Reset the data to its initial state (Typhoon Salinlahi Batch 2026-001)?")) return;
     setIsResetting(true);
     try {
       await resetDemoData();
-      setResetMessage("Demo data reset successfully!");
+      setResetMessage("Data reset successfully!");
       setTimeout(() => {
         setResetMessage(null);
         window.location.reload();
       }, 1200);
     } catch (err) {
-      alert("Failed to reset demo: " + String(err));
+      alert("Failed to reset: " + String(err));
     } finally {
       setIsResetting(false);
     }
@@ -122,10 +122,10 @@ export default function Navbar() {
               onClick={handleReset}
               disabled={isResetting}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-medium border border-slate-700 transition shadow-sm disabled:opacity-50"
-              title="Reset database to initial demo state"
+              title="Reset the database to its initial state"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isResetting ? "animate-spin text-blue-400" : ""}`} />
-              <span className="hidden sm:inline">{isResetting ? "Resetting..." : "Reset Demo"}</span>
+              <span className="hidden sm:inline">{isResetting ? "Resetting..." : "Reset data"}</span>
             </button>
           </div>
         </div>

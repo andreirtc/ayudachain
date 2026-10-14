@@ -1,12 +1,13 @@
 "use client";
-import {useErrorMessage} from './Language';
+import {useErrorMessage,useLanguage} from './Language';
 import {RefObject,useRef,useState} from 'react';
 import {request} from '@/lib/mvp-client';
 import {Status,manila} from './UI';
+import {currentIntegrity} from './Storytelling';
 
 type IntegrityResult={result:string;checked_at?:string;last_confirmed_observation?:{checked_at:string;observed_tx_hash:string|null};[field:string]:unknown};
 type Check={status:'checking'|'complete'|'failed';value?:IntegrityResult;checkedAt?:string;lastMatchAt?:string};
-const explanations:Record<string,string>={match:'Committed content matches the chain record.',mismatch:'Committed content does not match.',required_anchor_absent:'Required anchor not found.',chain_unreachable:'Chain could not be read; not verified.',evidence_unavailable:'Required evidence unavailable; not verified.'};
+const filipinoExplanations:Record<string,string>={not_checked:'Wala pang kasalukuyang pagsusuri sa chain.',checking:'Binabasa ang kasalukuyang tala sa chain; hindi pa beripikado.',match:'Tumutugma ang nakatalang nilalaman sa tala sa chain.',mismatch:'Hindi tumutugma ang nakatalang nilalaman.',required_anchor_absent:'Hindi natagpuan ang kinakailangang anchor.',chain_unreachable:'Hindi mabasa ang chain; hindi beripikado.',evidence_unavailable:'Hindi makuha ang kinakailangang katibayan; hindi beripikado.',refresh_failed:'Nabigo ang kasalukuyang refresh; hindi beripikado. Basahin itong muli.'};
 
 export function useIntegrityChecks(actor:string,control:RefObject<AbortController|null>,onError:(error:string)=>void){
   const explainError=useErrorMessage();
@@ -32,11 +33,12 @@ export function useIntegrityChecks(actor:string,control:RefObject<AbortControlle
 }
 
 export default function IntegrityStatus({check,details=false}:{check?:Check;details?:boolean}){
-  const current=check?.status==='complete'?check.value?.result:check?.status==='checking'?'checking…':check?.status==='failed'?'unavailable · refresh failed':'not checked';
-  return <div role={check?'status':undefined} aria-live={check?'polite':undefined} aria-atomic="true">
-    <div className="ac-integrity-result"><Status value={String(current)}/>{check?.status==='complete'&&check.checkedAt&&<span>Checked {manila(check.checkedAt)} Manila</span>}</div>
-    {check?.status==='complete'&&check.value&&<p>{explanations[check.value.result]}</p>}
-    {check?.lastMatchAt&&check.value?.result!=='match'&&<p className="mvp-note">Last match: {manila(check.lastMatchAt)} Manila. This earlier check does not establish the current result.</p>}
-    {check?.status==='complete'&&check.value&&<><dl className="ac-data-fields"><div><dt>Recorded evidence</dt><dd>Saved canonical version and listed original bytes</dd></div><div><dt>Chain commitment</dt><dd>{check.value.result==='match'?'Matches recorded evidence':check.value.result==='mismatch'?'Different committed content':check.value.result==='required_anchor_absent'?'No commitment found at the pinned deployment':'Unavailable for comparison'}</dd></div>{check.value.kind!==undefined&&<div><dt>Evidence kind</dt><dd>{String(check.value.kind).replaceAll('_',' ')}</dd></div>}{check.value.block_number!==undefined&&<div><dt>Observed block</dt><dd>{String(check.value.block_number)}</dd></div>}{check.value.contract_address!==undefined&&<div><dt>Pinned chain reference</dt><dd>Chain {String(check.value.chain_id)} · {String(check.value.contract_address)}</dd></div>}</dl><details><summary>Raw hashes and observed check details</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(check.value,null,2)}</pre></details></>}
+  const {t}=useLanguage(),current=currentIntegrity(check);
+  const label=current.state==='not_checked'?'not checked':current.state==='checking'?'checking…':current.state==='refresh_failed'?'refresh failed':current.state;
+  return <div className="ac-proof-status" role={check?'status':undefined} aria-live={check?'polite':undefined} aria-atomic="true">
+    <div className="ac-integrity-result"><Status value={label}/>{current.checkedAt&&<span>{' '}{t('Checked','Sinuri')} {manila(current.checkedAt)} Manila</span>}</div>
+    <p>{t(current.explanation,filipinoExplanations[current.state])}</p>
+    {current.earlierMatchAt&&<p className="mvp-note">{t('Last match:','Huling pagtugma:')} {manila(current.earlierMatchAt)} Manila. {t('This earlier check does not establish the current result.','Hindi pinatutunayan ng naunang pagsusuring ito ang kasalukuyang resulta.')}</p>}
+    {check?.status==='complete'&&check.value&&<details open={details}><summary>{t('Current check details','Mga detalye ng kasalukuyang pagsusuri')}</summary><dl className="ac-data-fields"><div><dt>{t('Recorded evidence','Naitalang katibayan')}</dt><dd>{t('Saved canonical version and listed original bytes','Naitalang canonical na bersiyon at nakalistang orihinal na bytes')}</dd></div><div><dt>{t('Chain commitment','Commitment sa chain')}</dt><dd>{current.verified?t('Matches recorded evidence','Tumutugma sa naitalang katibayan'):current.state==='mismatch'?t('Different committed content','Iba ang nakatalang nilalaman'):current.state==='required_anchor_absent'?t('No commitment found at the pinned deployment','Walang commitment sa nakatakdang deployment'):t('Unavailable for comparison','Hindi makuha para sa paghahambing')}</dd></div>{check.value.kind!==undefined&&<div><dt>{t('Evidence kind','Uri ng katibayan')}</dt><dd>{String(check.value.kind).replaceAll('_',' ')}</dd></div>}{check.value.block_number!==undefined&&<div><dt>{t('Observed block','Nabasang block')}</dt><dd>{String(check.value.block_number)}</dd></div>}{check.value.contract_address!==undefined&&<div><dt>{t('Pinned chain reference','Nakatakdang chain reference')}</dt><dd>Chain {String(check.value.chain_id)} · {String(check.value.contract_address)}</dd></div>}</dl><details><summary>{t('Raw hashes and observed check details','Mga hash at detalye ng nabasang pagsusuri')}</summary><pre style={{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}}>{JSON.stringify(check.value,null,2)}</pre></details></details>}
   </div>;
 }

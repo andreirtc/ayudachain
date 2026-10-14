@@ -2,6 +2,7 @@ import {workspacePath} from './workspace-navigation';
 import {test,expect} from '@playwright/test';
 import {execFileSync} from 'node:child_process';
 import path from 'node:path';
+test.beforeEach(async({page})=>{await page.addInitScript(()=>{if(!localStorage.getItem('ayudachain.guidance-language'))localStorage.setItem('ayudachain.guidance-language','en');});});
 
 test('fresh editable release survives reload and Auditor is read-only',async({page,request})=>{
   const catalogue=(await (await request.get('http://127.0.0.1:8000/api/v1/actors/catalogue')).json()).data as {id:string;role:string;status:string}[];

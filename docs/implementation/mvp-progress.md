@@ -9,6 +9,8 @@ Preflight shared interfaces: T02 typed owners/scope and actor context → T03 ev
 
 ## Current stage ledger
 
+Screen storytelling execution authorized 2026-10-14: the [five-phase approved plan](2026-10-13-screen-storytelling-plan.md) is being implemented without changing the approved API/schema/contracts. See the [durable requirement checklist](screen-storytelling-progress.md), [status/action mapping](storytelling-status-map.md), [local-chain recovery/evidence](storytelling-runtime.md) and [Pending human validation](storytelling-human-validation.md). Phase 1 pure regressions passed; beneficiary shell/task regressions passed; complete actual beneficiary journey is being diagnosed before extending its patterns to staff. This is not yet completion of all five storytelling phases. Changes remain uncommitted.
+
 T01-T14 complete for the approved full local synthetic MVP as of 2026-10-11 (Asia/Manila). All 26 acceptance criteria are implemented and mapped to actual checks in [validation](validation.md). The fresh final runs passed 92 backend tests, 23 contract/vector tests, 8 retained-backend tests and all 15 browser tests; strict TypeScript and the production build passed. Independent review findings are resolved. Authentication and real-household readiness remain Pending.
 
 | Stage | Implemented integrated output / actual validation |
@@ -63,3 +65,6 @@ T09–T14: pending. AC-01–AC-26: pending until complete integrated evaluation.
 Ruling: PRD supplies settled users/workflows/stack; no new PRODUCT.md authority or material-gap interview is needed for this implementation. Extend the incumbent blue/slate interface with operational forms; preserve historical ideation. Skill concept/interview steps must not reopen the user's approved scope.
 
 Validation corrections: initial deferred correction function used an invalid SQL operator without whitespace; corrected and an explicit versioned migration upgrades existing databases. The first fault-node run used the evaluation RPC with the test manifest and correctly reported deployment loss; isolated RPC selection fixed. A newly added log-outage assertion was first placed before its local ID assignment; corrected before rerun.
+
+Screen storytelling (2026-10-14): all five phases implemented in the frontend and software-checked; no API, schema, dependency, contract or hashing change. Typecheck and isolated production build passed, the real chain-backed journey passed, and a 42-case layout matrix passed. Two defects (hydration mismatch with a saved English choice; lost payout detail on re-choosing the auto-selected transaction) were fixed with regressions, and four stale raw-error-code assertions updated. Limits: no single uninterrupted all-green run, colour contrast not measured, an unresolved `submitted` anchor job blocks chain-backed reruns pending a maintainer decision, and native Filipino review, participant comprehension and physical-device checks remain Pending. See [checklist](screen-storytelling-progress.md) and [validation](validation.md).
+

@@ -331,7 +331,7 @@ export default function DashboardPage() {
                 onChange={(e) => setSelectedNetwork(e.target.value)}
                 className="mt-1.5 w-full bg-slate-800 text-white text-xs font-semibold rounded-lg border border-slate-700 p-2 focus:ring-2 focus:ring-blue-500 cursor-pointer"
               >
-                <option value="Local EVM">Local EVM (Fast Offline Demo • Port 8545)</option>
+                <option value="Local EVM">Local EVM (Port 8545)</option>
                 <option value="Polygon Amoy Testnet">Polygon Amoy Testnet (Public Web3 Explorer)</option>
                 <option value="Hardhat Sandbox">Hardhat In-Memory Sandbox</option>
               </select>

@@ -1,6 +1,7 @@
 import {test,expect,Page} from '@playwright/test';
 import {workspacePath} from './workspace-navigation';
 import type {Claim} from '../components/mvp/Claims';
+test.beforeEach(async({page})=>{await page.addInitScript(()=>{if(!localStorage.getItem('ayudachain.guidance-language'))localStorage.setItem('ayudachain.guidance-language','en');});});
 
 const disaster='00000000-0000-4000-8000-000000000002';
 const claimID='00000000-0000-4000-8000-000000000003';
@@ -50,7 +51,7 @@ test('review projection fixture: acknowledgment resets for changed check, claim 
  claim.latest_check!.id='check-three';claim.latest_check!.compared_data_revision=claim.latest_check!.current_data_revision;claim.latest_check!.stale=false;
  await page.getByRole('button',{name:'Refresh claims',exact:true}).click();
  await expect(acknowledged).not.toBeChecked();await acknowledged.check();await expect(decide).toBeEnabled();
- await decide.click();await expect.poll(()=>decisions.length).toBe(1);
+ await decide.click();await page.getByRole('dialog',{name:'Review claim decision',exact:true}).getByRole('button',{name:'Record decision',exact:true}).click();await expect.poll(()=>decisions.length).toBe(1);
  expect(decisions[0]).toMatchObject({expected_revision:1,reviewed_check_id:'check-three',action:'approve',category_id:category});
  expect(opened.length).toBeGreaterThan(3);
 });

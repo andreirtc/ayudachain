@@ -1,6 +1,7 @@
 import {test,expect,Page} from '@playwright/test';
 import {request} from '../lib/mvp-client';
 import {workflowMessage} from '../lib/workflow-errors';
+test.beforeEach(async({page})=>{await page.addInitScript(()=>{if(!localStorage.getItem('ayudachain.guidance-language'))localStorage.setItem('ayudachain.guidance-language','en');});});
 
 // Controlled error responses test presentation only; no workflow success or
 // blockchain observation is supplied and no live business command is sent.
@@ -33,10 +34,10 @@ for(const language of ['en','fil'])test(`claim rejection gives the Beneficiary a
   const url=await errors(page,'beneficiary','intake_closed_or_not_covered','/claims','POST');
   await page.goto(url.replace('?', '/claims?'));
   await page.getByLabel('Guidance language / Wika ng gabay').selectOption(language);
-  await page.getByLabel('Household',{exact:true}).selectOption(household);
-  await page.getByLabel('Stated damage category',{exact:true}).selectOption(category);
-  await page.getByLabel('Damage description',{exact:true}).fill('Invented house damage for a copy regression.');
-  await page.getByRole('button',{name:'Submit household claim',exact:true}).click();
+  await page.getByLabel(language==='en'?'Household':'Sambahayan',{exact:true}).selectOption(household);
+  await page.getByLabel(language==='en'?'Stated damage category':'Ipinahayag na kategorya ng pinsala',{exact:true}).selectOption(category);
+  await page.getByLabel(language==='en'?'Damage description':'Paglalarawan ng pinsala',{exact:true}).fill('Invented house damage for a copy regression.');
+  await page.getByRole('button',{name:language==='en'?'Review household claim':'Suriin ang aplikasyon ng sambahayan',exact:true}).click();await page.getByRole('dialog').getByRole('button',{name:language==='en'?'Submit household claim':'Isumite ang aplikasyon',exact:true}).click();
   const alert=page.locator('main .mvp-error[role="alert"]').first();
   await expect(alert).toContainText(language==='en'?'Ask your Barangay Officer or DSWD':'Magtanong sa Barangay Officer o DSWD');
   await expect(alert).not.toContainText('intake_closed_or_not_covered');
@@ -47,9 +48,10 @@ const cases=[
   {role:'barangay',section:'claims',code:'independent_endorser_required',endpoint:'/claims',expected:'another independent Barangay Officer'},
   {role:'dswd',section:'registry',code:'intake_closed_or_not_covered',endpoint:'/intake',expected:'Households & intake'},
   {role:'disbursing',section:'payouts',code:'handover_already_recorded',endpoint:'/transactions',expected:'Do not hand over cash again'},
-  {role:'auditor',section:'audit',code:'inspection_logging_unavailable',endpoint:'/audit/overview',expected:'inspection could not be logged'},
+  {role:'auditor',section:'overview',code:'inspection_logging_unavailable',endpoint:'/audit/overview',expected:'inspection could not be logged'},
+  {role:'auditor',section:'audit',code:'inspection_logging_unavailable',endpoint:'/audit/proofs',expected:'inspection could not be logged'},
 ];
-for(const item of cases)test(`${item.role} sees actionable workflow guidance`,async({page})=>{
+for(const item of cases)test(`${item.role} sees actionable workflow guidance${item.role==='auditor'?' on '+item.section:''}`,async({page})=>{
   const url=await errors(page,item.role,item.code,item.endpoint);
   await page.goto(url.replace('?',`/${item.section}?`));
   const alert=page.locator('main [role="alert"]').first();
@@ -128,7 +130,7 @@ test('missing ID originals tell a Beneficiary to upload, without assigning offic
 });
 
 test('invalid UTF-8 uploads explain how to correct the CSV',async({page})=>{
-  const url=await errors(page,'beneficiary','unused_fixture_error','/never');
+  const url=await errors(page,'barangay','unused_fixture_error','/never');
   await page.goto(url.replace('?', '/registry?'));
   await page.getByText('Import household declarations from CSV',{exact:true}).click();
   await page.getByLabel('Completed UTF-8 CSV file').setInputFiles({name:'synthetic-invalid-encoding.csv',mimeType:'text/csv',buffer:Buffer.from([0xff,0xfe])});
