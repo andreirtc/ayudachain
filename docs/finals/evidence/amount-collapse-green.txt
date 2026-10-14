@@ -1,0 +1,12 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/inputs.spec.ts
+
+
+Running 1 test using 1 worker
+
+(node:73449) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 tests/inputs.spec.ts:4:5 › amount inputs cannot submit the initial revision while saved input history is loading (2.5s)
+
+  1 passed (3.0s)

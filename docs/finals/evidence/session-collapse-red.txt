@@ -1,0 +1,49 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/sessions-loading.spec.ts
+
+
+Running 1 test using 1 worker
+
+(node:77053) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 tests/sessions-loading.spec.ts:4:5 › late saved sessions cannot collapse the session form after editing starts (7.5s)
+
+
+  1) tests/sessions-loading.spec.ts:4:5 › late saved sessions cannot collapse the session form after editing starts 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator:  getByLabel('Site', { exact: true })
+    Expected: visible
+    Received: hidden
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeVisible" getByLabel('Site', { exact: true }) with timeout 5000ms
+      - waiting for getByLabel('Site', { exact: true })
+        14 × locator resolved to <input required="" value="Invented draft hall"/>
+           - unexpected value "hidden"
+
+
+      13 |     await page.getByLabel('Site',{exact:true}).fill('Invented draft hall');
+      14 |     release();
+    > 15 |     await expect(page.getByLabel('Site',{exact:true})).toBeVisible();
+         |                                                        ^
+      16 |     await expect(page.getByLabel('Site',{exact:true})).toHaveValue('Invented draft hall');
+      17 |     await expect(page.getByLabel('Current published list',{exact:true}).locator('option')).not.toHaveCount(1);
+      18 |     await expect(page.getByLabel('Site',{exact:true})).toBeVisible();
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/sessions-loading.spec.ts:15:56
+
+    Error Context: test-results/sessions-loading-late-save-2f99d-n-form-after-editing-starts/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/sessions-loading-late-save-2f99d-n-form-after-editing-starts/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/sessions-loading-late-save-2f99d-n-form-after-editing-starts/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests/sessions-loading.spec.ts:4:5 › late saved sessions cannot collapse the session form after editing starts 

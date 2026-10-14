@@ -1,5 +1,7 @@
 # AyudaChain local synthetic MVP
 
+Finals preparation (14 October 2026): see [current readiness and evidence](docs/finals/FINALIST_READINESS.md), [safe demo runbook](docs/finals/DEMO_RUNBOOK.md), [plain-English explanation](docs/finals/PROJECT_EXPLAINED.md) and [judges’ defense masterbook](docs/finals/JUDGES_QA.md). These fresh results are distinct from historical validation.
+
 The implemented five-role workflow runs at **/mvp** with FastAPI, PostgreSQL and an actual local EVM registry. The root page redirects there. Open a dedicated role workspace from the entry page: /mvp/beneficiary, /mvp/barangay-officer, /mvp/dswd-officer, /mvp/disbursing-officer or /mvp/auditor. Each has its own overview, nested navigation and a same-role synthetic Account panel. URLs organize the interface; there is no sign-in gate. Authentication, secure authorization, operational privacy and authenticated accountability remain **Pending**. Use invented households only.
 
 Beneficiaries and Barangay Officers register households and submit claims. Barangay responses and council resolutions or explicit unsigned fallback snapshots reach an independent DSWD reviewer. Documentary wage/category inputs produce exact centavo amounts; only a list's own matching chain confirmation publishes it. DSWD schedules cash staff and members. The recipient authorizes a short-lived attempt; an assigned officer compares the person/photo ID and records cash once. No-phone assistance requires a private PIN and a distinct independent checking officer. Private recipient answers, grievances and resident challenges retain their histories. Auditors inspect exact evidence and current chain reads without business mutation.
@@ -28,7 +30,7 @@ npm --prefix frontend run build
 npm --prefix frontend run test:mvp
 ```
 
-The integration suite requires the distinct fault node on 8555 and its manifest; the browser suite requires the running MVP. Browser full-journey evaluation explicitly retires the old namespace and deploys a new local registry before creating reference seeds. It preserves previous records and originals. Follow [evaluation instructions](docs/guides/demo-script.md). Actual results and all 26 requirement mappings are in [validation](docs/implementation/validation.md).
+The integration suite requires the distinct fault node on 8555 and its manifest; the browser suite requires the running MVP. Browser full-journey evaluation now requires a separately created fresh isolated lab and MVP_BROWSER_FRESH_RUN=1. It refuses a nonempty household registry and never resets the current evaluation. Run the journey before dependent browser cases; retain failed partial labs. Follow [evaluation instructions](docs/guides/demo-script.md). Actual results and all 26 requirement mappings are in [validation](docs/implementation/validation.md).
 
 The authoritative design is [PRD](docs/product/prd.md), [ERD](docs/system/erd.md), and the [14-stage plan](docs/product-ideation/plans/2026-10-10-mvp-implementation-plan.md). [Compatibility ADR](docs/adr/2026-10-10-mvp-evidence-protocol-and-registry.md) defines the separate evidence protocol. Historical ideation is unchanged.
 
@@ -66,7 +68,7 @@ This branch applies the visual layer of the approved "Tonal" design to `/mvp`. T
 | Phone navigation | Material 3 bottom navigation bar with at most four destinations per role | Hamburger menu opening the full drawer |
 | Desktop navigation | Navigation rail with a floating action button, plus list and detail panes side by side for claims, payouts and integrity | Fixed side drawer; list and detail are separate stacked panels |
 | Decisions | Segmented buttons (Approve / Decline / Refer to barangay; Endorse / Do not endorse; Pass after comparison / Fail and hold/stop) | Existing radio buttons and selects |
-| Confirmation | "Record this decision?" dialog before an irreversible decision or handover | Decisions and handovers save directly (CSV intake keeps its own preview-and-confirm step) |
+| Confirmation | "Record this decision?" dialog before an irreversible decision or handover | Cash handover has a native household/amount review dialog with cancel/Escape. Other decisions still save directly; CSV keeps its preview-and-confirm step. |
 | Feedback | Snackbar after saving ("Decision recorded for DFC-…", with View) | Inline saved message |
 | Flags | Material 3 banner at the top of a case: icon, sentence, text-button actions, divider | Flags appear inside the existing panels |
 | Integrity rows | Status rows (glyph, record name, time or action, explanation line) | Existing `IntegrityStatus` layout restyled; same structure as before |
@@ -78,11 +80,9 @@ This branch applies the visual layer of the approved "Tonal" design to `/mvp`. T
 | Other palettes | Bayanihan Teal and Indigo and Mango | Only Sea and Sun is shipped |
 | Legacy screens | Not covered by the design | Unchanged (Tailwind legacy UI); only the favicon is shared |
 
-### Known validation gaps
+### Validation status
 
-- **Typecheck:** passes.
-- **Production build:** not run on this branch.
-- **Browser suite:** 10 of 37 tests fail. I re-ran the three spec files containing them on the unmodified, pre-redesign code: 6 of these failures were reproduced there, and the other 4 were not re-run there because they depend on the journey test passing first. The causes are a duplicate "Register your household" heading match in `journey.spec.ts`, and verification tests that expect a word boundary after "Verified", which `IntegrityStatus` does not render. These need a separate fix.
+The starting Tonal branch documented ten browser failures. Finals preparation reproduced the duplicate registration selector and concatenated integrity text, repaired them, integrated the existing role error guidance and fixed transaction reselection/registry loading. The cash-handover review and explicit evaluation-clock disclosure are now connected. [Finalist readiness](docs/finals/FINALIST_READINESS.md) records current completed checks, failed intermediate runs and remaining limits. Do not treat earlier branch results as current evidence.
 
 The prompt for completing the missing parts is in [docs/design/implement-missing-design.md](docs/design/implement-missing-design.md).
 

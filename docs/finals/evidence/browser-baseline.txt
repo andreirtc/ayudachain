@@ -1,0 +1,17 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/workspaces.spec.ts -g entry links|keyboard navigation|dedicated workspaces|read-only auditor|all principal|failed dashboard
+
+
+Running 6 tests using 1 worker
+
+(node:34794) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 tests/workspaces.spec.ts:6:5 › dedicated workspaces survive refresh, preserve role and fit both viewports (34.2s)
+  ✓  2 tests/workspaces.spec.ts:22:5 › entry links lead to five workspaces; unknown sections cannot display another role (6.5s)
+  ✓  3 tests/workspaces.spec.ts:30:5 › read-only auditor and restricted barangay keep private actions out (6.4s)
+  ✓  4 tests/workspaces.spec.ts:40:5 › keyboard navigation, scoped accounts and nested links retain context (6.0s)
+  ✓  5 tests/workspaces.spec.ts:101:5 › all principal role sections render without horizontal overflow (58.5s)
+  ✓  6 tests/workspaces.spec.ts:114:5 › failed dashboard and audit reads stay unavailable until a successful retry (5.4s)
+
+  6 passed (2.0m)

@@ -1,0 +1,42 @@
+
+> ayudachain-contracts@1.0.0 test
+> hardhat test
+
+Compiled 2 Solidity files successfully (evm target: paris).
+
+
+  AyudaChainRegistry Smart Contract
+    Access Control & Initialization
+      ✔ should set deployer as owner and default operator
+      ✔ should allow owner to authorize new operators
+      ✔ should prevent unauthorized accounts from releasing funds
+    P0 Workflow: Fund Release -> Allocation -> Distribution
+      ✔ should successfully record fund release and emit event
+      ✔ should prevent duplicate batch creation (append-only integrity)
+      ✔ should record barangay allocation under an active batch
+      ✔ should confirm distribution and anchor cryptographic receipt hash
+      ✔ should verify matching receipt hash and reject mismatched/altered hash
+      ✔ should anchor generic audit report hashes
+
+  AyudaChain evidence registry (separate from legacy)
+    ✔ round-trips full bytes32 and rejects unauthorized/duplicate/zero records
+correction gas units: 555889
+    ✔ atomically exposes signed centavo correction amounts and prevents repeated original correction
+    ✔ rejects cross-context lineage and exposes all private answers through one public kind
+
+  Python/Node evidence protocol vectors
+    ✔ independently matches document
+    ✔ independently matches amount_input
+    ✔ independently matches barangay_submission
+    ✔ independently matches system_fallback
+    ✔ independently matches approved_list
+    ✔ independently matches handover
+    ✔ independently matches outcome
+    ✔ independently matches fund_release
+    ✔ independently matches fund_reversal
+    ✔ independently matches fund_replacement
+    ✔ rejects numeric/secret/surrogate material
+
+
+  23 passing (1s)
+

@@ -1,0 +1,705 @@
+{
+  "baseline": "4377db1 plus local finals changes",
+  "data": "invented local application records",
+  "blockchain": "actual loopback EVM, chain ID 31337",
+  "business_clock": "labelled accelerated synthetic clock may differ from wall time",
+  "page_errors": [],
+  "records": [
+    {
+      "file": "directory-1440-light.png",
+      "url": "/mvp",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:17.288Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "dswd-overview-1440-light.png",
+      "url": "/mvp/dswd-officer?account=c1a1de44-226d-4450-b93c-7b8d791ebc3c&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:19.625Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "dswd-funds-1440-light.png",
+      "url": "/mvp/dswd-officer/funds?account=c1a1de44-226d-4450-b93c-7b8d791ebc3c&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:21.600Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "dswd-registry-1440-light.png",
+      "url": "/mvp/dswd-officer/registry?account=c1a1de44-226d-4450-b93c-7b8d791ebc3c&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:24.116Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "dswd-claims-1440-light.png",
+      "url": "/mvp/dswd-officer/claims?account=c1a1de44-226d-4450-b93c-7b8d791ebc3c&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:26.482Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "dswd-lists-1440-light.png",
+      "url": "/mvp/dswd-officer/lists?account=c1a1de44-226d-4450-b93c-7b8d791ebc3c&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:28.461Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "dswd-sessions-1440-light.png",
+      "url": "/mvp/dswd-officer/sessions?account=c1a1de44-226d-4450-b93c-7b8d791ebc3c&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:30.504Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "barangay-overview-1440-light.png",
+      "url": "/mvp/barangay-officer?account=c545a09d-0204-41e8-b974-6d72f7a2de54&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:32.290Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "beneficiary-overview-1440-light.png",
+      "url": "/mvp/beneficiary?account=58737215-cc8c-40df-b4eb-4e54cda53487&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:33.993Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "beneficiary-receipt-1440-light.png",
+      "url": "/mvp/beneficiary/payouts?account=58737215-cc8c-40df-b4eb-4e54cda53487&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81&record=1c2835f4-a11d-466f-abc9-e49cb2293568",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:35.738Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "beneficiary-outcomes-1440-light.png",
+      "url": "/mvp/beneficiary/outcomes?account=58737215-cc8c-40df-b4eb-4e54cda53487&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81&record=1c2835f4-a11d-466f-abc9-e49cb2293568",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:37.716Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "disbursing-overview-1440-light.png",
+      "url": "/mvp/disbursing-officer?account=01fee26a-e933-4e93-bc4a-a697f2fac67f&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:39.464Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "disbursing-receipt-1440-light.png",
+      "url": "/mvp/disbursing-officer/payouts?account=01fee26a-e933-4e93-bc4a-a697f2fac67f&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81&record=1c2835f4-a11d-466f-abc9-e49cb2293568",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:41.194Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "auditor-overview-1440-light.png",
+      "url": "/mvp/auditor?account=49584ff1-dd97-4b35-9be0-caec7e4fd0d1&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:43.100Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "auditor-integrity-1440-light.png",
+      "url": "/mvp/auditor/audit?account=49584ff1-dd97-4b35-9be0-caec7e4fd0d1&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:46.208Z",
+      "horizontal_overflow": false,
+      "actual_integrity": {
+        "result": "match",
+        "components": [
+          "canonical_bytes",
+          "raw_originals",
+          "chain_record"
+        ],
+        "local_hash": "0xdd21ac56d310f772ff7759ff710f4c155b2ef8fb86445a3129be22bc1ca05864",
+        "onchain_hash": "0xdd21ac56d310f772ff7759ff710f4c155b2ef8fb86445a3129be22bc1ca05864",
+        "deployment_id": "bb5be6d4-bc09-4401-b9b3-d92ad5c1e0ab",
+        "chain_id": "31337",
+        "contract_address": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
+        "public_id": "0xa305bebc29cfa0c77394ce8cacd787c736dcd2a94ae88ce12dab80aa0874a393",
+        "block_number": "71",
+        "block_hash": "0xe1bac37a05320f181b16b45cbf78383c19bf71ab83089423f5dec333bb27abdf",
+        "historical": false,
+        "checked_at": "2026-10-14T04:28:45.786520+00:00",
+        "commitment_id": "ed406814-666c-4f84-9164-899a10c6616c",
+        "kind": "handover"
+      }
+    },
+    {
+      "file": "directory-1440-light-taglish.png",
+      "url": "/mvp",
+      "language": "fil",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:47.309Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "dswd-registry-1440-light-taglish.png",
+      "url": "/mvp/dswd-officer/registry?account=c1a1de44-226d-4450-b93c-7b8d791ebc3c&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "fil",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:48.966Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "barangay-overview-1440-light-taglish.png",
+      "url": "/mvp/barangay-officer?account=c545a09d-0204-41e8-b974-6d72f7a2de54&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "fil",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:50.436Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "beneficiary-overview-1440-light-taglish.png",
+      "url": "/mvp/beneficiary?account=58737215-cc8c-40df-b4eb-4e54cda53487&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "fil",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:52.053Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "disbursing-overview-1440-light-taglish.png",
+      "url": "/mvp/disbursing-officer?account=01fee26a-e933-4e93-bc4a-a697f2fac67f&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "fil",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:53.426Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "auditor-integrity-1440-light-taglish.png",
+      "url": "/mvp/auditor/audit?account=49584ff1-dd97-4b35-9be0-caec7e4fd0d1&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "fil",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:55.763Z",
+      "horizontal_overflow": false,
+      "actual_integrity": {
+        "result": "match",
+        "components": [
+          "canonical_bytes",
+          "raw_originals",
+          "chain_record"
+        ],
+        "local_hash": "0xdd21ac56d310f772ff7759ff710f4c155b2ef8fb86445a3129be22bc1ca05864",
+        "onchain_hash": "0xdd21ac56d310f772ff7759ff710f4c155b2ef8fb86445a3129be22bc1ca05864",
+        "deployment_id": "bb5be6d4-bc09-4401-b9b3-d92ad5c1e0ab",
+        "chain_id": "31337",
+        "contract_address": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
+        "public_id": "0xa305bebc29cfa0c77394ce8cacd787c736dcd2a94ae88ce12dab80aa0874a393",
+        "block_number": "71",
+        "block_hash": "0xe1bac37a05320f181b16b45cbf78383c19bf71ab83089423f5dec333bb27abdf",
+        "historical": false,
+        "checked_at": "2026-10-14T04:28:55.432513+00:00",
+        "commitment_id": "ed406814-666c-4f84-9164-899a10c6616c",
+        "kind": "handover"
+      }
+    },
+    {
+      "file": "directory-390-light.png",
+      "url": "/mvp",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:56.873Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "dswd-overview-390-light.png",
+      "url": "/mvp/dswd-officer?account=c1a1de44-226d-4450-b93c-7b8d791ebc3c&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:58.477Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "dswd-funds-390-light.png",
+      "url": "/mvp/dswd-officer/funds?account=c1a1de44-226d-4450-b93c-7b8d791ebc3c&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:28:59.966Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "dswd-registry-390-light.png",
+      "url": "/mvp/dswd-officer/registry?account=c1a1de44-226d-4450-b93c-7b8d791ebc3c&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:01.498Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "dswd-claims-390-light.png",
+      "url": "/mvp/dswd-officer/claims?account=c1a1de44-226d-4450-b93c-7b8d791ebc3c&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:03.084Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "dswd-lists-390-light.png",
+      "url": "/mvp/dswd-officer/lists?account=c1a1de44-226d-4450-b93c-7b8d791ebc3c&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:04.891Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "dswd-sessions-390-light.png",
+      "url": "/mvp/dswd-officer/sessions?account=c1a1de44-226d-4450-b93c-7b8d791ebc3c&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:06.679Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "barangay-overview-390-light.png",
+      "url": "/mvp/barangay-officer?account=c545a09d-0204-41e8-b974-6d72f7a2de54&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:08.467Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "beneficiary-overview-390-light.png",
+      "url": "/mvp/beneficiary?account=58737215-cc8c-40df-b4eb-4e54cda53487&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:10.379Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "beneficiary-receipt-390-light.png",
+      "url": "/mvp/beneficiary/payouts?account=58737215-cc8c-40df-b4eb-4e54cda53487&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81&record=1c2835f4-a11d-466f-abc9-e49cb2293568",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:12.034Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "beneficiary-outcomes-390-light.png",
+      "url": "/mvp/beneficiary/outcomes?account=58737215-cc8c-40df-b4eb-4e54cda53487&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81&record=1c2835f4-a11d-466f-abc9-e49cb2293568",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:13.812Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "disbursing-overview-390-light.png",
+      "url": "/mvp/disbursing-officer?account=01fee26a-e933-4e93-bc4a-a697f2fac67f&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:15.416Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "disbursing-receipt-390-light.png",
+      "url": "/mvp/disbursing-officer/payouts?account=01fee26a-e933-4e93-bc4a-a697f2fac67f&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81&record=1c2835f4-a11d-466f-abc9-e49cb2293568",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:17.064Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "auditor-overview-390-light.png",
+      "url": "/mvp/auditor?account=49584ff1-dd97-4b35-9be0-caec7e4fd0d1&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:18.871Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "auditor-integrity-390-light.png",
+      "url": "/mvp/auditor/audit?account=49584ff1-dd97-4b35-9be0-caec7e4fd0d1&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:21.484Z",
+      "horizontal_overflow": false,
+      "actual_integrity": {
+        "result": "match",
+        "components": [
+          "canonical_bytes",
+          "raw_originals",
+          "chain_record"
+        ],
+        "local_hash": "0xdd21ac56d310f772ff7759ff710f4c155b2ef8fb86445a3129be22bc1ca05864",
+        "onchain_hash": "0xdd21ac56d310f772ff7759ff710f4c155b2ef8fb86445a3129be22bc1ca05864",
+        "deployment_id": "bb5be6d4-bc09-4401-b9b3-d92ad5c1e0ab",
+        "chain_id": "31337",
+        "contract_address": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
+        "public_id": "0xa305bebc29cfa0c77394ce8cacd787c736dcd2a94ae88ce12dab80aa0874a393",
+        "block_number": "71",
+        "block_hash": "0xe1bac37a05320f181b16b45cbf78383c19bf71ab83089423f5dec333bb27abdf",
+        "historical": false,
+        "checked_at": "2026-10-14T04:29:21.110807+00:00",
+        "commitment_id": "ed406814-666c-4f84-9164-899a10c6616c",
+        "kind": "handover"
+      }
+    },
+    {
+      "file": "directory-390-light-taglish.png",
+      "url": "/mvp",
+      "language": "fil",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:22.499Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "dswd-registry-390-light-taglish.png",
+      "url": "/mvp/dswd-officer/registry?account=c1a1de44-226d-4450-b93c-7b8d791ebc3c&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "fil",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:24.500Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "barangay-overview-390-light-taglish.png",
+      "url": "/mvp/barangay-officer?account=c545a09d-0204-41e8-b974-6d72f7a2de54&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "fil",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:26.231Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "beneficiary-overview-390-light-taglish.png",
+      "url": "/mvp/beneficiary?account=58737215-cc8c-40df-b4eb-4e54cda53487&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "fil",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:28.400Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "disbursing-overview-390-light-taglish.png",
+      "url": "/mvp/disbursing-officer?account=01fee26a-e933-4e93-bc4a-a697f2fac67f&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "fil",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:30.009Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "auditor-integrity-390-light-taglish.png",
+      "url": "/mvp/auditor/audit?account=49584ff1-dd97-4b35-9be0-caec7e4fd0d1&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "fil",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "light",
+      "captured_at": "2026-10-14T04:29:32.716Z",
+      "horizontal_overflow": false,
+      "actual_integrity": {
+        "result": "match",
+        "components": [
+          "canonical_bytes",
+          "raw_originals",
+          "chain_record"
+        ],
+        "local_hash": "0xdd21ac56d310f772ff7759ff710f4c155b2ef8fb86445a3129be22bc1ca05864",
+        "onchain_hash": "0xdd21ac56d310f772ff7759ff710f4c155b2ef8fb86445a3129be22bc1ca05864",
+        "deployment_id": "bb5be6d4-bc09-4401-b9b3-d92ad5c1e0ab",
+        "chain_id": "31337",
+        "contract_address": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
+        "public_id": "0xa305bebc29cfa0c77394ce8cacd787c736dcd2a94ae88ce12dab80aa0874a393",
+        "block_number": "71",
+        "block_hash": "0xe1bac37a05320f181b16b45cbf78383c19bf71ab83089423f5dec333bb27abdf",
+        "historical": false,
+        "checked_at": "2026-10-14T04:29:32.331522+00:00",
+        "commitment_id": "ed406814-666c-4f84-9164-899a10c6616c",
+        "kind": "handover"
+      }
+    },
+    {
+      "file": "dswd-overview-1440-dark.png",
+      "url": "/mvp/dswd-officer?account=c1a1de44-226d-4450-b93c-7b8d791ebc3c&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "dark",
+      "captured_at": "2026-10-14T04:29:34.508Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "beneficiary-receipt-1440-dark.png",
+      "url": "/mvp/beneficiary/payouts?account=58737215-cc8c-40df-b4eb-4e54cda53487&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81&record=1c2835f4-a11d-466f-abc9-e49cb2293568",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "dark",
+      "captured_at": "2026-10-14T04:29:36.274Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "auditor-integrity-1440-dark.png",
+      "url": "/mvp/auditor/audit?account=49584ff1-dd97-4b35-9be0-caec7e4fd0d1&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "dark",
+      "captured_at": "2026-10-14T04:29:39.010Z",
+      "horizontal_overflow": false,
+      "actual_integrity": {
+        "result": "match",
+        "components": [
+          "canonical_bytes",
+          "raw_originals",
+          "chain_record"
+        ],
+        "local_hash": "0xdd21ac56d310f772ff7759ff710f4c155b2ef8fb86445a3129be22bc1ca05864",
+        "onchain_hash": "0xdd21ac56d310f772ff7759ff710f4c155b2ef8fb86445a3129be22bc1ca05864",
+        "deployment_id": "bb5be6d4-bc09-4401-b9b3-d92ad5c1e0ab",
+        "chain_id": "31337",
+        "contract_address": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
+        "public_id": "0xa305bebc29cfa0c77394ce8cacd787c736dcd2a94ae88ce12dab80aa0874a393",
+        "block_number": "71",
+        "block_hash": "0xe1bac37a05320f181b16b45cbf78383c19bf71ab83089423f5dec333bb27abdf",
+        "historical": false,
+        "checked_at": "2026-10-14T04:29:38.587309+00:00",
+        "commitment_id": "ed406814-666c-4f84-9164-899a10c6616c",
+        "kind": "handover"
+      }
+    },
+    {
+      "file": "dswd-overview-390-dark.png",
+      "url": "/mvp/dswd-officer?account=c1a1de44-226d-4450-b93c-7b8d791ebc3c&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "dark",
+      "captured_at": "2026-10-14T04:29:40.634Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "beneficiary-receipt-390-dark.png",
+      "url": "/mvp/beneficiary/payouts?account=58737215-cc8c-40df-b4eb-4e54cda53487&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81&record=1c2835f4-a11d-466f-abc9-e49cb2293568",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "dark",
+      "captured_at": "2026-10-14T04:29:42.467Z",
+      "horizontal_overflow": false
+    },
+    {
+      "file": "auditor-integrity-390-dark.png",
+      "url": "/mvp/auditor/audit?account=49584ff1-dd97-4b35-9be0-caec7e4fd0d1&disaster=fdd39b4b-8661-465d-94bf-1fec1af58b81",
+      "language": "en",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "theme": "dark",
+      "captured_at": "2026-10-14T04:29:44.976Z",
+      "horizontal_overflow": false,
+      "actual_integrity": {
+        "result": "match",
+        "components": [
+          "canonical_bytes",
+          "raw_originals",
+          "chain_record"
+        ],
+        "local_hash": "0xdd21ac56d310f772ff7759ff710f4c155b2ef8fb86445a3129be22bc1ca05864",
+        "onchain_hash": "0xdd21ac56d310f772ff7759ff710f4c155b2ef8fb86445a3129be22bc1ca05864",
+        "deployment_id": "bb5be6d4-bc09-4401-b9b3-d92ad5c1e0ab",
+        "chain_id": "31337",
+        "contract_address": "0x5f3f1dBD7B74C6B46e8c44f98792A1dAf8d69154",
+        "public_id": "0xa305bebc29cfa0c77394ce8cacd787c736dcd2a94ae88ce12dab80aa0874a393",
+        "block_number": "71",
+        "block_hash": "0xe1bac37a05320f181b16b45cbf78383c19bf71ab83089423f5dec333bb27abdf",
+        "historical": false,
+        "checked_at": "2026-10-14T04:29:44.607438+00:00",
+        "commitment_id": "ed406814-666c-4f84-9164-899a10c6616c",
+        "kind": "handover"
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/journey.spec.ts --output=../.runtime/finals/resumed-final-journey
+
+
+Running 1 test using 1 worker
+
+(node:20392) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+  ✓  1 tests/journey.spec.ts:8:5 › five roles use edited original-backed forms for own-device and assisted cash, answers and actual audit (1.6m)
+
+  1 passed (1.6m)

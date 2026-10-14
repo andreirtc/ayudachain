@@ -1,3 +1,4 @@
+import {python} from './python';
 import {test,expect} from '@playwright/test';
 import {execFileSync} from 'node:child_process';
 import path from 'node:path';
@@ -21,7 +22,7 @@ test('dedicated workspaces survive refresh, preserve role and fit both viewports
 });
 test('entry links lead to five workspaces; unknown sections cannot display another role',async({page})=>{
   await page.goto('/mvp');
-  await expect(page.getByRole('heading',{name:'Relief you can follow.'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Choose your work area'})).toBeVisible();
   for(const space of spaces)await expect(page.locator(`a[href="/mvp/${space}"]`)).toBeVisible();
   await page.goto('/mvp/barangay-officer/funds');
   await expect(page.getByRole('heading',{name:'Page unavailable'})).toBeVisible();
@@ -38,12 +39,14 @@ test('read-only auditor and restricted barangay keep private actions out',async(
 });
 
 test('keyboard navigation, scoped accounts and nested links retain context',async({page,request})=>{
+  const pageErrors:string[]=[];page.on('pageerror',e=>pageErrors.push(e.message));
   const actors=(await (await request.get('http://127.0.0.1:8000/api/v1/actors/catalogue')).json()).data;
   const dswd=actors.find((a:{role:string;status:string})=>a.role==='dswd'&&a.status==='active');
   const d=(await (await request.get('http://127.0.0.1:8000/api/v1/disasters')).json()).data[0];
   let release!:()=>void;const held=new Promise<void>(resolve=>release=resolve);
   await page.route('**/api/v1/actors/catalogue',async route=>{const response=await route.fetch();await held;try{await route.fulfill({response});}catch{}});
   await page.goto(`/mvp/dswd-officer?account=${dswd.id}&disaster=${d.id}`);
+  await expect(page.getByRole('link',{name:'Skip to main content'})).toBeVisible();
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link',{name:'Skip to main content'})).toBeFocused();
   await page.keyboard.press('Enter');
@@ -65,6 +68,7 @@ test('keyboard navigation, scoped accounts and nested links retain context',asyn
   await page.getByRole('navigation',{name:'Workspace navigation'}).getByRole('link',{name:'Claim review'}).click();
   await expect(page.getByRole('heading',{name:'Claims and review',exact:true})).toBeVisible();
   await expect(page.getByRole('button',{name:'Open navigation'})).toHaveAttribute('aria-expanded','false');
+  expect(pageErrors).toEqual([]);
 });
 
 test('edited original-backed release survives refresh and cannot be changed by auditor',async({page,request})=>{
@@ -75,7 +79,7 @@ test('edited original-backed release survives refresh and cannot be changed by a
   const reference='DFC-2026-UX'+Date.now();
   await page.goto(`/mvp/dswd-officer/funds?account=${dswd.id}&disaster=${disaster}`);
   await page.getByRole('button',{name:'Record a release'}).click();
-  const bytes=execFileSync(path.join(root,'.venv/Scripts/python.exe'),['-c',"from backend.scripts.synthetic_evidence import synthetic_pdf; import sys; sys.stdout.buffer.write(synthetic_pdf('SYNTHETIC RELEASE '+sys.argv[1]+'\\nAmount: PHP 12,345.00'))",reference],{cwd:root});
+  const bytes=execFileSync(python,['-c',"from backend.scripts.synthetic_evidence import synthetic_pdf; import sys; sys.stdout.buffer.write(synthetic_pdf('SYNTHETIC RELEASE '+sys.argv[1]+'\\nAmount: PHP 12,345.00'))",reference],{cwd:root});
   await page.getByLabel('Release original',{exact:true}).setInputFiles({name:'synthetic-release.pdf',mimeType:'application/pdf',buffer:bytes});
   await expect(page.getByLabel('Confirmed amount (PHP)',{exact:true})).toHaveValue('12345.00');
   await page.getByLabel('Reference number',{exact:true}).fill(reference);
@@ -93,9 +97,11 @@ test('edited original-backed release survives refresh and cannot be changed by a
   await expect(entry).toContainText('₱12,350.50');
   await expect(entry.getByRole('button',{name:'Append correction'})).toHaveCount(0);
   await entry.getByText('Evidence, amount review and chain proofs',{exact:true}).click();
+  await expect.poll(async()=>{const r=await request.get('http://127.0.0.1:8000/api/v1/audit/proofs',{headers:{'X-Demo-Actor-ID':auditor.id}});return (await r.json()).data.filter((p:{state:string})=>p.state!=='confirmed').length;},{timeout:30000}).toBe(0);
+  const checked=page.waitForResponse(r=>r.url().endsWith('/integrity/check')&&r.request().method()==='POST');
   await entry.getByRole('button',{name:'Check chain now'}).first().click();
-  await expect(entry.getByText('Chain could not be read; not verified.').first()).toBeVisible({timeout:25000});
-  await expect(entry.locator('.ac-integrity-result').first()).not.toContainText('Verified');
+  expect((await(await checked).json()).data.result).toBe('match');
+  await expect(entry.locator('.ac-integrity-result').first()).toContainText(/\bVerified\b/);
 });
 
 test('all principal role sections render without horizontal overflow',async({page})=>{

@@ -1,0 +1,15 @@
+{
+  "checked_at": "2026-10-14T04:28:16.971741+00:00",
+  "commitment_id": "ed406814-666c-4f84-9164-899a10c6616c",
+  "kind": "handover",
+  "source": "Authorized actual saved material and original bytes; separate signer-free Node verifier",
+  "signing_key_supplied": false,
+  "result": {
+    "result": "match",
+    "local_hash": "0xdd21ac56d310f772ff7759ff710f4c155b2ef8fb86445a3129be22bc1ca05864",
+    "onchain_hash": "0xdd21ac56d310f772ff7759ff710f4c155b2ef8fb86445a3129be22bc1ca05864",
+    "block_number": "71",
+    "block_hash": "0xe1bac37a05320f181b16b45cbf78383c19bf71ab83089423f5dec333bb27abdf",
+    "historical": false
+  }
+}

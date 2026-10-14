@@ -25,6 +25,6 @@ test('queue filters navigate without putting household search text in URLs',asyn
 });
 test('queue errors are recoverable and do not show previous counts',async({page})=>{
  await fixture(page);let fail=true;await page.route('**/api/v1/queues/search',async route=>{if(fail)await route.fulfill({status:503,json:{error:'database_unavailable'}});else await route.fulfill({json:{data:{rows:[],total:0,offset:0,limit:25,kinds:['claims'],states:[],scope:'permitted'}}});});
- await page.goto(`/mvp/dswd-officer/queues?account=${office.id}&disaster=${disaster}`);await expect(page.getByRole('alert').filter({hasText:'database_unavailable'})).toContainText('database_unavailable');
+ await page.goto(`/mvp/dswd-officer/queues?account=${office.id}&disaster=${disaster}`);await expect(page.getByRole('alert').filter({hasText:'database service is unavailable'})).toContainText('Ask the evaluation operator');
  fail=false;await page.getByRole('button',{name:'Retry search'}).click();await expect(page.getByText('0 results',{exact:false})).toBeVisible();
 });

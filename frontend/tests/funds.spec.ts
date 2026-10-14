@@ -1,3 +1,4 @@
+import {python} from './python';
 import {workspacePath} from './workspace-navigation';
 import {test,expect} from '@playwright/test';
 import {execFileSync} from 'node:child_process';
@@ -10,7 +11,7 @@ test('fresh editable release survives reload and Auditor is read-only',async({pa
   await page.getByRole('button',{name:'Record a release'}).click();
   const reference=`DFC-2026-${Date.now()}`;
   const root=path.resolve(__dirname,'../..');
-  const bytes=execFileSync(path.join(root,'.venv/Scripts/python.exe'),['-c',"from backend.scripts.synthetic_evidence import synthetic_pdf; import sys; sys.stdout.buffer.write(synthetic_pdf('Invented browser release '+sys.argv[1]+'\\nAmount: PHP 123,456.00'))",reference],{cwd:root});
+  const bytes=execFileSync(python,['-c',"from backend.scripts.synthetic_evidence import synthetic_pdf; import sys; sys.stdout.buffer.write(synthetic_pdf('Invented browser release '+sys.argv[1]+'\\nAmount: PHP 123,456.00'))",reference],{cwd:root});
   await page.getByLabel('Release original',{exact:true}).setInputFiles({name:'invented-release.pdf',mimeType:'application/pdf',buffer:bytes});
   await expect(page.getByLabel('Confirmed amount (PHP)',{exact:true})).toHaveValue('123456.00');
   await page.getByLabel('Reference number',{exact:true}).fill(reference);

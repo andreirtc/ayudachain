@@ -1,0 +1,412 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test --grep-invert five roles use edited original-backed forms
+
+
+Running 53 tests using 1 worker
+
+(node:61141) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/actor-switch.spec.ts:4:5 › a delayed real former-actor response cannot render after switching role (3.6s)
+  ✓   2 tests/finals-ux.spec.ts:3:5 › assisted registration stays open while choosing a recipient and editing (1.5s)
+  ✓   3 tests/finals-ux.spec.ts:32:5 › handover review supports cancel, Escape and one explicit confirmation (2.0s)
+
+  ✓   4 tests/funds-accuracy.spec.ts:28:5 › extracted centavos beyond the safe Number range prefill without losing a cent (2.2s)
+
+  ✓   5 tests/funds-accuracy.spec.ts:33:5 › a saved large-centavo correction prefills the exact recorded amount (3.6s)
+
+  ✓   6 tests/funds-accuracy.spec.ts:48:5 › transcription correction retains the primary source when supporting evidence was uploaded first (4.3s)
+
+  ✓   7 tests/funds.spec.ts:7:5 › fresh editable release survives reload and Auditor is read-only (6.5s)
+  ✓   8 tests/inputs.spec.ts:4:5 › amount inputs cannot submit the initial revision while saved input history is loading (1.9s)
+  ✓   9 tests/legacy.spec.ts:2:5 › legacy verification has explicit coverage and no fabricated fraud controls (2.0s)
+  ✓  10 tests/notes.spec.ts:5:5 › closed-transaction DSWD notes persist and remain absent from payer and Auditor write controls (9.5s)
+  ✓  11 tests/registry.spec.ts:4:5 › self registry persists absence and scoped staff view omits private contact (5.2s)
+  ✘  12 tests/usability-csv.spec.ts:45:5 › CSV preview rejects private headers, cancels without writes and confirms only selected valid rows (7.0s)
+(node:62623) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  13 tests/usability-csv.spec.ts:70:5 › lost CSV acknowledgement retries identical content and repeat upload recovers saved row (6.9s)
+(node:62776) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  14 tests/usability-duplicate.spec.ts:34:5 › review projection fixture: acknowledgment resets for changed check, claim revision and comparison data (2.4s)
+  ✓  15 tests/usability-duplicate.spec.ts:58:5 › review projection fixture: Auditor inspects frozen comparisons without decision or recheck controls (1.4s)
+  ✓  16 tests/usability-guidance-scan.spec.ts:23:5 › camera capability fixture: unsupported browser keeps manual lookup available (1.6s)
+  ✓  17 tests/usability-guidance-scan.spec.ts:31:5 › camera capability fixture: cancel releases a stream granted after cancellation (2.6s)
+  ✓  18 tests/usability-guidance-scan.spec.ts:45:5 › camera capability fixture: mocked decoder opens a reference once without payout mutations (1.8s)
+  ✘  19 tests/usability-guidance-scan.spec.ts:65:5 › projection fixture: direct reference outside catalogue loads and failure clears identity controls (7.0s)
+(node:63132) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  20 tests/usability-guidance-scan.spec.ts:79:5 › projection fixture: a direct record from another disaster cannot display payout controls (1.5s)
+  ✘  21 tests/usability-guidance-scan.spec.ts:109:5 › Filipino guidance persists navigation and reload with language metadata (6.5s)
+(node:63373) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  22 tests/usability-guidance-scan.spec.ts:123:5 › manual lookup rejects malformed and unknown references then opens current transaction without authorization (465ms)
+(node:63489) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  23 tests/usability-guidance-scan.spec.ts:142:5 › camera decode uses the scoped live lookup and releases tracks on result, cancel and late permission (501ms)
+(node:63612) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  24 tests/usability-guidance-scan.spec.ts:168:5 › unsupported camera and denied permission retain equal manual fallback (465ms)
+(node:63736) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  25 tests/usability-queues.spec.ts:12:5 › queue filters navigate without putting household search text in URLs (4.1s)
+  ✘  26 tests/usability-queues.spec.ts:26:5 › queue errors are recoverable and do not show previous counts (6.6s)
+(node:63947) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  27 tests/verification.spec.ts:6:7 › Funds clears the current match when a later verification request fails (4.0s)
+  ✓  28 tests/verification.spec.ts:6:7 › Amounts and lists clears the current match when a later verification request fails (3.6s)
+  ✓  29 tests/verification.spec.ts:6:7 › Authorization and handover clears the current match when a later verification request fails (3.6s)
+  ✘  30 tests/verification.spec.ts:6:7 › Evidence and review clears the current match when a later verification request fails (7.3s)
+(node:64480) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  31 tests/verification.spec.ts:42:5 › a delayed real chain result cannot populate a newly selected actor view (3.7s)
+  ✓  32 tests/workflow-errors.spec.ts:32:40 › claim rejection gives the Beneficiary a next step in en (1.6s)
+  ✓  33 tests/workflow-errors.spec.ts:32:40 › claim rejection gives the Beneficiary a next step in fil (1.8s)
+  ✓  34 tests/workflow-errors.spec.ts:52:29 › barangay sees actionable workflow guidance (1.5s)
+  ✓  35 tests/workflow-errors.spec.ts:52:29 › dswd sees actionable workflow guidance (1.5s)
+  ✓  36 tests/workflow-errors.spec.ts:52:29 › disbursing sees actionable workflow guidance (1.5s)
+  ✓  37 tests/workflow-errors.spec.ts:52:29 › auditor sees actionable workflow guidance (1.4s)
+  ✓  38 tests/workflow-errors.spec.ts:62:5 › unknown API details are not displayed to the user (27ms)
+  ✓  39 tests/workflow-errors.spec.ts:71:5 › a lost write response does not advise repeating physical cash (6ms)
+  ✓  40 tests/workflow-errors.spec.ts:79:5 › a gateway HTML response gets a recovery message (3ms)
+  ✓  41 tests/workflow-errors.spec.ts:88:5 › cancelled requests retain AbortError so old views stay silent (2ms)
+  ✓  42 tests/workflow-errors.spec.ts:96:5 › error presentation retains the API code and status for diagnostics (1ms)
+  ✓  43 tests/workflow-errors.spec.ts:105:5 › private lookup failures do not disclose whether the transaction exists (1ms)
+  ✓  44 tests/workflow-errors.spec.ts:113:5 › lost read-only POST replies do not claim a business action may have saved (4ms)
+  ✓  45 tests/workflow-errors.spec.ts:124:5 › missing ID originals tell a Beneficiary to upload, without assigning officer duties (1ms)
+  ✓  46 tests/workflow-errors.spec.ts:130:5 › invalid UTF-8 uploads explain how to correct the CSV (1.5s)
+  ✓  47 tests/workspaces.spec.ts:7:5 › dedicated workspaces survive refresh, preserve role and fit both viewports (14.1s)
+  ✓  48 tests/workspaces.spec.ts:23:5 › entry links lead to five workspaces; unknown sections cannot display another role (2.9s)
+  ✓  49 tests/workspaces.spec.ts:31:5 › read-only auditor and restricted barangay keep private actions out (2.8s)
+  ✓  50 tests/workspaces.spec.ts:41:5 › keyboard navigation, scoped accounts and nested links retain context (3.3s)
+
+  ✓  51 tests/workspaces.spec.ts:71:5 › edited original-backed release survives refresh and cannot be changed by auditor (10.9s)
+  ✓  52 tests/workspaces.spec.ts:104:5 › all principal role sections render without horizontal overflow (44.3s)
+  ✓  53 tests/workspaces.spec.ts:117:5 › failed dashboard and audit reads stay unavailable until a successful retry (4.0s)
+
+
+  1) tests/usability-csv.spec.ts:45:5 › CSV preview rejects private headers, cancels without writes and confirms only selected valid rows 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('alert').filter({ hasText: 'csv_headers_require' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('alert').filter({ hasText: 'csv_headers_require' }) with timeout 5000ms
+      - waiting for getByRole('alert').filter({ hasText: 'csv_headers_require' })
+
+
+      46 |   const state=await fixture(page);
+      47 |   await upload(page,content.replace('name,','phone,'));
+    > 48 |   await expect(page.getByRole('alert').filter({hasText:'csv_headers_require'})).toBeVisible();
+         |                                                                                 ^
+      49 |   await upload(page);await expect(page.getByRole('heading',{name:'Row 1: Invented <b>Tala</b> · Valid'})).toBeVisible();
+      50 |   await expect(page.getByText('Birth date requires past YYYY MM DD')).toBeVisible();
+      51 |   expect(await page.locator('article b').count()).toBe(0);
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/usability-csv.spec.ts:48:81
+
+    Error Context: test-results/usability-csv-CSV-preview--2544c-ms-only-selected-valid-rows/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/usability-csv-CSV-preview--2544c-ms-only-selected-valid-rows/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/usability-csv-CSV-preview--2544c-ms-only-selected-valid-rows/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests/usability-csv.spec.ts:70:5 › lost CSV acknowledgement retries identical content and repeat upload recovers saved row 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('Household already saved; original acknowledgement recovered')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('Household already saved; original acknowledgement recovered') with timeout 5000ms
+      - waiting for getByText('Household already saved; original acknowledgement recovered')
+
+
+      74 |   await expect(page.getByRole('alert').filter({hasText:'Some confirmed rows may already be saved'})).toBeVisible();
+      75 |   await page.getByRole('button',{name:'Retry the same confirmation'}).click();
+    > 76 |   await expect(page.getByText('Household already saved; original acknowledgement recovered')).toBeVisible();
+         |                                                                                               ^
+      77 |   expect(state.confirmations).toHaveLength(2);expect(state.confirmations[1]).toEqual(state.confirmations[0]);
+      78 |   await page.getByRole('button',{name:'Close import preview'}).click();await upload(page);
+      79 |   await expect(page.getByRole('link',{name:'Open household'})).toBeVisible();
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/usability-csv.spec.ts:76:95
+
+    Error Context: test-results/usability-csv-lost-CSV-ack-d610c-t-upload-recovers-saved-row/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/usability-csv-lost-CSV-ack-d610c-t-upload-recovers-saved-row/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/usability-csv-lost-CSV-ack-d610c-t-upload-recovers-saved-row/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) tests/usability-guidance-scan.spec.ts:65:5 › projection fixture: direct reference outside catalogue loads and failure clears identity controls 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('main .mvp-error[role="alert"]')
+    Expected substring: "record_unavailable"
+    Received string:    "This record is unavailable for the selected account. Check the account, disaster and reference. If it remains unavailable, ask the responsible officer for help."
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" locator('main .mvp-error[role="alert"]') with timeout 5000ms
+      - waiting for locator('main .mvp-error[role="alert"]')
+        14 × locator resolved to <p lang="en" role="alert" class="mvp-error">This record is unavailable for the selected accou…</p>
+           - unexpected value "This record is unavailable for the selected account. Check the account, disaster and reference. If it remains unavailable, ask the responsible officer for help."
+
+
+      70 |   await page.getByLabel('I compared the person with the accepted photo ID').check();
+      71 |   await page.evaluate(()=>{const url=new URL(location.href);url.searchParams.set('record','00000000-0000-4000-8000-000000000099');history.pushState(null,'',url);});
+    > 72 |   await expect(page.locator('main .mvp-error[role="alert"]')).toContainText('record_unavailable');
+         |                                                               ^
+      73 |   await expect(page.getByRole('heading',{name:'Invented Test Household',exact:true})).toHaveCount(0);
+      74 |   await page.evaluate(id=>{const url=new URL(location.href);url.searchParams.set('record',id);history.pushState(null,'',url);},capabilityTransaction);
+      75 |   await expect(page.getByLabel('Accepted photo ID type',{exact:true})).toHaveValue('');
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/usability-guidance-scan.spec.ts:72:63
+
+    Error Context: test-results/usability-guidance-scan-pr-9c26a-re-clears-identity-controls/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/usability-guidance-scan-pr-9c26a-re-clears-identity-controls/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/usability-guidance-scan-pr-9c26a-re-clears-identity-controls/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) tests/usability-guidance-scan.spec.ts:109:5 › Filipino guidance persists navigation and reload with language metadata 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: 'Irehistro ang inyong sambahayan' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: 'Irehistro ang inyong sambahayan' }) with timeout 5000ms
+      - waiting for getByRole('heading', { name: 'Irehistro ang inyong sambahayan' })
+
+
+      112 |   await page.goto(workspacePath('beneficiary',actor.id,'registry'));
+      113 |   await page.getByLabel('Guidance language / Wika ng gabay').selectOption('fil');
+    > 114 |   await expect(page.getByRole('heading',{name:'Irehistro ang inyong sambahayan'})).toBeVisible();
+          |                                                                                    ^
+      115 |   await expect(page.locator('aside[lang="fil"]')).toContainText('hindi beripikado');
+      116 |   await page.reload();await expect(page.getByLabel('Guidance language / Wika ng gabay')).toHaveValue('fil');
+      117 |   await page.goto(workspacePath('beneficiary',actor.id,'payouts'));
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/usability-guidance-scan.spec.ts:114:84
+
+    Error Context: test-results/usability-guidance-scan-Fi-2c306-load-with-language-metadata/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/usability-guidance-scan-Fi-2c306-load-with-language-metadata/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/usability-guidance-scan-Fi-2c306-load-with-language-metadata/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) tests/usability-guidance-scan.spec.ts:123:5 › manual lookup rejects malformed and unknown references then opens current transaction without authorization 
+
+    Error: Run the synthetic journey first: these live lookup regressions require an actual published, assigned session.
+
+       98 |     }
+       99 |   }
+    > 100 |   throw new Error('Run the synthetic journey first: these live lookup regressions require an actual published, assigned session.');
+          |         ^
+      101 | }
+      102 | async function openLookup(page:Page,request:APIRequestContext){
+      103 |   const data=await assigned(request);
+        at assigned (/home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/usability-guidance-scan.spec.ts:100:9)
+        at openLookup (/home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/usability-guidance-scan.spec.ts:103:14)
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/usability-guidance-scan.spec.ts:124:14
+
+    Error Context: test-results/usability-guidance-scan-ma-8c6bd-ction-without-authorization/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/usability-guidance-scan-ma-8c6bd-ction-without-authorization/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/usability-guidance-scan-ma-8c6bd-ction-without-authorization/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) tests/usability-guidance-scan.spec.ts:142:5 › camera decode uses the scoped live lookup and releases tracks on result, cancel and late permission 
+
+    Error: Run the synthetic journey first: these live lookup regressions require an actual published, assigned session.
+
+       98 |     }
+       99 |   }
+    > 100 |   throw new Error('Run the synthetic journey first: these live lookup regressions require an actual published, assigned session.');
+          |         ^
+      101 | }
+      102 | async function openLookup(page:Page,request:APIRequestContext){
+      103 |   const data=await assigned(request);
+        at assigned (/home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/usability-guidance-scan.spec.ts:100:9)
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/usability-guidance-scan.spec.ts:143:14
+
+    Error Context: test-results/usability-guidance-scan-ca-ce85d--cancel-and-late-permission/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/usability-guidance-scan-ca-ce85d--cancel-and-late-permission/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/usability-guidance-scan-ca-ce85d--cancel-and-late-permission/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) tests/usability-guidance-scan.spec.ts:168:5 › unsupported camera and denied permission retain equal manual fallback 
+
+    Error: Run the synthetic journey first: these live lookup regressions require an actual published, assigned session.
+
+       98 |     }
+       99 |   }
+    > 100 |   throw new Error('Run the synthetic journey first: these live lookup regressions require an actual published, assigned session.');
+          |         ^
+      101 | }
+      102 | async function openLookup(page:Page,request:APIRequestContext){
+      103 |   const data=await assigned(request);
+        at assigned (/home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/usability-guidance-scan.spec.ts:100:9)
+        at openLookup (/home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/usability-guidance-scan.spec.ts:103:14)
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/usability-guidance-scan.spec.ts:170:3
+
+    Error Context: test-results/usability-guidance-scan-un-23616-etain-equal-manual-fallback/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/usability-guidance-scan-un-23616-etain-equal-manual-fallback/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/usability-guidance-scan-un-23616-etain-equal-manual-fallback/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) tests/usability-queues.spec.ts:26:5 › queue errors are recoverable and do not show previous counts 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByRole('alert').filter({ hasText: 'database_unavailable' })
+    Expected substring: "database_unavailable"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toContainText" getByRole('alert').filter({ hasText: 'database_unavailable' }) with timeout 5000ms
+      - waiting for getByRole('alert').filter({ hasText: 'database_unavailable' })
+
+
+      26 | test('queue errors are recoverable and do not show previous counts',async({page})=>{
+      27 |  await fixture(page);let fail=true;await page.route('**/api/v1/queues/search',async route=>{if(fail)await route.fulfill({status:503,json:{error:'database_unavailable'}});else await route.fulfill({json:{data:{rows:[],total:0,offset:0,limit:25,kinds:['claims'],states:[],scope:'permitted'}}});});
+    > 28 |  await page.goto(`/mvp/dswd-officer/queues?account=${office.id}&disaster=${disaster}`);await expect(page.getByRole('alert').filter({hasText:'database_unavailable'})).toContainText('database_unavailable');
+         |                                                                                                                                                                       ^
+      29 |  fail=false;await page.getByRole('button',{name:'Retry search'}).click();await expect(page.getByText('0 results',{exact:false})).toBeVisible();
+      30 | });
+      31 |
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/usability-queues.spec.ts:28:167
+
+    Error Context: test-results/usability-queues-queue-err-10b09-do-not-show-previous-counts/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/usability-queues-queue-err-10b09-do-not-show-previous-counts/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/usability-queues-queue-err-10b09-do-not-show-previous-counts/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) tests/verification.spec.ts:6:7 › Evidence and review clears the current match when a later verification request fails 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('.mvp-entry').filter({ has: getByRole('button', { name: 'Check now', exact: true }) }).filter({ hasText: 'confirmed' }).first()
+    Timeout: 5000ms
+    Expected pattern: /\bVerified\b/
+    Received string:  "DocumentReference f688618a · Saved submission: ConfirmedVerified Checked Oct 14, 2026, 1:57 AM ManilaCommitted content matches the chain record.This verifies the saved evidence against the chain. It does not prove document authenticity or that cash was received.Recorded evidenceSaved canonical version and listed original bytesChain commitmentMatches recorded evidenceEvidence kinddocumentObserved block48Pinned chain referenceChain 31337 · 0x09635F643e140090A9A8Dcd712eD6285858ceBefRaw hashes and observed check details{
+      \"result\": \"match\",
+      \"components\": [
+        \"canonical_bytes\",
+        \"raw_originals\",
+        \"chain_record\"
+      ],
+      \"local_hash\": \"0x9e00f05da3c9549f79b662ea7f06a7ed23fb4f6949227d48f38fbb2c575c96e8\",
+      \"onchain_hash\": \"0x9e00f05da3c9549f79b662ea7f06a7ed23fb4f6949227d48f38fbb2c575c96e8\",
+      \"deployment_id\": \"8e9e2aed-1e51-4d00-b2f7-c5ab3bd74268\",
+      \"chain_id\": \"31337\",
+      \"contract_address\": \"0x09635F643e140090A9A8Dcd712eD6285858ceBef\",
+      \"public_id\": \"0x8c8a9dda18a33ff9b5900fbcb6d2a785e5b4cab56b53b73de7575180392c9078\",
+      \"block_number\": \"48\",
+      \"block_hash\": \"0x4e4bbcd8830522fcc07e849bb5046122ef81230223cd55f3a27b7192c13b7283\",
+      \"historical\": false,
+      \"checked_at\": \"2026-10-13T17:57:13.321357+00:00\",
+      \"commitment_id\": \"f688618a-222f-4f14-b258-99c788d2901b\",
+      \"kind\": \"document\"
+    }Check nowOpen exact material"
+
+    Call log:
+      - Expect "toContainText" locator('.mvp-entry').filter({ has: getByRole('button', { name: 'Check now', exact: true }) }).filter({ hasText: 'confirmed' }).first() with timeout 5000ms
+      - waiting for locator('.mvp-entry').filter({ has: getByRole('button', { name: 'Check now', exact: true }) }).filter({ hasText: 'confirmed' }).first()
+        14 × locator resolved to <article class="mvp-entry ac-proof-entry" id="proof-f688618a-222f-4f14-b258-99c788d2901b">…</article>
+           - unexpected value "DocumentReference f688618a · Saved submission: ConfirmedVerified Checked Oct 14, 2026, 1:57 AM ManilaCommitted content matches the chain record.This verifies the saved evidence against the chain. It does not prove document authenticity or that cash was received.Recorded evidenceSaved canonical version and listed original bytesChain commitmentMatches recorded evidenceEvidence kinddocumentObserved block48Pinned chain referenceChain 31337 · 0x09635F643e140090A9A8Dcd712eD6285858ceBefRaw hashes and observed check details{
+      "result": "match",
+      "components": [
+        "canonical_bytes",
+        "raw_originals",
+        "chain_record"
+      ],
+      "local_hash": "0x9e00f05da3c9549f79b662ea7f06a7ed23fb4f6949227d48f38fbb2c575c96e8",
+      "onchain_hash": "0x9e00f05da3c9549f79b662ea7f06a7ed23fb4f6949227d48f38fbb2c575c96e8",
+      "deployment_id": "8e9e2aed-1e51-4d00-b2f7-c5ab3bd74268",
+      "chain_id": "31337",
+      "contract_address": "0x09635F643e140090A9A8Dcd712eD6285858ceBef",
+      "public_id": "0x8c8a9dda18a33ff9b5900fbcb6d2a785e5b4cab56b53b73de7575180392c9078",
+      "block_number": "48",
+      "block_hash": "0x4e4bbcd8830522fcc07e849bb5046122ef81230223cd55f3a27b7192c13b7283",
+      "historical": false,
+      "checked_at": "2026-10-13T17:57:13.321357+00:00",
+      "commitment_id": "f688618a-222f-4f14-b258-99c788d2901b",
+      "kind": "document"
+    }Check nowOpen exact material"
+
+
+      20 |     const real=page.waitForResponse(r=>r.url().endsWith('/integrity/check')&&r.request().method()==='POST');
+      21 |     await button.click();expect((await(await real).json()).data.result).toBe('match');
+    > 22 |     await expect(block).toContainText(currentMatch);
+         |                         ^
+      23 |     let release!:()=>void,started!:()=>void;
+      24 |     const held=new Promise<void>(r=>release=r),ready=new Promise<void>(r=>started=r);
+      25 |     await page.route('**/api/v1/integrity/check',async route=>{started();await held;await route.abort('connectionfailed');});
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/verification.spec.ts:22:25
+
+    Error Context: test-results/verification-Evidence-and--d1205--verification-request-fails/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/verification-Evidence-and--d1205--verification-request-fails/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/verification-Evidence-and--d1205--verification-request-fails/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9 failed
+    tests/usability-csv.spec.ts:45:5 › CSV preview rejects private headers, cancels without writes and confirms only selected valid rows 
+    tests/usability-csv.spec.ts:70:5 › lost CSV acknowledgement retries identical content and repeat upload recovers saved row 
+    tests/usability-guidance-scan.spec.ts:65:5 › projection fixture: direct reference outside catalogue loads and failure clears identity controls 
+    tests/usability-guidance-scan.spec.ts:109:5 › Filipino guidance persists navigation and reload with language metadata 
+    tests/usability-guidance-scan.spec.ts:123:5 › manual lookup rejects malformed and unknown references then opens current transaction without authorization 
+    tests/usability-guidance-scan.spec.ts:142:5 › camera decode uses the scoped live lookup and releases tracks on result, cancel and late permission 
+    tests/usability-guidance-scan.spec.ts:168:5 › unsupported camera and denied permission retain equal manual fallback 
+    tests/usability-queues.spec.ts:26:5 › queue errors are recoverable and do not show previous counts 
+    tests/verification.spec.ts:6:7 › Evidence and review clears the current match when a later verification request fails 
+  44 passed (3.6m)

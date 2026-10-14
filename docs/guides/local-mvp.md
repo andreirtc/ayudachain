@@ -1,6 +1,6 @@
 # Local MVP operation and evaluation
 
-Use the `mvp-full` working checkout on `feat/five-role-mvp`. The original `main-2` ideation checkout is preserved. All implementation changes are uncommitted. FastAPI/PostgreSQL is authoritative; the retained standard-library/SQLite backend is separate. No external service or public-network deployment is required or authorized.
+Historical Windows setup below describes the original `mvp-full` checkout. For the current Linux `design-proposal` finals worktree and safe isolated labs, use [the finals runbook](../finals/DEMO_RUNBOOK.md). Branch/runtime status must be inspected rather than inferred from this historical setup. FastAPI/PostgreSQL is authoritative; the retained standard-library/SQLite backend is separate. No external service or public-network deployment is required or authorized.
 
 ## Locked setup
 
@@ -64,7 +64,7 @@ For restart/backup evaluation, keep Hardhat in a **separate terminal** so stoppi
 npm --prefix contracts run node -- --hostname 127.0.0.1
 ```
 
-Then run `local_mvp serve` without `--with-chain` in another terminal. The current checkout already has a separate evaluation node on 8545, so use this form. Open [the MVP](http://127.0.0.1:3000/mvp). API documentation is [local OpenAPI](http://127.0.0.1:8000/docs); health is `/api/v1/health`. Choose any active claimed actor and either synthetic disaster. The visible accelerated clock changes business deadlines only.
+Then run `local_mvp serve` without `--with-chain` in another terminal. Inspect the selected checkout before starting; preserve any surviving evaluation node and its pinned manifest. Open [the MVP](http://127.0.0.1:3000/mvp). API documentation is [local OpenAPI](http://127.0.0.1:8000/docs); health is `/api/v1/health`. Choose any active claimed actor and either synthetic disaster. The visible accelerated clock changes business deadlines only.
 
 ```powershell
 .venv/Scripts/python -m backend.scripts.local_mvp stop
@@ -116,7 +116,7 @@ npm --prefix frontend run build
 npm --prefix frontend run test:mvp
 ```
 
-The browser suite requires all evaluation services on 3000/8000/8545. It creates fresh uploaded files, edits forms and performs real own-device/assisted journeys; it explicitly resets to reference seeds while preserving retired history. Fault tests kill/reconcile prepared, broadcast and mined work, exercise a real EVM revert, uncertain nonce/conflict, API restart/lost acknowledgement, concurrent business changes and backup restore. A dedicated owned node tests same-address reset; it never resets the evaluation chain. Results are recorded in [validation](../implementation/validation.md).
+The browser suite requires all evaluation services on 3000/8000/8545. It creates fresh uploaded files, edits forms and performs real own-device/assisted journeys; it now requires an explicitly selected fresh isolated lab and never resets existing evaluation data. Run the full journey first with MVP_BROWSER_FRESH_RUN=1; it refuses existing households. Fault tests kill/reconcile prepared, broadcast and mined work, exercise a real EVM revert, uncertain nonce/conflict, API restart/lost acknowledgement, concurrent business changes and backup restore. A dedicated owned node tests same-address reset; it never resets the evaluation chain. Results are recorded in [validation](../implementation/validation.md).
 
 An authorized Auditor/DSWD can retrieve `/api/v1/commitments/{id}/material` and the permitted original bytes. Save the exact `canonical_utf8`, `content_hash`, `deployment` and an `originals` array of `{id,path}` for every evidence descriptor to a private JSON file. Pipe it to `node contracts/scripts/verify_evidence.js`; it recomputes exact canonical/original hashes and reads the pinned registry, without database or signing key. This material contains private preimages; resident list columns are not a selective inclusion proof. The backend full-journey test independently checks all ten kinds this way.
 

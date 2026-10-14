@@ -1,0 +1,13 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/finals-ux.spec.ts tests/verification.spec.ts -g handover review|Funds clears
+
+
+Running 2 tests using 1 worker
+
+(node:45391) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 tests/finals-ux.spec.ts:5:5 › handover review supports cancel, Escape and one explicit confirmation (4.2s)
+  ✓  2 tests/verification.spec.ts:6:7 › Funds clears the current match when a later verification request fails (9.4s)
+
+  2 passed (15.6s)

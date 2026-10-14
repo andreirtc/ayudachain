@@ -1,0 +1,51 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/journey.spec.ts
+
+
+Running 1 test using 1 worker
+
+(node:70647) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+  ✘  1 tests/journey.spec.ts:8:5 › five roles use edited original-backed forms for own-device and assisted cash, answers and actual audit (1.2m)
+
+
+  1) tests/journey.spec.ts:8:5 › five roles use edited original-backed forms for own-device and assisted cash, answers and actual audit 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByLabel('Wage basis original', { exact: true }).locator('..').getByRole('status')
+    Expected substring: "Original saved"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toContainText" getByLabel('Wage basis original', { exact: true }).locator('..').getByRole('status') with timeout 5000ms
+      - waiting for getByLabel('Wage basis original', { exact: true }).locator('..').getByRole('status')
+        5 × locator resolved to <span role="status" class="mvp-note">Uploading original…</span>
+          - unexpected value "Uploading original…"
+
+
+      21 |  expect((await read('/registry')).households,'Use a new isolated database/reference run; existing households are preserved.').toHaveLength(0);
+      22 |  function bytes(text:string,portrait=false){return execFileSync(python,['-c',portrait?"from backend.scripts.synthetic_evidence import synthetic_portrait; import sys; sys.stdout.buffer.write(synthetic_portrait())":'from backend.scripts.synthetic_evidence import synthetic_pdf; import sys; sys.stdout.buffer.write(synthetic_pdf(sys.argv[1]))',text],{cwd:root});}
+    > 23 |  async function upload(label:string,portrait=false){const l=page.getByLabel(label,{exact:true});await l.setInputFiles({name:portrait?'invented.png':'invented.pdf',mimeType:portrait?'image/png':'application/pdf',buffer:bytes('Invented browser original '+label+' '+Date.now(),portrait)});await expect(l.locator('..').getByRole('status')).toContainText('Original saved');}
+         |                                                                                                                                                                                                                                                                                                                                                 ^
+      24 |  async function transaction(head:string){const l=page.getByLabel('Transaction',{exact:true});await expect(l.locator('option').filter({hasText:head})).toHaveCount(1);await l.selectOption((await l.locator('option').filter({hasText:head}).getAttribute('value'))!);}
+      25 |  async function act(id:string,tab:string){const section=({'Funds':'funds','Registry and intake':'registry','Claims and review':'claims','Amounts and lists':'lists','Sessions and notices':'sessions','Authorization and handover':'payouts','Private follow-up':'outcomes','Evidence and review':'audit'} as Record<string,string>)[tab];await page.goto(workspacePath(actors.find(a=>a.id===id)!.role,id,section,disaster));}
+      26 |  async function approve(head:string){await page.getByLabel('Household to review',{exact:true}).selectOption({label:head+' · Awaiting DSWD review'});const form=page.locator('article').filter({has:page.getByRole('heading',{name:head,exact:true})}).filter({has:page.getByLabel('Final category',{exact:true})});await form.getByLabel('Final category',{exact:true}).selectOption(category.id);await form.getByLabel('Decision reason',{exact:true}).fill('Invented individual human review of evidence and current flags');await form.getByLabel('I reviewed this current check and its flags, the response thread and available evidence.',{exact:true}).check();await form.getByRole('button',{name:'Save human decision'}).click();await expect(page.getByRole('status').filter({hasText:'Response saved.'})).toBeVisible();}
+        at upload (/home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/journey.spec.ts:23:337)
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/journey.spec.ts:50:337
+
+    Error Context: test-results/journey-five-roles-use-edi-9868f-sh-answers-and-actual-audit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/journey-five-roles-use-edi-9868f-sh-answers-and-actual-audit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/journey-five-roles-use-edi-9868f-sh-answers-and-actual-audit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests/journey.spec.ts:8:5 › five roles use edited original-backed forms for own-device and assisted cash, answers and actual audit 

@@ -1,0 +1,109 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test --grep-invert five roles use edited original-backed forms --output=../.runtime/finals/browser-delivery
+
+
+Running 55 tests using 1 worker
+
+(node:100316) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/actor-switch.spec.ts:4:5 › a delayed real former-actor response cannot render after switching role (3.3s)
+  ✓   2 tests/finals-ux.spec.ts:3:5 › assisted registration stays open while choosing a recipient and editing (1.5s)
+  ✓   3 tests/finals-ux.spec.ts:32:5 › handover review supports cancel, Escape and one explicit confirmation (2.1s)
+
+  ✓   4 tests/funds-accuracy.spec.ts:28:5 › extracted centavos beyond the safe Number range prefill without losing a cent (2.4s)
+
+  ✓   5 tests/funds-accuracy.spec.ts:33:5 › a saved large-centavo correction prefills the exact recorded amount (4.0s)
+
+  ✓   6 tests/funds-accuracy.spec.ts:48:5 › transcription correction retains the primary source when supporting evidence was uploaded first (4.6s)
+
+  ✓   7 tests/funds.spec.ts:7:5 › fresh editable release survives reload and Auditor is read-only (7.8s)
+  ✓   8 tests/inputs.spec.ts:4:5 › amount inputs cannot submit the initial revision while saved input history is loading (1.9s)
+  ✓   9 tests/legacy.spec.ts:2:5 › legacy verification has explicit coverage and no fabricated fraud controls (1.6s)
+  ✓  10 tests/notes.spec.ts:5:5 › closed-transaction DSWD notes persist and remain absent from payer and Auditor write controls (9.0s)
+  ✓  11 tests/receipt-guidance.spec.ts:4:5 › a recorded beneficiary receipt leads to private follow-up without obsolete code instructions (3.0s)
+  ✓  12 tests/registry.spec.ts:4:5 › self registry persists absence and scoped staff view omits private contact (4.1s)
+  ✓  13 tests/sessions-loading.spec.ts:4:5 › late saved sessions cannot collapse the session form after editing starts (1.9s)
+  ✓  14 tests/usability-csv.spec.ts:45:5 › CSV preview rejects private headers, cancels without writes and confirms only selected valid rows (4.2s)
+  ✓  15 tests/usability-csv.spec.ts:70:5 › lost CSV acknowledgement retries identical content and repeat upload recovers saved row (2.2s)
+  ✓  16 tests/usability-duplicate.spec.ts:34:5 › review projection fixture: acknowledgment resets for changed check, claim revision and comparison data (2.3s)
+  ✓  17 tests/usability-duplicate.spec.ts:58:5 › review projection fixture: Auditor inspects frozen comparisons without decision or recheck controls (1.6s)
+  ✓  18 tests/usability-guidance-scan.spec.ts:23:5 › camera capability fixture: unsupported browser keeps manual lookup available (2.2s)
+  ✓  19 tests/usability-guidance-scan.spec.ts:31:5 › camera capability fixture: cancel releases a stream granted after cancellation (1.9s)
+  ✓  20 tests/usability-guidance-scan.spec.ts:45:5 › camera capability fixture: mocked decoder opens a reference once without payout mutations (1.9s)
+  ✓  21 tests/usability-guidance-scan.spec.ts:65:5 › projection fixture: direct reference outside catalogue loads and failure clears identity controls (1.8s)
+  ✓  22 tests/usability-guidance-scan.spec.ts:79:5 › projection fixture: a direct record from another disaster cannot display payout controls (1.5s)
+  ✘  23 tests/usability-guidance-scan.spec.ts:109:5 › Filipino guidance persists navigation and reload with language metadata (9.4s)
+(node:102439) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  24 tests/usability-guidance-scan.spec.ts:123:5 › manual lookup rejects malformed and unknown references then opens current transaction without authorization (2.4s)
+  ✓  25 tests/usability-guidance-scan.spec.ts:142:5 › camera decode uses the scoped live lookup and releases tracks on result, cancel and late permission (3.1s)
+  ✓  26 tests/usability-guidance-scan.spec.ts:168:5 › unsupported camera and denied permission retain equal manual fallback (1.8s)
+  ✓  27 tests/usability-queues.spec.ts:12:5 › queue filters navigate without putting household search text in URLs (4.1s)
+  ✓  28 tests/usability-queues.spec.ts:26:5 › queue errors are recoverable and do not show previous counts (1.5s)
+  ✓  29 tests/verification.spec.ts:6:7 › Funds clears the current match when a later verification request fails (4.3s)
+  ✓  30 tests/verification.spec.ts:6:7 › Amounts and lists clears the current match when a later verification request fails (3.6s)
+  ✓  31 tests/verification.spec.ts:6:7 › Authorization and handover clears the current match when a later verification request fails (4.0s)
+  ✓  32 tests/verification.spec.ts:6:7 › Evidence and review clears the current match when a later verification request fails (4.0s)
+  ✓  33 tests/verification.spec.ts:42:5 › a delayed real chain result cannot populate a newly selected actor view (3.8s)
+  ✓  34 tests/workflow-errors.spec.ts:32:40 › claim rejection gives the Beneficiary a next step in en (1.7s)
+  ✓  35 tests/workflow-errors.spec.ts:32:40 › claim rejection gives the Beneficiary a next step in fil (1.7s)
+  ✓  36 tests/workflow-errors.spec.ts:52:29 › barangay sees actionable workflow guidance (1.5s)
+  ✓  37 tests/workflow-errors.spec.ts:52:29 › dswd sees actionable workflow guidance (1.4s)
+  ✓  38 tests/workflow-errors.spec.ts:52:29 › disbursing sees actionable workflow guidance (1.7s)
+  ✓  39 tests/workflow-errors.spec.ts:52:29 › auditor sees actionable workflow guidance (1.8s)
+  ✓  40 tests/workflow-errors.spec.ts:62:5 › unknown API details are not displayed to the user (15ms)
+  ✓  41 tests/workflow-errors.spec.ts:71:5 › a lost write response does not advise repeating physical cash (1ms)
+  ✓  42 tests/workflow-errors.spec.ts:79:5 › a gateway HTML response gets a recovery message (3ms)
+  ✓  43 tests/workflow-errors.spec.ts:88:5 › cancelled requests retain AbortError so old views stay silent (3ms)
+  ✓  44 tests/workflow-errors.spec.ts:96:5 › error presentation retains the API code and status for diagnostics (2ms)
+  ✓  45 tests/workflow-errors.spec.ts:105:5 › private lookup failures do not disclose whether the transaction exists (3ms)
+  ✓  46 tests/workflow-errors.spec.ts:113:5 › lost read-only POST replies do not claim a business action may have saved (5ms)
+  ✓  47 tests/workflow-errors.spec.ts:124:5 › missing ID originals tell a Beneficiary to upload, without assigning officer duties (2ms)
+  ✓  48 tests/workflow-errors.spec.ts:130:5 › invalid UTF-8 uploads explain how to correct the CSV (1.6s)
+  ✓  49 tests/workspaces.spec.ts:7:5 › dedicated workspaces survive refresh, preserve role and fit both viewports (14.6s)
+  ✓  50 tests/workspaces.spec.ts:23:5 › entry links lead to five workspaces; unknown sections cannot display another role (2.6s)
+  ✓  51 tests/workspaces.spec.ts:31:5 › read-only auditor and restricted barangay keep private actions out (2.7s)
+  ✓  52 tests/workspaces.spec.ts:41:5 › keyboard navigation, scoped accounts and nested links retain context (3.5s)
+
+  ✓  53 tests/workspaces.spec.ts:71:5 › edited original-backed release survives refresh and cannot be changed by auditor (11.2s)
+  ✓  54 tests/workspaces.spec.ts:104:5 › all principal role sections render without horizontal overflow (39.3s)
+  ✓  55 tests/workspaces.spec.ts:117:5 › failed dashboard and audit reads stay unavailable until a successful retry (4.1s)
+
+
+  1) tests/usability-guidance-scan.spec.ts:109:5 › Filipino guidance persists navigation and reload with language metadata 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: 'Panatilihing pribado ang code at PIN' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: 'Panatilihing pribado ang code at PIN' }) with timeout 5000ms
+      - waiting for getByRole('heading', { name: 'Panatilihing pribado ang code at PIN' })
+
+
+      116 |   await page.reload();await expect(page.getByLabel('Guidance language / Wika ng gabay')).toHaveValue('fil');
+      117 |   await page.goto(workspacePath('beneficiary',actor.id,'payouts'));
+    > 118 |   await expect(page.getByRole('heading',{name:'Panatilihing pribado ang code at PIN'})).toBeVisible();
+          |                                                                                         ^
+      119 |   await page.getByLabel('Guidance language / Wika ng gabay').selectOption('en');
+      120 |   await expect(page.getByRole('heading',{name:'Keep your code and PIN private'})).toBeVisible();
+      121 | });
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/usability-guidance-scan.spec.ts:118:89
+
+    Error Context: ../.runtime/finals/browser-delivery/usability-guidance-scan-Fi-2c306-load-with-language-metadata/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../.runtime/finals/browser-delivery/usability-guidance-scan-Fi-2c306-load-with-language-metadata/trace.zip
+    Usage:
+
+        npx playwright show-trace ../.runtime/finals/browser-delivery/usability-guidance-scan-Fi-2c306-load-with-language-metadata/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests/usability-guidance-scan.spec.ts:109:5 › Filipino guidance persists navigation and reload with language metadata 
+  54 passed (3.4m)

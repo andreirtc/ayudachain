@@ -10,7 +10,7 @@ test('self registry persists absence and scoped staff view omits private contact
   if(!existing.length){
   const registration=page.locator('details').filter({has:page.getByRole('heading',{name:'Register your household',exact:true})});
   await expect(registration).toBeVisible();
-  if(await registration.getAttribute('open')===null)await registration.locator('summary').click();
+  if(await registration.getAttribute('open')===null)await registration.locator(':scope > summary').click();
   head=`Invented Browser Head ${Date.now()}`;
   const barangays=(await(await request.get('http://127.0.0.1:8000/api/v1/barangays')).json()).data as {id:string}[];
   await page.getByRole('combobox',{name:'Declared barangay',exact:true}).selectOption(barangays[0].id);

@@ -1,0 +1,47 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/finals-ux.spec.ts
+
+
+Running 1 test using 1 worker
+
+(node:51034) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 tests/finals-ux.spec.ts:5:5 › handover review supports cancel, Escape and one explicit confirmation (6.7s)
+
+
+  1) tests/finals-ux.spec.ts:5:5 › handover review supports cancel, Escape and one explicit confirmation 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByLabel('Recipient payout code', { exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByLabel('Recipient payout code', { exact: true }) with timeout 5000ms
+      - waiting for getByLabel('Recipient payout code', { exact: true })
+
+
+      22 |   await page.getByLabel('Recipient payout code',{exact:true}).fill('123456');
+      23 |   await page.getByLabel('Transaction',{exact:true}).selectOption(tx);
+    > 24 |   await expect(page.getByLabel('Recipient payout code',{exact:true})).toBeVisible();
+         |                                                                       ^
+      25 |   await page.getByLabel('Recipient payout code',{exact:true}).fill('123456');
+      26 |   const trigger=page.getByRole('button',{name:'Record cash handover',exact:true});
+      27 |   await trigger.click();
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/finals-ux.spec.ts:24:71
+
+    Error Context: test-results/finals-ux-handover-review--5a3d1-d-one-explicit-confirmation/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/finals-ux-handover-review--5a3d1-d-one-explicit-confirmation/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/finals-ux-handover-review--5a3d1-d-one-explicit-confirmation/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests/finals-ux.spec.ts:5:5 › handover review supports cancel, Escape and one explicit confirmation 

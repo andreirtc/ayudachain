@@ -1,0 +1,7 @@
+test_time_wait_allows_restart_but_active_listener_is_preserved (backend.tests.test_local_supervisor.LocalPortTests.test_time_wait_allows_restart_but_active_listener_is_preserved) ... ok
+test_owned_stop_releases_descendants_and_preserves_unrelated_process (backend.tests.test_local_supervisor.LocalSupervisorTests.test_owned_stop_releases_descendants_and_preserves_unrelated_process) ... skipped 'Windows process-tree regression'
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.015s
+
+OK (skipped=1)

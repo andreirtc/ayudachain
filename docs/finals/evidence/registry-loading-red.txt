@@ -1,0 +1,49 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/finals-ux.spec.ts -g assisted registration
+
+
+Running 1 test using 1 worker
+
+(node:56988) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 tests/finals-ux.spec.ts:3:5 › assisted registration stays open while choosing a recipient and editing (6.9s)
+
+
+  1) tests/finals-ux.spec.ts:3:5 › assisted registration stays open while choosing a recipient and editing 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByLabel('Head name', { exact: true })
+    Expected: 0
+    Received: 1
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" getByLabel('Head name', { exact: true }) with timeout 5000ms
+      - waiting for getByLabel('Head name', { exact: true })
+        14 × locator resolved to 1 element
+           - unexpected value "1"
+
+
+      16 |   });
+      17 |   await page.goto(`/mvp/barangay-officer/registry?account=${actor}`);
+    > 18 |   await ready;try{await expect(page.getByLabel('Head name',{exact:true})).toHaveCount(0);await expect(page.locator('main')).not.toContainText('No household in your current scope.');}finally{release();}
+         |                                                                           ^
+      19 |   await expect(page.getByRole('heading',{name:/DFC-2026-9011/})).toBeVisible();
+      20 |   const registration=page.locator('details').filter({has:page.getByRole('heading',{name:'Assist household registration',exact:true})});
+      21 |   if(await registration.getAttribute('open')===null)await registration.locator('summary').click();
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/finals-ux.spec.ts:18:75
+
+    Error Context: test-results/finals-ux-assisted-registr-b0b05-ing-a-recipient-and-editing/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/finals-ux-assisted-registr-b0b05-ing-a-recipient-and-editing/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/finals-ux-assisted-registr-b0b05-ing-a-recipient-and-editing/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests/finals-ux.spec.ts:3:5 › assisted registration stays open while choosing a recipient and editing 

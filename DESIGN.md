@@ -141,7 +141,7 @@ This document records the implementation of `/mvp` and its five role workspaces 
 
 ## Logo
 
-The mark is **Kubo Link**: a bahay kubo roof (the household) over two linked rings (the checkable record). `LogoMark` in `frontend/components/mvp/Logo.tsx` draws it in `currentColor`. It appears in primary blue beside the Open Sans Bold wordmark in the drawer and on the directory page. `frontend/app/icon.svg` is the favicon: the mark in on-primary-container ink on a primary-container tile. The logo is a concept that has not been registered. It uses no government seal, flag or agency mark.
+The earlier mark was **Kubo Link**: a bahay kubo roof (the household) over two linked rings (the checkable record). `LogoMark` in `frontend/components/mvp/Logo.tsx` draws it in `currentColor`. It appears in primary blue beside the Open Sans Bold wordmark in the drawer and on the directory page. `frontend/app/icon.svg` is the favicon: the mark in on-primary-container ink on a primary-container tile. The logo is a concept that has not been registered. It uses no government seal, flag or agency mark.
 
 ## Colours
 
@@ -238,3 +238,20 @@ Existing transitions are kept, and `prefers-reduced-motion` still removes them. 
 ## Usability extension (12 October 2026)
 
 Search and task queues use labelled, wrapping controls and bounded semantic tables. Barangay operations use aligned rows with scoped drill-down links, and aggregate-only cells are plain text. Duplicate review compares two permitted frozen versions alongside the acknowledgement and actions. The language selector controls complete step guidance, with an English fallback. CSV preview and camera or manual lookup remain task panels within Registry and payouts. Raw proof hashes expand beneath readable coverage and comparison. Mobile tables scroll within their panel, and controls keep visible focus and touch targets.
+
+## Finals usability corrections (14 October 2026)
+
+Registration guidance has a distinct “Before you register” heading and says phone is optional. Initial registry reads use a loading/unavailable gate; saved CSV confirmation state remains mounted during successful refresh. Role-specific English/Filipino recovery guidance from the MVP branch explains permitted next steps without changing server rules. Integrity labels are separated from adjacent text and a match explains its evidence-only scope. Reselecting a transaction reloads its current detail.
+
+Cash handover opens a native `<dialog>` with household and computed amount, an irreversible-record explanation, Go back and explicit confirmation. Native focus trapping, Escape and return focus are tested; role-token surfaces/backdrop work in both schemes. Other irreversible decisions still lack this review. DSWD/Auditor can open the existing clock under “Evaluation tools (synthetic only)” in the footer; only DSWD has the advance form. This is an evaluation aid, not an operational deadline bypass.
+
+Fresh test and screenshot provenance is in docs/finals/FINALIST_READINESS.md. Physical-device, screen-reader, comprehension and native-speaker review remain pending.
+
+Final visual review: a Beneficiary with a recorded receipt now sees completion guidance and a direct link to the same transaction’s private report, instead of obsolete instructions to create/reveal a code. This changes presentation/navigation only; prior answers remain editable through the existing append-only outcome flow. Phone controls retain a 44px minimum target and the mobile drawer close icon uses on-surface contrast.
+
+
+## Current team-reviewed finals direction
+
+The maintainer supplied a blue shield/green linked mark, recreated as native SVG in Logo.tsx, icon.svg and public/brand/ayudachain.svg. Light/dark decorative color tokens preserve brand visibility. No government seal/registration claim. Welcome introduces the product with an original code-native workflow/brand illustration before all five role choices. The illustration contains no transaction amounts, hashes or successful verification claims.
+
+Full desktop task-label navigation/placement references five-role-mvp; four phone shortcuts/full drawer remain. Role-token palette, typography, focus, truthful state words and44px targets stay; staff surfaces use restrained6px corners, white/role-token backgrounds, dividers and familiar forms/tables. Searchable household list/detail, grouped payout controls and optional audit/calculation detail reduce density. English/Taglish selection defaults to natural Taglish and persists; unknown specialist text falls back to English. This is not a citizen comprehension/accessibility certification.
