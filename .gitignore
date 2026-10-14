@@ -5,6 +5,9 @@
 # Environment Variables & Secrets
 # ==========================================
 .env
+.env.mvp
+.runtime/
+.superpowers/
 .env.local
 .env.development.local
 .env.test.local
@@ -107,3 +110,6 @@ Thumbs.db
 # ==========================================
 *.log
 /tmp/ayudachain*
+
+frontend/test-results/
+frontend/playwright-report/

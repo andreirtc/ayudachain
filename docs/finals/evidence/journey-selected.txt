@@ -1,0 +1,41 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/journey.spec.ts
+
+
+Running 1 test using 1 worker
+
+(node:58199) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+  ✘  1 tests/journey.spec.ts:8:5 › five roles use edited original-backed forms for own-device and assisted cash, answers and actual audit (1.5m)
+
+
+  1) tests/journey.spec.ts:8:5 › five roles use edited original-backed forms for own-device and assisted cash, answers and actual audit 
+
+    TimeoutError: locator.fill: Timeout 20000ms exceeded.
+    Call log:
+      - waiting for getByLabel('Advance synthetic business time (hours)', { exact: true })
+
+
+      46 |    if(!assisted){await page.getByLabel('Include in formal submission',{exact:true}).check();await upload('Council resolution original');const sent=page.waitForResponse(r=>r.url().endsWith('/claims/submissions')&&r.request().method()==='POST');await page.getByRole('button',{name:'Submit selected threads'}).click();expect((await sent).status()).toBe(200);await expect(page.getByRole('status').filter({hasText:'Response saved.'})).toBeVisible();}
+      47 |    await act(dswd.id,'Claims and review');
+    > 48 |    if(assisted){await page.getByLabel('Advance synthetic business time (hours)',{exact:true}).fill('48');await page.getByRole('button',{name:'Advance evaluation clock',exact:true}).click();await expect.poll(async()=>JSON.stringify(await read('/claims?disaster_id='+disaster)),{timeout:20000}).toContain('system_fallback');await page.getByRole('button',{name:'Refresh claims',exact:true}).click();}
+         |                                                                                               ^
+      49 |    await approve(head);
+      50 |    await act(dswd.id,'Amounts and lists');await page.waitForLoadState('networkidle');if(!(await page.getByLabel('Documented daily wage (PHP)',{exact:true}).isVisible()))await page.getByText('Record an amount basis',{exact:true}).click();await page.getByLabel('Documented daily wage (PHP)',{exact:true}).fill(assisted?'501.25':'435.00');await upload('Wage basis original');const rule=page.locator('fieldset').filter({has:page.locator('legend').getByText(category.name,{exact:true})});await rule.getByLabel('Documented days',{exact:true}).fill(assisted?'20':'15');await upload(category.name+' rule original');if(assisted)await page.getByLabel('Basis reason (required for a change)',{exact:true}).fill('Invented later documentary wage; paid amount stays locked');await page.getByRole('button',{name:'Save immutable input version'}).click();await expect(page.getByRole('status').filter({hasText:'Version saved'})).toBeVisible();await page.getByLabel('Barangay',{exact:true}).selectOption(barangay.id);await page.getByRole('button',{name:'Prepare list for publication'}).click();
+      51 |    await expect.poll(async()=>{const l=await read('/lists?disaster_id='+disaster);return l.filter((v:any)=>v.business_status==='published'&&v.entries.some((e:any)=>e.name===head)).length;},{timeout:30000}).toBeGreaterThan(0);
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/journey.spec.ts:48:95
+
+    Error Context: test-results/journey-five-roles-use-edi-9868f-sh-answers-and-actual-audit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/journey-five-roles-use-edi-9868f-sh-answers-and-actual-audit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/journey-five-roles-use-edi-9868f-sh-answers-and-actual-audit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests/journey.spec.ts:8:5 › five roles use edited original-backed forms for own-device and assisted cash, answers and actual audit 

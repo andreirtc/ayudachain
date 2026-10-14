@@ -1,0 +1,47 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/journey.spec.ts --output=../.runtime/finals/review-journey
+
+
+Running 1 test using 1 worker
+
+(node:29077) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 tests/journey.spec.ts:8:5 › five roles use edited original-backed forms for own-device and assisted cash, answers and actual audit (306ms)
+
+
+  1) tests/journey.spec.ts:8:5 › five roles use edited original-backed forms for own-device and assisted cash, answers and actual audit 
+
+    Error: apiRequestContext.get: connect ECONNREFUSED 127.0.0.1:8000
+    Call log:
+      - → GET http://127.0.0.1:8000/api/v1/actors/catalogue
+        - user-agent: Playwright/1.64.0 (x64; debian 13) node/24.18
+        - accept: */*
+        - accept-encoding: gzip,deflate,br
+
+
+      10 |  const base='http://127.0.0.1:8000/api/v1',root=path.resolve(__dirname,'../..');
+      11 |  if(process.env.MVP_BROWSER_FRESH_RUN!=='1')throw new Error('Journey requires an explicitly isolated fresh run (MVP_BROWSER_FRESH_RUN=1). Existing data is never reset by this test.');
+    > 12 |  const actors=(await(await request.get(base+'/actors/catalogue')).json()).data as {id:string;role:string;display_name:string;position:string;barangay_id:string}[];
+         |                                    ^
+      13 |  const dswd=actors.find(a=>a.role==='dswd')!,aud=actors.find(a=>a.role==='auditor')!,punong=actors.find(a=>a.position==='Punong Barangay')!,bar=actors.find(a=>a.role==='barangay'&&a.barangay_id===punong.barangay_id&&a.id!==punong.id)!;
+      14 |  const beneficiaryActors=actors.filter(a=>a.role==='beneficiary');const recipients=process.env.MVP_PRESENTATION_DATA==='1'?['Maria Santos · Demo','Rosa Reyes · Demo'].map(name=>beneficiaryActors.find(a=>a.display_name===name)!):beneficiaryActors;const staff=actors.filter(a=>a.role==='disbursing');
+      15 |  const refs=(await(await request.get(base+'/barangays')).json()).data as {id:string;name:string}[];
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/journey.spec.ts:12:36
+
+    attachment #1: video (video/webm) ──────────────────────────────────────────────────────────────
+    ../.runtime/finals/review-journey/journey-five-roles-use-edi-9868f-sh-answers-and-actual-audit/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ../.runtime/finals/review-journey/journey-five-roles-use-edi-9868f-sh-answers-and-actual-audit/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../.runtime/finals/review-journey/journey-five-roles-use-edi-9868f-sh-answers-and-actual-audit/trace.zip
+    Usage:
+
+        npx playwright show-trace ../.runtime/finals/review-journey/journey-five-roles-use-edi-9868f-sh-answers-and-actual-audit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests/journey.spec.ts:8:5 › five roles use edited original-backed forms for own-device and assisted cash, answers and actual audit 

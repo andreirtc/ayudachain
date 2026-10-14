@@ -1,0 +1,441 @@
+[
+  {
+    "scenario": "fresh-local-chain-retained-database",
+    "chainRecord": [
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "0",
+      "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "0",
+      false
+    ],
+    "api": {
+      "record_id": "DIST-0001",
+      "beneficiary_id": "BEN-0001",
+      "receipt_hash_local": "0x6e4600d4c9a40da3ccc0e628363d99c94d4eb55ddb01ed61e248e4d9fa4cc580",
+      "receipt_hash_onchain": "0x6e4600d4c9a40da3ccc0e628363d99c94d4eb55ddb01ed61e248e4d9fa4cc580",
+      "is_verified": true,
+      "blockchain_tx_hash": "0xc3dc0b990651fbd7c159bfe2eb4d016a7772d8ec09cdc945ff5dab156438e4e5",
+      "timestamp": 1791397922,
+      "network": "Local EVM",
+      "contract_address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      "explorer_url": null,
+      "status_message": "INTEGRITY VERIFIED: Off-chain record strictly matches immutable on-chain proof."
+    }
+  },
+  {
+    "scenario": "first-reset-officer-fresh-chain-intermediate-sampling",
+    "priorAudit": {
+      "error": "Not found: /api/audit-events"
+    },
+    "priorDistributionCount": 15,
+    "afterAudit": {
+      "error": "Not found: /api/audit-events"
+    },
+    "afterDistributions": [],
+    "limitation": "Wrong audit route returned 404; snapshot sampled while seeding, before response. Subsequent fresh seed had five payouts and real chain records. Role was Officer; wrong localStorage key did not change role."
+  },
+  {
+    "scenario": "citizen-repeat-reset-same-chain",
+    "role": "Public Citizen",
+    "auditBefore": [
+      {
+        "id": 38,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "DISTRIBUTION_CONFIRMED",
+        "description": "Disbursed ₱5,000.00 to Teresa Villanueva (BEN-0009) — Receipt anchored on-chain",
+        "amount": 5000,
+        "entity_id": "DIST-0005",
+        "blockchain_tx_hash": "0x484f7f786b4d548de50ce80105a404bde51f49bd8c530743043862383aa41fcf",
+        "timestamp": "2026-10-07T18:17:37.325560"
+      },
+      {
+        "id": 37,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "DISTRIBUTION_CONFIRMED",
+        "description": "Disbursed ₱5,000.00 to Rodrigo Mendoza (BEN-0008) — Receipt anchored on-chain",
+        "amount": 5000,
+        "entity_id": "DIST-0004",
+        "blockchain_tx_hash": "0x53d0fa3d128371a3cc3394bd858af278e719573525007292ae3ca771b2dac217",
+        "timestamp": "2026-10-07T18:12:37.325560"
+      },
+      {
+        "id": 36,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "DISTRIBUTION_CONFIRMED",
+        "description": "Disbursed ₱5,000.00 to Elena Bautista (BEN-0003) — Receipt anchored on-chain",
+        "amount": 5000,
+        "entity_id": "DIST-0003",
+        "blockchain_tx_hash": "0xf4fda390272d540036a1168bf023e26d0122baacfeded329bb33189a886a3397",
+        "timestamp": "2026-10-07T18:07:37.325560"
+      },
+      {
+        "id": 41,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "AI_ANOMALY_FLAG",
+        "description": "AI Anomaly Engine: Flagged BEN-0022 for non-standard disbursement amount (₱15,000)",
+        "amount": null,
+        "entity_id": "BEN-0022",
+        "blockchain_tx_hash": null,
+        "timestamp": "2026-10-07T18:07:37.325560"
+      },
+      {
+        "id": 40,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "AI_DUPLICATE_FLAG",
+        "description": "AI Entity Resolution: Flagged BEN-0014 (Ma. Santos) ↔ BEN-0013 (Maria Santos) [91% match]",
+        "amount": null,
+        "entity_id": "BEN-0014",
+        "blockchain_tx_hash": null,
+        "timestamp": "2026-10-07T18:04:37.325560"
+      },
+      {
+        "id": 35,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "DISTRIBUTION_CONFIRMED",
+        "description": "Disbursed ₱5,000.00 to Juan Dela Cruz (BEN-0002) — Receipt anchored on-chain",
+        "amount": 5000,
+        "entity_id": "DIST-0002",
+        "blockchain_tx_hash": "0x0d4130e65d3594e72318de2f8bfc7658c1832b19f497343364b6689ec3609bf0",
+        "timestamp": "2026-10-07T18:02:37.325560"
+      },
+      {
+        "id": 39,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "AI_DUPLICATE_FLAG",
+        "description": "AI Entity Resolution: Flagged BEN-0007 (Juan D. Cruz) ↔ BEN-0002 (Juan Dela Cruz) [94% match]",
+        "amount": null,
+        "entity_id": "BEN-0007",
+        "blockchain_tx_hash": null,
+        "timestamp": "2026-10-07T18:02:37.325560"
+      },
+      {
+        "id": 34,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "DISTRIBUTION_CONFIRMED",
+        "description": "Disbursed ₱5,000.00 to Roberto Ramos (BEN-0001) — Receipt anchored on-chain",
+        "amount": 5000,
+        "entity_id": "DIST-0001",
+        "blockchain_tx_hash": "0xc3dc0b990651fbd7c159bfe2eb4d016a7772d8ec09cdc945ff5dab156438e4e5",
+        "timestamp": "2026-10-07T17:57:37.325560"
+      },
+      {
+        "id": 33,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "ALLOCATION",
+        "description": "Allocated ₱2,500,000.00 to Barangay Maligaya",
+        "amount": 2500000,
+        "entity_id": "ALLOC-0004",
+        "blockchain_tx_hash": "0x4649935445a747ab333886a3436eca6bd32104d2f72ebe22f3a8660d028c622c",
+        "timestamp": "2026-10-07T16:22:37.325560"
+      },
+      {
+        "id": 32,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "ALLOCATION",
+        "description": "Allocated ₱2,500,000.00 to Barangay San Roque",
+        "amount": 2500000,
+        "entity_id": "ALLOC-0003",
+        "blockchain_tx_hash": "0xa52760ff8eb87fd613b7362b5fa163d34d6785a3613c44340c8b2c654c0a7d26",
+        "timestamp": "2026-10-07T16:12:37.325560"
+      },
+      {
+        "id": 31,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "ALLOCATION",
+        "description": "Allocated ₱2,500,000.00 to Barangay Santa Elena",
+        "amount": 2500000,
+        "entity_id": "ALLOC-0002",
+        "blockchain_tx_hash": "0x26a47a0c42b3c05ebe8ce175a1712e475c174bfdcc51888b61a0779892f9d757",
+        "timestamp": "2026-10-07T16:02:37.325560"
+      },
+      {
+        "id": 30,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "ALLOCATION",
+        "description": "Allocated ₱2,500,000.00 to Barangay San Isidro",
+        "amount": 2500000,
+        "entity_id": "ALLOC-0001",
+        "blockchain_tx_hash": "0xe736a868b305588a1761c3088d784ca9df179e752128086b962a425067eadef9",
+        "timestamp": "2026-10-07T15:52:37.325560"
+      }
+    ],
+    "auditAfter": [
+      {
+        "id": 50,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "DISTRIBUTION_CONFIRMED",
+        "description": "Disbursed ₱5,000.00 to Teresa Villanueva (BEN-0009) — Receipt anchored on-chain",
+        "amount": 5000,
+        "entity_id": "DIST-0005",
+        "blockchain_tx_hash": "0x2768eb51296f032dad5746c7315888c55f2976ccba8d8209b85ae321c17e942f",
+        "timestamp": "2026-10-07T18:18:14.874995"
+      },
+      {
+        "id": 49,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "DISTRIBUTION_CONFIRMED",
+        "description": "Disbursed ₱5,000.00 to Rodrigo Mendoza (BEN-0008) — Receipt anchored on-chain",
+        "amount": 5000,
+        "entity_id": "DIST-0004",
+        "blockchain_tx_hash": "0x8a62a1cb4ef9d437666222e20ad22a4d67000bce1225452bae3e544e63a08dcf",
+        "timestamp": "2026-10-07T18:13:14.874995"
+      },
+      {
+        "id": 48,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "DISTRIBUTION_CONFIRMED",
+        "description": "Disbursed ₱5,000.00 to Elena Bautista (BEN-0003) — Receipt anchored on-chain",
+        "amount": 5000,
+        "entity_id": "DIST-0003",
+        "blockchain_tx_hash": "0x669140ab380577262ed4b19117b4c4acd912bd205f83fbf02ee37d0d68d14db5",
+        "timestamp": "2026-10-07T18:08:14.874995"
+      },
+      {
+        "id": 53,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "AI_ANOMALY_FLAG",
+        "description": "AI Anomaly Engine: Flagged BEN-0022 for non-standard disbursement amount (₱15,000)",
+        "amount": null,
+        "entity_id": "BEN-0022",
+        "blockchain_tx_hash": null,
+        "timestamp": "2026-10-07T18:08:14.874995"
+      },
+      {
+        "id": 52,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "AI_DUPLICATE_FLAG",
+        "description": "AI Entity Resolution: Flagged BEN-0014 (Ma. Santos) ↔ BEN-0013 (Maria Santos) [91% match]",
+        "amount": null,
+        "entity_id": "BEN-0014",
+        "blockchain_tx_hash": null,
+        "timestamp": "2026-10-07T18:05:14.874995"
+      },
+      {
+        "id": 47,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "DISTRIBUTION_CONFIRMED",
+        "description": "Disbursed ₱5,000.00 to Juan Dela Cruz (BEN-0002) — Receipt anchored on-chain",
+        "amount": 5000,
+        "entity_id": "DIST-0002",
+        "blockchain_tx_hash": "0x2f28312afa04498a7040adda26654bb8474606e0935b2181c0127323748417fd",
+        "timestamp": "2026-10-07T18:03:14.874995"
+      },
+      {
+        "id": 51,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "AI_DUPLICATE_FLAG",
+        "description": "AI Entity Resolution: Flagged BEN-0007 (Juan D. Cruz) ↔ BEN-0002 (Juan Dela Cruz) [94% match]",
+        "amount": null,
+        "entity_id": "BEN-0007",
+        "blockchain_tx_hash": null,
+        "timestamp": "2026-10-07T18:03:14.874995"
+      },
+      {
+        "id": 46,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "DISTRIBUTION_CONFIRMED",
+        "description": "Disbursed ₱5,000.00 to Roberto Ramos (BEN-0001) — Receipt anchored on-chain",
+        "amount": 5000,
+        "entity_id": "DIST-0001",
+        "blockchain_tx_hash": "0x25bd965bf21b79172a2ece2b796406e4b6d3935b80c7c22f3887601570786271",
+        "timestamp": "2026-10-07T17:58:14.874995"
+      },
+      {
+        "id": 45,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "ALLOCATION",
+        "description": "Allocated ₱2,500,000.00 to Barangay Maligaya",
+        "amount": 2500000,
+        "entity_id": "ALLOC-0004",
+        "blockchain_tx_hash": "0x1a8927568fc7e2907e4af8429add327621c32c2134362445cd2b89957c4c286a",
+        "timestamp": "2026-10-07T16:23:14.874995"
+      },
+      {
+        "id": 44,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "ALLOCATION",
+        "description": "Allocated ₱2,500,000.00 to Barangay San Roque",
+        "amount": 2500000,
+        "entity_id": "ALLOC-0003",
+        "blockchain_tx_hash": "0xba9d2ea810eedcd1874218919e9844797378076d082390a111dfca6ff53023fb",
+        "timestamp": "2026-10-07T16:13:14.874995"
+      },
+      {
+        "id": 43,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "ALLOCATION",
+        "description": "Allocated ₱2,500,000.00 to Barangay Santa Elena",
+        "amount": 2500000,
+        "entity_id": "ALLOC-0002",
+        "blockchain_tx_hash": "0x5e2ca7b66980bc201b2a88bd4d8fe40251599bc60272ff8cf9205cf5d83f328a",
+        "timestamp": "2026-10-07T16:03:14.874995"
+      },
+      {
+        "id": 42,
+        "batch_id": "RELIEF-2026-001",
+        "event_type": "ALLOCATION",
+        "description": "Allocated ₱2,500,000.00 to Barangay San Isidro",
+        "amount": 2500000,
+        "entity_id": "ALLOC-0001",
+        "blockchain_tx_hash": "0xa929a8a2047439b296bbfcd8dfc1e8e6824874f26ff7cd04ebb4bd96d1e50070",
+        "timestamp": "2026-10-07T15:53:14.874995"
+      }
+    ],
+    "distributionsBefore": [
+      {
+        "id": 20,
+        "distribution_id": "DIST-0005",
+        "beneficiary_id": "BEN-0009",
+        "batch_id": "RELIEF-2026-001",
+        "amount": 5000,
+        "verification_method": "QR_VOUCHER_PHYSICAL_RECEIPT",
+        "receipt_hash": "0x4015654629bd15b93030529034ed98ff3e9420eab8d57967b4b91e09ba38cef2",
+        "receipt_file_path": "/receipts/sample_relief_receipt.svg",
+        "ocr_text": "REPUBLIC OF THE PHILIPPINES\nDEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT\nTYPHOON SALINLAHI EMERGENCY ASSISTANCE (2026)\n--------------------------------------------------\nOFFICIAL RELIEF DISBURSEMENT ACKNOWLEDGEMENT RECEIPT\nBATCH REFERENCE      : RELIEF-2026-001\nDISTRIBUTION ID      : DIST-0001\nBENEFICIARY ID       : BEN-0001\nHOUSEHOLD HEAD       : JUAN DELA CRUZ\nMUNICIPALITY / LGU   : ALBAY DISASTER RESPONSE CENTER\nBARANGAY             : SAN ISIDRO\nDISBURSEMENT TYPE    : EMERGENCY CASH & RELIEF PACK (ECRP)\nGRANT AMOUNT         : PHP 5,000.00\nVERIFICATION METHOD  : QR VOUCHER & BIOMETRIC CONFIRMATION\nSTATUS               : CLAIMED & CONFIRMED\nDISBURSING OFFICER   : MARIA SANTOS, DSWD FIELD OFFICER #4412\nISSUED TIMESTAMP     : 2026-09-01 09:41:22 UTC\n--------------------------------------------------\nINTEGRITY NOTICE:\nThis digital record is protected under AyudaChain.\nAny alteration to name, amount, or reference will invalidate the cryptographic blockchain proof.\n",
+        "status": "CONFIRMED",
+        "blockchain_tx_hash": "0x484f7f786b4d548de50ce80105a404bde51f49bd8c530743043862383aa41fcf",
+        "distributed_at": "2026-10-07T18:17:37.325560"
+      },
+      {
+        "id": 19,
+        "distribution_id": "DIST-0004",
+        "beneficiary_id": "BEN-0008",
+        "batch_id": "RELIEF-2026-001",
+        "amount": 5000,
+        "verification_method": "QR_VOUCHER_PHYSICAL_RECEIPT",
+        "receipt_hash": "0x42d2244e9fdf5183e014688db4225a18a10c5c0294ebda8c588cfa563654c8e3",
+        "receipt_file_path": "/receipts/sample_relief_receipt.svg",
+        "ocr_text": "REPUBLIC OF THE PHILIPPINES\nDEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT\nTYPHOON SALINLAHI EMERGENCY ASSISTANCE (2026)\n--------------------------------------------------\nOFFICIAL RELIEF DISBURSEMENT ACKNOWLEDGEMENT RECEIPT\nBATCH REFERENCE      : RELIEF-2026-001\nDISTRIBUTION ID      : DIST-0001\nBENEFICIARY ID       : BEN-0001\nHOUSEHOLD HEAD       : JUAN DELA CRUZ\nMUNICIPALITY / LGU   : ALBAY DISASTER RESPONSE CENTER\nBARANGAY             : SAN ISIDRO\nDISBURSEMENT TYPE    : EMERGENCY CASH & RELIEF PACK (ECRP)\nGRANT AMOUNT         : PHP 5,000.00\nVERIFICATION METHOD  : QR VOUCHER & BIOMETRIC CONFIRMATION\nSTATUS               : CLAIMED & CONFIRMED\nDISBURSING OFFICER   : MARIA SANTOS, DSWD FIELD OFFICER #4412\nISSUED TIMESTAMP     : 2026-09-01 09:41:22 UTC\n--------------------------------------------------\nINTEGRITY NOTICE:\nThis digital record is protected under AyudaChain.\nAny alteration to name, amount, or reference will invalidate the cryptographic blockchain proof.\n",
+        "status": "CONFIRMED",
+        "blockchain_tx_hash": "0x53d0fa3d128371a3cc3394bd858af278e719573525007292ae3ca771b2dac217",
+        "distributed_at": "2026-10-07T18:12:37.325560"
+      },
+      {
+        "id": 18,
+        "distribution_id": "DIST-0003",
+        "beneficiary_id": "BEN-0003",
+        "batch_id": "RELIEF-2026-001",
+        "amount": 5000,
+        "verification_method": "QR_VOUCHER_PHYSICAL_RECEIPT",
+        "receipt_hash": "0x864db014fa72f90e3669665630de12efaccf92d8bb8c811761b8b97ef0a8bf4c",
+        "receipt_file_path": "/receipts/sample_relief_receipt.svg",
+        "ocr_text": "REPUBLIC OF THE PHILIPPINES\nDEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT\nTYPHOON SALINLAHI EMERGENCY ASSISTANCE (2026)\n--------------------------------------------------\nOFFICIAL RELIEF DISBURSEMENT ACKNOWLEDGEMENT RECEIPT\nBATCH REFERENCE      : RELIEF-2026-001\nDISTRIBUTION ID      : DIST-0001\nBENEFICIARY ID       : BEN-0001\nHOUSEHOLD HEAD       : JUAN DELA CRUZ\nMUNICIPALITY / LGU   : ALBAY DISASTER RESPONSE CENTER\nBARANGAY             : SAN ISIDRO\nDISBURSEMENT TYPE    : EMERGENCY CASH & RELIEF PACK (ECRP)\nGRANT AMOUNT         : PHP 5,000.00\nVERIFICATION METHOD  : QR VOUCHER & BIOMETRIC CONFIRMATION\nSTATUS               : CLAIMED & CONFIRMED\nDISBURSING OFFICER   : MARIA SANTOS, DSWD FIELD OFFICER #4412\nISSUED TIMESTAMP     : 2026-09-01 09:41:22 UTC\n--------------------------------------------------\nINTEGRITY NOTICE:\nThis digital record is protected under AyudaChain.\nAny alteration to name, amount, or reference will invalidate the cryptographic blockchain proof.\n",
+        "status": "CONFIRMED",
+        "blockchain_tx_hash": "0xf4fda390272d540036a1168bf023e26d0122baacfeded329bb33189a886a3397",
+        "distributed_at": "2026-10-07T18:07:37.325560"
+      },
+      {
+        "id": 17,
+        "distribution_id": "DIST-0002",
+        "beneficiary_id": "BEN-0002",
+        "batch_id": "RELIEF-2026-001",
+        "amount": 5000,
+        "verification_method": "QR_VOUCHER_PHYSICAL_RECEIPT",
+        "receipt_hash": "0x237c3840f41aa5ce1f9c08fe15e25bb613ca2b22a15f738069528ccd8a189f61",
+        "receipt_file_path": "/receipts/sample_relief_receipt.svg",
+        "ocr_text": "REPUBLIC OF THE PHILIPPINES\nDEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT\nTYPHOON SALINLAHI EMERGENCY ASSISTANCE (2026)\n--------------------------------------------------\nOFFICIAL RELIEF DISBURSEMENT ACKNOWLEDGEMENT RECEIPT\nBATCH REFERENCE      : RELIEF-2026-001\nDISTRIBUTION ID      : DIST-0001\nBENEFICIARY ID       : BEN-0001\nHOUSEHOLD HEAD       : JUAN DELA CRUZ\nMUNICIPALITY / LGU   : ALBAY DISASTER RESPONSE CENTER\nBARANGAY             : SAN ISIDRO\nDISBURSEMENT TYPE    : EMERGENCY CASH & RELIEF PACK (ECRP)\nGRANT AMOUNT         : PHP 5,000.00\nVERIFICATION METHOD  : QR VOUCHER & BIOMETRIC CONFIRMATION\nSTATUS               : CLAIMED & CONFIRMED\nDISBURSING OFFICER   : MARIA SANTOS, DSWD FIELD OFFICER #4412\nISSUED TIMESTAMP     : 2026-09-01 09:41:22 UTC\n--------------------------------------------------\nINTEGRITY NOTICE:\nThis digital record is protected under AyudaChain.\nAny alteration to name, amount, or reference will invalidate the cryptographic blockchain proof.\n",
+        "status": "CONFIRMED",
+        "blockchain_tx_hash": "0x0d4130e65d3594e72318de2f8bfc7658c1832b19f497343364b6689ec3609bf0",
+        "distributed_at": "2026-10-07T18:02:37.325560"
+      },
+      {
+        "id": 16,
+        "distribution_id": "DIST-0001",
+        "beneficiary_id": "BEN-0001",
+        "batch_id": "RELIEF-2026-001",
+        "amount": 5000,
+        "verification_method": "QR_VOUCHER_PHYSICAL_RECEIPT",
+        "receipt_hash": "0x6e4600d4c9a40da3ccc0e628363d99c94d4eb55ddb01ed61e248e4d9fa4cc580",
+        "receipt_file_path": "/receipts/sample_relief_receipt.svg",
+        "ocr_text": "REPUBLIC OF THE PHILIPPINES\nDEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT\nTYPHOON SALINLAHI EMERGENCY ASSISTANCE (2026)\n--------------------------------------------------\nOFFICIAL RELIEF DISBURSEMENT ACKNOWLEDGEMENT RECEIPT\nBATCH REFERENCE      : RELIEF-2026-001\nDISTRIBUTION ID      : DIST-0001\nBENEFICIARY ID       : BEN-0001\nHOUSEHOLD HEAD       : JUAN DELA CRUZ\nMUNICIPALITY / LGU   : ALBAY DISASTER RESPONSE CENTER\nBARANGAY             : SAN ISIDRO\nDISBURSEMENT TYPE    : EMERGENCY CASH & RELIEF PACK (ECRP)\nGRANT AMOUNT         : PHP 5,000.00\nVERIFICATION METHOD  : QR VOUCHER & BIOMETRIC CONFIRMATION\nSTATUS               : CLAIMED & CONFIRMED\nDISBURSING OFFICER   : MARIA SANTOS, DSWD FIELD OFFICER #4412\nISSUED TIMESTAMP     : 2026-09-01 09:41:22 UTC\n--------------------------------------------------\nINTEGRITY NOTICE:\nThis digital record is protected under AyudaChain.\nAny alteration to name, amount, or reference will invalidate the cryptographic blockchain proof.\n",
+        "status": "CONFIRMED",
+        "blockchain_tx_hash": "0xc3dc0b990651fbd7c159bfe2eb4d016a7772d8ec09cdc945ff5dab156438e4e5",
+        "distributed_at": "2026-10-07T17:57:37.325560"
+      }
+    ],
+    "distributionsAfter": [
+      {
+        "id": 25,
+        "distribution_id": "DIST-0005",
+        "beneficiary_id": "BEN-0009",
+        "batch_id": "RELIEF-2026-001",
+        "amount": 5000,
+        "verification_method": "QR_VOUCHER_PHYSICAL_RECEIPT",
+        "receipt_hash": "0x4015654629bd15b93030529034ed98ff3e9420eab8d57967b4b91e09ba38cef2",
+        "receipt_file_path": "/receipts/sample_relief_receipt.svg",
+        "ocr_text": "REPUBLIC OF THE PHILIPPINES\nDEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT\nTYPHOON SALINLAHI EMERGENCY ASSISTANCE (2026)\n--------------------------------------------------\nOFFICIAL RELIEF DISBURSEMENT ACKNOWLEDGEMENT RECEIPT\nBATCH REFERENCE      : RELIEF-2026-001\nDISTRIBUTION ID      : DIST-0001\nBENEFICIARY ID       : BEN-0001\nHOUSEHOLD HEAD       : JUAN DELA CRUZ\nMUNICIPALITY / LGU   : ALBAY DISASTER RESPONSE CENTER\nBARANGAY             : SAN ISIDRO\nDISBURSEMENT TYPE    : EMERGENCY CASH & RELIEF PACK (ECRP)\nGRANT AMOUNT         : PHP 5,000.00\nVERIFICATION METHOD  : QR VOUCHER & BIOMETRIC CONFIRMATION\nSTATUS               : CLAIMED & CONFIRMED\nDISBURSING OFFICER   : MARIA SANTOS, DSWD FIELD OFFICER #4412\nISSUED TIMESTAMP     : 2026-09-01 09:41:22 UTC\n--------------------------------------------------\nINTEGRITY NOTICE:\nThis digital record is protected under AyudaChain.\nAny alteration to name, amount, or reference will invalidate the cryptographic blockchain proof.\n",
+        "status": "CONFIRMED",
+        "blockchain_tx_hash": "0x2768eb51296f032dad5746c7315888c55f2976ccba8d8209b85ae321c17e942f",
+        "distributed_at": "2026-10-07T18:18:14.874995"
+      },
+      {
+        "id": 24,
+        "distribution_id": "DIST-0004",
+        "beneficiary_id": "BEN-0008",
+        "batch_id": "RELIEF-2026-001",
+        "amount": 5000,
+        "verification_method": "QR_VOUCHER_PHYSICAL_RECEIPT",
+        "receipt_hash": "0x42d2244e9fdf5183e014688db4225a18a10c5c0294ebda8c588cfa563654c8e3",
+        "receipt_file_path": "/receipts/sample_relief_receipt.svg",
+        "ocr_text": "REPUBLIC OF THE PHILIPPINES\nDEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT\nTYPHOON SALINLAHI EMERGENCY ASSISTANCE (2026)\n--------------------------------------------------\nOFFICIAL RELIEF DISBURSEMENT ACKNOWLEDGEMENT RECEIPT\nBATCH REFERENCE      : RELIEF-2026-001\nDISTRIBUTION ID      : DIST-0001\nBENEFICIARY ID       : BEN-0001\nHOUSEHOLD HEAD       : JUAN DELA CRUZ\nMUNICIPALITY / LGU   : ALBAY DISASTER RESPONSE CENTER\nBARANGAY             : SAN ISIDRO\nDISBURSEMENT TYPE    : EMERGENCY CASH & RELIEF PACK (ECRP)\nGRANT AMOUNT         : PHP 5,000.00\nVERIFICATION METHOD  : QR VOUCHER & BIOMETRIC CONFIRMATION\nSTATUS               : CLAIMED & CONFIRMED\nDISBURSING OFFICER   : MARIA SANTOS, DSWD FIELD OFFICER #4412\nISSUED TIMESTAMP     : 2026-09-01 09:41:22 UTC\n--------------------------------------------------\nINTEGRITY NOTICE:\nThis digital record is protected under AyudaChain.\nAny alteration to name, amount, or reference will invalidate the cryptographic blockchain proof.\n",
+        "status": "CONFIRMED",
+        "blockchain_tx_hash": "0x8a62a1cb4ef9d437666222e20ad22a4d67000bce1225452bae3e544e63a08dcf",
+        "distributed_at": "2026-10-07T18:13:14.874995"
+      },
+      {
+        "id": 23,
+        "distribution_id": "DIST-0003",
+        "beneficiary_id": "BEN-0003",
+        "batch_id": "RELIEF-2026-001",
+        "amount": 5000,
+        "verification_method": "QR_VOUCHER_PHYSICAL_RECEIPT",
+        "receipt_hash": "0x864db014fa72f90e3669665630de12efaccf92d8bb8c811761b8b97ef0a8bf4c",
+        "receipt_file_path": "/receipts/sample_relief_receipt.svg",
+        "ocr_text": "REPUBLIC OF THE PHILIPPINES\nDEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT\nTYPHOON SALINLAHI EMERGENCY ASSISTANCE (2026)\n--------------------------------------------------\nOFFICIAL RELIEF DISBURSEMENT ACKNOWLEDGEMENT RECEIPT\nBATCH REFERENCE      : RELIEF-2026-001\nDISTRIBUTION ID      : DIST-0001\nBENEFICIARY ID       : BEN-0001\nHOUSEHOLD HEAD       : JUAN DELA CRUZ\nMUNICIPALITY / LGU   : ALBAY DISASTER RESPONSE CENTER\nBARANGAY             : SAN ISIDRO\nDISBURSEMENT TYPE    : EMERGENCY CASH & RELIEF PACK (ECRP)\nGRANT AMOUNT         : PHP 5,000.00\nVERIFICATION METHOD  : QR VOUCHER & BIOMETRIC CONFIRMATION\nSTATUS               : CLAIMED & CONFIRMED\nDISBURSING OFFICER   : MARIA SANTOS, DSWD FIELD OFFICER #4412\nISSUED TIMESTAMP     : 2026-09-01 09:41:22 UTC\n--------------------------------------------------\nINTEGRITY NOTICE:\nThis digital record is protected under AyudaChain.\nAny alteration to name, amount, or reference will invalidate the cryptographic blockchain proof.\n",
+        "status": "CONFIRMED",
+        "blockchain_tx_hash": "0x669140ab380577262ed4b19117b4c4acd912bd205f83fbf02ee37d0d68d14db5",
+        "distributed_at": "2026-10-07T18:08:14.874995"
+      },
+      {
+        "id": 22,
+        "distribution_id": "DIST-0002",
+        "beneficiary_id": "BEN-0002",
+        "batch_id": "RELIEF-2026-001",
+        "amount": 5000,
+        "verification_method": "QR_VOUCHER_PHYSICAL_RECEIPT",
+        "receipt_hash": "0x237c3840f41aa5ce1f9c08fe15e25bb613ca2b22a15f738069528ccd8a189f61",
+        "receipt_file_path": "/receipts/sample_relief_receipt.svg",
+        "ocr_text": "REPUBLIC OF THE PHILIPPINES\nDEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT\nTYPHOON SALINLAHI EMERGENCY ASSISTANCE (2026)\n--------------------------------------------------\nOFFICIAL RELIEF DISBURSEMENT ACKNOWLEDGEMENT RECEIPT\nBATCH REFERENCE      : RELIEF-2026-001\nDISTRIBUTION ID      : DIST-0001\nBENEFICIARY ID       : BEN-0001\nHOUSEHOLD HEAD       : JUAN DELA CRUZ\nMUNICIPALITY / LGU   : ALBAY DISASTER RESPONSE CENTER\nBARANGAY             : SAN ISIDRO\nDISBURSEMENT TYPE    : EMERGENCY CASH & RELIEF PACK (ECRP)\nGRANT AMOUNT         : PHP 5,000.00\nVERIFICATION METHOD  : QR VOUCHER & BIOMETRIC CONFIRMATION\nSTATUS               : CLAIMED & CONFIRMED\nDISBURSING OFFICER   : MARIA SANTOS, DSWD FIELD OFFICER #4412\nISSUED TIMESTAMP     : 2026-09-01 09:41:22 UTC\n--------------------------------------------------\nINTEGRITY NOTICE:\nThis digital record is protected under AyudaChain.\nAny alteration to name, amount, or reference will invalidate the cryptographic blockchain proof.\n",
+        "status": "CONFIRMED",
+        "blockchain_tx_hash": "0x2f28312afa04498a7040adda26654bb8474606e0935b2181c0127323748417fd",
+        "distributed_at": "2026-10-07T18:03:14.874995"
+      },
+      {
+        "id": 21,
+        "distribution_id": "DIST-0001",
+        "beneficiary_id": "BEN-0001",
+        "batch_id": "RELIEF-2026-001",
+        "amount": 5000,
+        "verification_method": "QR_VOUCHER_PHYSICAL_RECEIPT",
+        "receipt_hash": "0x6e4600d4c9a40da3ccc0e628363d99c94d4eb55ddb01ed61e248e4d9fa4cc580",
+        "receipt_file_path": "/receipts/sample_relief_receipt.svg",
+        "ocr_text": "REPUBLIC OF THE PHILIPPINES\nDEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT\nTYPHOON SALINLAHI EMERGENCY ASSISTANCE (2026)\n--------------------------------------------------\nOFFICIAL RELIEF DISBURSEMENT ACKNOWLEDGEMENT RECEIPT\nBATCH REFERENCE      : RELIEF-2026-001\nDISTRIBUTION ID      : DIST-0001\nBENEFICIARY ID       : BEN-0001\nHOUSEHOLD HEAD       : JUAN DELA CRUZ\nMUNICIPALITY / LGU   : ALBAY DISASTER RESPONSE CENTER\nBARANGAY             : SAN ISIDRO\nDISBURSEMENT TYPE    : EMERGENCY CASH & RELIEF PACK (ECRP)\nGRANT AMOUNT         : PHP 5,000.00\nVERIFICATION METHOD  : QR VOUCHER & BIOMETRIC CONFIRMATION\nSTATUS               : CLAIMED & CONFIRMED\nDISBURSING OFFICER   : MARIA SANTOS, DSWD FIELD OFFICER #4412\nISSUED TIMESTAMP     : 2026-09-01 09:41:22 UTC\n--------------------------------------------------\nINTEGRITY NOTICE:\nThis digital record is protected under AyudaChain.\nAny alteration to name, amount, or reference will invalidate the cryptographic blockchain proof.\n",
+        "status": "CONFIRMED",
+        "blockchain_tx_hash": "0x25bd965bf21b79172a2ece2b796406e4b6d3935b80c7c22f3887601570786271",
+        "distributed_at": "2026-10-07T17:58:14.874995"
+      }
+    ],
+    "claimedTransactionReceipt": null,
+    "chainRecord": [
+      "0x52454c4945462d323032362d3030310000000000000000000000000000000000",
+      "0x444953542d303030310000000000000000000000000000000000000000000000",
+      "0x42454e2d30303031000000000000000000000000000000000000000000000000",
+      "5000000000000000000000",
+      "0x6e4600d4c9a40da3ccc0e628363d99c94d4eb55ddb01ed61e248e4d9fa4cc580",
+      "1791397962",
+      true
+    ]
+  }
+]

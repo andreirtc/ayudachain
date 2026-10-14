@@ -1,0 +1,40 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/finals-ux.spec.ts -g handover review
+
+
+Running 1 test using 1 worker
+
+(node:89332) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 tests/finals-ux.spec.ts:32:5 › handover review supports cancel, Escape and one explicit confirmation (4.4s)
+
+
+  1) tests/finals-ux.spec.ts:32:5 › handover review supports cancel, Escape and one explicit confirmation 
+
+    Error: expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 44
+    Received:    40
+
+      61 |   await page.setViewportSize({width:390,height:844});await trigger.click();
+      62 |   expect(await dialog.evaluate(e=>e.getBoundingClientRect().width<=innerWidth)).toBeTruthy();
+    > 63 |   expect(await dialog.getByRole('button',{name:'Go back',exact:true}).evaluate(e=>e.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
+         |                                                                                                                      ^
+      64 |   await dialog.getByRole('button',{name:'Confirm recorded handover',exact:true}).click();
+      65 |   await expect.poll(()=>posts.length).toBe(1);
+      66 |   await expect(page.locator('main [role="alert"]').first()).toContainText('recipient');
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/finals-ux.spec.ts:63:118
+
+    Error Context: test-results/finals-ux-handover-review--5a3d1-d-one-explicit-confirmation/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/finals-ux-handover-review--5a3d1-d-one-explicit-confirmation/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/finals-ux-handover-review--5a3d1-d-one-explicit-confirmation/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests/finals-ux.spec.ts:32:5 › handover review supports cancel, Escape and one explicit confirmation 

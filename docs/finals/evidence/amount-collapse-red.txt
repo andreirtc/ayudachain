@@ -1,0 +1,49 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/inputs.spec.ts
+
+
+Running 1 test using 1 worker
+
+(node:73105) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 tests/inputs.spec.ts:4:5 › amount inputs cannot submit the initial revision while saved input history is loading (6.9s)
+
+
+  1) tests/inputs.spec.ts:4:5 › amount inputs cannot submit the initial revision while saved input history is loading 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator:  getByLabel('Documented daily wage (PHP)', { exact: true })
+    Expected: visible
+    Received: hidden
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toBeVisible" getByLabel('Documented daily wage (PHP)', { exact: true }) with timeout 5000ms
+      - waiting for getByLabel('Documented daily wage (PHP)', { exact: true })
+        13 × locator resolved to <input required="" value="999.55"/>
+           - unexpected value "hidden"
+
+
+      16 |     await page.getByLabel('Documented daily wage (PHP)',{exact:true}).fill('999.55');
+      17 |     release();
+    > 18 |     await expect(page.getByLabel('Documented daily wage (PHP)',{exact:true})).toBeVisible();
+         |                                                                               ^
+      19 |     await expect(page.getByLabel('Documented daily wage (PHP)',{exact:true})).toHaveValue('999.55');
+      20 |     await expect(page.getByRole('button',{name:'Save immutable input version',exact:true})).toBeEnabled();
+      21 |   }finally{release();await page.unrouteAll({behavior:'wait'});}
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/inputs.spec.ts:18:79
+
+    Error Context: test-results/inputs-amount-inputs-canno-397f6-ed-input-history-is-loading/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/inputs-amount-inputs-canno-397f6-ed-input-history-is-loading/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/inputs-amount-inputs-canno-397f6-ed-input-history-is-loading/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests/inputs.spec.ts:4:5 › amount inputs cannot submit the initial revision while saved input history is loading 

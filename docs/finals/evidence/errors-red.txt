@@ -1,0 +1,218 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/workflow-errors.spec.ts -g unknown API|lost write|gateway|claim rejection
+
+
+Running 5 tests using 1 worker
+
+(node:40658) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 tests/workflow-errors.spec.ts:32:40 › claim rejection gives the Beneficiary a next step in en (7.7s)
+(node:40901) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  2 tests/workflow-errors.spec.ts:32:40 › claim rejection gives the Beneficiary a next step in fil (10.2s)
+(node:41264) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  3 tests/workflow-errors.spec.ts:62:5 › unknown API details are not displayed to the user (43ms)
+(node:41291) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  4 tests/workflow-errors.spec.ts:71:5 › a lost write response does not advise repeating physical cash (18ms)
+(node:41322) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  5 tests/workflow-errors.spec.ts:79:5 › a gateway HTML response gets a recovery message (21ms)
+
+
+  1) tests/workflow-errors.spec.ts:32:40 › claim rejection gives the Beneficiary a next step in en ─
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('main .mvp-error[role="alert"]').first()
+    Expected substring: "Ask your Barangay Officer or DSWD"
+    Received string:    "intake_closed_or_not_covered. Your action is not confirmed. Refresh the current record before retrying."
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" locator('main .mvp-error[role="alert"]').first() with timeout 5000ms
+      - waiting for locator('main .mvp-error[role="alert"]').first()
+        14 × locator resolved to <p role="alert" class="mvp-error">intake_closed_or_not_covered. Your action is not …</p>
+           - unexpected value "intake_closed_or_not_covered. Your action is not confirmed. Refresh the current record before retrying."
+
+
+      39 |   await page.getByRole('button',{name:'Submit household claim',exact:true}).click();
+      40 |   const alert=page.locator('main .mvp-error[role="alert"]').first();
+    > 41 |   await expect(alert).toContainText(language==='en'?'Ask your Barangay Officer or DSWD':'Magtanong sa Barangay Officer o DSWD');
+         |                       ^
+      42 |   await expect(alert).not.toContainText('intake_closed_or_not_covered');
+      43 |   await expect(alert).not.toContainText('Your action is not confirmed.');
+      44 | });
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/workflow-errors.spec.ts:41:23
+
+    Error Context: test-results/workflow-errors-claim-reje-b8aa4-neficiary-a-next-step-in-en/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/workflow-errors-claim-reje-b8aa4-neficiary-a-next-step-in-en/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/workflow-errors-claim-reje-b8aa4-neficiary-a-next-step-in-en/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests/workflow-errors.spec.ts:32:40 › claim rejection gives the Beneficiary a next step in fil 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('main .mvp-error[role="alert"]').first()
+    Expected substring: "Magtanong sa Barangay Officer o DSWD"
+    Received string:    "intake_closed_or_not_covered. Hindi kumpirmado ang ginawa. I-refresh ang kasalukuyang tala bago subukang muli."
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" locator('main .mvp-error[role="alert"]').first() with timeout 5000ms
+      - waiting for locator('main .mvp-error[role="alert"]').first()
+        14 × locator resolved to <p role="alert" class="mvp-error">intake_closed_or_not_covered. Hindi kumpirmado an…</p>
+           - unexpected value "intake_closed_or_not_covered. Hindi kumpirmado ang ginawa. I-refresh ang kasalukuyang tala bago subukang muli."
+
+
+      39 |   await page.getByRole('button',{name:'Submit household claim',exact:true}).click();
+      40 |   const alert=page.locator('main .mvp-error[role="alert"]').first();
+    > 41 |   await expect(alert).toContainText(language==='en'?'Ask your Barangay Officer or DSWD':'Magtanong sa Barangay Officer o DSWD');
+         |                       ^
+      42 |   await expect(alert).not.toContainText('intake_closed_or_not_covered');
+      43 |   await expect(alert).not.toContainText('Your action is not confirmed.');
+      44 | });
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/workflow-errors.spec.ts:41:23
+
+    Error Context: test-results/workflow-errors-claim-reje-29ff9-eficiary-a-next-step-in-fil/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/workflow-errors-claim-reje-29ff9-eficiary-a-next-step-in-fil/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/workflow-errors-claim-reje-29ff9-eficiary-a-next-step-in-fil/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) tests/workflow-errors.spec.ts:62:5 › unknown API details are not displayed to the user ────────
+
+    Error: expect(received).rejects.toThrow(expected)
+
+    Expected substring: "selected account"
+    Received message:   "internal_trace_forbidden"
+
+          11 |   const response=await fetch(`${getApiBase()}/api/v1${path}`,{method:body?"POST":"GET",headers,body:body instanceof FormData?body:body?JSON.stringify(body):undefined,signal,cache:"no-store"});
+          12 |   const result=await response.json();
+        > 13 |   if(!response.ok)throw new Error(result.error||`Request failed (${response.status})`);
+             |                         ^
+          14 |   return (result as Envelope<T>).data;
+          15 | }
+          16 | export const pesos=(v:string)=>{const n=BigInt(v),absolute=n<0?-n:n;return `${n<0?'−':''}₱${(absolute/BigInt(100)).toLocaleString('en-PH')}.${(absolute%BigInt(100)).toString().padStart(2,'0')}`;};
+
+          at request (lib/mvp-client.ts:13:25)
+          at tests/workflow-errors.spec.ts:66:5
+          at node_modules/playwright/lib/worker/workerProcessEntry.js:1654:9
+          at node_modules/playwright/lib/worker/workerProcessEntry.js:1134:11
+          at TimeoutManager.withRunnable (node_modules/playwright/lib/worker/workerProcessEntry.js:403:14)
+          at TestInfoImpl._runWithTimeout (node_modules/playwright/lib/worker/workerProcessEntry.js:1132:7)
+          at node_modules/playwright/lib/worker/workerProcessEntry.js:1652:7
+          at WorkerMain._runTest (node_modules/playwright/lib/worker/workerProcessEntry.js:1625:5)
+          at WorkerMain.runTestGroup (node_modules/playwright/lib/worker/workerProcessEntry.js:1520:9)
+          at process.<anonymous> (node_modules/playwright/lib/common/index.js:1955:25)
+
+      64 |   try{
+      65 |     globalThis.fetch=async()=>new Response(JSON.stringify({error:'internal_trace_forbidden'}),{status:403});
+    > 66 |     await expect(request('/registry',null)).rejects.toThrow('selected account');
+         |                                                     ^
+      67 |     await expect(request('/registry',null)).rejects.not.toThrow('internal_trace_forbidden');
+      68 |   }finally{globalThis.fetch=saved;}
+      69 | });
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/workflow-errors.spec.ts:66:53
+
+    Error Context: test-results/workflow-errors-unknown-AP-bf84c-e-not-displayed-to-the-user/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/workflow-errors-unknown-AP-bf84c-e-not-displayed-to-the-user/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/workflow-errors-unknown-AP-bf84c-e-not-displayed-to-the-user/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) tests/workflow-errors.spec.ts:71:5 › a lost write response does not advise repeating physical cash 
+
+    Error: expect(received).rejects.toThrow(expected)
+
+    Expected substring: "Do not hand over cash again"
+    Received message:   "Failed to fetch"
+
+          72 |   const saved=globalThis.fetch;
+          73 |   try{
+        > 74 |     globalThis.fetch=async()=>{throw new TypeError('Failed to fetch');};
+             |                                      ^
+          75 |     await expect(request('/transactions/example/handover',null,undefined,{},'synthetic-test-key')).rejects.toThrow('Do not hand over cash again');
+          76 |   }finally{globalThis.fetch=saved;}
+          77 | });
+
+          at fetch (tests/workflow-errors.spec.ts:74:38)
+          at request (lib/mvp-client.ts:11:24)
+          at tests/workflow-errors.spec.ts:75:25
+          at node_modules/playwright/lib/worker/workerProcessEntry.js:1654:15
+          at node_modules/playwright/lib/worker/workerProcessEntry.js:1134:17
+          at TimeoutManager.withRunnable (node_modules/playwright/lib/worker/workerProcessEntry.js:404:9)
+          at TestInfoImpl._runWithTimeout (node_modules/playwright/lib/worker/workerProcessEntry.js:1132:34)
+          at node_modules/playwright/lib/worker/workerProcessEntry.js:1652:22
+          at WorkerMain._runTest (node_modules/playwright/lib/worker/workerProcessEntry.js:1625:5)
+          at WorkerMain.runTestGroup (node_modules/playwright/lib/worker/workerProcessEntry.js:1520:9)
+          at process.<anonymous> (node_modules/playwright/lib/common/index.js:1955:25)
+
+      73 |   try{
+      74 |     globalThis.fetch=async()=>{throw new TypeError('Failed to fetch');};
+    > 75 |     await expect(request('/transactions/example/handover',null,undefined,{},'synthetic-test-key')).rejects.toThrow('Do not hand over cash again');
+         |                                                                                                            ^
+      76 |   }finally{globalThis.fetch=saved;}
+      77 | });
+      78 |
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/workflow-errors.spec.ts:75:108
+
+    Error Context: test-results/workflow-errors-a-lost-wri-6df69-ise-repeating-physical-cash/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/workflow-errors-a-lost-wri-6df69-ise-repeating-physical-cash/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/workflow-errors-a-lost-wri-6df69-ise-repeating-physical-cash/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) tests/workflow-errors.spec.ts:79:5 › a gateway HTML response gets a recovery message ──────────
+
+    Error: expect(received).rejects.toThrow(expected)
+
+    Expected substring: "service"
+    Received message:   "Unexpected token '<', \"<html>inte\"... is not valid JSON"
+
+
+      81 |   try{
+      82 |     globalThis.fetch=async()=>new Response('<html>internal gateway trace</html>',{status:502});
+    > 83 |     await expect(request('/claims',null)).rejects.toThrow('service');
+         |                                                   ^
+      84 |     await expect(request('/claims',null)).rejects.not.toThrow('Unexpected token');
+      85 |   }finally{globalThis.fetch=saved;}
+      86 | });
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/workflow-errors.spec.ts:83:51
+
+    Error Context: test-results/workflow-errors-a-gateway--25629-nse-gets-a-recovery-message/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/workflow-errors-a-gateway--25629-nse-gets-a-recovery-message/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/workflow-errors-a-gateway--25629-nse-gets-a-recovery-message/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5 failed
+    tests/workflow-errors.spec.ts:32:40 › claim rejection gives the Beneficiary a next step in en ──
+    tests/workflow-errors.spec.ts:32:40 › claim rejection gives the Beneficiary a next step in fil ─
+    tests/workflow-errors.spec.ts:62:5 › unknown API details are not displayed to the user ─────────
+    tests/workflow-errors.spec.ts:71:5 › a lost write response does not advise repeating physical cash 
+    tests/workflow-errors.spec.ts:79:5 › a gateway HTML response gets a recovery message ───────────

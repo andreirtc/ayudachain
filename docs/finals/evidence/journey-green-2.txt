@@ -1,0 +1,48 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/journey.spec.ts
+
+
+Running 1 test using 1 worker
+
+(node:48112) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+  ✘  1 tests/journey.spec.ts:8:5 › five roles use edited original-backed forms for own-device and assisted cash, answers and actual audit (1.3m)
+
+
+  1) tests/journey.spec.ts:8:5 › five roles use edited original-backed forms for own-device and assisted cash, answers and actual audit 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByRole('heading', { name: /Handover recorded once/ })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByRole('heading', { name: /Handover recorded once/ }) with timeout 5000ms
+      - waiting for getByRole('heading', { name: /Handover recorded once/ })
+
+
+      54 |    await page.getByRole('button',{name:'Open payout authorization'}).click();const revealed=page.getByRole('region',{name:'Your payout code',exact:true});await expect(revealed).toBeVisible();const code=(await revealed.innerText()).match(/\d{6}/)![0];await act(staff[0].id,'Authorization and handover');await transaction(head);await page.getByRole('button',{name:'Open household head photo'}).click();await expect(page.getByAltText('Synthetic household head photo for comparison')).toBeVisible();await page.getByLabel('Accepted photo ID type',{exact:true}).fill('Synthetic photo ID');await page.getByLabel('I compared the person with the accepted photo ID',{exact:true}).check();await page.getByRole('button',{name:'Save ID comparison'}).click();await page.getByLabel('Recipient payout code',{exact:true}).fill(code);if(assisted)await page.getByLabel('Independent assigned checker',{exact:true}).selectOption(staff[1].id);await page.getByRole('button',{name:'Record cash handover',exact:true}).click();await page.getByRole('dialog',{name:'Record this cash handover?'}).getByRole('button',{name:'Confirm recorded handover',exact:true}).click();await expect(page.getByRole('heading',{name:/Handover recorded once/})).toBeVisible();
+      55 |    await act(dswd.id,'Sessions and notices');const closedSession=page.waitForResponse(r=>r.url().includes('/changes')&&r.request().method()==='POST');await page.getByRole('button',{name:'Close cash session',exact:true}).click();expect((await closedSession).status()).toBe(200);await act(assisted?staff[1].id:recipient.id,'Private follow-up');await transaction(head);await page.getByLabel('Recipient’s private answer',{exact:true}).selectOption(assisted?'received_less':'received_full');await page.getByRole('button',{name:'Save private receipt answer'}).click();await expect(page.getByRole('status').filter({hasText:'saved'})).toBeVisible();
+    > 56 |    await page.reload();await page.getByLabel('Disaster',{exact:true}).selectOption(disaster);await act(recipient.id,'Authorization and handover');await transaction(head);await expect(page.getByRole('heading',{name:/Handover recorded once/})).toBeVisible();await expect(page.getByRole('button',{name:'Open payout authorization'})).toHaveCount(0);
+         |                                                                                                                                                                                                                                                   ^
+      57 |  }
+      58 |  await act(aud.id,'Evidence and review');await expect(page.getByRole('heading',{name:'Evidence and integrity',exact:true})).toBeVisible();await expect.poll(async()=>{const proofs=await read('/audit/proofs',aud.id);return proofs.filter((p:any)=>p.state!=='confirmed').length;},{timeout:40000}).toBe(0);
+      59 |  for(const width of [390,1440]){await page.setViewportSize({width,height:900});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();await page.screenshot({path:path.join(root,'.runtime','journey-'+width+'.png'),fullPage:true});}
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/journey.spec.ts:56:243
+
+    Error Context: test-results/journey-five-roles-use-edi-9868f-sh-answers-and-actual-audit/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/journey-five-roles-use-edi-9868f-sh-answers-and-actual-audit/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/journey-five-roles-use-edi-9868f-sh-answers-and-actual-audit/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests/journey.spec.ts:8:5 › five roles use edited original-backed forms for own-device and assisted cash, answers and actual audit 

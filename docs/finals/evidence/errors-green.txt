@@ -1,0 +1,26 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/workflow-errors.spec.ts
+
+
+Running 15 tests using 1 worker
+
+(node:42731) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/workflow-errors.spec.ts:32:40 › claim rejection gives the Beneficiary a next step in en (3.5s)
+  ✓   2 tests/workflow-errors.spec.ts:32:40 › claim rejection gives the Beneficiary a next step in fil (2.3s)
+  ✓   3 tests/workflow-errors.spec.ts:52:29 › barangay sees actionable workflow guidance (3.8s)
+  ✓   4 tests/workflow-errors.spec.ts:52:29 › dswd sees actionable workflow guidance (3.4s)
+  ✓   5 tests/workflow-errors.spec.ts:52:29 › disbursing sees actionable workflow guidance (3.0s)
+  ✓   6 tests/workflow-errors.spec.ts:52:29 › auditor sees actionable workflow guidance (2.4s)
+  ✓   7 tests/workflow-errors.spec.ts:62:5 › unknown API details are not displayed to the user (16ms)
+  ✓   8 tests/workflow-errors.spec.ts:71:5 › a lost write response does not advise repeating physical cash (16ms)
+  ✓   9 tests/workflow-errors.spec.ts:79:5 › a gateway HTML response gets a recovery message (3ms)
+  ✓  10 tests/workflow-errors.spec.ts:88:5 › cancelled requests retain AbortError so old views stay silent (4ms)
+  ✓  11 tests/workflow-errors.spec.ts:96:5 › error presentation retains the API code and status for diagnostics (3ms)
+  ✓  12 tests/workflow-errors.spec.ts:105:5 › private lookup failures do not disclose whether the transaction exists (1ms)
+  ✓  13 tests/workflow-errors.spec.ts:113:5 › lost read-only POST replies do not claim a business action may have saved (4ms)
+  ✓  14 tests/workflow-errors.spec.ts:124:5 › missing ID originals tell a Beneficiary to upload, without assigning officer duties (1ms)
+  ✓  15 tests/workflow-errors.spec.ts:130:5 › invalid UTF-8 uploads explain how to correct the CSV (2.2s)
+
+  15 passed (24.5s)

@@ -1,172 +1,93 @@
-# AYUDACHAIN 🇵🇭
-### Single, Tamper-Evident Digital Trail for Disaster Relief & Public Aid
-*DSWD Calamity Cash Payouts • DAFAC Household Access Cards • Polygon Blockchain Proofs • AI Entity Resolution*
+# AyudaChain local synthetic MVP
 
-[![Network: Polygon](https://img.shields.io/badge/Blockchain-Polygon%20%7C%20EVM-8247E5?style=flat&logo=polygon)](https://polygon.technology)
-[![Frontend: Next.js 15](https://img.shields.io/badge/Frontend-Next.js%2015%20App%20Router-000000?style=flat&logo=next.js)](https://nextjs.org)
-[![Backend: Python](https://img.shields.io/badge/Backend-Python%203.13%20REST-3776AB?style=flat&logo=python)](https://python.org)
-[![Smart Contract: Solidity](https://img.shields.io/badge/Contracts-Solidity%200.8.20-363636?style=flat&logo=solidity)](https://soliditylang.org)
-[![Security: DSWD DAFAC](https://img.shields.io/badge/Standard-DSWD%20DAFAC%20Voucher-blue)](https://www.dswd.gov.ph)
+Finals preparation (14 October 2026): start with [natural Taglish guides](docs/finals/taglish/START_HERE.md), [SDG alignment](docs/finals/SDG_ALIGNMENT.md) and [teammate reference](docs/finals/REFERENCE_BRANCH.md); see [current readiness and evidence](docs/finals/FINALIST_READINESS.md), [safe demo runbook](docs/finals/DEMO_RUNBOOK.md), [plain-English explanation](docs/finals/PROJECT_EXPLAINED.md) and [judges’ defense masterbook](docs/finals/JUDGES_QA.md). These fresh results are distinct from historical validation.
 
----
+The implemented five-role workflow runs at **/mvp** with FastAPI, PostgreSQL and an actual local EVM registry. The root page redirects there. Open a dedicated role workspace from the entry page: /mvp/beneficiary, /mvp/barangay-officer, /mvp/dswd-officer, /mvp/disbursing-officer or /mvp/auditor. Each has its own overview, nested navigation and a same-role synthetic Account panel. URLs organize the interface; there is no sign-in gate. Authentication, secure authorization, operational privacy and authenticated accountability remain **Pending**. Use invented households only.
 
-## 🏛️ The Problem: The Calamity Relief Trust Deficit in the Philippines
+Beneficiaries and Barangay Officers register households and submit claims. Barangay responses and council resolutions or explicit unsigned fallback snapshots reach an independent DSWD reviewer. Documentary wage/category inputs produce exact centavo amounts; only a list's own matching chain confirmation publishes it. DSWD schedules cash staff and members. The recipient authorizes a short-lived attempt; an assigned officer compares the person/photo ID and records cash once. No-phone assistance requires a private PIN and a distinct independent checking officer. Private recipient answers, grievances and resident challenges retain their histories. Auditors inspect exact evidence and current chain reads without business mutation.
 
-During major typhoons, volcanic eruptions, and earthquakes in the Philippines, billions of pesos in national calamity funds (e.g. DSWD Emergency Cash Transfer / Assistance to Individuals in Crisis Situations - AICS) are mobilized to local government units (LGUs). However, distribution is plagued by three systemic issues:
+This software records physical cash evidence; it does not transfer money. Original uploads, real PDF extraction, editable confirmation, immutable versions, corrections, checks, human decisions, notices, audit records, signed transaction recovery and fresh verification use persistent records. National ID checking and notice SMS are explicitly simulated. Digital signatures are **not_validated**; originals are retained. An accelerated business clock is labelled; chain timestamps and references remain actual.
 
-1. **"Multong Benepisyaryo" (Ghost Beneficiaries & Duplicate Claims):** Evacuees register multiple times under slight name variations (*Juan Dela Cruz* vs *Jhon Dela Cruz* vs *Cruz, Juan D.*) or across adjacent barangay borders.
-2. **"Kupit sa Pera" (Table Deductions & Ledger Tampering):** The national government releases ₱5,000 per family, but local officials hand out only ₱2,000 in cash at the covered court claiming *"₱2,000 lang ang pondo mula sa taas"*, while submitting altered liquidation papers to COA for the full ₱5,000.
-3. **The Audit Blackhole:** Commission on Audit (COA) post-disaster audits occur 6 to 12 months after relief operations when physical liquidation paper sheets are lost, water-damaged, or retroactively falsified.
+Start from the repository root with Python 3.14, Node 22 and local PostgreSQL 18 available. Use the locked environments:
 
----
-
-## 💡 The AyudaChain Solution
-
-> **"The operational database holds the private family records.**  
-> **The AI identifies duplicates and anomalies for field worker review.**  
-> **The blockchain anchors the permanent, mathematical proof of payout.**  
-> **The public transparency portal empowers 110 million Filipinos to verify their aid."**
-
-AyudaChain creates a closed-loop, verifiable pipeline:
-```
-[ DSWD National Treasury ]  ──> Releases ₱10M Batch Fund (Anchored on Polygon)
-            │
-            ▼
-[ LGU / Barangay Allocation ] ──> 100% Assigned to 4 Local Barangays
-            │
-            ▼
-[ AI Entity Resolution Engine ] ──> Flags Typo Duplicates, Field Swaps, Cross-Brgy Claims
-            │
-            ▼
-[ Field Payout & DAFAC Scanner ] ──> Worker scans DAFAC QR, disburses ₱5,000, signs receipt
-            │
-            ▼
-[ Cryptographic SHA-256 Hash ] ──> Compact 32-byte receipt hash stamped into Smart Contract
-            │
-            ▼
-[ Public Citizen / COA Portal ] ──> Instant tamper detection (Current Record vs On-Chain Seal)
+```powershell
+python -m venv .venv
+.venv/Scripts/python -m pip install -r backend/requirements-mvp.lock
+npm --prefix contracts ci
+npm --prefix frontend ci
+.venv/Scripts/python -m backend.scripts.setup_mvp
+.venv/Scripts/python -m backend.scripts.local_mvp serve --with-chain
 ```
 
----
+PostgreSQL must already be running; setup defaults to the owned loopback cluster on port 55432. Configure its local admin/owner URLs privately when using another installation. Setup creates the databases, purpose-specific roles, approved migrations and ignored **.env.mvp**. Point MVP_NODE to the supported Node executable. The supervisor starts frontend 3000, API 8000, chain 8545, the durable worker and scheduler, using private runtime logs. It refuses occupied ports. With a node already running, omit --with-chain. Existing pinned manifests are checked; lost deployments are refused. See [local operation](docs/guides/local-mvp.md) for configuration, recovery, tests and deployment loss.
 
-## ✨ Key Features Implemented in the MVP
-
-### 1. 📱 Point-of-Payout DAFAC QR Scanner (`/distributions`)
-- **Official DSWD Standard**: Full integration with the official **DAFAC** (*Disaster Assistance Family Access Card* No. `DFC-2026-0001` to `DFC-2026-0024`).
-- **Simulated Camera Viewfinder**: Mobile-first live camera overlay with animated targeting reticle, scanning laser, and 1-click test vouchers for rapid hackathon demonstrations (*Danilo Soriano `DFC-2026-0004`*, *Antonio Mercado `DFC-2026-0006`*, *Carmencita Reyes `DFC-2026-0005`*).
-- **Auto-Locking Entitlement**: Automatically locks to the statutory ₱5,000 relief grant, preventing unauthorized arbitrary deductions.
-
-### 2. 🧠 AI Entity Resolution & LGU CSV Masterlist Analyzer (`/beneficiaries`)
-- **Bulk CSV Upload & 1-Click Testing**: Field workers or auditors can upload raw LGU calamity masterlists (`seed_beneficiaries.csv`) or custom spreadsheets.
-- **Multi-Vector Fuzzy Token Matching**: Combines Levenshtein distance, token sort ratio, and phonetic analysis to flag:
-  - *Clerical Typo / Phonetic Match*: `Juan Dela Cruz` ↔ `Jhon Dela Cruz` (95.0% match)
-  - *Swapped Name Fields*: `Maria Santos` ↔ `Santos Maria` (95.6% match)
-  - *Cross-Barangay Duplicate Claim*: `Ricardo Reyes (Brgy 628)` ↔ `Riccardo Reyes (Brgy 630)` (92.8% match)
-  - *Exact Duplicates*: Instant flagging with direct comparison drawer.
-- **Ethical AI Principle**: The AI never denies food or cash autonomously. It flags suspicious records for human review, and field officers make the final call.
-
-### 3. 🗑️ Role-Based Governance & Duplicate Record Removal (`/beneficiaries`)
-- **3 Dynamic Personas**: Switch between **Public Citizen (Mamamayan)**, **Barangay Officer (Kawani)**, and **COA Auditor (Tagasuri)**.
-- **Role-Gated Actions**: Normal citizens can inspect records in read-only mode, while Barangay Officers and Auditors can permanently purge duplicate records with **"Tanggalin ang Doble (Delete Duplicate)"**.
-- **Immutable Audit Trail**: Every deletion triggers a permanent `BENEFICIARY_DELETED` event on the audit log to prevent corrupt insiders from secretly deleting legitimate claimants.
-
-### 4. 📶 Evacuation Center Offline Mode (Downed Cell Tower Resilience)
-- Addresses the #1 judge question: *"What happens when typhoon winds topple cell towers?"*
-- Field tablets cache signed distribution vouchers locally in browser storage (`IndexedDB` / Service Worker).
-- Vouchers queue locally and automatically batch-sync cryptographic hashes to Polygon as soon as Starlink or municipal hall internet reconnects.
-
-### 5. 🛡️ Public Blockchain Verification & Live Fraud Simulator (`/verify`)
-- Allows any citizen or auditor to verify receipt integrity against the immutable Polygon Smart Contract.
-- **Interactive Pitch Demonstrations**:
-  - **Scenario A: Pocketing Cash (Kupit sa Pera)** — Simulates an insider reducing a database record from ₱5,000 to ₱2,000 after payout. The system computes the current hash, detects the mismatch against the original on-chain seal, and raises an instant **RED CORRUPTION ALERT**.
-  - **Scenario B: Ghost Beneficiary Swap (Multong Claim)** — Simulates secretly swapping an evacuee's name in the database. Instantly caught by the cryptographic signature.
-  - **Restore Authentic Record** — Restores the genuine ₱5,000 record and confirms a 100% cryptographic match.
-
-### 6. ⚙️ Interactive Blockchain Ledger Customization Card (`/`)
-- Accessible directly on the homepage dashboard.
-- Allows live switching between **Local EVM (Port 8545)**, **Polygon Amoy Testnet**, and custom RPC endpoints.
-- Features **1-click Copy Contract Address**, direct link to **Polygonscan Block Explorer**, and an educational collapsible explainer on how smart contracts work.
-
-### 7. 🌐 Balanced Bilingual UX
-- Professional English as the primary clear heading and button text.
-- Natural, conversational Filipino as helpful secondary subtext to guide local field workers and evacuees.
-
----
-
-## 🚀 Quick Start Guide
-
-### 1. Prerequisites
-- **Node.js** v20+ or v24+
-- **Python** 3.10+ or 3.13+
-
-### 2. Environment Setup
-```bash
-cp .env.example .env
+```powershell
+.venv/Scripts/python -m unittest discover -s backend/tests -v
+.venv/Scripts/python backend/test_backend.py
+npm --prefix contracts test
+npm --prefix frontend run typecheck
+npm --prefix frontend run build
+npm --prefix frontend run test:mvp
 ```
 
-### 3. Start Local EVM Blockchain Node (Port 8545)
-```bash
-cd contracts
-npx hardhat node --hostname 127.0.0.1 --port 8545
-```
-Deploy the smart contract:
-```bash
-cd contracts
-npx hardhat run scripts/deploy.js --network localhost
-```
-*Deployed Contract Address:* `0x5FbDB2315678afecb367f032d93F642f64180aa3`
+The integration suite requires the distinct fault node on 8555 and its manifest; the browser suite requires the running MVP. Browser full-journey evaluation now requires a separately created fresh isolated lab and MVP_BROWSER_FRESH_RUN=1. It refuses a nonempty household registry and never resets the current evaluation. Run the journey before dependent browser cases; retain failed partial labs. Follow [evaluation instructions](docs/guides/demo-script.md). Actual results and all 26 requirement mappings are in [validation](docs/implementation/validation.md).
 
-### 4. Start the Python Backend Server (Port 8000)
-```bash
-cd backend
-python3 server.py 8000
-```
-*Auto-initializes SQLite database with Typhoon Salinlahi (RELIEF-2026-001) test masterlist.*
+The authoritative design is [PRD](docs/product/prd.md), [ERD](docs/system/erd.md), and the [14-stage plan](docs/product-ideation/plans/2026-10-10-mvp-implementation-plan.md). [Compatibility ADR](docs/adr/2026-10-10-mvp-evidence-protocol-and-registry.md) defines the separate evidence protocol. Historical ideation is unchanged.
 
-### 5. Start the Next.js Frontend (Port 3000)
-```bash
-cd frontend
-npm run build && npm start
-# or for live development: npm run dev
-```
-Open **http://localhost:3000** in your browser.
+Legacy standard-library/SQLite code, the original receipt hasher, original contract and generated artifacts are retained without dual writes. /legacy-home preserves the old interface; other retained legacy screens need the separate legacy server and do not implement MVP workflows. /verify offers honest frozen legacy verification through the MVP read boundary. Missing original deployment/evidence is explicit, never green.
 
----
+Offline handover, real SMS, live National ID integration, general PIN recovery, authenticated accounts, operational public-network/key governance, liquidation/advances/returns and cryptographic signature validation remain Pending or deferred. Advanced and returned funds are outside the current MVP and are omitted from the funds interface; recorded handovers do not reduce the received funding balance. Frontend lock audit is clean; retained Hardhat 2/toolbox development tooling has unresolved advisories. Real-household readiness conditions are documented in [local operation](docs/guides/local-mvp.md); this implementation is not ready for real household records.
 
-## 🧪 Testing Suite
+The redesigned MVP uses responsive task queues, household progress, amount-basis explanations, searchable review/proof records and document previews. [Routes](docs/product/sitemap.md), [user flow](docs/product/user-flow.md) and [design system](DESIGN.md) describe the delivered surface. See the redesign section in [validation](docs/implementation/validation.md) for fresh checks and current runtime limitations.
 
-### 1. Smart Contract Hardhat Tests
-```bash
-cd contracts
-npx hardhat test
-```
-*Passes 100% of test cases: fund release, allocation, receipt anchoring, access control, and hash verification.*
+## Finals reference interface (Material 3, Sea and Sun)
 
-### 2. Backend Unit & AI Tests
-```bash
-cd backend
-python3 test_backend.py
-```
-*Passes 100% of test cases: Levenshtein token sort matching, duplicate resolution, statistical anomaly detection, and cryptographic integrity verification.*
+This branch applies the visual layer of the approved "Tonal" design to `/mvp`. The full reference design is in [docs/design/tonal-design-reference.html](docs/design/tonal-design-reference.html); open it in a browser. Its palette switcher previews all three palettes, but only **Sea and Sun** is used in the app. [DESIGN.md](DESIGN.md) records what the code implements.
 
-### 3. TypeScript Compilation Audit
-```bash
-cd frontend
-./node_modules/.bin/tsc --noEmit
-```
-*Passes with 0 errors across all routes and components.*
+### Implemented
 
----
+- **Sea and Sun palette:** every `/mvp` colour is a Material 3 role token in `frontend/app/mvp.css`, with no hard-coded hex values in component rules. Both light and dark schemes are included.
+- **Light / Dark / Device theme toggle** (`ThemeToggle.tsx`): in the workspace top bar and the `/mvp` header. The choice is remembered in the browser and applied before first paint.
+- **Kubo Link logo:** `components/mvp/Logo.tsx`, used in the drawer and on the directory page. The favicon is `app/icon.svg`.
+- **Fonts:** Open Sans for the interface and Source Code Pro for references, loaded with `next/font`. The minimum text size is 13px.
+- **Material 3 shapes and states:**
+  - pill buttons with outlined secondary buttons;
+  - outlined text fields;
+  - borderless rounded tonal panels;
+  - a tonal navigation drawer with a pill indicator for the current page;
+  - a primary-container next-step card;
+  - a primary-filled journey stepper.
+- **Status:** shown as a glyph and a coloured word, with no filled boxes or pills. There is a new negative tone (cross) for "Does not match", "Chain unreachable", "Anchor absent", "Evidence unavailable", "Not received" and "Stopped".
+- **Messages:** error, warning and success messages are banner rows with a glyph and a divider, not tinted boxes.
+- **Return to the directory:** the logo and an "All workspaces" link return to `/mvp`. Neither switches role directly; see [sitemap](docs/product/sitemap.md).
 
-## 📖 Additional Documentation
+### Not yet implemented or missing
 
-- [User Guide & Role Walkthrough](docs/USER_GUIDE.md) — Comprehensive guide for Citizens, Barangay Workers, and COA Auditors.
-- [Technical Architecture Specification](docs/architecture.md) — In-depth hybrid off-chain/on-chain design.
-- [Smart Contract & Blockchain Spec](docs/blockchain-spec.md) — Gas optimization, data structures, and Polygon Amoy deployment.
-- [5-Minute Hackathon Demo Script](docs/demo-script.md) — Minute-by-minute pitch guide with winning talking points.
+| Area | In the reference design | Current app |
+|---|---|---|
+| Phone navigation | Material 3 bottom navigation bar with at most four destinations per role | Hamburger menu opening the full drawer |
+| Desktop navigation | Navigation rail with a floating action button, plus list and detail panes side by side for claims, payouts and integrity | Fixed side drawer; list and detail are separate stacked panels |
+| Decisions | Segmented buttons (Approve / Decline / Refer to barangay; Endorse / Do not endorse; Pass after comparison / Fail and hold/stop) | Existing radio buttons and selects |
+| Confirmation | "Record this decision?" dialog before an irreversible decision or handover | Cash handover has a native household/amount review dialog with cancel/Escape. Other decisions still save directly; CSV keeps its preview-and-confirm step. |
+| Feedback | Snackbar after saving ("Decision recorded for DFC-…", with View) | Inline saved message |
+| Flags | Material 3 banner at the top of a case: icon, sentence, text-button actions, divider | Flags appear inside the existing panels |
+| Integrity rows | Status rows (glyph, record name, time or action, explanation line) | Existing `IntegrityStatus` layout restyled; same structure as before |
+| Floating action button | Role's main create action (for example, Barangay "Assisted registration") | Not present |
+| Household screens | Phone-first Home, My claim stepper, payout code screen with a large Source Code Pro code and PIN warning banner, private report screen | Existing screens restyled; same layout as before |
+| Disbursing Officer | Tablet layout: photo beside the comparison form, plus a "Handover steps" side panel | Existing stacked form restyled |
+| Auditor | Result filter chips above the integrity table | Existing search and select filters |
+| Empty states | Icon, title and explanation in an outlined card | Existing empty state restyled |
+| Other palettes | Bayanihan Teal and Indigo and Mango | Only Sea and Sun is shipped |
+| Legacy screens | Not covered by the design | Unchanged (Tailwind legacy UI); only the favicon is shared |
 
----
+### Validation status
 
-## ⚖️ License
-MIT License. Built for disaster resilience and public transparency in the Republic of the Philippines. 🇵🇭
+The starting Tonal branch documented ten browser failures. Finals preparation reproduced the duplicate registration selector and concatenated integrity text, repaired them, integrated the existing role error guidance and fixed transaction reselection/registry loading. The cash-handover review and explicit evaluation-clock disclosure are now connected. [Finalist readiness](docs/finals/FINALIST_READINESS.md) records current completed checks, failed intermediate runs and remaining limits. Do not treat earlier branch results as current evidence.
 
+The prompt for completing the missing parts is in [docs/design/implement-missing-design.md](docs/design/implement-missing-design.md).
+
+## Five-role usability additions
+
+The workspaces now include scoped search/task queues, frozen duplicate comparisons, English/Filipino step guidance, barangay operations tables, contextual proof checks, staged CSV registration and native QR/manual session lookup. See [delivered behavior and limitations](docs/implementation/bring-forward-usability.md) and [validation](docs/implementation/validation.md). CSV templates cover head-only no-ID declarations; private completion follows normal workflows. Camera scanning requires browser BarcodeDetector support; manual lookup remains available. These are synthetic evaluation workflows with claimed/unverified accounts, not authenticated production privacy.
+
+The current finalist layer recreates the supplied shield/link logo as SVG, introduces the product before all five role choices, uses full desktop task labels referenced from five-role-mvp and four phone shortcuts/full menu, and supports remembered English/Taglish. Private records remain off-chain; authentication remains absent. Native workflow artwork is illustrative, not transaction evidence. No financial/schema/hash/contract change.

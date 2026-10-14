@@ -1,0 +1,7 @@
+test_checked_database_originals_manifests_and_replay_key_restore_against_surviving_chain (backend.tests.test_recovery.RecoveryTests.test_checked_database_originals_manifests_and_replay_key_restore_against_surviving_chain) ... ok
+test_restored_prepared_signature_reconciles_same_candidate_once (backend.tests.test_recovery.RecoveryTests.test_restored_prepared_signature_reconciles_same_candidate_once) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 36.214s
+
+OK

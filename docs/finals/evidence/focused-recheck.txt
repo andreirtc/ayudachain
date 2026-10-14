@@ -1,0 +1,22 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/usability-csv.spec.ts tests/finals-ux.spec.ts tests/verification.spec.ts tests/usability-queues.spec.ts
+
+
+Running 11 tests using 1 worker
+
+(node:68101) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/finals-ux.spec.ts:3:5 › assisted registration stays open while choosing a recipient and editing (2.0s)
+  ✓   2 tests/finals-ux.spec.ts:32:5 › handover review supports cancel, Escape and one explicit confirmation (2.0s)
+  ✓   3 tests/usability-csv.spec.ts:45:5 › CSV preview rejects private headers, cancels without writes and confirms only selected valid rows (3.5s)
+  ✓   4 tests/usability-csv.spec.ts:70:5 › lost CSV acknowledgement retries identical content and repeat upload recovers saved row (1.9s)
+  ✓   5 tests/usability-queues.spec.ts:12:5 › queue filters navigate without putting household search text in URLs (3.1s)
+  ✓   6 tests/usability-queues.spec.ts:26:5 › queue errors are recoverable and do not show previous counts (1.5s)
+  ✓   7 tests/verification.spec.ts:6:7 › Funds clears the current match when a later verification request fails (4.1s)
+  ✓   8 tests/verification.spec.ts:6:7 › Amounts and lists clears the current match when a later verification request fails (3.8s)
+  ✓   9 tests/verification.spec.ts:6:7 › Authorization and handover clears the current match when a later verification request fails (3.7s)
+  ✓  10 tests/verification.spec.ts:6:7 › Evidence and review clears the current match when a later verification request fails (4.1s)
+  ✓  11 tests/verification.spec.ts:42:5 › a delayed real chain result cannot populate a newly selected actor view (4.0s)
+
+  11 passed (35.0s)

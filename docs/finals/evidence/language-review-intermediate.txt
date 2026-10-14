@@ -1,0 +1,45 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/compact-role-layout.spec.ts tests/localized-experience.spec.ts --output=../.runtime/finals/review-language
+
+
+Running 5 tests using 1 worker
+
+(node:37846) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 tests/compact-role-layout.spec.ts:3:5 › each role has readable task navigation, four phone shortcuts and reachable complete navigation (11.9s)
+  ✓  2 tests/compact-role-layout.spec.ts:19:5 › display preferences retain language/theme access and close with Escape and route changes (2.0s)
+  ✓  3 tests/localized-experience.spec.ts:4:5 › first visit uses Filipino/Taglish, all five roles stay visible and English is available (2.3s)
+  ✓  4 tests/localized-experience.spec.ts:12:5 › all five role homes use Filipino controls without horizontal overflow on phones and desktops (7.7s)
+  ✘  5 tests/localized-experience.spec.ts:21:5 › citizen sees assistance amount first; wage basis is optional detail and changing language changes no business record (289ms)
+
+
+  1) tests/localized-experience.spec.ts:21:5 › citizen sees assistance amount first; wage basis is optional detail and changing language changes no business record 
+
+    Error: expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+      21 | test('citizen sees assistance amount first; wage basis is optional detail and changing language changes no business record',async({page,request})=>{
+      22 |  const base='http://127.0.0.1:8000/api/v1';const actors=(await(await request.get(base+'/actors/catalogue')).json()).data;const actor=actors.find((a:{role:string})=>a.role==='beneficiary');const d=(await(await request.get(base+'/disasters')).json()).data[0].id;
+    > 23 |  const read=async()=>(await(await request.get(base+'/transactions?disaster_id='+d,{headers:{'X-Demo-Actor-ID':actor.id}})).json()).data;const before=await read();expect(before.length).toBeGreaterThan(0);
+         |                                                                                                                                                                                         ^
+      24 |  await page.goto(workspacePath('beneficiary',actor.id,'overview',d)+'&lang=fil');await expect(page.getByRole('heading',{name:'Halaga ng ayuda',exact:true})).toBeVisible();
+      25 |  const basis=page.locator('.ac-amount-basis');await expect(basis).not.toBeVisible();await page.getByText('Paano kinuwenta?',{exact:true}).click();await expect(basis).toBeVisible();
+      26 |  await page.locator('.ac-display-preferences>summary').click();await page.getByLabel('Guidance language / Wika ng gabay').selectOption('en');await page.keyboard.press('Escape');await expect(page.getByRole('heading',{name:'Your assistance amount',exact:true})).toBeVisible();await page.reload();await expect(page.getByRole('heading',{name:'Your assistance amount',exact:true})).toBeVisible();expect(await read()).toEqual(before);
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/localized-experience.spec.ts:23:185
+
+    Error Context: ../.runtime/finals/review-language/localized-experience-citiz-330b3--changes-no-business-record/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    ../.runtime/finals/review-language/localized-experience-citiz-330b3--changes-no-business-record/trace.zip
+    Usage:
+
+        npx playwright show-trace ../.runtime/finals/review-language/localized-experience-citiz-330b3--changes-no-business-record/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests/localized-experience.spec.ts:21:5 › citizen sees assistance amount first; wage basis is optional detail and changing language changes no business record 
+  4 passed (25.2s)

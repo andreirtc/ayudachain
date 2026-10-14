@@ -1,0 +1,78 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test --grep-invert five roles use edited original-backed forms --output=../.runtime/finals/resumed-browser
+
+
+Running 62 tests using 1 worker
+
+(node:10198) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/actor-switch.spec.ts:4:5 › a delayed real former-actor response cannot render after switching role (2.4s)
+  ✓   2 tests/compact-role-layout.spec.ts:3:5 › each role has readable task navigation, four phone shortcuts and reachable complete navigation (9.0s)
+  ✓   3 tests/compact-role-layout.spec.ts:19:5 › display preferences retain language/theme access and close with Escape and route changes (2.0s)
+  ✓   4 tests/finals-ux.spec.ts:3:5 › assisted registration stays open while choosing a recipient and editing (1.7s)
+  ✓   5 tests/finals-ux.spec.ts:32:5 › handover review supports cancel, Escape and one explicit confirmation (2.1s)
+
+  ✓   6 tests/funds-accuracy.spec.ts:28:5 › extracted centavos beyond the safe Number range prefill without losing a cent (2.0s)
+
+  ✓   7 tests/funds-accuracy.spec.ts:33:5 › a saved large-centavo correction prefills the exact recorded amount (3.1s)
+
+  ✓   8 tests/funds-accuracy.spec.ts:48:5 › transcription correction retains the primary source when supporting evidence was uploaded first (3.5s)
+
+  ✓   9 tests/funds.spec.ts:7:5 › fresh editable release survives reload and Auditor is read-only (6.2s)
+  ✓  10 tests/inputs.spec.ts:4:5 › amount inputs cannot submit the initial revision while saved input history is loading (1.8s)
+  ✓  11 tests/legacy.spec.ts:2:5 › legacy verification has explicit coverage and no fabricated fraud controls (2.0s)
+  ✓  12 tests/localized-experience.spec.ts:4:5 › first visit uses Filipino/Taglish, all five roles stay visible and English is available (2.5s)
+  ✓  13 tests/localized-experience.spec.ts:12:5 › all five role homes use Filipino controls without horizontal overflow on phones and desktops (9.1s)
+  ✓  14 tests/localized-experience.spec.ts:21:5 › citizen sees assistance amount first; wage basis is optional detail and changing language changes no business record (3.8s)
+  ✓  15 tests/notes.spec.ts:5:5 › closed-transaction DSWD notes persist and remain absent from payer and Auditor write controls (9.2s)
+  ✓  16 tests/receipt-guidance.spec.ts:4:5 › a recorded beneficiary receipt leads to private follow-up without obsolete code instructions (3.0s)
+  ✓  17 tests/registry.spec.ts:4:5 › self registry persists absence and scoped staff view omits private contact (4.6s)
+  ✓  18 tests/role-workspaces.spec.ts:13:5 › staff search and inspect one household inline without exposing the whole registry (1.9s)
+  ✓  19 tests/role-workspaces.spec.ts:21:5 › phone list/detail returns focus and keeps private actions out of Barangay views (1.7s)
+  ✓  20 tests/sessions-loading.spec.ts:4:5 › late saved sessions cannot collapse the session form after editing starts (1.8s)
+  ✓  21 tests/usability-csv.spec.ts:45:5 › CSV preview rejects private headers, cancels without writes and confirms only selected valid rows (4.2s)
+  ✓  22 tests/usability-csv.spec.ts:70:5 › lost CSV acknowledgement retries identical content and repeat upload recovers saved row (2.3s)
+  ✓  23 tests/usability-duplicate.spec.ts:34:5 › review projection fixture: acknowledgment resets for changed check, claim revision and comparison data (2.6s)
+  ✓  24 tests/usability-duplicate.spec.ts:58:5 › review projection fixture: Auditor inspects frozen comparisons without decision or recheck controls (2.1s)
+  ✓  25 tests/usability-guidance-scan.spec.ts:23:5 › camera capability fixture: unsupported browser keeps manual lookup available (2.3s)
+  ✓  26 tests/usability-guidance-scan.spec.ts:31:5 › camera capability fixture: cancel releases a stream granted after cancellation (2.8s)
+  ✓  27 tests/usability-guidance-scan.spec.ts:45:5 › camera capability fixture: mocked decoder opens a reference once without payout mutations (1.7s)
+  ✓  28 tests/usability-guidance-scan.spec.ts:65:5 › projection fixture: direct reference outside catalogue loads and failure clears identity controls (1.7s)
+  ✓  29 tests/usability-guidance-scan.spec.ts:79:5 › projection fixture: a direct record from another disaster cannot display payout controls (1.4s)
+  ✓  30 tests/usability-guidance-scan.spec.ts:109:5 › Filipino guidance persists navigation and reload with language metadata (4.4s)
+  ✓  31 tests/usability-guidance-scan.spec.ts:128:5 › manual lookup rejects malformed and unknown references then opens current transaction without authorization (2.4s)
+  ✓  32 tests/usability-guidance-scan.spec.ts:147:5 › camera decode uses the scoped live lookup and releases tracks on result, cancel and late permission (2.9s)
+  ✓  33 tests/usability-guidance-scan.spec.ts:173:5 › unsupported camera and denied permission retain equal manual fallback (1.7s)
+  ✓  34 tests/usability-queues.spec.ts:12:5 › queue filters navigate without putting household search text in URLs (3.6s)
+  ✓  35 tests/usability-queues.spec.ts:26:5 › queue errors are recoverable and do not show previous counts (1.4s)
+  ✓  36 tests/verification.spec.ts:6:7 › Funds clears the current match when a later verification request fails (3.8s)
+  ✓  37 tests/verification.spec.ts:6:7 › Amounts and lists clears the current match when a later verification request fails (4.4s)
+  ✓  38 tests/verification.spec.ts:6:7 › Authorization and handover clears the current match when a later verification request fails (3.5s)
+  ✓  39 tests/verification.spec.ts:6:7 › Evidence and review clears the current match when a later verification request fails (3.7s)
+  ✓  40 tests/verification.spec.ts:42:5 › a delayed real chain result cannot populate a newly selected actor view (4.0s)
+  ✓  41 tests/workflow-errors.spec.ts:32:40 › claim rejection gives the Beneficiary a next step in en (1.8s)
+  ✓  42 tests/workflow-errors.spec.ts:32:40 › claim rejection gives the Beneficiary a next step in fil (1.6s)
+  ✓  43 tests/workflow-errors.spec.ts:54:29 › barangay sees actionable workflow guidance (1.6s)
+  ✓  44 tests/workflow-errors.spec.ts:54:29 › dswd sees actionable workflow guidance (1.4s)
+  ✓  45 tests/workflow-errors.spec.ts:54:29 › disbursing sees actionable workflow guidance (1.4s)
+  ✓  46 tests/workflow-errors.spec.ts:54:29 › auditor sees actionable workflow guidance (1.5s)
+  ✓  47 tests/workflow-errors.spec.ts:64:5 › unknown API details are not displayed to the user (7ms)
+  ✓  48 tests/workflow-errors.spec.ts:73:5 › a lost write response does not advise repeating physical cash (1ms)
+  ✓  49 tests/workflow-errors.spec.ts:81:5 › a gateway HTML response gets a recovery message (2ms)
+  ✓  50 tests/workflow-errors.spec.ts:90:5 › cancelled requests retain AbortError so old views stay silent (1ms)
+  ✓  51 tests/workflow-errors.spec.ts:98:5 › error presentation retains the API code and status for diagnostics (1ms)
+  ✓  52 tests/workflow-errors.spec.ts:107:5 › private lookup failures do not disclose whether the transaction exists (1ms)
+  ✓  53 tests/workflow-errors.spec.ts:115:5 › lost read-only POST replies do not claim a business action may have saved (4ms)
+  ✓  54 tests/workflow-errors.spec.ts:126:5 › missing ID originals tell a Beneficiary to upload, without assigning officer duties (1ms)
+  ✓  55 tests/workflow-errors.spec.ts:132:5 › invalid UTF-8 uploads explain how to correct the CSV (1.6s)
+  ✓  56 tests/workspaces.spec.ts:7:5 › dedicated workspaces survive refresh, preserve role and fit both viewports (13.5s)
+  ✓  57 tests/workspaces.spec.ts:23:5 › entry links lead to five workspaces; unknown sections cannot display another role (2.7s)
+  ✓  58 tests/workspaces.spec.ts:31:5 › read-only auditor and restricted barangay keep private actions out (2.8s)
+  ✓  59 tests/workspaces.spec.ts:41:5 › keyboard navigation, scoped accounts and nested links retain context (3.3s)
+
+  ✓  60 tests/workspaces.spec.ts:74:5 › edited original-backed release survives refresh and cannot be changed by auditor (8.4s)
+  ✓  61 tests/workspaces.spec.ts:107:5 › all principal role sections render without horizontal overflow (41.1s)
+  ✓  62 tests/workspaces.spec.ts:120:5 › failed dashboard and audit reads stay unavailable until a successful retry (4.1s)
+
+  62 passed (3.7m)

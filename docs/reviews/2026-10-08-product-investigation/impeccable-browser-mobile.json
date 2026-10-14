@@ -1,0 +1,319 @@
+[
+  {
+    "route": "/beneficiaries",
+    "width": 390,
+    "documentWidth": 390,
+    "overflow": false,
+    "forms": [
+      {
+        "tag": "SELECT",
+        "type": "select-one",
+        "labelCount": 0,
+        "ariaLabel": null,
+        "id": "",
+        "name": "",
+        "placeholder": null
+      },
+      {
+        "tag": "INPUT",
+        "type": "text",
+        "labelCount": 0,
+        "ariaLabel": null,
+        "id": "",
+        "name": "",
+        "placeholder": "Search household name, ID, barangay..."
+      }
+    ],
+    "buttons": [
+      {
+        "text": "Reset Demo",
+        "height": 28
+      },
+      {
+        "text": "Lumipat sa Barangay Officer Mode →",
+        "height": 14.65625
+      },
+      {
+        "text": "Filter: Flagged Records",
+        "height": 30
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      },
+      {
+        "text": "Inspect",
+        "height": 16
+      }
+    ]
+  },
+  {
+    "route": "/distributions",
+    "width": 390,
+    "documentWidth": 390,
+    "overflow": false,
+    "forms": [
+      {
+        "tag": "SELECT",
+        "type": "select-one",
+        "labelCount": 0,
+        "ariaLabel": null,
+        "id": "",
+        "name": "",
+        "placeholder": null
+      },
+      {
+        "tag": "SELECT",
+        "type": "select-one",
+        "labelCount": 0,
+        "ariaLabel": null,
+        "id": "",
+        "name": "",
+        "placeholder": null
+      },
+      {
+        "tag": "INPUT",
+        "type": "number",
+        "labelCount": 0,
+        "ariaLabel": null,
+        "id": "",
+        "name": "",
+        "placeholder": "5000"
+      }
+    ],
+    "buttons": [
+      {
+        "text": "Reset Demo",
+        "height": 28
+      },
+      {
+        "text": "Lumipat sa Barangay Officer Mode →",
+        "height": 14.65625
+      },
+      {
+        "text": "Test Offline Mode",
+        "height": 23.328125
+      },
+      {
+        "text": "Scan DAFAC QR",
+        "height": 20.65625
+      },
+      {
+        "text": "View Receipt",
+        "height": 16
+      },
+      {
+        "text": "View Receipt",
+        "height": 16
+      },
+      {
+        "text": "View Receipt",
+        "height": 16
+      },
+      {
+        "text": "View Receipt",
+        "height": 16
+      },
+      {
+        "text": "View Receipt",
+        "height": 16
+      },
+      {
+        "text": "View Receipt",
+        "height": 16
+      },
+      {
+        "text": "View Receipt",
+        "height": 16
+      },
+      {
+        "text": "View Receipt",
+        "height": 16
+      },
+      {
+        "text": "View Receipt",
+        "height": 16
+      },
+      {
+        "text": "View Receipt",
+        "height": 16
+      },
+      {
+        "text": "View Receipt",
+        "height": 16
+      },
+      {
+        "text": "View Receipt",
+        "height": 16
+      },
+      {
+        "text": "View Receipt",
+        "height": 16
+      }
+    ]
+  },
+  {
+    "route": "/verify",
+    "width": 390,
+    "documentWidth": 390,
+    "overflow": false,
+    "forms": [
+      {
+        "tag": "SELECT",
+        "type": "select-one",
+        "labelCount": 0,
+        "ariaLabel": null,
+        "id": "",
+        "name": "",
+        "placeholder": null
+      },
+      {
+        "tag": "SELECT",
+        "type": "select-one",
+        "labelCount": 0,
+        "ariaLabel": null,
+        "id": "",
+        "name": "",
+        "placeholder": null
+      }
+    ],
+    "buttons": [
+      {
+        "text": "Reset Demo",
+        "height": 28
+      },
+      {
+        "text": "Lumipat sa Barangay Officer Mode →",
+        "height": 14.65625
+      },
+      {
+        "text": "Re-Check Authentic Record",
+        "height": 32
+      },
+      {
+        "text": "Show Raw Cryptographic Hashes (For Technical Auditors & Judg",
+        "height": 33
+      }
+    ]
+  }
+]

@@ -1,0 +1,310 @@
+[
+  {
+    "id": "O01",
+    "journey": "04-duplicate-citizen",
+    "escapeClosesModal": false,
+    "modalRoleCount": 0
+  },
+  {
+    "id": "O02",
+    "journey": "12-offline-toggle-payout",
+    "payout": {
+      "id": 6,
+      "distribution_id": "DIST-7614",
+      "beneficiary_id": "BEN-0004",
+      "batch_id": "RELIEF-2026-001",
+      "amount": 5000,
+      "verification_method": "QR_VOUCHER_PHYSICAL_RECEIPT",
+      "receipt_hash": "0x33385fd24a3b42f141c39a162915ceb75d35cf0698c410762aba1911f937b87b",
+      "receipt_file_path": "/receipts/sample_relief_receipt.svg",
+      "ocr_text": "REPUBLIC OF THE PHILIPPINES\nDEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT\nTYPHOON SALINLAHI EMERGENCY ASSISTANCE (2026)\n--------------------------------------------------\nOFFICIAL RELIEF DISBURSEMENT ACKNOWLEDGEMENT RECEIPT\nBATCH REFERENCE      : RELIEF-2026-001\nDISTRIBUTION ID      : DIST-0001\nBENEFICIARY ID       : BEN-0001\nHOUSEHOLD HEAD       : JUAN DELA CRUZ\nMUNICIPALITY / LGU   : ALBAY DISASTER RESPONSE CENTER\nBARANGAY             : SAN ISIDRO\nDISBURSEMENT TYPE    : EMERGENCY CASH & RELIEF PACK (ECRP)\nGRANT AMOUNT         : PHP 5,000.00\nVERIFICATION METHOD  : QR VOUCHER & BIOMETRIC CONFIRMATION\nSTATUS               : CLAIMED & CONFIRMED\nDISBURSING OFFICER   : MARIA SANTOS, DSWD FIELD OFFICER #4412\nISSUED TIMESTAMP     : 2026-09-01 09:41:22 UTC\n--------------------------------------------------\nINTEGRITY NOTICE:\nThis digital record is protected under AyudaChain.\nAny alteration to name, amount, or reference will invalidate the cryptographic blockchain proof.\n",
+      "status": "CONFIRMED",
+      "blockchain_tx_hash": "0xa2e68d4f9276df5d862e9b9cc074f91c371cc10764ef5b02600cd5a9089c33d8",
+      "distributed_at": "2026-10-07T18:13:08.199279"
+    },
+    "successCardVisible": false,
+    "selectedAfter": "BEN-0001",
+    "storage": {
+      "keys": [
+        "ayudachain_role"
+      ],
+      "databases": [],
+      "serviceWorkers": 0
+    }
+  },
+  {
+    "id": "O03",
+    "journey": "13-receipt-preview",
+    "imageRequestUrl": "http://127.0.0.1:3000/receipts/sample_relief_receipt.svg",
+    "naturalWidth": 0
+  },
+  {
+    "id": "O04",
+    "journey": "15-name-swap-simulation",
+    "apiReturned": {
+      "record_id": "DIST-7614",
+      "beneficiary_id": "BEN-0004",
+      "receipt_hash_local": "0x33385fd24a3b42f141c39a162915ceb75d35cf0698c410762aba1911f937b87b",
+      "receipt_hash_onchain": "0x33385fd24a3b42f141c39a162915ceb75d35cf0698c410762aba1911f937b87b",
+      "is_verified": true,
+      "blockchain_tx_hash": "0xa2e68d4f9276df5d862e9b9cc074f91c371cc10764ef5b02600cd5a9089c33d8",
+      "timestamp": 1791396790,
+      "network": "Local EVM",
+      "contract_address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      "explorer_url": null,
+      "status_message": "INTEGRITY VERIFIED: Off-chain record strictly matches immutable on-chain proof."
+    },
+    "uiMismatch": true
+  },
+  {
+    "id": "layout-mobile-home",
+    "route": "/",
+    "widths": {
+      "viewport": 390,
+      "scroll": 390,
+      "body": 390
+    },
+    "nav": "Public DashboardBuod ng AyudaRelief BatchPondo ng CalamityBeneficiaries (AI)Listahan ng EvacueesDistributionsPamamahagi ng PeraVerify IntegritySelyo sa Blockchain",
+    "roleSelectVisible": false
+  },
+  {
+    "id": "layout-mobile-batch",
+    "route": "/batch/RELIEF-2026-001",
+    "widths": {
+      "viewport": 522,
+      "scroll": 522,
+      "body": 522
+    },
+    "nav": "Public DashboardBuod ng AyudaRelief BatchPondo ng CalamityBeneficiaries (AI)Listahan ng EvacueesDistributionsPamamahagi ng PeraVerify IntegritySelyo sa Blockchain",
+    "roleSelectVisible": false
+  },
+  {
+    "id": "layout-mobile-beneficiaries",
+    "route": "/beneficiaries",
+    "widths": {
+      "viewport": 390,
+      "scroll": 390,
+      "body": 390
+    },
+    "nav": "Public DashboardBuod ng AyudaRelief BatchPondo ng CalamityBeneficiaries (AI)Listahan ng EvacueesDistributionsPamamahagi ng PeraVerify IntegritySelyo sa Blockchain",
+    "roleSelectVisible": false
+  },
+  {
+    "id": "layout-mobile-distributions",
+    "route": "/distributions",
+    "widths": {
+      "viewport": 390,
+      "scroll": 390,
+      "body": 390
+    },
+    "nav": "Public DashboardBuod ng AyudaRelief BatchPondo ng CalamityBeneficiaries (AI)Listahan ng EvacueesDistributionsPamamahagi ng PeraVerify IntegritySelyo sa Blockchain",
+    "roleSelectVisible": false
+  },
+  {
+    "id": "layout-mobile-verify",
+    "route": "/verify",
+    "widths": {
+      "viewport": 390,
+      "scroll": 390,
+      "body": 390
+    },
+    "nav": "Public DashboardBuod ng AyudaRelief BatchPondo ng CalamityBeneficiaries (AI)Listahan ng EvacueesDistributionsPamamahagi ng PeraVerify IntegritySelyo sa Blockchain",
+    "roleSelectVisible": false
+  },
+  {
+    "id": "O05",
+    "task": "refresh registration draft",
+    "modalGone": true,
+    "role": "Barangay Officer"
+  },
+  {
+    "id": "O06",
+    "journey": "17-nonstandard-payout-verification",
+    "claimedPayout": 2000,
+    "sealDisplay": 5000,
+    "greenExact5000Claim": true
+  },
+  {
+    "id": "O07",
+    "journey": "18-missing-reference-substitution",
+    "requested": "DIST-MISSING",
+    "selected": "DIST-RACE-1"
+  },
+  {
+    "id": "O08",
+    "journey": "22-cosmetic-network-selection",
+    "uiAddress": "0x1111111111111111111111111111111111111111",
+    "backend": {
+      "success": true,
+      "network": "Local EVM",
+      "chainId": 31337,
+      "blockNumber": 19,
+      "contractAddress": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      "explorerUrl": null
+    }
+  },
+  {
+    "id": "O09",
+    "action": "reload network customizations",
+    "selected": "Local EVM",
+    "customAddressPersists": false
+  },
+  {
+    "id": "harness-recovery",
+    "note": "Uncaught route.fetch rejection reset browser harness when API suffered DB lock after intentionally forced SQL-ID collision. No lost-response test success claimed; backend restarted to release leaked connection. Evidence before reset persisted; resumed new browser."
+  },
+  {
+    "id": "O10-accepted-response-dropped",
+    "result": {
+      "id": 14,
+      "distribution_id": "DIST-0125",
+      "beneficiary_id": "BEN-9908",
+      "batch_id": "RELIEF-2026-001",
+      "amount": 5000,
+      "verification_method": "QR_VOUCHER_PHYSICAL_RECEIPT",
+      "receipt_hash": "0xd632099ac8b4c5feb456941b02b14971edacfad3c5b38af8ab6f109f6c19af5c",
+      "receipt_file_path": "/receipts/sample_relief_receipt.svg",
+      "ocr_text": "REPUBLIC OF THE PHILIPPINES\nDEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT\nTYPHOON SALINLAHI EMERGENCY ASSISTANCE (2026)\n--------------------------------------------------\nOFFICIAL RELIEF DISBURSEMENT ACKNOWLEDGEMENT RECEIPT\nBATCH REFERENCE      : RELIEF-2026-001\nDISTRIBUTION ID      : DIST-0001\nBENEFICIARY ID       : BEN-0001\nHOUSEHOLD HEAD       : JUAN DELA CRUZ\nMUNICIPALITY / LGU   : ALBAY DISASTER RESPONSE CENTER\nBARANGAY             : SAN ISIDRO\nDISBURSEMENT TYPE    : EMERGENCY CASH & RELIEF PACK (ECRP)\nGRANT AMOUNT         : PHP 5,000.00\nVERIFICATION METHOD  : QR VOUCHER & BIOMETRIC CONFIRMATION\nSTATUS               : CLAIMED & CONFIRMED\nDISBURSING OFFICER   : MARIA SANTOS, DSWD FIELD OFFICER #4412\nISSUED TIMESTAMP     : 2026-09-01 09:41:22 UTC\n--------------------------------------------------\nINTEGRITY NOTICE:\nThis digital record is protected under AyudaChain.\nAny alteration to name, amount, or reference will invalidate the cryptographic blockchain proof.\n",
+      "status": "CONFIRMED",
+      "blockchain_tx_hash": "0x96888b8c06926b44ab73dd1bfd21cdd21a7e10454947a2b9a4d5cde12a5b8e71",
+      "distributed_at": "2026-10-07T18:22:40.705312"
+    }
+  },
+  {
+    "id": "O10-retry",
+    "dialogs": [
+      {
+        "type": "alert",
+        "message": "Distribution failed: TypeError: Failed to fetch"
+      },
+      {
+        "type": "alert",
+        "message": "Distribution failed: Error: Failed to confirm distribution"
+      }
+    ],
+    "recordAccepted": "DIST-0125"
+  },
+  {
+    "id": "O11",
+    "task": "actual browser offline submission",
+    "dialogs": [
+      {
+        "type": "alert",
+        "message": "Distribution failed: TypeError: Failed to fetch"
+      }
+    ],
+    "storage": {
+      "local": [
+        "ayudachain_role"
+      ],
+      "databases": [],
+      "workers": 0
+    }
+  },
+  {
+    "id": "O12",
+    "task": "reconnect then refresh",
+    "completed": false
+  },
+  {
+    "id": "O13",
+    "task": "UI amount invalid",
+    "zeroSubmitDisabled": true
+  },
+  {
+    "id": "O14",
+    "task": "injected 2500ms verification delay",
+    "selected": "DIST-REJECTED",
+    "recheckDisabled": true,
+    "greenStillVisible": true
+  },
+  {
+    "id": "O15",
+    "task": "auditor role payout permissions",
+    "role": "Auditor / COA",
+    "payButtonVisible": true
+  },
+  {
+    "id": "O16",
+    "task": "registration modal keyboard/accessibility sample",
+    "dialogRoles": 0,
+    "namedHouseholdInput": 0,
+    "initialFocus": {
+      "tag": "BUTTON",
+      "text": "Test Register Beneficiary"
+    },
+    "afterEscapeVisible": true,
+    "tabSequence": [
+      {
+        "tag": "INPUT",
+        "text": "",
+        "placeholder": "Search household name, ID, barangay..."
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Filter: Flagged Records",
+        "placeholder": null
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Inspect",
+        "placeholder": null
+      },
+      {
+        "tag": "BUTTON",
+        "text": "",
+        "placeholder": null
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Inspect",
+        "placeholder": null
+      },
+      {
+        "tag": "BUTTON",
+        "text": "",
+        "placeholder": null
+      },
+      {
+        "tag": "BUTTON",
+        "text": "Inspect",
+        "placeholder": null
+      }
+    ]
+  },
+  {
+    "id": "O17",
+    "task": "actual chain stopped; verify outage payout",
+    "chainPortAbsent": true,
+    "green": true
+  },
+  {
+    "id": "O18",
+    "task": "actual backend stopped; major route failures",
+    "dialogs": [
+      {
+        "type": "alert",
+        "message": "Distribution failed: TypeError: Failed to fetch"
+      },
+      {
+        "type": "alert",
+        "message": "Verification error: TypeError: Failed to fetch"
+      }
+    ]
+  },
+  {
+    "id": "O19",
+    "task": "back navigation after unsubmitted payout draft",
+    "steps": "Choose BEN-0004 amount2000; nav Verify Integrity; browser back",
+    "before": {
+      "household": "BEN-0004",
+      "amount": "2000"
+    },
+    "after": {
+      "household": "BEN-0001",
+      "amount": "5000"
+    },
+    "submitted": false,
+    "chain": "stopped; no payment submitted"
+  }
+]

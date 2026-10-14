@@ -1,0 +1,15 @@
+test_time_wait_allows_restart_but_active_listener_is_preserved (backend.tests.test_local_supervisor.LocalPortTests.test_time_wait_allows_restart_but_active_listener_is_preserved) ... FAIL
+
+======================================================================
+FAIL: test_time_wait_allows_restart_but_active_listener_is_preserved (backend.tests.test_local_supervisor.LocalPortTests.test_time_wait_allows_restart_but_active_listener_is_preserved)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/backend/tests/test_local_supervisor.py", line 27, in test_time_wait_allows_restart_but_active_listener_is_preserved
+    self.assertTrue(available(port), 'A closed owned service must be restartable')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : A closed owned service must be restartable
+
+----------------------------------------------------------------------
+Ran 1 test in 0.032s
+
+FAILED (failures=1)

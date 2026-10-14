@@ -1,0 +1,107 @@
+AyudaChain Backend Server running at http://0.0.0.0:8000/
+127.0.0.1 - - [08/Oct/2026 02:22:03] "GET /api/distributions HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:22:03] "GET /api/beneficiaries? HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:22:04] "GET /api/dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:22:10] "GET /api/dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:22:10] "GET /api/dashboard HTTP/1.1" 200 -
+C:\Users\Yushin\AppData\Local\Temp\ayudachain-investigation-ba4heaqr\backend\server.py:561: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ben_id = body.get("beneficiary_id", f"BEN-{int(datetime.utcnow().timestamp())}")
+C:\Users\Yushin\AppData\Local\Temp\ayudachain-investigation-ba4heaqr\backend\server.py:579: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  now_str = datetime.utcnow().isoformat()
+127.0.0.1 - - [08/Oct/2026 02:22:38] "POST /api/beneficiaries HTTP/1.1" 201 -
+127.0.0.1 - - [08/Oct/2026 02:22:38] "GET /api/beneficiaries? HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:22:38] "GET /api/distributions HTTP/1.1" 200 -
+C:\Users\Yushin\AppData\Local\Temp\ayudachain-investigation-ba4heaqr\backend\server.py:649: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  d_id = body.get("distribution_id", f"DIST-{int(datetime.utcnow().timestamp())}")
+C:\Users\Yushin\AppData\Local\Temp\ayudachain-investigation-ba4heaqr\backend\server.py:699: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  now_str = datetime.utcnow().isoformat()
+127.0.0.1 - - [08/Oct/2026 02:22:40] "POST /api/distributions/confirm HTTP/1.1" 201 -
+127.0.0.1 - - [08/Oct/2026 02:22:41] "POST /api/distributions/confirm HTTP/1.1" 400 -
+127.0.0.1 - - [08/Oct/2026 02:22:41] "GET /api/distributions HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:22:41] "GET /api/beneficiaries? HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:23:13] "OPTIONS /api/distributions/confirm HTTP/1.1" 204 -
+127.0.0.1 - - [08/Oct/2026 02:23:13] "GET /api/distributions HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:23:13] "GET /api/beneficiaries? HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:23:14] "GET /api/distributions HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:23:14] "OPTIONS /api/blockchain/verify HTTP/1.1" 204 -
+127.0.0.1 - - [08/Oct/2026 02:23:14] "GET /api/beneficiaries? HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:23:15] "POST /api/blockchain/verify HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:23:18] "POST /api/blockchain/verify HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:23:50] "GET /api/distributions HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:23:50] "GET /api/beneficiaries? HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:23:51] "GET /api/beneficiaries? HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:23:51] "OPTIONS /api/beneficiaries/BEN-0023/verify HTTP/1.1" 204 -
+C:\Users\Yushin\AppData\Local\Temp\ayudachain-investigation-ba4heaqr\backend\server.py:628: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  now_str = datetime.utcnow().isoformat()
+127.0.0.1 - - [08/Oct/2026 02:23:51] "POST /api/beneficiaries/BEN-0023/verify HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:23:51] "GET /api/beneficiaries? HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:24:24] "GET /api/beneficiaries? HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:24:28] "POST /api/blockchain/verify HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:25:26] "GET /api/dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:25:34] "POST /api/distributions/confirm HTTP/1.1" 201 -
+127.0.0.1 - - [08/Oct/2026 02:25:35] "GET /api/dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:25:42] "POST /api/blockchain/verify HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:25:45] "GET /api/dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:25:55] "GET /api/dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:26:06] "GET /api/dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:26:16] "GET /api/dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:26:26] "GET /api/dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:26:36] "GET /api/dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:26:46] "GET /api/dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:26:54] "GET /api/distributions HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:26:54] "OPTIONS /api/blockchain/verify HTTP/1.1" 204 -
+127.0.0.1 - - [08/Oct/2026 02:26:54] "GET /api/beneficiaries? HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:27:02] "POST /api/blockchain/verify HTTP/1.1" 200 -
+AyudaChain Backend Server running at http://0.0.0.0:8000/
+127.0.0.1 - - [08/Oct/2026 02:31:49] "POST /api/blockchain/verify HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:32:03] "POST /api/blockchain/verify HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:32:04] "GET /api/distributions HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:32:04] "GET /api/beneficiaries? HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:32:04] "OPTIONS /api/blockchain/verify HTTP/1.1" 204 -
+127.0.0.1 - - [08/Oct/2026 02:32:05] "POST /api/blockchain/verify HTTP/1.1" 200 -
+C:\Users\Yushin\AppData\Local\Temp\ayudachain-investigation-ba4heaqr\backend\server.py:834: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  now_str = datetime.utcnow().isoformat()
+127.0.0.1 - - [08/Oct/2026 02:32:12] "DELETE /api/beneficiaries/BEN-0001 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:32:13] "POST /api/blockchain/verify HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:32:25] "GET /api/distributions HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:32:25] "GET /api/beneficiaries? HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:32:25] "OPTIONS /api/blockchain/verify HTTP/1.1" 204 -
+127.0.0.1 - - [08/Oct/2026 02:32:26] "POST /api/blockchain/verify HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:32:36] "GET /api/audit-events HTTP/1.1" 404 -
+127.0.0.1 - - [08/Oct/2026 02:32:36] "GET /api/distributions HTTP/1.1" 200 -
+C:\Users\Yushin\AppData\Local\Temp\ayudachain-investigation-ba4heaqr\backend\server.py:129: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  now = datetime.utcnow()
+127.0.0.1 - - [08/Oct/2026 02:32:40] "GET /api/audit-events HTTP/1.1" 404 -
+127.0.0.1 - - [08/Oct/2026 02:32:40] "GET /api/distributions HTTP/1.1" 200 -
+Database seeded with realistic Typhoon Salinlahi demo data.
+127.0.0.1 - - [08/Oct/2026 02:32:47] "POST /api/demo/reset HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:32:49] "OPTIONS /api/blockchain/verify HTTP/1.1" 204 -
+127.0.0.1 - - [08/Oct/2026 02:32:49] "GET /api/distributions HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:32:49] "GET /api/beneficiaries? HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:32:50] "POST /api/blockchain/verify HTTP/1.1" 200 -
+C:\Users\Yushin\AppData\Local\Temp\ayudachain-investigation-ba4heaqr\backend\server.py:308: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "timestamp": datetime.utcnow().isoformat(),
+127.0.0.1 - - [08/Oct/2026 02:32:55] "GET /api/health HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:32:55] "GET /api/distributions HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:33:14] "OPTIONS /api/blockchain/verify HTTP/1.1" 204 -
+127.0.0.1 - - [08/Oct/2026 02:33:14] "GET /api/distributions HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:33:14] "GET /api/beneficiaries? HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:33:14] "GET /api/audit-trail/RELIEF-2026-001 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:33:14] "GET /api/distributions HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:33:15] "POST /api/blockchain/verify HTTP/1.1" 200 -
+Database seeded with realistic Typhoon Salinlahi demo data.
+127.0.0.1 - - [08/Oct/2026 02:33:22] "POST /api/demo/reset HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:33:24] "OPTIONS /api/blockchain/verify HTTP/1.1" 204 -
+127.0.0.1 - - [08/Oct/2026 02:33:24] "GET /api/distributions HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:33:24] "GET /api/beneficiaries? HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:33:24] "GET /api/audit-trail/RELIEF-2026-001 HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:33:24] "GET /api/distributions HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 02:33:25] "POST /api/blockchain/verify HTTP/1.1" 200 -
+AyudaChain Backend Server running at http://0.0.0.0:8000/
+127.0.0.1 - - [08/Oct/2026 03:01:28] "GET /api/distributions HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 03:01:28] "GET /api/beneficiaries? HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 03:01:28] "GET /api/distributions HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 03:01:28] "OPTIONS /api/blockchain/verify HTTP/1.1" 204 -
+127.0.0.1 - - [08/Oct/2026 03:01:28] "GET /api/beneficiaries? HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 03:01:28] "GET /api/distributions HTTP/1.1" 200 -
+127.0.0.1 - - [08/Oct/2026 03:01:28] "GET /api/beneficiaries? HTTP/1.1" 200 -

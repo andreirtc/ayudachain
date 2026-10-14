@@ -1,0 +1,87 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/verification.spec.ts -g Funds clears
+
+
+Running 1 test using 1 worker
+
+(node:41632) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 tests/verification.spec.ts:6:7 › Funds clears the current match when a later verification request fails (9.7s)
+
+
+  1) tests/verification.spec.ts:6:7 › Funds clears the current match when a later verification request fails 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('.mvp-proof').filter({ hasText: 'confirmed' }).first()
+    Timeout: 5000ms
+    Expected pattern: /\bVerified\b/
+    Received string:  "document - confirmed (historical observation)VerifiedChecked Oct 14, 2026, 1:29 AM ManilaCommitted content matches the chain record.Recorded evidenceSaved canonical version and listed original bytesChain commitmentMatches recorded evidenceEvidence kinddocumentObserved block3Pinned chain referenceChain 31337 · 0x5FbDB2315678afecb367f032d93F642f64180aa3Raw hashes and observed check details{
+      \"result\": \"match\",
+      \"components\": [
+        \"canonical_bytes\",
+        \"raw_originals\",
+        \"chain_record\"
+      ],
+      \"local_hash\": \"0xffd9f5db813df45db1cae42c95b730c66dbc18a5809314bf1f4b18d9015e6a34\",
+      \"onchain_hash\": \"0xffd9f5db813df45db1cae42c95b730c66dbc18a5809314bf1f4b18d9015e6a34\",
+      \"deployment_id\": \"6b8752ec-51fb-4969-899b-2c505e3f6ddc\",
+      \"chain_id\": \"31337\",
+      \"contract_address\": \"0x5FbDB2315678afecb367f032d93F642f64180aa3\",
+      \"public_id\": \"0xaef63a0ccf3dad9f96a5c62b8b92aed47d87641171cd3176e8b7be48be1dc273\",
+      \"block_number\": \"3\",
+      \"block_hash\": \"0x0dda0d3a0a746f0a7c3f00f3684b07b5c0b57da69a8f4a3f77010af5cc02c6ae\",
+      \"historical\": false,
+      \"checked_at\": \"2026-10-13T17:29:53.294174+00:00\",
+      \"commitment_id\": \"9088fd69-37e8-45b4-b39c-a739e2ab8631\",
+      \"kind\": \"document\"
+    }Check chain now"
+
+    Call log:
+      - Expect "toContainText" locator('.mvp-proof').filter({ hasText: 'confirmed' }).first() with timeout 5000ms
+      - waiting for locator('.mvp-proof').filter({ hasText: 'confirmed' }).first()
+        14 × locator resolved to <div class="mvp-proof">…</div>
+           - unexpected value "document - confirmed (historical observation)VerifiedChecked Oct 14, 2026, 1:29 AM ManilaCommitted content matches the chain record.Recorded evidenceSaved canonical version and listed original bytesChain commitmentMatches recorded evidenceEvidence kinddocumentObserved block3Pinned chain referenceChain 31337 · 0x5FbDB2315678afecb367f032d93F642f64180aa3Raw hashes and observed check details{
+      "result": "match",
+      "components": [
+        "canonical_bytes",
+        "raw_originals",
+        "chain_record"
+      ],
+      "local_hash": "0xffd9f5db813df45db1cae42c95b730c66dbc18a5809314bf1f4b18d9015e6a34",
+      "onchain_hash": "0xffd9f5db813df45db1cae42c95b730c66dbc18a5809314bf1f4b18d9015e6a34",
+      "deployment_id": "6b8752ec-51fb-4969-899b-2c505e3f6ddc",
+      "chain_id": "31337",
+      "contract_address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      "public_id": "0xaef63a0ccf3dad9f96a5c62b8b92aed47d87641171cd3176e8b7be48be1dc273",
+      "block_number": "3",
+      "block_hash": "0x0dda0d3a0a746f0a7c3f00f3684b07b5c0b57da69a8f4a3f77010af5cc02c6ae",
+      "historical": false,
+      "checked_at": "2026-10-13T17:29:53.294174+00:00",
+      "commitment_id": "9088fd69-37e8-45b4-b39c-a739e2ab8631",
+      "kind": "document"
+    }Check chain now"
+
+
+      20 |     const real=page.waitForResponse(r=>r.url().endsWith('/integrity/check')&&r.request().method()==='POST');
+      21 |     await button.click();expect((await(await real).json()).data.result).toBe('match');
+    > 22 |     await expect(block).toContainText(currentMatch);
+         |                         ^
+      23 |     let release!:()=>void,started!:()=>void;
+      24 |     const held=new Promise<void>(r=>release=r),ready=new Promise<void>(r=>started=r);
+      25 |     await page.route('**/api/v1/integrity/check',async route=>{started();await held;await route.abort('connectionfailed');});
+        at /home/ralphandreicastillo326/orca/workspaces/ayudachain-finals-agent/design-proposal/frontend/tests/verification.spec.ts:22:25
+
+    Error Context: test-results/verification-Funds-clears--718f0--verification-request-fails/error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/verification-Funds-clears--718f0--verification-request-fails/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/verification-Funds-clears--718f0--verification-request-fails/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests/verification.spec.ts:6:7 › Funds clears the current match when a later verification request fails 

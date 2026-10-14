@@ -1,0 +1,12 @@
+
+> ayudachain-frontend@1.0.0 test:mvp
+> playwright test tests/sessions-loading.spec.ts
+
+
+Running 1 test using 1 worker
+
+(node:77378) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 tests/sessions-loading.spec.ts:4:5 › late saved sessions cannot collapse the session form after editing starts (2.2s)
+
+  1 passed (3.5s)
