@@ -1,0 +1,8 @@
+/* Kubo Link mark: a bahay kubo roof (the household) over two linked rings (the checkable record). */
+export function LogoMark({size=32}:{size?:number}){
+  return <svg width={size} height={size} viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth={4.5} aria-hidden="true">
+    <path d="M5 22.5L24 7l19 15.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <rect x="7.5" y="25" width="19" height="15" rx="7.5"/>
+    <rect x="21.5" y="25" width="19" height="15" rx="7.5"/>
+  </svg>;
+}

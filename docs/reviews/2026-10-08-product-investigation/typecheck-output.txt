@@ -1,0 +1,4 @@
+Command: node node_modules/typescript/bin/tsc --noEmit
+CWD: C:\Users\Yushin\AppData\Local\Temp\ayudachain-investigation-ba4heaqr\frontend
+Exit: 0
+

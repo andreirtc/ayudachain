@@ -20,10 +20,12 @@
   "author": "AyudaChain Team",
   "license": "MIT",
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "hardhat": "^2.22.0"
+    "@nomicfoundation/hardhat-toolbox": "5.0.0",
+    "hardhat": "2.29.1"
   },
   "dependencies": {
-    "ethers": "^6.17.0"
+    "ayudachain": "file:..",
+    "ethers": "6.17.0",
+    "pg": "8.23.1"
   }
 }

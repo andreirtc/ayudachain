@@ -1,0 +1,92 @@
+﻿[
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\Yushin\\orca\\workspaces\\ayudachain\\main-2\\frontend\\app\\beneficiaries\\page.tsx",
+    "line": 302,
+    "snippet": "text-slate-400 on bg-rose-50"
+  },
+  {
+    "antipattern": "side-tab",
+    "name": "Side-tab accent border",
+    "description": "Thick colored border on one side of a card — the most recognizable tell of AI-generated UIs. Use a subtler accent or remove it entirely.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\Yushin\\orca\\workspaces\\ayudachain\\main-2\\frontend\\app\\distributions\\page.tsx",
+    "line": 525,
+    "snippet": "border-l-2"
+  },
+  {
+    "antipattern": "side-tab",
+    "name": "Side-tab accent border",
+    "description": "Thick colored border on one side of a card — the most recognizable tell of AI-generated UIs. Use a subtler accent or remove it entirely.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\Yushin\\orca\\workspaces\\ayudachain\\main-2\\frontend\\app\\distributions\\page.tsx",
+    "line": 526,
+    "snippet": "border-r-2"
+  },
+  {
+    "antipattern": "border-accent-on-rounded",
+    "name": "Border accent on rounded element",
+    "description": "Thick accent border on a rounded card — the border clashes with the rounded corners. Remove the border or the border-radius.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\Yushin\\orca\\workspaces\\ayudachain\\main-2\\frontend\\app\\distributions\\page.tsx",
+    "line": 525,
+    "snippet": "border-t-2"
+  },
+  {
+    "antipattern": "border-accent-on-rounded",
+    "name": "Border accent on rounded element",
+    "description": "Thick accent border on a rounded card — the border clashes with the rounded corners. Remove the border or the border-radius.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\Yushin\\orca\\workspaces\\ayudachain\\main-2\\frontend\\app\\distributions\\page.tsx",
+    "line": 527,
+    "snippet": "border-b-2"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\Yushin\\orca\\workspaces\\ayudachain\\main-2\\frontend\\app\\verify\\page.tsx",
+    "line": 155,
+    "snippet": "text-slate-700 on bg-rose-50"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\Yushin\\orca\\workspaces\\ayudachain\\main-2\\frontend\\app\\verify\\page.tsx",
+    "line": 167,
+    "snippet": "text-slate-700 on bg-rose-50"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\Yushin\\orca\\workspaces\\ayudachain\\main-2\\frontend\\app\\verify\\page.tsx",
+    "line": 179,
+    "snippet": "text-slate-700 on bg-emerald-50"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\Yushin\\orca\\workspaces\\ayudachain\\main-2\\frontend\\components\\Navbar.tsx",
+    "line": 148,
+    "snippet": "text-slate-400 on bg-blue-600"
+  }
+]

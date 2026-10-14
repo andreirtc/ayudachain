@@ -1,0 +1,28 @@
+[
+  {
+    "scenario": "chain-success-db-id-collision",
+    "method": "POST",
+    "path": "/api/distributions/confirm",
+    "request": {
+      "distribution_id": "DIST-DB-ONLY",
+      "beneficiary_id": "BEN-9905",
+      "amount": 5000,
+      "batch_id": "RELIEF-2026-001"
+    },
+    "response": {
+      "status": "connection failure",
+      "error": "RemoteDisconnected('Remote end closed connection without response')"
+    },
+    "auth": "none"
+  },
+  {
+    "scenario": "db-collision-existing-row",
+    "rows": [
+      {
+        "distribution_id": "DIST-DB-ONLY",
+        "beneficiary_id": "BEN-0001",
+        "receipt_hash": "0x6e4600d4c9a40da3ccc0e628363d99c94d4eb55ddb01ed61e248e4d9fa4cc580"
+      }
+    ]
+  }
+]

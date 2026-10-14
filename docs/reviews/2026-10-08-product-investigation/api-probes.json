@@ -1,0 +1,51 @@
+[
+  {
+    "scenario": "unauthorized-delete-paid-household",
+    "method": "DELETE",
+    "path": "/api/beneficiaries/BEN-0001",
+    "request": null,
+    "response": {
+      "status": 200,
+      "body": {
+        "success": true,
+        "message": "Beneficiary BEN-0001 deleted successfully."
+      },
+      "cors": "*"
+    },
+    "auth": "none"
+  },
+  {
+    "scenario": "orphan-distribution-count",
+    "rows": [
+      {
+        "n": 2
+      }
+    ]
+  },
+  {
+    "scenario": "orphan-payout-still-verified",
+    "method": "POST",
+    "path": "/api/blockchain/verify",
+    "request": {
+      "distribution_id": "DIST-0001"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "record_id": "DIST-0001",
+        "beneficiary_id": "BEN-0001",
+        "receipt_hash_local": "0x6e4600d4c9a40da3ccc0e628363d99c94d4eb55ddb01ed61e248e4d9fa4cc580",
+        "receipt_hash_onchain": "0x6e4600d4c9a40da3ccc0e628363d99c94d4eb55ddb01ed61e248e4d9fa4cc580",
+        "is_verified": true,
+        "blockchain_tx_hash": "0xc3dc0b990651fbd7c159bfe2eb4d016a7772d8ec09cdc945ff5dab156438e4e5",
+        "timestamp": 1791397932,
+        "network": "Local EVM",
+        "contract_address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        "explorer_url": null,
+        "status_message": "INTEGRITY VERIFIED: Off-chain record strictly matches immutable on-chain proof."
+      },
+      "cors": "*"
+    },
+    "auth": "none"
+  }
+]
