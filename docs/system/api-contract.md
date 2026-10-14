@@ -13,7 +13,7 @@ Responses use data and meta. Metadata identifies claimed_unverified, authenticat
 | Evaluation/references | GET health, context, actors/catalogue, disasters, barangays, categories; GET evaluation/status; DSWD POST evaluation/clock |
 | Originals | POST evidence multipart file/purpose/prepared_for_actor_id; GET evidence/{id} metadata and evidence/{id}/content original |
 | Funding | GET funds (ledger, totals and exceptions); POST funds/releases; POST funds/{id}/corrections |
-| Registry/staff/intake | GET registry; POST registry; GET registry/{id}; POST registry/{id}/reviews; GET staff; POST staff/nominations, staff/{id}/status and staff/{id}/member-link; GET intake; POST intake/open and intake/{id}/close |
+| Registry/staff/intake | GET registry; POST registry; GET registry/{id}; POST registry/{id}/reviews (DSWD; a Barangay Officer may submit only `residence_confirm`, for an own-barangay household they neither belong to nor helped register, while its residence is unconfirmed); GET staff; POST staff/nominations, staff/{id}/status and staff/{id}/member-link; GET intake; POST intake/open and intake/{id}/close |
 | Claims | GET/POST claims; GET claims/{id}; POST claim-rounds/{id}/responses and claims/submissions |
 | Decisions/amounts/lists | POST claims/{id}/decisions and claims/bulk-approve; GET/POST amount-inputs; GET/POST lists; GET entitlements |
 | Sessions/notices | GET barangay/payout-counts; GET/POST sessions; POST sessions/{id}/changes; GET notifications |

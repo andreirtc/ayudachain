@@ -54,6 +54,40 @@ class RegistryTests(unittest.TestCase):
                 self.assertNotIn('phone',str(view));self.assertNotIn('09990000003',str(view));self.assertNotIn('id_number',str(view))
                 with self.assertRaises(DomainError):registry.require_endorser(db,resolve_identity(db,h.actors['barangay']),identity)
 
+    def test_barangay_officer_confirms_residence_once_for_an_independent_own_barangay_household(self):
+        registry=self.service()
+        with Harness() as h:
+            req=self.request(h)
+            identity=UUID(execute_command(h.actors['beneficiary'],'registry.register','self',req,lambda tx:registry.register(tx,req))['resources'][0]['id'])
+            confirm={'expected_revision':0,'action':'residence_confirm','reason':'Invented neighbours know this household'}
+            execute_command(h.actors['barangay'],'registry.review','confirm',confirm,lambda tx:registry.review(tx,identity,confirm))
+            with h.connection() as db:
+                row=db.execute('SELECT h.revision,v.residence_state,v.predecessor_id FROM households h JOIN household_versions v ON v.id=h.current_version_id WHERE h.id=%s',(identity,)).fetchone()
+                self.assertEqual(row['residence_state'],'confirmed');self.assertEqual(row['revision'],1);self.assertIsNotNone(row['predecessor_id'])
+                self.assertEqual(db.execute("SELECT count(*) n FROM audit_events WHERE action='registry.residence_confirm'").fetchone()['n'],1)
+                self.assertEqual(db.execute('SELECT count(*) n FROM household_versions').fetchone()['n'],2)
+            again=confirm|{'expected_revision':1}
+            with self.assertRaises(DomainError) as refused:execute_command(h.actors['barangay2'],'registry.review','again',again,lambda tx:registry.review(tx,identity,again))
+            self.assertEqual(refused.exception.code,'residence_not_awaiting_confirmation')
+
+    def test_barangay_officer_cannot_confirm_assisted_other_barangay_or_other_actions(self):
+        registry=self.service()
+        with Harness() as h:
+            assisted=self.request(h,beneficiary_actor_id=None)
+            identity=UUID(execute_command(h.actors['barangay'],'registry.register','help',assisted,lambda tx:registry.register(tx,assisted))['resources'][0]['id'])
+            confirm={'expected_revision':0,'action':'residence_confirm','reason':'Invented neighbours know this household'}
+            with self.assertRaises(DomainError) as own:execute_command(h.actors['barangay'],'registry.review','own',confirm,lambda tx:registry.review(tx,identity,confirm))
+            self.assertEqual(own.exception.code,'independent_endorser_required')
+            other=confirm|{'action':'facts_correct','address':'Invented elsewhere 5'}
+            with self.assertRaises(DomainError) as scope:execute_command(h.actors['barangay2'],'registry.review','scope',other,lambda tx:registry.review(tx,identity,other))
+            self.assertEqual(scope.exception.code,'barangay_residence_confirm_only')
+            elsewhere=self.request(h,declared_barangay_id=h.barangays[1])
+            far=UUID(execute_command(h.actors['beneficiary'],'registry.register','far',elsewhere,lambda tx:registry.register(tx,elsewhere))['resources'][0]['id'])
+            with self.assertRaises(DomainError) as outside:execute_command(h.actors['barangay'],'registry.review','far',confirm,lambda tx:registry.review(tx,far,confirm))
+            self.assertEqual(outside.exception.code,'independent_endorser_required')
+            execute_command(h.actors['barangay2'],'registry.review','ok',confirm,lambda tx:registry.review(tx,identity,confirm))
+            with h.connection() as db:self.assertEqual(db.execute('SELECT v.residence_state FROM households h JOIN household_versions v ON v.id=h.current_version_id WHERE h.id=%s',(identity,)).fetchone()['residence_state'],'confirmed')
+
     def test_documentary_intake_opens_and_closes_without_reopening(self):
         registry=self.service()
         with Harness() as h:

@@ -40,7 +40,7 @@ Phone destinations are selected from the role's tasks, at most four; the full se
 
 | Role | Phone destinations | Reason |
 |---|---|---|
-| Barangay | Overview, Claim responses, Households, Approved list | Respond first from a claims table; Households is a read-only census with assisted registration below; the approved list shows no amounts. Formal submission is inside claims and Punong-only. |
+| Barangay | Overview, Claim responses, Households, Approved list | Respond first from a claims table; Households is a census table whose rows open the registration for independent residence approval, with assisted registration below; the approved list shows no amounts. Formal submission is inside claims and Punong-only. |
 | DSWD | Overview, Claim review, Payout sessions, Private cases | Human decisions, scheduling and private recovery; funding, intake, amount/publication and evidence remain secondary links and dashboard prerequisites. |
 | Disbursing | My work today, Cash handover, Assigned sessions, Exit checks & notes | Current session/recipient task; independent checker task is visibly separate. |
 | Auditor | Overview, Integrity & histories, Funding evidence, Search & task queues | Read-only exception/proof inspection; all other permitted record pages stay in the drawer. No create action. |

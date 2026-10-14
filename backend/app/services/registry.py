@@ -68,9 +68,15 @@ def register(tx,req):
 
 
 def review(tx,identity,req):
-    require_role(tx.context,'dswd');require_independent(tx.context,identity)
+    # A barangay officer may only confirm residence of an own-barangay household they are independent of; DSWD reviews everything.
+    barangay=tx.context.role=='barangay'
+    if barangay:
+        if req['action']!='residence_confirm':raise DomainError(403,'barangay_residence_confirm_only')
+        require_endorser(tx.db,tx.context,identity)
+    else:require_role(tx.context,'dswd');require_independent(tx.context,identity)
     root=tx.get('households',identity);tx.revision(root,req['expected_revision'])
     prior=tx.get('household_versions',root['current_version_id']);action=req['action']
+    if barangay and prior['residence_state']!='unconfirmed':raise DomainError(409,'residence_not_awaiting_confirmation')
     if not req['reason'].strip():raise DomainError(422,'review_reason_required')
     current_link=tx.db.execute('SELECT * FROM household_links WHERE household_id=%s',(identity,)).fetchone()
     event_id=uuid4();version_id=None;link_id=None
