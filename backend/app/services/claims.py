@@ -22,10 +22,9 @@ def eligible_endorsers(tx,identity,barangay):
 
 
 def submit(tx,req):
-    require_role(tx.context,'beneficiary','barangay')
+    require_role(tx.context,'beneficiary')
     h=registry.household(tx.db,tx.context,req['household_id'])
-    if tx.context.role=='beneficiary' and tx.context.household_id!=h['id']:raise DomainError(403,'own_household_only')
-    if tx.context.role=='barangay' and tx.context.barangay_id!=h['declared_barangay_id']:raise DomainError(403,'own_barangay_only')
+    if tx.context.household_id!=h['id']:raise DomainError(403,'own_household_only')
     operation=tx.db.execute("SELECT o.*,v.response_hours FROM claim_operations o JOIN operation_versions v ON v.id=o.current_version_id WHERE o.disaster_id=%s AND o.run_id=%s AND o.business_status='open'",(req['disaster_id'],tx.context.run_id)).fetchone()
     if not operation or not tx.db.execute('SELECT 1 FROM operation_barangays WHERE operation_version_id=%s AND barangay_id=%s',(operation['current_version_id'],h['declared_barangay_id'])).fetchone():raise DomainError(409,'intake_closed_or_not_covered')
     tx.get('damage_categories',req['stated_category_id'])

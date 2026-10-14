@@ -23,6 +23,14 @@ class ClaimsTests(unittest.TestCase):
 
     def request(self,h,identity):return {'household_id':identity,'disaster_id':h.disasters[0],'stated_category_id':h.categories[0],'damage_description':'Invented damaged synthetic roof','evidence_ids':[],'new_information':None}
 
+    def test_barangay_officer_cannot_submit_a_claim(self):
+        claims=self.service()
+        with Harness() as h:
+            h.register_chain();identity=self.register_and_open(h);req=self.request(h,identity)
+            with self.assertRaises(DomainError) as refused:execute_command(h.actors['barangay'],'claim.submit','officer-claim',req,lambda tx:claims.submit(tx,req))
+            self.assertEqual(refused.exception.status,403)
+            with h.connection() as db:self.assertEqual(db.execute('SELECT count(*) n FROM claims').fetchone()['n'],0)
+
     def test_staffless_immediate_fallback_is_fixed_real_snapshot_not_signed(self):
         claims=self.service()
         with Harness() as h:
