@@ -1,5 +1,7 @@
 # Repeatable local evaluation
 
+For a single, click-by-click walk-through of one household with named accounts, see [demo flow](demo-flow.md).
+
 This is an evaluation procedure, not a fixture or scripted business state engine. Open the corresponding role workspace from /mvp and select another same-role account in its Account panel when needed. Account/disaster context stays in nested URLs and survives refresh. Select and edit actual forms. The automated journey uses the same APIs, real originals and actual local chain.
 
 Start the stack per [local operation](local-mvp.md). Reset explicitly with python -m backend.scripts.reset_mvp using the locked interpreter. The command checks durable nonce uncertainty, deploys a new actual local registry, retires the previous namespace and seeds references only. Previous private records/files/manifests remain readable through the separate Auditor history tool.
