@@ -141,7 +141,7 @@ This document records the implementation of `/mvp` and its five role workspaces 
 
 ## Logo
 
-The mark is a blue shield and check (verified) around a green house inside a chain ring (the household held by the anchored record), with a second link beneath it. The master file is `frontend/public/logo.svg`, a fixed blue and green gradient on a transparent background that does not follow the theme colours. `LogoMark` in `frontend/components/mvp/Logo.tsx` renders that file beside the Open Sans Bold wordmark in the drawer and on the directory page. `frontend/app/icon.svg` is the favicon: a copy of the same file. It replaces the earlier Kubo Link mark (a bahay kubo roof over two rings). The logo is a concept that has not been registered. It uses no government seal, flag or agency mark.
+The mark is a blue shield and check (verified) around a blue house (the household) held inside a green chain of two links (the anchored record). It was rebuilt as clean vector paths from the maintainer's supplied raster logo and checked against it by pixel overlay. The master file is `frontend/public/logo.svg`, flat blue (`#4a85fa`) and green (`#288b58`) on a transparent background that does not follow the theme colours. `LogoMark` in `frontend/components/mvp/Logo.tsx` renders that file beside the Open Sans Bold wordmark in the drawer and on the directory page. `frontend/app/icon.svg` is the favicon: a copy of the same file. It replaces the earlier Kubo Link mark (a bahay kubo roof over two rings). The logo is a concept that has not been registered. It uses no government seal, flag or agency mark.
 
 ## Colours
 
