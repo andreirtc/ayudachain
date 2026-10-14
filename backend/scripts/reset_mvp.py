@@ -26,4 +26,11 @@ def reset(*,persist_configuration=False):
             lines.append('MVP_DEPLOYMENT_MANIFEST='+str(manifest));file.write_text('\n'.join(lines)+'\n')
     return {'status':'new_reference_only_namespace','retired_count':len(runs),'manifest':str(manifest),'old_history':'retained_read_only','blockchain_simulated':False}
 
-if __name__=='__main__':print(json.dumps(reset(persist_configuration=True)))
+if __name__=='__main__':
+    import sys
+    result=reset(persist_configuration=True)
+    if '--with-sample-households' in sys.argv:
+        # Opt-in fictional residents; the default stays reference-only because browser journeys register their own households.
+        from backend.scripts.seed_households import seed_households
+        result['sample_households']=len(seed_households()[0])
+    print(json.dumps(result))

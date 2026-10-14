@@ -97,6 +97,16 @@ Retired actors cannot run ordinary commands. Read old history separately using a
 
 Original export requires a new path; inspection is privately logged. Old matched reads remain historical if the pinned chain is unavailable. Frozen legacy SQLite import is explicit and read-only: `python -m backend.scripts.import_legacy --actor DSWD_UUID --source PATH_TO_SYNTHETIC_SQLITE [--manifest ORIGINAL_LEGACY_MANIFEST]`. Import does not create MVP eligibility or re-anchor legacy data. Without original evidence/deployment, verification is explicitly unavailable.
 
+## Optional sample households
+
+The reference seed creates beneficiary accounts but no households, so barangay Households and claim tables start empty. To fill them with fictional households, run against the active evaluation run. It registers one household for each of the six beneficiaries (three in Silong, three in Sapa) plus seven assisted-registration households per barangay for residents without accounts, registered by that barangay's Punong Barangay and so flagged as assisted:
+
+```powershell
+.venv/Scripts/python -m backend.scripts.seed_households --with-claims
+```
+
+Each household is registered through the real registry command as its own beneficiary account; it is unconfirmed and not an aid application. `--with-claims` also files a claim, but only for barangays covered by an open DSWD intake, and the claim then waits for barangay responses. Nothing is endorsed, approved, published or anchored. The script skips households that already exist, so it is safe to repeat. A published approved list still needs the real DSWD approval, amount and chain publication steps. A reset retires the run and its households, and the browser journey spec resets the run, so rerun the script afterwards, or reset with `.venv/Scripts/python -m backend.scripts.reset_mvp --with-sample-households`.
+
 ## Tests and independently recomputed proof
 
 The backend integration suite needs a distinct persistent fault node on **8555**, compiled artifacts, the selected test deployment manifest, and the isolated database created by setup. The selected test manifest is `MVP_TEST_DEPLOYMENT_MANIFEST`, or `.runtime/test-deployment.json` by default. Run the node in another terminal:
