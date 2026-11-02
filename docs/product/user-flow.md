@@ -36,3 +36,16 @@ Use Search & task queues to filter permitted records and open a specific househo
 Choose English or Filipino guidance in the context bar; the preference and full step guidance persist across navigation/refresh. Registry CSV follows template → upload → validate/preview → review possible duplicates → explicitly select valid rows → audited registration → per-row outcomes/links. Cancellation before confirmation creates nothing; successful partial rows are retained and identical-file retry recovers them. Templates deliberately omit private identity/contact fields and additional members. Complete those through the ordinary permitted registry workflow.
 
 Assigned Disbursing staff can decode an opaque transaction QR on supported browsers or enter the same reference manually. Unknown/wrong-session references reveal no record. Opening does not compare identity, create a code or record cash. Continue the existing ID, fixed amount, recipient authorization and distinct-checker steps. Proof panels show coverage/current read separately from stored submission state and historical observations. See [delivery details and limits](../implementation/bring-forward-usability.md).
+
+## Finals interaction corrections (14 October 2026)
+
+Initial household reads must settle before registration/review controls appear; failure says records unavailable, not no households. Successful refresh preserves CSV acknowledgment and selected rows. Registration guidance states phone is optional. Errors explain the responsible role and current permitted step; uncertain writes never advise repeating physical cash. Reselecting the current transaction reloads its receipt/detail.
+
+After submitting the handover form, the payer reviews the same household/computed amount in a native confirmation dialog, cancels with Go back/Escape, or explicitly confirms. The original server payload, code consumption, idempotency and authority checks remain unchanged. Other decisions have no new confirmation step. Current integrity text separates status/time and explains that a match is not document authenticity or cash-delivery proof.
+
+The footer’s synthetic evaluation disclosure exposes the existing clock to DSWD/Auditor, with advance controls only for DSWD. It labels business time separately from actual chain time. The browser journey now uses a new isolated lab without reset, and keeps its final paid session open for the later live lookup checks; once-only payment remains consumed.
+
+Final visual review: a Beneficiary with a recorded receipt now sees completion guidance and a direct link to the same transaction’s private report, instead of obsolete instructions to create/reveal a code. This changes presentation/navigation only; prior answers remain editable through the existing append-only outcome flow. Phone controls retain a 44px minimum target and the mobile drawer close icon uses on-surface contrast.
+
+
+Resumed finals UI: welcome introduction/brand illustration precedes five role choices. Desktop uses full task labels; phone has four shortcuts plus full drawer. Staff registry selects one household detail; payout/optional audit/calculation hierarchy preserves existing APIs/permissions. First visit defaults to conversational Taglish; English/?lang=en remains available. No business/schema/hash changes.

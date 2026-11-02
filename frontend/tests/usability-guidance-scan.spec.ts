@@ -50,7 +50,7 @@ test('camera capability fixture: mocked decoder opens a reference once without p
     HTMLMediaElement.prototype.play=async()=>{};
     Object.defineProperty(HTMLMediaElement.prototype,'srcObject',{get(){return null;},set(){}});
   },`ayudachain:transaction:${capabilityTransaction}`);
-  const posts:string[]=[];page.on('request',request=>{if(request.method()==='POST')posts.push(new URL(request.url()).pathname);});
+  const posts:string[]=[];page.on('request',request=>{if(request.method()==='POST'&&new URL(request.url()).pathname.startsWith('/api/v1/'))posts.push(new URL(request.url()).pathname);});
   await capabilityFixture(page);
   await page.getByRole('button',{name:'Scan QR with camera'}).click();
   await expect(page.getByRole('status').filter({hasText:'Transaction found'})).toBeVisible();
@@ -69,7 +69,7 @@ test('projection fixture: direct reference outside catalogue loads and failure c
   await page.getByLabel('Accepted photo ID type',{exact:true}).fill('Invented photo ID');
   await page.getByLabel('I compared the person with the accepted photo ID').check();
   await page.evaluate(()=>{const url=new URL(location.href);url.searchParams.set('record','00000000-0000-4000-8000-000000000099');history.pushState(null,'',url);});
-  await expect(page.locator('main .mvp-error[role="alert"]')).toContainText('record_unavailable');
+  await expect(page.locator('main .mvp-error[role="alert"]')).toContainText('unavailable for the selected account');
   await expect(page.getByRole('heading',{name:'Invented Test Household',exact:true})).toHaveCount(0);
   await page.evaluate(id=>{const url=new URL(location.href);url.searchParams.set('record',id);history.pushState(null,'',url);},capabilityTransaction);
   await expect(page.getByLabel('Accepted photo ID type',{exact:true})).toHaveValue('');
@@ -110,14 +110,19 @@ test('Filipino guidance persists navigation and reload with language metadata',a
   const actors=(await(await request.get('http://127.0.0.1:8000/api/v1/actors/catalogue')).json()).data;
   const actor=actors.find((a:{role:string;status:string})=>a.role==='beneficiary'&&a.status==='active');
   await page.goto(workspacePath('beneficiary',actor.id,'registry'));
+  await page.locator('.ac-display-preferences>summary').click();
   await page.getByLabel('Guidance language / Wika ng gabay').selectOption('fil');
-  await expect(page.getByRole('heading',{name:'Irehistro ang inyong sambahayan'})).toBeVisible();
-  await expect(page.locator('aside[lang="fil"]')).toContainText('hindi beripikado');
-  await page.reload();await expect(page.getByLabel('Guidance language / Wika ng gabay')).toHaveValue('fil');
-  await page.goto(workspacePath('beneficiary',actor.id,'payouts'));
-  await expect(page.getByRole('heading',{name:'Panatilihing pribado ang code at PIN'})).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('heading',{name:'Bago mag-register'})).toBeVisible();
+  await expect(page.locator('aside[lang="fil"]')).toContainText('Walang secure sign-in');
+  await page.reload();await page.locator('.ac-display-preferences>summary').click();await expect(page.getByLabel('Guidance language / Wika ng gabay')).toHaveValue('fil');
+  await page.keyboard.press('Escape');
+  await page.goto(workspacePath('beneficiary',actor.id,'claims'));
+  await expect(page.getByRole('heading',{name:'Bago mag-submit'})).toBeVisible();
+  await page.locator('.ac-display-preferences>summary').click();
   await page.getByLabel('Guidance language / Wika ng gabay').selectOption('en');
-  await expect(page.getByRole('heading',{name:'Keep your code and PIN private'})).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('aside[lang="en"]').getByRole('heading',{name:'Submit a claim',exact:true})).toBeVisible();
 });
 
 test('manual lookup rejects malformed and unknown references then opens current transaction without authorization',async({page,request})=>{

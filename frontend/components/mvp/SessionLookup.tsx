@@ -1,4 +1,7 @@
 "use client";
+import {useInterfaceText} from "./Language";
+
+import {useErrorMessage} from './Language';
 import {useEffect,useRef,useState} from 'react';
 import {Actor,request} from '@/lib/mvp-client';
 import {Session} from './Sessions';
@@ -10,6 +13,9 @@ export const transactionReference=(id:string)=>`ayudachain:transaction:${id}`;
 const validReference=/^(?:ayudachain:transaction:)?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export default function SessionLookup({actor,sessions,onOpen}:{actor:Actor;sessions:Session[];onOpen:(id:string)=>void}){
+  const ui=useInterfaceText();
+
+  const explainError=useErrorMessage(actor.role);
   const [session,setSession]=useState(''),[reference,setReference]=useState(''),[error,setError]=useState(''),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[scanning,setScanning]=useState(false);
   const video=useRef<HTMLVideoElement|null>(null),stream=useRef<MediaStream|null>(null),timer=useRef<ReturnType<typeof setTimeout>|null>(null),generation=useRef(0),controller=useRef<AbortController|null>(null),last=useRef('');
   const permitted=sessions.filter(s=>['scheduled','open'].includes(s.business_status)&&s.assignments.some(a=>a.actor_id===actor.id));
@@ -25,7 +31,7 @@ export default function SessionLookup({actor,sessions,onOpen}:{actor:Actor;sessi
     if(last.current===`${session}:${canonical}`){setMessage('This reference is already open. Use its current transaction controls; a repeat scan does not authorize payout.');return;}
     controller.current?.abort();const c=new AbortController();controller.current=c;setBusy(true);
     try{const data=await request<{transaction_id:string}>(`/sessions/${session}/lookup`,actor.id,c.signal,{reference:text});if(c.signal.aborted)return;last.current=`${session}:${canonical}`;setMessage('Transaction found. Complete the current identity, amount and recipient authorization checks before handover.');onOpen(data.transaction_id);}
-    catch(e){if(e instanceof Error&&e.name!=='AbortError')setError(e.message==='record_unavailable'?'No permitted transaction was found in this assigned session. Check the reference and selected session.':`${e instanceof Error?e.message:'Lookup unavailable'}. Check your connection and retry; no payout was recorded.`);}
+    catch(e){if(e instanceof Error&&e.name!=='AbortError')setError(explainError(e));}
     finally{if(!c.signal.aborted)setBusy(false);}
   }
   async function start(){
@@ -49,11 +55,11 @@ export default function SessionLookup({actor,sessions,onOpen}:{actor:Actor;sessi
       void decode();
     }catch(e){if(token!==generation.current)return;stop();setError(e instanceof Error&&e.name==='NotAllowedError'?'Camera permission was denied. Allow camera access or enter the transaction reference below.':'Camera unavailable. Check that it is connected and unused, or enter the transaction reference below.');}
   }
-  return <section className="mvp-panel"><h2>Open an assigned transaction</h2><p>Scan an opaque transaction QR or enter its reference. Lookup opens a record only. Identity comparison, computed amount, recipient code/PIN and independent checker rules still apply.</p>
-    <label>Assigned payout session<select aria-label="Assigned payout session" value={session} onChange={e=>{stop();controller.current?.abort();setBusy(false);setSession(e.target.value);setReference('');setError('');setMessage('');last.current='';}}><option value="">Select an assigned session</option>{permitted.map(s=><option key={s.id} value={s.id}>{manila(s.date,true)} · {s.site}</option>)}</select></label>
-    {!permitted.length&&<p>No current assigned payout session is available. Refresh sessions after an assignment changes.</p>}
-    <form className="mvp-form" onSubmit={e=>{e.preventDefault();void lookup(reference);}}><label>Transaction reference<input value={reference} autoComplete="off" spellCheck={false} maxLength={100} onChange={e=>setReference(e.target.value)} placeholder="Transaction UUID or ayudachain:transaction:UUID"/></label><div className="mvp-actions"><button className="primary" disabled={!session||!reference.trim()||busy}>{busy?'Looking up…':'Open transaction reference'}</button><button type="button" disabled={!session||busy||scanning} onClick={()=>void start()}>Scan QR with camera</button></div></form>
-    {scanning&&<div><video ref={video} muted playsInline aria-label="QR camera preview" style={{width:'100%',maxWidth:480}}/><p role="status">Point the camera at the transaction QR. Scanning does not record a payment.</p><button type="button" onClick={()=>{stop();setMessage('Scanning cancelled. Camera released; manual lookup remains available.');}}>Cancel scanning</button></div>}
+  return <section className="mvp-panel"><h2>{ui("Open an assigned transaction")}</h2><p>{ui("Scan an opaque transaction QR or enter its reference. Lookup opens a record only. Identity comparison, computed amount, recipient code/PIN and independent checker rules still apply.")}</p>
+    <label>{ui("Assigned payout session")}<select aria-label={ui("Assigned payout session")} value={session} onChange={e=>{stop();controller.current?.abort();setBusy(false);setSession(e.target.value);setReference('');setError('');setMessage('');last.current='';}}><option value="">{ui("Select an assigned session")}</option>{permitted.map(s=><option key={s.id} value={s.id}>{manila(s.date,true)} · {s.site}</option>)}</select></label>
+    {!permitted.length&&<p>{ui("No current assigned payout session is available. Refresh sessions after an assignment changes.")}</p>}
+    <form className="mvp-form" onSubmit={e=>{e.preventDefault();void lookup(reference);}}><label>{ui("Transaction reference")}<input value={reference} autoComplete="off" spellCheck={false} maxLength={100} onChange={e=>setReference(e.target.value)} placeholder={ui("Transaction UUID or ayudachain:transaction:UUID")}/></label><div className="mvp-actions"><button className="primary" disabled={!session||!reference.trim()||busy}>{busy?ui("Looking up…"):ui("Open transaction reference")}</button><button type="button" disabled={!session||busy||scanning} onClick={()=>void start()}>{ui("Scan QR with camera")}</button></div></form>
+    {scanning&&<div><video ref={video} muted playsInline aria-label={ui("QR camera preview")} style={{width:'100%',maxWidth:480}}/><p role="status">{ui("Point the camera at the transaction QR. Scanning does not record a payment.")}</p><button type="button" onClick={()=>{stop();setMessage('Scanning cancelled. Camera released; manual lookup remains available.');}}>{ui("Cancel scanning")}</button></div>}
     {error&&<p className="mvp-error" role="alert">{error}</p>}{message&&<p role="status">{message}</p>}
   </section>;
 }

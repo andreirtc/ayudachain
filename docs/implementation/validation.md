@@ -103,3 +103,9 @@ All seven additions are implemented; see [delivery and limitations](bring-forwar
 | Physical camera | Not validated. Native decoder support and physical camera behavior require device testing; manual lookup remains available. |
 
 These results do not establish authentication, operational privacy, native-speaker approval of Filipino copy or production readiness. No commit or push was made.
+
+## Finals stabilization — 2026-10-14
+
+Fresh Linux validation and all intermediate failures are recorded in [finalist readiness](../finals/FINALIST_READINESS.md) and its evidence ledger. This section does not replace historical Windows evidence above. The design-proposal worktree selectively integrates existing role error recovery, adds cash-handover review, corrects initial/late loading and transaction detail behavior, separates integrity text, exposes the already implemented synthetic clock through labelled tools, makes browser Python portable and removes automatic browser reset. The POSIX supervisor probe now allows TIME_WAIT restart while still refusing a live listener. No financial rules, business schema, hash payload or contract changes were made.
+
+Browser full journey now requires a newly isolated lab and MVP_BROWSER_FRESH_RUN=1, refuses an existing household registry, and retains failed partial runs. Use the finals runbook instead of running reset. New/changed regressions have recorded before/after failures; controlled UI fixtures do not supply blockchain success. Read the finals report for completed current counts and outstanding checks.

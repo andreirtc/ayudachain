@@ -15,15 +15,17 @@ def seed():
     with connection(purpose='owner') as db:
         db.execute("SELECT pg_advisory_xact_lock(74632519)")
         if db.execute("SELECT 1 FROM evaluation_runs WHERE state='active'").fetchone():return False
+        presentation=os.environ.get('MVP_PRESENTATION_DATA')=='1'
         office,run,system=uuid4(),uuid4(),uuid4()
-        db.execute('INSERT INTO field_offices(id,name,revision,check_data_revision) VALUES(%s,%s,0,0)',(office,'Invented DSWD Field Office'))
+        db.execute('INSERT INTO field_offices(id,name,revision,check_data_revision) VALUES(%s,%s,0,0)',(office,'DSWD Field Office · Demo' if presentation else 'Invented DSWD Field Office'))
         db.execute("INSERT INTO evaluation_runs(id,office_id,namespace,state,clock_mode,clock_offset,created_at) VALUES(%s,%s,%s,'active','wall_clock',interval '0',clock_timestamp())",(run,office,secrets.token_bytes(32)))
         tx=Transaction(db,ActorContext(system,run,office,'system','Local scheduler',None,None,None,None,'system'),uuid4())
-        barangays=[tx.insert('barangays',{'name':n,'zone_description':None})['id'] for n in ['Invented Silong','Invented Sapa','Invented Staffless']]
-        for name in ['Synthetic Typhoon Luntian','Synthetic Flood Talim']:tx.insert('disasters',{'name':name,'external_reference':None,'current_input_version_id':None,'inputs_locked_at':None,'revision':0})
+        barangays=[tx.insert('barangays',{'name':n,'zone_description':None})['id'] for n in (['Barangay Maligaya · Demo','Barangay Mapayapa · Demo','Barangay Pag-asa · Demo'] if presentation else ['Invented Silong','Invented Sapa','Invented Staffless'])]
+        for name in (['Bagyong Luntian · Demo','Pagbaha sa Maligaya · Demo'] if presentation else ['Synthetic Typhoon Luntian','Synthetic Flood Talim']):tx.insert('disasters',{'name':name,'external_reference':None,'current_input_version_id':None,'inputs_locked_at':None,'revision':0})
         for code,label in [('totally_damaged','Totally damaged'),('partially_damaged','Partially damaged')]:tx.insert('damage_categories',{'code':code,'label':label})
         actors=[]
         for role,names in [('system',['Local scheduler']),('dswd',['Invented Lira Sayo','Invented Dalisay Tala']),('beneficiary',['Invented Bituin Salonga','Invented Amihan Malaya','Invented Sinag Dima']),('disbursing',['Invented Alon Sinta','Invented Habagat Dalisay','Invented Mayumi Alit']),('auditor',['Invented Hiraya Luntian','Invented Diwa Bayani']),('barangay',['Invented Sol Tala','Invented Ulap Sayo','Invented Liway Sinta','Invented Buwan Ali'])]:
+            if presentation:names={'system':['Demo scheduler'],'dswd':['Lira Sayo · Demo','Dalisay Tala · Demo'],'beneficiary':['Maria Santos · Demo','Rosa Reyes · Demo','Ana Dima · Demo'],'disbursing':['Alon Sinta · Demo','Habagat Dalisay · Demo','Mayumi Alit · Demo'],'auditor':['Hiraya Luntian · Demo','Diwa Bayani · Demo'],'barangay':['Sol Tala · Demo','Ulap Sayo · Demo','Liway Sinta · Demo','Buwan Ali · Demo']}[role]
             for ordinal,name in enumerate(names):
                 identity=system if role=='system' else uuid4();version=uuid4()
                 tx.insert('actors',{'id':identity,'role':role,'display_name':name,'email':None,'current_version_id':version,'current_member_link_id':None,'revision':0})

@@ -16,6 +16,10 @@ def environment():
 
 def available(port):
     with socket.socket() as s:
+        # POSIX TIME_WAIT is a closed connection, not an occupied service.
+        # SO_REUSEADDR still refuses a live listener (no SO_REUSEPORT).
+        # Keep Windows' existing exclusive probe semantics.
+        if os.name!='nt':s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
         try:s.bind(('127.0.0.1',port));return True
         except OSError:return False
 

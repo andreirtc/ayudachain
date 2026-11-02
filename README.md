@@ -1,5 +1,7 @@
 # AyudaChain local synthetic MVP
 
+Finals preparation (14 October 2026): start with [natural Taglish guides](docs/finals/taglish/START_HERE.md), [SDG alignment](docs/finals/SDG_ALIGNMENT.md) and [teammate reference](docs/finals/REFERENCE_BRANCH.md); see [current readiness and evidence](docs/finals/FINALIST_READINESS.md), [safe demo runbook](docs/finals/DEMO_RUNBOOK.md), [plain-English explanation](docs/finals/PROJECT_EXPLAINED.md) and [judges’ defense masterbook](docs/finals/JUDGES_QA.md). These fresh results are distinct from historical validation.
+
 The implemented five-role workflow runs at **/mvp** with FastAPI, PostgreSQL and an actual local EVM registry. The root page redirects there. Open a dedicated role workspace from the entry page: /mvp/beneficiary, /mvp/barangay-officer, /mvp/dswd-officer, /mvp/disbursing-officer or /mvp/auditor. Each has its own overview, nested navigation and a same-role synthetic Account panel. URLs organize the interface; there is no sign-in gate. Authentication, secure authorization, operational privacy and authenticated accountability remain **Pending**. Use invented households only.
 
 Beneficiaries and Barangay Officers register households and submit claims. Barangay responses and council resolutions or explicit unsigned fallback snapshots reach an independent DSWD reviewer. Documentary wage/category inputs produce exact centavo amounts; only a list's own matching chain confirmation publishes it. DSWD schedules cash staff and members. The recipient authorizes a short-lived attempt; an assigned officer compares the person/photo ID and records cash once. No-phone assistance requires a private PIN and a distinct independent checking officer. Private recipient answers, grievances and resident challenges retain their histories. Auditors inspect exact evidence and current chain reads without business mutation.
@@ -28,7 +30,7 @@ npm --prefix frontend run build
 npm --prefix frontend run test:mvp
 ```
 
-The integration suite requires the distinct fault node on 8555 and its manifest; the browser suite requires the running MVP. Browser full-journey evaluation explicitly retires the old namespace and deploys a new local registry before creating reference seeds. It preserves previous records and originals. Follow [evaluation instructions](docs/guides/demo-script.md). Actual results and all 26 requirement mappings are in [validation](docs/implementation/validation.md).
+The integration suite requires the distinct fault node on 8555 and its manifest; the browser suite requires the running MVP. Browser full-journey evaluation now requires a separately created fresh isolated lab and MVP_BROWSER_FRESH_RUN=1. It refuses a nonempty household registry and never resets the current evaluation. Run the journey before dependent browser cases; retain failed partial labs. Follow [evaluation instructions](docs/guides/demo-script.md). Actual results and all 26 requirement mappings are in [validation](docs/implementation/validation.md).
 
 The authoritative design is [PRD](docs/product/prd.md), [ERD](docs/system/erd.md), and the [14-stage plan](docs/product-ideation/plans/2026-10-10-mvp-implementation-plan.md). [Compatibility ADR](docs/adr/2026-10-10-mvp-evidence-protocol-and-registry.md) defines the separate evidence protocol. Historical ideation is unchanged.
 
@@ -38,7 +40,7 @@ Offline handover, real SMS, live National ID integration, general PIN recovery, 
 
 The redesigned MVP uses responsive task queues, household progress, amount-basis explanations, searchable review/proof records and document previews. [Routes](docs/product/sitemap.md), [user flow](docs/product/user-flow.md) and [design system](DESIGN.md) describe the delivered surface. See the redesign section in [validation](docs/implementation/validation.md) for fresh checks and current runtime limitations.
 
-## Design proposal: Tonal (Material 3, Sea and Sun)
+## Finals reference interface (Material 3, Sea and Sun)
 
 This branch applies the visual layer of the approved "Tonal" design to `/mvp`. The full reference design is in [docs/design/tonal-design-reference.html](docs/design/tonal-design-reference.html); open it in a browser. Its palette switcher previews all three palettes, but only **Sea and Sun** is used in the app. [DESIGN.md](DESIGN.md) records what the code implements.
 
@@ -66,7 +68,7 @@ This branch applies the visual layer of the approved "Tonal" design to `/mvp`. T
 | Phone navigation | Material 3 bottom navigation bar with at most four destinations per role | Hamburger menu opening the full drawer |
 | Desktop navigation | Navigation rail with a floating action button, plus list and detail panes side by side for claims, payouts and integrity | Fixed side drawer; list and detail are separate stacked panels |
 | Decisions | Segmented buttons (Approve / Decline / Refer to barangay; Endorse / Do not endorse; Pass after comparison / Fail and hold/stop) | Existing radio buttons and selects |
-| Confirmation | "Record this decision?" dialog before an irreversible decision or handover | Decisions and handovers save directly (CSV intake keeps its own preview-and-confirm step) |
+| Confirmation | "Record this decision?" dialog before an irreversible decision or handover | Cash handover has a native household/amount review dialog with cancel/Escape. Other decisions still save directly; CSV keeps its preview-and-confirm step. |
 | Feedback | Snackbar after saving ("Decision recorded for DFC-…", with View) | Inline saved message |
 | Flags | Material 3 banner at the top of a case: icon, sentence, text-button actions, divider | Flags appear inside the existing panels |
 | Integrity rows | Status rows (glyph, record name, time or action, explanation line) | Existing `IntegrityStatus` layout restyled; same structure as before |
@@ -78,14 +80,14 @@ This branch applies the visual layer of the approved "Tonal" design to `/mvp`. T
 | Other palettes | Bayanihan Teal and Indigo and Mango | Only Sea and Sun is shipped |
 | Legacy screens | Not covered by the design | Unchanged (Tailwind legacy UI); only the favicon is shared |
 
-### Known validation gaps
+### Validation status
 
-- **Typecheck:** passes.
-- **Production build:** not run on this branch.
-- **Browser suite:** 10 of 37 tests fail. I re-ran the three spec files containing them on the unmodified, pre-redesign code: 6 of these failures were reproduced there, and the other 4 were not re-run there because they depend on the journey test passing first. The causes are a duplicate "Register your household" heading match in `journey.spec.ts`, and verification tests that expect a word boundary after "Verified", which `IntegrityStatus` does not render. These need a separate fix.
+The starting Tonal branch documented ten browser failures. Finals preparation reproduced the duplicate registration selector and concatenated integrity text, repaired them, integrated the existing role error guidance and fixed transaction reselection/registry loading. The cash-handover review and explicit evaluation-clock disclosure are now connected. [Finalist readiness](docs/finals/FINALIST_READINESS.md) records current completed checks, failed intermediate runs and remaining limits. Do not treat earlier branch results as current evidence.
 
 The prompt for completing the missing parts is in [docs/design/implement-missing-design.md](docs/design/implement-missing-design.md).
 
 ## Five-role usability additions
 
 The workspaces now include scoped search/task queues, frozen duplicate comparisons, English/Filipino step guidance, barangay operations tables, contextual proof checks, staged CSV registration and native QR/manual session lookup. See [delivered behavior and limitations](docs/implementation/bring-forward-usability.md) and [validation](docs/implementation/validation.md). CSV templates cover head-only no-ID declarations; private completion follows normal workflows. Camera scanning requires browser BarcodeDetector support; manual lookup remains available. These are synthetic evaluation workflows with claimed/unverified accounts, not authenticated production privacy.
+
+The current finalist layer recreates the supplied shield/link logo as SVG, introduces the product before all five role choices, uses full desktop task labels referenced from five-role-mvp and four phone shortcuts/full menu, and supports remembered English/Taglish. Private records remain off-chain; authentication remains absent. Native workflow artwork is illustrative, not transaction evidence. No financial/schema/hash/contract change.

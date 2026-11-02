@@ -13,8 +13,10 @@ test('amount inputs cannot submit the initial revision while saved input history
   try{
     await page.goto(workspacePath(dswd.role,dswd.id,'lists'));await ready;
     await expect(page.getByRole('button',{name:'Save immutable input version',exact:true})).toBeDisabled();
+    await page.getByLabel('Documented daily wage (PHP)',{exact:true}).fill('999.55');
     release();
-    if(!(await page.getByLabel('Documented daily wage (PHP)',{exact:true}).isVisible()))await page.getByText('Record an amount basis',{exact:true}).click();
+    await expect(page.getByLabel('Documented daily wage (PHP)',{exact:true})).toBeVisible();
+    await expect(page.getByLabel('Documented daily wage (PHP)',{exact:true})).toHaveValue('999.55');
     await expect(page.getByRole('button',{name:'Save immutable input version',exact:true})).toBeEnabled();
   }finally{release();await page.unrouteAll({behavior:'wait'});}
 });

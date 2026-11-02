@@ -1,4 +1,6 @@
 'use client';
+import {useInterfaceText} from "./Language";
+
 import {House,Users,ClipboardCheck,ListChecks,CalendarDays,Landmark,Receipt,MessageSquare,ShieldCheck,ScanLine,HandCoins,ArrowRight,Check,Clock3,AlertCircle,X} from 'lucide-react';
 import Link from 'next/link';
 import {pesos} from '@/lib/mvp-client';
@@ -7,10 +9,18 @@ export function Icon({name,size=19}:{name:string;size?:number}){const Glyph=icon
 const words:Record<string,string>={awaiting_dswd:'Awaiting DSWD review',waiting_barangay:'Awaiting barangay response',handed_over:'Handover recorded',received_full:'Received in full',received_less:'Received less',not_received:'Not received',pending_publication:'Awaiting publication',awaiting_amount:'Awaiting amount',not_endorse:'Not endorsed',chain_unreachable:'Chain unreachable',required_anchor_absent:'Anchor absent',evidence_unavailable:'Evidence unavailable',own_device:'Recipient’s device',system_fallback:'System-forwarded',category_change:'Category updated',no_barangay_submission:'No signed barangay submission',match:'Verified',mismatch:'Does not match'};
 export function readable(value:string){return words[value]||value.replaceAll('_',' ').replace(/^./,c=>c.toUpperCase());}
 export function manila(value:string,dateOnly=false){if(!value)return 'Date not recorded';const d=new Date(value.length===10?value+'T00:00:00+08:00':value);if(Number.isNaN(d.getTime()))return value;return new Intl.DateTimeFormat('en-PH',{timeZone:'Asia/Manila',day:'numeric',month:'short',year:'numeric',...(!dateOnly?{hour:'numeric',minute:'2-digit'}:{})}).format(d);}
-export function Status({value}:{value:string}){const positive=['approved','published','active','received_full','open','match','handed_over','confirmed'].includes(value);const negative=['stopped','mismatch','not_received','chain_unreachable','required_anchor_absent','evidence_unavailable'].includes(value);const attention=['held','declined','reversed','received_less','stale'].includes(value);return <span className={`ac-status ${positive?'is-positive':negative?'is-negative':attention?'is-attention':'is-neutral'}`}>{positive?<Check size={15}/>:negative?<X size={15}/>:attention?<AlertCircle size={15}/>:<Clock3 size={15}/>}<span>{readable(value)}</span></span>;}
-export function Empty({title,children,href,action}:{title:string;children:React.ReactNode;href?:string;action?:string}){return <div className="ac-empty"><Icon name="clipboard" size={26}/><h3>{title}</h3><p>{children}</p>{href&&<Link className="ac-button primary" href={href}>{action}<ArrowRight size={16}/></Link>}</div>;}
+export function Status({value}:{value:string}){
+  const ui=useInterfaceText();
+const positive=['approved','published','active','received_full','open','match','handed_over','confirmed'].includes(value);const negative=['stopped','mismatch','not_received','chain_unreachable','required_anchor_absent','evidence_unavailable'].includes(value);const attention=['held','declined','reversed','received_less','stale'].includes(value);return <span className={`ac-status ${positive?'is-positive':negative?'is-negative':attention?'is-attention':'is-neutral'}`}>{positive?<Check size={15}/>:negative?<X size={15}/>:attention?<AlertCircle size={15}/>:<Clock3 size={15}/>}<span>{ui(readable(value))}</span></span>;}
+export function Empty({title,children,href,action}:{title:string;children:React.ReactNode;href?:string;action?:string}){
+  const ui=useInterfaceText();
+return <div className="ac-empty"><Icon name="clipboard" size={26}/><h3>{ui(title)}</h3><p>{children}</p>{href&&<Link className="ac-button primary" href={href}>{ui(action)}<ArrowRight size={16}/></Link>}</div>;}
 export function DataFields({data}:{data:object}){
+  const ui=useInterfaceText();
+
   const format=(key:string,value:unknown):string=>{if(value===null||value===undefined)return 'Not recorded';if(typeof value==='boolean')return value?'Yes':'No';if(key.endsWith('centavos')&&/^[-0-9]+$/.test(String(value)))return pesos(String(value));if(typeof value==='object')return Array.isArray(value)?value.map(v=>typeof v==='object'&&v?Object.entries(v).map(([k,x])=>`${readable(k)}: ${format(k,x)}`).join(' · '):String(v)).join('; ')||'None':Object.entries(value).map(([k,v])=>`${readable(k)}: ${format(k,v)}`).join(' · ');if(key.endsWith('_at'))return manila(String(value));return typeof value==='string'?readable(value):String(value);};
-  return <dl className="ac-data-fields">{Object.entries(data).map(([key,value])=><div key={key}><dt>{readable(key)}</dt><dd>{format(key,value)}</dd></div>)}</dl>;
+  return <dl className="ac-data-fields">{Object.entries(data).map(([key,value])=><div key={key}><dt>{ui(readable(key))}</dt><dd>{format(key,value)}</dd></div>)}</dl>;
 }
-export function AmountBasis({calculation}:{calculation:object}){const c=calculation as Record<string,string>;return c.rounded_daily_centavos?<div className="ac-amount-basis"><span>{pesos(c.rounded_daily_centavos)} per day</span><span>× {c.days} documented days</span><small>75% of {pesos(c.wage_centavos)} daily wage, rounded up to the next ₱10.</small></div>:<DataFields data={calculation}/>;}
+export function AmountBasis({calculation}:{calculation:object}){
+  const ui=useInterfaceText();
+const c=calculation as Record<string,string>;return c.rounded_daily_centavos?<div className="ac-amount-basis"><span>{pesos(c.rounded_daily_centavos)}{' '}{ui("per day")}</span><span>× {c.days}{' '}{ui("documented days")}</span><small>{ui("75% of")}{' '}{pesos(c.wage_centavos)}{' '}{ui("daily wage, rounded up to the next ₱10.")}</small></div>:<DataFields data={calculation}/>;}

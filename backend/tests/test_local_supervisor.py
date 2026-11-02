@@ -7,6 +7,24 @@ import sys
 import tempfile
 import time
 import unittest
+import socket
+
+
+@unittest.skipIf(os.name == 'nt', 'POSIX port reuse behavior')
+class LocalPortTests(unittest.TestCase):
+    def test_time_wait_allows_restart_but_active_listener_is_preserved(self):
+        from backend.scripts.local_mvp import available
+        with socket.socket() as server:
+            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            server.bind(('127.0.0.1', 0))
+            port = server.getsockname()[1]
+            server.listen()
+            self.assertFalse(available(port), 'Never take over a listening service')
+            with socket.create_connection(('127.0.0.1', port)) as client:
+                accepted, _ = server.accept()
+                accepted.close()  # Server actively closes; its address enters TIME_WAIT.
+                self.assertEqual(client.recv(1), b'')
+        self.assertTrue(available(port), 'A closed owned service must be restartable')
 
 
 @unittest.skipUnless(os.name == 'nt', 'Windows process-tree regression')

@@ -24,3 +24,5 @@ The original legacy sitemap is archived in ../legacy-documentation/product-sitem
 ## Usability navigation additions
 
 Each role also has a nested `/mvp/<workspace>/queues` page with permitted queue kinds only. Registry/claims/payout links use an opaque `record` query parameter and resolve direct server projections independently of bounded catalogues. Evidence links use `record=<commitment UUID>&history=commitment_id`; supporting history links use approved typed target slots. Account changes discard record/history selectors and reset private action state while retaining the URL role. Safe queue state/barangay/page parameters survive refresh/back/forward; search text stays in actor/disaster/queue-scoped tab session storage. CSV remains inside Registry and scan/manual lookup inside assigned payout work. No cross-role workspace navigation was added.
+
+Finals corrections add no routes. Cash handover review stays within payouts; labelled synthetic evaluation tools stay in the DSWD/Auditor footer. See ../finals/FINALIST_READINESS.md for current validation.

@@ -1,3 +1,4 @@
+import {python} from './python';
 import {workspacePath} from './workspace-navigation';
 import {test,expect,Page} from '@playwright/test';
 import {execFileSync} from 'node:child_process';
@@ -5,7 +6,7 @@ import path from 'node:path';
 
 const root=path.resolve(__dirname,'../..'),exactAmount='90071992547409.93';
 function original(amount:string,reference:string){
-  return {name:'invented-release.pdf',mimeType:'application/pdf',buffer:execFileSync(path.join(root,'.venv/Scripts/python.exe'),['-c','from backend.scripts.synthetic_evidence import synthetic_pdf; import sys; sys.stdout.buffer.write(synthetic_pdf(sys.argv[1]))',`Invented accuracy original ${reference}\nAmount: PHP ${amount}`],{cwd:root})};
+  return {name:'invented-release.pdf',mimeType:'application/pdf',buffer:execFileSync(python,['-c','from backend.scripts.synthetic_evidence import synthetic_pdf; import sys; sys.stdout.buffer.write(synthetic_pdf(sys.argv[1]))',`Invented accuracy original ${reference}\nAmount: PHP ${amount}`],{cwd:root})};
 }
 async function record(page:Page,reference:string,amount:string){
   await page.getByLabel('Confirmed amount (PHP)',{exact:true}).fill(amount);

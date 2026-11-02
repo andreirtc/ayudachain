@@ -45,9 +45,9 @@ async function upload(page:Page,text=content){await page.getByLabel('Completed U
 test('CSV preview rejects private headers, cancels without writes and confirms only selected valid rows',async({page})=>{
   const state=await fixture(page);
   await upload(page,content.replace('name,','phone,'));
-  await expect(page.getByRole('alert').filter({hasText:'csv_headers_require'})).toBeVisible();
+  await expect(page.getByRole('alert').filter({hasText:'Use the template’s five headers exactly once'})).toBeVisible();
   await upload(page);await expect(page.getByRole('heading',{name:'Row 1: Invented <b>Tala</b> · Valid'})).toBeVisible();
-  await expect(page.getByText('Birth date requires past YYYY MM DD')).toBeVisible();
+  await expect(page.getByText('Enter the birth date as YYYY-MM-DD, no later than today, or leave it blank if unknown.')).toBeVisible();
   expect(await page.locator('article b').count()).toBe(0);
   for(const viewport of [{width:1280,height:900,name:'desktop'},{width:390,height:844,name:'mobile'}]){
     await page.setViewportSize(viewport);
