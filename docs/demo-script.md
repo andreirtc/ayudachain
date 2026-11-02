@@ -1,5 +1,7 @@
 # AyudaChain — 5-Minute Hackathon Pitch Script 🇵🇭
 
+> **Historical pitch script for the legacy interface.** Its screens and claims below do not describe the current five-role MVP. For the current named-household walkthrough, use [Demo flow: one household, end to end](guides/demo-flow.md); for the wider evaluation, use [Repeatable local evaluation](guides/demo-script.md). Offline payout and public-network deployment are not current MVP capabilities.
+
 **Scenario**: Typhoon Salinlahi (Batch RELIEF-2026-001) in the Province of Albay.  
 **Presenter Roles**: Switch between *Public Citizen*, *Barangay Field Worker*, and *COA Auditor*.
 

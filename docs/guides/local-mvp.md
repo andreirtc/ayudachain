@@ -50,6 +50,18 @@ Setup creates ignored `.env.mvp` if absent, including a random HMAC replay key. 
 
 ## Start and stop
 
+### Run beside another checkout
+
+The launcher accepts `--frontend-port 3001 --api-port 8001`; the frontend is explicitly pointed at that API. The existing API CORS policy permits frontend ports 3000 and 3001. Each checkout must have its own ignored configuration, PostgreSQL database/cluster, originals and deployment manifest. Do not reset or reuse another checkout's evaluation database or lost deployment.
+
+This branch's 2026-10-14 demo uses frontend **3001**, API **8001**, chain **8545**, and its own PostgreSQL cluster on **55433**. The older checkout remains on 3000/8000 with its separate chain on 8547 and PostgreSQL on 55432. With this branch's database and chain already running:
+
+```bash
+.venv/bin/python -m backend.scripts.local_mvp serve --frontend-port 3001 --api-port 8001
+```
+
+Open http://127.0.0.1:3001/mvp. Stop only this checkout's application services with `.venv/bin/python -m backend.scripts.local_mvp stop`. The separate chain must remain alive to preserve its volatile deployment. Use `--with-chain` only when 8545 is free and the selected deployment has not been lost.
+
 For routine evaluation, start the owned supervisor:
 
 ```powershell

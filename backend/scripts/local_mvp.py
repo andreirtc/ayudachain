@@ -16,6 +16,8 @@ def environment():
 
 def available(port):
     with socket.socket() as s:
+        # POSIX TIME_WAIT is not an occupied service; active listeners still refuse.
+        if os.name!='nt':s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
         try:s.bind(('127.0.0.1',port));return True
         except OSError:return False
 
@@ -45,10 +47,13 @@ def prepare():
     command([python,'-m','backend.scripts.seed_mvp'])
     print('Migrated PostgreSQL and preserved/idempotently seeded reference records; pinned local deployment checked',flush=True)
 
-def serve(with_chain=False):
+def serve(with_chain=False, *, api_port=8000, frontend_port=3000):
+    # Only the two frontend origins already allowed by the API are supported.
+    if frontend_port not in {3000,3001} or not 1 <= api_port <= 65535 or api_port in {frontend_port,8545}:
+        raise ValueError('Use frontend port 3000/3001 and a distinct valid API port')
     node,python=environment();owned=[];logs=[]
     token=uuid4().hex
-    for port in [3000,8000]+([8545] if with_chain else []):
+    for port in [frontend_port,api_port]+([8545] if with_chain else []):
         if not available(port):raise RuntimeError('Required local port occupied; existing process preserved')
     private=ROOT/'.runtime/supervised';private.mkdir(parents=True,exist_ok=True)
     def record(state):
@@ -76,12 +81,14 @@ def serve(with_chain=False):
         # Public Hardhat development key is permitted only with loopback chain ID
         # and an operator-pinned deployment. Never send it to a public network.
         env.setdefault('MVP_PRIVATE_KEY','0x'+'ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80')
-        start('api',[python,'-m','uvicorn','backend.app.main:app','--host','127.0.0.1','--port','8000'])
+        start('api',[python,'-m','uvicorn','backend.app.main:app','--host','127.0.0.1','--port',str(api_port)])
         start('scheduler',[python,'-m','backend.app.scheduler'])
         start('worker',[node,str(ROOT/'contracts/scripts/anchor_worker.js')],env=env)
-        start('frontend',[node,str(ROOT/'frontend/node_modules/next/dist/bin/next'),'dev','--hostname','127.0.0.1','--port','3000'],ROOT/'frontend')
+        frontend_env=os.environ.copy()
+        frontend_env['NEXT_PUBLIC_API_URL']='http://127.0.0.1:'+str(api_port)
+        start('frontend',[node,str(ROOT/'frontend/node_modules/next/dist/bin/next'),'dev','--hostname','127.0.0.1','--port',str(frontend_port)],ROOT/'frontend',frontend_env)
         record('running')
-        print('Local synthetic MVP: http://127.0.0.1:3000/mvp ; stop with Ctrl+C. Worker and scheduler recover durable work.',flush=True)
+        print(f'Local synthetic MVP: http://127.0.0.1:{frontend_port}/mvp ; stop with Ctrl+C. Worker and scheduler recover durable work.',flush=True)
         while True:
             time.sleep(2)
             try:
@@ -113,9 +120,9 @@ def stop():
     raise ValueError('Owned supervisor stop could not be confirmed; no unrelated process was terminated')
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['prepare','serve','stop']);parser.add_argument('--with-chain',action='store_true');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['prepare','serve','stop']);parser.add_argument('--with-chain',action='store_true');parser.add_argument('--api-port',type=int,default=8000);parser.add_argument('--frontend-port',type=int,choices=[3000,3001],default=3000);args=parser.parse_args()
     try:
         if args.action=='prepare':prepare()
         elif args.action=='stop':stop()
-        else:serve(args.with_chain)
+        else:serve(args.with_chain,api_port=args.api_port,frontend_port=args.frontend_port)
     except (ValueError,RuntimeError,subprocess.SubprocessError):print('Local setup/service unavailable. Inspect ignored runtime logs and keep existing history.',file=sys.stderr);sys.exit(1)

@@ -28,7 +28,7 @@ npm --prefix frontend run build
 npm --prefix frontend run test:mvp
 ```
 
-The integration suite requires the distinct fault node on 8555 and its manifest; the browser suite requires the running MVP. Browser full-journey evaluation explicitly retires the old namespace and deploys a new local registry before creating reference seeds. It preserves previous records and originals. Follow [evaluation instructions](docs/guides/demo-script.md). Actual results and all 26 requirement mappings are in [validation](docs/implementation/validation.md).
+The integration suite requires the distinct fault node on 8555 and its manifest; the browser suite requires the running MVP. Browser full-journey evaluation explicitly retires the old namespace and deploys a new local registry before creating reference seeds. It preserves previous records and originals. Follow the [single-household demo walkthrough](docs/guides/demo-flow.md) or the broader [evaluation instructions](docs/guides/demo-script.md). To run beside another checkout, use [alternate frontend/API ports](docs/guides/local-mvp.md#run-beside-another-checkout). Actual results and all 26 requirement mappings are in [validation](docs/implementation/validation.md).
 
 The authoritative design is [PRD](docs/product/prd.md), [ERD](docs/system/erd.md), and the [14-stage plan](docs/product-ideation/plans/2026-10-10-mvp-implementation-plan.md). [Compatibility ADR](docs/adr/2026-10-10-mvp-evidence-protocol-and-registry.md) defines the separate evidence protocol. Historical ideation is unchanged.
 

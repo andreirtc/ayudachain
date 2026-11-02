@@ -14,15 +14,15 @@ Status: written from the current screen code and seeded data. The individual ste
 
    This retires the current run (history is retained) and seeds 10 households per barangay, residence approvals, open intake and sample claim responses. Restart the API afterwards so it uses the new deployment. Do not run the Playwright journey spec before a demo; it resets the run and removes this data.
 
-2. Make three small PDFs to upload (any PDF or PNG works; these are synthetic):
+2. Make the synthetic PDFs and portrait needed for the walkthrough:
 
    ```powershell
-   .venv/Scripts/python -c "from pathlib import Path; from backend.scripts.synthetic_evidence import synthetic_pdf as p; d=Path('.runtime/demo-files'); d.mkdir(parents=True,exist_ok=True); [(d/n).write_bytes(p(t)) for n,t in {'1-council-resolution-silong.pdf':'COUNCIL RESOLUTION\nSynthetic demo resolution of the Silong barangay council.','2-wage-basis.pdf':'WAGE BASIS\nSynthetic documented daily wage PHP 435.','3-partially-damaged-days.pdf':'CATEGORY DAYS\nSynthetic documented days for Partially damaged: 10.'}.items()]"
+   .venv/Scripts/python -c "from pathlib import Path; from backend.scripts.synthetic_evidence import synthetic_pdf as p, synthetic_portrait; d=Path('.runtime/demo-files'); d.mkdir(parents=True,exist_ok=True); [(d/n).write_bytes(p(t)) for n,t in {'1-council-resolution-silong.pdf':'COUNCIL RESOLUTION\nSynthetic demo resolution of the Silong barangay council.','2-wage-basis.pdf':'WAGE BASIS\nSynthetic documented daily wage PHP 435.','3-partially-damaged-days.pdf':'CATEGORY DAYS\nSynthetic documented days for Partially damaged: 10.','4-field-check.pdf':'FIELD CHECK\nSynthetic training record for Teodoro Mendoza; no actual person was visited.','5-accepted-photo-id.pdf':'PHOTO ID\nSynthetic training ID for Teodoro Mendoza. DFC-2026-0001.'}.items()]; (d/'6-head-photo.png').write_bytes(synthetic_portrait())"
    ```
 
    Uploads start as soon as a file is chosen and report "Original saved; digital signature not validated."
 
-3. Open http://127.0.0.1:3000/mvp and choose a role. To change account inside a role, use the account menu at the top right and its **Account** dropdown. There is no sign-in. Account links of the form `/mvp/<role>?account=<id>` open a specific account, but account ids change on every reset; read them from `/api/v1/actors/catalogue`.
+3. Open http://127.0.0.1:3000/mvp and choose a role (this branch's parallel demo is at **http://127.0.0.1:3001/mvp**, API 8001; see [parallel startup](local-mvp.md#run-beside-another-checkout)). On Linux use `.venv/bin/python` in place of `.venv/Scripts/python`. Select **English** to follow the labels below; beneficiary screens default to Filipino. To change account inside a role, use the account menu at the top right and its **Account** dropdown. There is no sign-in. Account links of the form `/mvp/<role>?account=<id>` open a specific account, but account ids change on every reset; read them from `/api/v1/actors/catalogue` on the matching API.
 
 ## Accounts
 
@@ -54,10 +54,14 @@ The household is Teodoro Mendoza, Purok 1, Calle Rizal, Silong. His claim (Parti
    3. Tick the **Send to DSWD** box on Teodoro's row, upload `1-council-resolution-silong.pdf` under **Council resolution original**, and click **Submit selected claims**.
    4. Teodoro's claim moves to History as "Awaiting DSWD review".
 
-3. **DSWD decision** (Lourdes Villanueva, **Claim review**)
-   1. Under **Household to review**, pick **Teodoro Mendoza** and read the flags. A flag is a reason to look, not a fraud finding.
-   2. Choose **Approve**, set **Final category** to **Partially damaged**, enter a **Decision reason**, and tick "I reviewed this current check…".
-   3. Click **Save human decision**, then **Record decision**.
+3. **DSWD identity review and claim decision** (Lourdes Villanueva)
+   1. First open **Households & intake**. Sample households were registered without ID; they may claim, but payout is blocked until a documented field check and accepted photo ID are recorded.
+   2. Find Teodoro's household and click **Review registry or linkage**. Select **Field check**, enter a reason identifying this as a synthetic training review, enter an **Accepted photo ID type**, and tick **Person and photo compared** for the fictional exercise.
+   3. Upload `4-field-check.pdf` as **Field-check original**, `6-head-photo.png` as **Field-checked head photo**, and `5-accepted-photo-id.pdf` as **Accepted photo ID original**. Click **Append registry review** and wait for the saved result. These files and recorded comparisons are training stand-ins, not evidence of a real visit or identity check.
+   4. Open **Claim review** and continue:
+   5. Under **Household to review**, pick **Teodoro Mendoza** and read the flags. A flag is a reason to look, not a fraud finding.
+   6. Choose **Approve**, set **Final category** to **Partially damaged**, enter a **Decision reason**, and tick "I reviewed this current check…".
+   7. Click **Save human decision**, then **Record decision**.
 
 4. **Amount** (Lourdes Villanueva, **Amounts & approved lists**)
    1. Open **Record an amount basis**, mode wage formula.
@@ -78,12 +82,12 @@ The household is Teodoro Mendoza, Purok 1, Calle Rizal, Silong. His claim (Parti
 
 7. **Recipient code** (Teodoro Mendoza, **Authorization & receipt**)
    1. Leave **Recipient path** on **Own device** and click **Open payout authorization**.
-   2. Click **Reveal code in this view** and note the one-time code. Keep the page open; the code expires in ten minutes and is shown once.
+   2. The code appears immediately. Keep the page open; the code expires in ten minutes and cannot be recovered after refresh. **Hide code** and **Reveal code in this view** only toggle the code already held on this page. Count the presented cash before sharing it with the payer.
 
 8. **Cash handover** (Benito Castillo, **Cash handover**)
    1. Select Teodoro's transaction and click **Open household head photo**.
-   2. Under **Compare person and accepted photo ID**, set the result to pass, enter an **Accepted photo ID type** (for example "Driver's license"), tick "I compared the person with the accepted photo ID", and click **Save ID comparison**.
-   3. Enter the code in **Recipient payout code** and choose Arnel Soriano under **Independent assigned checker**.
+   2. Under **Compare person and accepted photo ID**, set the result to pass, enter an **Accepted photo ID type** (for example "Training photo ID"), tick "I compared the person with the accepted photo ID", and click **Save ID comparison**, then **Record comparison** in the review dialog.
+   3. Present the fixed ₱3,300 for the recipient to count, then enter the code in **Recipient payout code**. This own-device path has no checker dropdown. On the separate assisted path, a distinct assigned **cash** officer (Dolores Mercado here) must be selected as checker; Arnel's independent follow-up assignment is a different duty.
    4. Click **Record cash handover** and confirm. Record it once; after a lost response, read the saved receipt before retrying.
 
 9. **Close the session** (Lourdes Villanueva, **Payout sessions**): click **Close cash session**.
